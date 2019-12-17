@@ -18,6 +18,7 @@ import { generateReadmeFile } from "./generators/static/readmeFileGenerator";
 import { generateTsConfig } from "./generators/static/tsConfigFileGenerator";
 import { generateRollupConfig } from "./generators/static/rollupConfigFileGenerator";
 import { generateOperations } from "./generators/operationGenerator";
+import { generateParameters } from "./generators/parametersGenerator";
 
 const prettierTypeScriptOptions: prettier.Options = {
   parser: "typescript",
@@ -68,6 +69,7 @@ export async function generateTypeScriptLibrary(
     generateRollupConfig(clientDetails, packageDetails, project);
   }
 
+  generateParameters(clientDetails, project);
   generateClient(clientDetails, project);
   generateClientContext(clientDetails, packageDetails, project);
   generateModels(clientDetails, project);

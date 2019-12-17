@@ -10,7 +10,8 @@ import {
   ObjectSchema,
   Property,
   ChoiceSchema,
-  SealedChoiceSchema
+  SealedChoiceSchema,
+  Parameter
 } from "@azure-tools/codemodel";
 import {
   normalizeName,
@@ -22,6 +23,8 @@ import { getStringForValue } from "../utils/valueHelpers";
 import { getLanguageMetadata } from "../utils/languageHelpers";
 import { transformMapper } from "./mapperTransforms";
 import { transformOperationGroup } from "./operationTransforms";
+import { transformParameter, getParameterName } from "./parameterTransforms";
+import { OperationRequestParameterDetails } from "../models/operationDetails";
 
 export function transformProperty(property: Property): PropertyDetails {
   const metadata = getLanguageMetadata(property.language);
@@ -73,8 +76,43 @@ export function transformObject(obj: ObjectSchema): ModelDetails {
   };
 }
 
+function getOperationParameters(codeModel: CodeModel): Parameter[] {
+  return codeModel.operationGroups.reduce<Parameter[]>((acc, og) => {
+    const params = og.operations.reduce<Parameter[]>((acc, operation) => {
+      if (!operation.request.parameters) {
+        return acc;
+      }
+
+      return [...acc, ...operation.request.parameters];
+    }, []);
+
+    return [...acc, ...params];
+  }, []);
+}
+
+function getAllParameters(
+  codeModel: CodeModel
+): OperationRequestParameterDetails[] {
+  const operationParams = getOperationParameters(codeModel);
+  const globalParams = codeModel.globalParameters || [];
+  const allParams = dedupeParams([...operationParams, ...globalParams]);
+
+  return allParams.map(transformParameter);
+}
+
+function dedupeParams(params: Parameter[]) {
+  return params.reduce<Parameter[]>((acc, curr) => {
+    if (acc.some(a => getParameterName(a) === getParameterName(curr))) {
+      return acc;
+    }
+
+    return [...acc, curr];
+  }, []);
+}
+
 export function transformCodeModel(codeModel: CodeModel): ClientDetails {
   const className = normalizeName(codeModel.info.title, NameType.Class);
+
   return {
     name: codeModel.info.title,
     className,
@@ -88,6 +126,7 @@ export function transformCodeModel(codeModel: CodeModel): ClientDetails {
       ...(codeModel.schemas.choices || []),
       ...(codeModel.schemas.sealedChoices || [])
     ].map(transformChoice),
-    operationGroups: codeModel.operationGroups.map(transformOperationGroup)
+    operationGroups: codeModel.operationGroups.map(transformOperationGroup),
+    parameters: getAllParameters(codeModel)
   };
 }

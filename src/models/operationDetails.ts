@@ -3,7 +3,7 @@
 
 import { ParameterLocation, HttpMethod } from "@azure-tools/codemodel";
 import { KnownMediaType } from "@azure-tools/codegen";
-import { Mapper, OperationQueryParameter } from "@azure/core-http";
+import { Mapper } from "@azure/core-http";
 
 /**
  * Details of an operation request parameter, transformed from Request.
@@ -11,6 +11,7 @@ import { Mapper, OperationQueryParameter } from "@azure/core-http";
 export interface OperationRequestParameterDetails {
   name: string;
   description: string;
+  isConstant?: boolean;
   required?: boolean;
   modelType?: string; // Could be a primitive or actual model type
   mapper: Mapper | string;
@@ -57,7 +58,7 @@ export interface OperationSpecDetails {
   httpMethod: string;
   responses: OperationSpecResponses;
   requestBody?: OperationSpecRequest;
-  queryParameters?: OperationQueryParameter[];
+  queryParameters?: string[];
 }
 
 /**
@@ -78,7 +79,7 @@ export type OperationSpecResponses = {
 };
 
 export type OperationSpecRequest = {
-  queryParameters: OperationQueryParameter[];
+  queryParameters: string[];
   parameterPath: string;
   mapper: Mapper | string;
 };

@@ -10,755 +10,746 @@ import * as coreHttp from "@azure/core-http";
 import * as Models from "../models";
 import * as Mappers from "../models/mappers";
 import * as Parameters from "../models/parameters";
-import { BodyComplexClient } from "../bodyComplexClient";
+import { UrlClient } from "../urlClient";
 
 /**
- * Class representing a Primitive.
+ * Class representing a Paths.
  */
-export class Primitive {
-  private readonly client: BodyComplexClient;
+export class Paths {
+  private readonly client: UrlClient;
 
   /**
-   * Initialize a new instance of the class Primitive class.
+   * Initialize a new instance of the class Paths class.
    * @param client Reference to the service client
    */
-  constructor(client: BodyComplexClient) {
+  constructor(client: UrlClient) {
     this.client = client;
   }
 
   /**
-   * Get complex types with integer properties
+   * Get true Boolean value on path
    * @param options The options parameters.
    */
-  getInt(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  getBooleanTrue(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
    * @param callback The callback.
    */
-  getInt(callback: coreHttp.ServiceCallback<any>): void;
+  getBooleanTrue(callback: coreHttp.ServiceCallback<any>): void;
   /**
    * @param options The options parameters.
    * @param callback The callback.
    */
-  getInt(
+  getBooleanTrue(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  getInt(
+  getBooleanTrue(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getIntOperationSpec,
+      getBooleanTrueOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with integer properties
-   * @param complexBody Please put -1 and 2
+   * Get false Boolean value on path
    * @param options The options parameters.
    */
-  putInt(
-    complexBody: Models.IntWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  getBooleanFalse(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put -1 and 2
    * @param callback The callback.
    */
-  putInt(
-    complexBody: Models.IntWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  getBooleanFalse(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put -1 and 2
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putInt(
-    complexBody: Models.IntWrapper,
+  getBooleanFalse(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putInt(
-    complexBody: Models.IntWrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putIntOperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with long properties
-   * @param options The options parameters.
-   */
-  getLong(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getLong(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getLong(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getLong(
+  getBooleanFalse(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getLongOperationSpec,
+      getBooleanFalseOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with long properties
-   * @param complexBody Please put 1099511627775 and -999511627788
+   * Get '1000000' integer value
    * @param options The options parameters.
    */
-  putLong(
-    complexBody: Models.LongWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  getIntOneMillion(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put 1099511627775 and -999511627788
    * @param callback The callback.
    */
-  putLong(
-    complexBody: Models.LongWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  getIntOneMillion(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put 1099511627775 and -999511627788
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putLong(
-    complexBody: Models.LongWrapper,
+  getIntOneMillion(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putLong(
-    complexBody: Models.LongWrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putLongOperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with float properties
-   * @param options The options parameters.
-   */
-  getFloat(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getFloat(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getFloat(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getFloat(
+  getIntOneMillion(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getFloatOperationSpec,
+      getIntOneMillionOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with float properties
-   * @param complexBody Please put 1.05 and -0.003
+   * Get '-1000000' integer value
    * @param options The options parameters.
    */
-  putFloat(
-    complexBody: Models.FloatWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  getIntNegativeOneMillion(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put 1.05 and -0.003
    * @param callback The callback.
    */
-  putFloat(
-    complexBody: Models.FloatWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  getIntNegativeOneMillion(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put 1.05 and -0.003
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putFloat(
-    complexBody: Models.FloatWrapper,
+  getIntNegativeOneMillion(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putFloat(
-    complexBody: Models.FloatWrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putFloatOperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with double properties
-   * @param options The options parameters.
-   */
-  getDouble(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getDouble(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getDouble(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getDouble(
+  getIntNegativeOneMillion(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getDoubleOperationSpec,
+      getIntNegativeOneMillionOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with double properties
-   * @param complexBody Please put 3e-100 and -0.000000000000000000000000000000000000000000000000000000005
+   * Get '10000000000' 64 bit integer value
    * @param options The options parameters.
    */
-  putDouble(
-    complexBody: Models.DoubleWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  getTenBillion(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put 3e-100 and -0.000000000000000000000000000000000000000000000000000000005
    * @param callback The callback.
    */
-  putDouble(
-    complexBody: Models.DoubleWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  getTenBillion(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put 3e-100 and -0.000000000000000000000000000000000000000000000000000000005
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putDouble(
-    complexBody: Models.DoubleWrapper,
+  getTenBillion(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putDouble(
-    complexBody: Models.DoubleWrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putDoubleOperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with bool properties
-   * @param options The options parameters.
-   */
-  getBool(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getBool(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getBool(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getBool(
+  getTenBillion(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getBoolOperationSpec,
+      getTenBillionOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with bool properties
-   * @param complexBody Please put true and false
+   * Get '-10000000000' 64 bit integer value
    * @param options The options parameters.
    */
-  putBool(
-    complexBody: Models.BooleanWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  getNegativeTenBillion(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put true and false
    * @param callback The callback.
    */
-  putBool(
-    complexBody: Models.BooleanWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  getNegativeTenBillion(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put true and false
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putBool(
-    complexBody: Models.BooleanWrapper,
+  getNegativeTenBillion(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putBool(
-    complexBody: Models.BooleanWrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putBoolOperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with string properties
-   * @param options The options parameters.
-   */
-  getString(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getString(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getString(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getString(
+  getNegativeTenBillion(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getStringOperationSpec,
+      getNegativeTenBillionOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with string properties
-   * @param complexBody Please put 'goodrequest', '', and null
+   * Get '1.034E+20' numeric value
    * @param options The options parameters.
    */
-  putString(
-    complexBody: Models.StringWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  floatScientificPositive(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put 'goodrequest', '', and null
    * @param callback The callback.
    */
-  putString(
-    complexBody: Models.StringWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  floatScientificPositive(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put 'goodrequest', '', and null
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putString(
-    complexBody: Models.StringWrapper,
+  floatScientificPositive(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putString(
-    complexBody: Models.StringWrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putStringOperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with date properties
-   * @param options The options parameters.
-   */
-  getDate(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getDate(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getDate(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getDate(
+  floatScientificPositive(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getDateOperationSpec,
+      floatScientificPositiveOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with date properties
-   * @param complexBody Please put '0001-01-01' and '2016-02-29'
+   * Get '-1.034E-20' numeric value
    * @param options The options parameters.
    */
-  putDate(
-    complexBody: Models.DateWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  floatScientificNegative(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put '0001-01-01' and '2016-02-29'
    * @param callback The callback.
    */
-  putDate(
-    complexBody: Models.DateWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  floatScientificNegative(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put '0001-01-01' and '2016-02-29'
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putDate(
-    complexBody: Models.DateWrapper,
+  floatScientificNegative(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putDate(
-    complexBody: Models.DateWrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putDateOperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with datetime properties
-   * @param options The options parameters.
-   */
-  getDateTime(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getDateTime(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getDateTime(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getDateTime(
+  floatScientificNegative(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getDateTimeOperationSpec,
+      floatScientificNegativeOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with datetime properties
-   * @param complexBody Please put '0001-01-01T12:00:00-04:00' and '2015-05-18T11:38:00-08:00'
+   * Get '9999999.999' numeric value
    * @param options The options parameters.
    */
-  putDateTime(
-    complexBody: Models.DatetimeWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  doubleDecimalPositive(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put '0001-01-01T12:00:00-04:00' and '2015-05-18T11:38:00-08:00'
    * @param callback The callback.
    */
-  putDateTime(
-    complexBody: Models.DatetimeWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  doubleDecimalPositive(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put '0001-01-01T12:00:00-04:00' and '2015-05-18T11:38:00-08:00'
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putDateTime(
-    complexBody: Models.DatetimeWrapper,
+  doubleDecimalPositive(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putDateTime(
-    complexBody: Models.DatetimeWrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putDateTimeOperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with datetimeRfc1123 properties
-   * @param options The options parameters.
-   */
-  getDateTimeRfc1123(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getDateTimeRfc1123(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getDateTimeRfc1123(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getDateTimeRfc1123(
+  doubleDecimalPositive(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getDateTimeRfc1123OperationSpec,
+      doubleDecimalPositiveOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with datetimeRfc1123 properties
-   * @param complexBody Please put 'Mon, 01 Jan 0001 12:00:00 GMT' and 'Mon, 18 May 2015 11:38:00 GMT'
+   * Get '-9999999.999' numeric value
    * @param options The options parameters.
    */
-  putDateTimeRfc1123(
-    complexBody: Models.Datetimerfc1123Wrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  doubleDecimalNegative(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put 'Mon, 01 Jan 0001 12:00:00 GMT' and 'Mon, 18 May 2015 11:38:00 GMT'
    * @param callback The callback.
    */
-  putDateTimeRfc1123(
-    complexBody: Models.Datetimerfc1123Wrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  doubleDecimalNegative(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put 'Mon, 01 Jan 0001 12:00:00 GMT' and 'Mon, 18 May 2015 11:38:00 GMT'
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putDateTimeRfc1123(
-    complexBody: Models.Datetimerfc1123Wrapper,
+  doubleDecimalNegative(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putDateTimeRfc1123(
-    complexBody: Models.Datetimerfc1123Wrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putDateTimeRfc1123OperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with duration properties
-   * @param options The options parameters.
-   */
-  getDuration(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getDuration(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getDuration(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getDuration(
+  doubleDecimalNegative(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getDurationOperationSpec,
+      doubleDecimalNegativeOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with duration properties
-   * @param complexBody Please put 'P123DT22H14M12.011S'
+   * Get '啊齄丂狛狜隣郎隣兀﨩' multi-byte string value
    * @param options The options parameters.
    */
-  putDuration(
-    complexBody: Models.DurationWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  stringUnicode(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put 'P123DT22H14M12.011S'
    * @param callback The callback.
    */
-  putDuration(
-    complexBody: Models.DurationWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  stringUnicode(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put 'P123DT22H14M12.011S'
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putDuration(
-    complexBody: Models.DurationWrapper,
+  stringUnicode(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putDuration(
-    complexBody: Models.DurationWrapper,
-    options?: coreHttp.RequestOptionsBase,
-    callback?: coreHttp.ServiceCallback<any>
-  ): Promise<any> {
-    return this.client.sendOperationRequest(
-      { complexBody, options },
-      putDurationOperationSpec,
-      callback
-    );
-  }
-
-  /**
-   * Get complex types with byte properties
-   * @param options The options parameters.
-   */
-  getByte(options?: coreHttp.RequestOptionsBase): Promise<any>;
-  /**
-   * @param callback The callback.
-   */
-  getByte(callback: coreHttp.ServiceCallback<any>): void;
-  /**
-   * @param options The options parameters.
-   * @param callback The callback.
-   */
-  getByte(
-    options: coreHttp.RequestOptionsBase,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
-  getByte(
+  stringUnicode(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
       { options },
-      getByteOperationSpec,
+      stringUnicodeOperationSpec,
       callback
     );
   }
 
   /**
-   * Put complex types with byte properties
-   * @param complexBody Please put non-ascii byte string hex(FF FE FD FC 00 FA F9 F8 F7 F6)
+   * Get 'begin!*'();:@ &=+$,/?#[]end
    * @param options The options parameters.
    */
-  putByte(
-    complexBody: Models.ByteWrapper,
-    options?: coreHttp.RequestOptionsBase
-  ): Promise<any>;
+  stringUrlEncoded(options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
-   * @param complexBody Please put non-ascii byte string hex(FF FE FD FC 00 FA F9 F8 F7 F6)
    * @param callback The callback.
    */
-  putByte(
-    complexBody: Models.ByteWrapper,
-    callback: coreHttp.ServiceCallback<any>
-  ): void;
+  stringUrlEncoded(callback: coreHttp.ServiceCallback<any>): void;
   /**
-   * @param complexBody Please put non-ascii byte string hex(FF FE FD FC 00 FA F9 F8 F7 F6)
    * @param options The options parameters.
    * @param callback The callback.
    */
-  putByte(
-    complexBody: Models.ByteWrapper,
+  stringUrlEncoded(
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
-  putByte(
-    complexBody: Models.ByteWrapper,
+  stringUrlEncoded(
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { complexBody, options },
-      putByteOperationSpec,
+      { options },
+      stringUrlEncodedOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get ''
+   * @param options The options parameters.
+   */
+  stringEmpty(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  stringEmpty(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  stringEmpty(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  stringEmpty(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      stringEmptyOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get null (should throw)
+   * @param options The options parameters.
+   */
+  stringNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  stringNull(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  stringNull(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  stringNull(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      stringNullOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get using uri with 'green color' in path parameter
+   * @param options The options parameters.
+   */
+  enumValid(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  enumValid(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  enumValid(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  enumValid(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      enumValidOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get null (should throw on the client before the request is sent on wire)
+   * @param options The options parameters.
+   */
+  enumNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  enumNull(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  enumNull(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  enumNull(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      enumNullOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get '啊齄丂狛狜隣郎隣兀﨩' multibyte value as utf-8 encoded byte array
+   * @param options The options parameters.
+   */
+  byteMultiByte(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  byteMultiByte(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  byteMultiByte(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  byteMultiByte(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      byteMultiByteOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get '' as byte array
+   * @param options The options parameters.
+   */
+  byteEmpty(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  byteEmpty(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  byteEmpty(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  byteEmpty(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      byteEmptyOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get null as byte array (should throw)
+   * @param options The options parameters.
+   */
+  byteNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  byteNull(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  byteNull(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  byteNull(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      byteNullOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get '2012-01-01' as date
+   * @param options The options parameters.
+   */
+  dateValid(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  dateValid(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  dateValid(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  dateValid(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      dateValidOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get null as date - this should throw or be unusable on the client side, depending on date representation
+   * @param options The options parameters.
+   */
+  dateNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  dateNull(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  dateNull(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  dateNull(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      dateNullOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get '2012-01-01T01:01:01Z' as date-time
+   * @param options The options parameters.
+   */
+  dateTimeValid(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  dateTimeValid(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  dateTimeValid(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  dateTimeValid(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      dateTimeValidOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get null as date-time, should be disallowed or throw depending on representation of date-time
+   * @param options The options parameters.
+   */
+  dateTimeNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  dateTimeNull(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  dateTimeNull(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  dateTimeNull(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      dateTimeNullOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get 'lorem' encoded value as 'bG9yZW0' (base64url)
+   * @param options The options parameters.
+   */
+  base64Url(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  base64Url(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  base64Url(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  base64Url(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      base64UrlOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get an array of string ['ArrayPath1', 'begin!*'();:@ &=+$,/?#[]end' , null, ''] using the csv-array format
+   * @param options The options parameters.
+   */
+  arrayCsvInPath(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  arrayCsvInPath(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  arrayCsvInPath(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  arrayCsvInPath(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      arrayCsvInPathOperationSpec,
+      callback
+    );
+  }
+
+  /**
+   * Get the date 2016-04-13 encoded value as '1460505600' (Unix time)
+   * @param options The options parameters.
+   */
+  unixTimeUrl(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  /**
+   * @param callback The callback.
+   */
+  unixTimeUrl(callback: coreHttp.ServiceCallback<any>): void;
+  /**
+   * @param options The options parameters.
+   * @param callback The callback.
+   */
+  unixTimeUrl(
+    options: coreHttp.RequestOptionsBase,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
+  unixTimeUrl(
+    options?: coreHttp.RequestOptionsBase,
+    callback?: coreHttp.ServiceCallback<any>
+  ): Promise<any> {
+    return this.client.sendOperationRequest(
+      { options },
+      unixTimeUrlOperationSpec,
       callback
     );
   }
@@ -767,300 +758,265 @@ export class Primitive {
 
 const serializer = new coreHttp.Serializer(Mappers);
 
-const getIntOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/integer",
+const getBooleanTrueOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/bool/true/{boolPath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.IntWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putIntOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/integer",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.IntWrapper
-  },
-  serializer
-};
-const getLongOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/long",
+const getBooleanFalseOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/bool/false/{boolPath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.LongWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putLongOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/long",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.LongWrapper
-  },
-  serializer
-};
-const getFloatOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/float",
+const getIntOneMillionOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/int/1000000/{intPath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.FloatWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putFloatOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/float",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.FloatWrapper
-  },
-  serializer
-};
-const getDoubleOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/double",
+const getIntNegativeOneMillionOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/int/-1000000/{intPath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DoubleWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putDoubleOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/double",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.DoubleWrapper
-  },
-  serializer
-};
-const getBoolOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/bool",
+const getTenBillionOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/long/10000000000/{longPath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.BooleanWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putBoolOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/bool",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.BooleanWrapper
-  },
-  serializer
-};
-const getStringOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/string",
+const getNegativeTenBillionOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/long/-10000000000/{longPath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.StringWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putStringOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/string",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.StringWrapper
-  },
-  serializer
-};
-const getDateOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/date",
+const floatScientificPositiveOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/float/1.034E+20/{floatPath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DateWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putDateOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/date",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.DateWrapper
-  },
-  serializer
-};
-const getDateTimeOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/datetime",
+const floatScientificNegativeOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/float/-1.034E-20/{floatPath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DatetimeWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putDateTimeOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/datetime",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.DatetimeWrapper
-  },
-  serializer
-};
-const getDateTimeRfc1123OperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/datetimerfc1123",
+const doubleDecimalPositiveOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/double/9999999.999/{doublePath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Datetimerfc1123Wrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putDateTimeRfc1123OperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/datetimerfc1123",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.Datetimerfc1123Wrapper
-  },
-  serializer
-};
-const getDurationOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/duration",
+const doubleDecimalNegativeOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/double/-9999999.999/{doublePath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DurationWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putDurationOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/duration",
-  httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.DurationWrapper
-  },
-  serializer
-};
-const getByteOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/byte",
+const stringUnicodeOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/string/unicode/{stringPath}",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.ByteWrapper
-    },
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
   serializer
 };
-const putByteOperationSpec: coreHttp.OperationSpec = {
-  path: "/complex/primitive/byte",
-  httpMethod: "PUT",
+const stringUrlEncodedOperationSpec: coreHttp.OperationSpec = {
+  path:
+    "/paths/string/begin%21%2A%27%28%29%3B%3A%40%20%26%3D%2B%24%2C%2F%3F%23%5B%5Dend/{stringPath}",
+  httpMethod: "GET",
   responses: {
     default: {
       bodyMapper: Mappers.ErrorModel
     }
   },
-  requestBody: {
-    parameterPath: "complexBody",
-    mapper: Mappers.ByteWrapper
+  serializer
+};
+const stringEmptyOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/string/empty/{stringPath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const stringNullOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/string/null/{stringPath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const enumValidOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/enum/green%20color/{enumPath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const enumNullOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/string/null/{enumPath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const byteMultiByteOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/byte/multibyte/{bytePath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const byteEmptyOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/byte/empty/{bytePath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const byteNullOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/byte/null/{bytePath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const dateValidOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/date/2012-01-01/{datePath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const dateNullOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/date/null/{datePath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const dateTimeValidOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/datetime/2012-01-01T01%3A01%3A01Z/{dateTimePath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const dateTimeNullOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/datetime/null/{dateTimePath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const base64UrlOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/string/bG9yZW0/{base64UrlPath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const arrayCsvInPathOperationSpec: coreHttp.OperationSpec = {
+  path:
+    "/paths/array/ArrayPath1%2cbegin%21%2A%27%28%29%3B%3A%40%20%26%3D%2B%24%2C%2F%3F%23%5B%5Dend%2c%2c/{arrayPath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
+  },
+  serializer
+};
+const unixTimeUrlOperationSpec: coreHttp.OperationSpec = {
+  path: "/paths/int/1460505600/{unixTimeUrlPath}",
+  httpMethod: "GET",
+  responses: {
+    default: {
+      bodyMapper: Mappers.ErrorModel
+    }
   },
   serializer
 };

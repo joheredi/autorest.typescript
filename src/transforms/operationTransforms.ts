@@ -1,10 +1,4 @@
-import {
-  HttpMethods,
-  Mapper,
-  MapperType,
-  CompositeMapper,
-  OperationQueryParameter
-} from "@azure/core-http";
+import { HttpMethods, Mapper, MapperType } from "@azure/core-http";
 import {
   Operation,
   Request,
@@ -15,7 +9,6 @@ import {
   ChoiceSchema,
   OperationGroup,
   ParameterLocation,
-  Parameter,
   ConstantSchema
 } from "@azure-tools/codemodel";
 import { normalizeName, NameType } from "../utils/nameUtils";
@@ -32,6 +25,7 @@ import {
 import { getLanguageMetadata } from "../utils/languageHelpers";
 import { getTypeForSchema } from "../utils/schemaHelpers";
 import { getMapperTypeFromSchema } from "./mapperTransforms";
+import { transformParameter } from "./parameterTransforms";
 
 export function transformOperationSpec(
   operationDetails: OperationDetails
@@ -173,34 +167,6 @@ export function extractSchemaResponses(responses: OperationResponseDetails[]) {
   );
 }
 
-export function transformOperationRequestParameter(
-  parameter: Parameter
-): OperationRequestParameterDetails {
-  const metadata = getLanguageMetadata(parameter.language);
-
-  return {
-    name: metadata.name,
-    description: metadata.description,
-    modelType: getTypeForSchema(parameter.schema).typeName,
-    required: isParameterRequired(parameter),
-    location: parameter.protocol.http
-      ? parameter.protocol.http.in
-      : ParameterLocation.Body,
-    mapper: getBodyMapperFromSchema(parameter.schema, true),
-    serializedName: metadata.serializedName
-  };
-}
-
-function isParameterRequired(parameter: Parameter) {
-  const mapper = getBodyMapperFromSchema(
-    parameter.schema,
-    true
-  ) as CompositeMapper;
-
-  // If the parameter contains a default value, it is not required
-  return mapper.isConstant ? false : parameter.required;
-}
-
 export function transformOperationRequest(
   request: Request
 ): OperationRequestDetails {
@@ -210,7 +176,7 @@ export function transformOperationRequest(
       path: request.protocol.http.path.replace("{$host}/", ""),
       method: request.protocol.http.method,
       parameters: request.parameters
-        ? request.parameters.map(transformOperationRequestParameter)
+        ? request.parameters.map(transformParameter)
         : undefined
     };
   } else {
@@ -302,12 +268,6 @@ function mergeResponsesAndExceptions(operation: Operation) {
 
 function extractQueryParam(
   parameter: OperationRequestParameterDetails
-): OperationQueryParameter {
-  return {
-    parameterPath: parameter.name,
-    mapper: {
-      ...(parameter.mapper as Mapper),
-      serializedName: parameter.serializedName
-    }
-  };
+): string {
+  return `Parameters.${parameter.name}`;
 }

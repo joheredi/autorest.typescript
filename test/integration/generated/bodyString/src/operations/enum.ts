@@ -9,6 +9,7 @@
 import * as coreHttp from "@azure/core-http";
 import * as Models from "../models";
 import * as Mappers from "../models/mappers";
+import * as Parameters from "../models/parameters";
 import { BodyStringClient } from "../bodyStringClient";
 
 /**
@@ -262,7 +263,9 @@ const putNotExpandableOperationSpec: coreHttp.OperationSpec = {
       type: {
         name: "Enum",
         allowedValues: ["red color", "green-color", "blue_color"]
-      }
+      },
+      serializedName: "Colors",
+      required: true
     }
   },
   serializer
@@ -299,7 +302,9 @@ const putReferencedOperationSpec: coreHttp.OperationSpec = {
       type: {
         name: "Enum",
         allowedValues: ["red color", "green-color", "blue_color"]
-      }
+      },
+      serializedName: "Colors",
+      required: true
     }
   },
   serializer

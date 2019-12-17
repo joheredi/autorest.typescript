@@ -9,6 +9,7 @@
 import * as coreHttp from "@azure/core-http";
 import * as Models from "../models";
 import * as Mappers from "../models/mappers";
+import * as Parameters from "../models/parameters";
 import { BodyStringClient } from "../bodyStringClient";
 
 /**
@@ -427,7 +428,12 @@ const putNullOperationSpec: coreHttp.OperationSpec = {
   },
   requestBody: {
     parameterPath: "stringBody",
-    mapper: { type: { name: "String" }, isConstant: true, defaultValue: null }
+    mapper: {
+      type: { name: "String" },
+      serializedName: "Constant0",
+      defaultValue: null,
+      isConstant: true
+    }
   },
   serializer
 };
@@ -454,7 +460,12 @@ const putEmptyOperationSpec: coreHttp.OperationSpec = {
   },
   requestBody: {
     parameterPath: "stringBody",
-    mapper: { type: { name: "String" }, isConstant: true, defaultValue: "" }
+    mapper: {
+      type: { name: "String" },
+      serializedName: "Constant1",
+      defaultValue: "",
+      isConstant: true
+    }
   },
   serializer
 };
@@ -483,9 +494,10 @@ const putMbcsOperationSpec: coreHttp.OperationSpec = {
     parameterPath: "stringBody",
     mapper: {
       type: { name: "String" },
-      isConstant: true,
+      serializedName: "Constant2",
       defaultValue:
-        "啊齄丂狛狜隣郎隣兀﨩ˊ〞〡￤℡㈱‐ー﹡﹢﹫、〓ⅰⅹ⒈€㈠㈩ⅠⅫ！￣ぁんァヶΑ︴АЯаяāɡㄅㄩ─╋︵﹄︻︱︳︴ⅰⅹɑɡ〇〾⿻⺁䜣€"
+        "啊齄丂狛狜隣郎隣兀﨩ˊ〞〡￤℡㈱‐ー﹡﹢﹫、〓ⅰⅹ⒈€㈠㈩ⅠⅫ！￣ぁんァヶΑ︴АЯаяāɡㄅㄩ─╋︵﹄︻︱︳︴ⅰⅹɑɡ〇〾⿻⺁䜣€",
+      isConstant: true
     }
   },
   serializer
@@ -515,9 +527,10 @@ const putWhitespaceOperationSpec: coreHttp.OperationSpec = {
     parameterPath: "stringBody",
     mapper: {
       type: { name: "String" },
-      isConstant: true,
+      serializedName: "Constant3",
       defaultValue:
-        "    Now is the time for all good men to come to the aid of their country    "
+        "    Now is the time for all good men to come to the aid of their country    ",
+      isConstant: true
     }
   },
   serializer
@@ -571,7 +584,11 @@ const putBase64UrlEncodedOperationSpec: coreHttp.OperationSpec = {
   },
   requestBody: {
     parameterPath: "stringBody",
-    mapper: { type: { name: "Base64Url" } }
+    mapper: {
+      type: { name: "Base64Url" },
+      serializedName: "byte-array",
+      required: true
+    }
   },
   serializer
 };

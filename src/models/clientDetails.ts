@@ -3,7 +3,10 @@
 
 import { ModelDetails } from "./modelDetails";
 import { UnionDetails } from "./unionDetails";
-import { OperationGroupDetails } from "./operationDetails";
+import {
+  OperationGroupDetails,
+  OperationRequestParameterDetails
+} from "./operationDetails";
 import { Mapper } from "@azure/core-http";
 
 export interface ClientDetails {
@@ -15,4 +18,5 @@ export interface ClientDetails {
   mappers: Mapper[];
   unions: UnionDetails[];
   operationGroups: OperationGroupDetails[];
+  parameters: OperationRequestParameterDetails[];
 }

@@ -82,7 +82,7 @@ function buildSpec(spec: OperationSpecDetails): string {
   const responses = buildResponses(spec);
   const requestBody = buildRequestBody(spec);
   const queryParams = spec.queryParameters
-    ? `queryParameters: ${JSON.stringify(spec.queryParameters)},`
+    ? `queryParameters: [${spec.queryParameters.join(",")}],`
     : "";
   return `{ path: "${spec.path}", httpMethod: "${
     spec.httpMethod
@@ -226,7 +226,10 @@ function addOperations(
     const parameters = operation.request.parameters || [];
     const params = parameters
       .filter(
-        param => param.location === ParameterLocation.Body && param.required
+        param =>
+          param.location === ParameterLocation.Body &&
+          param.required &&
+          !param.isConstant
       )
       .map<ParameterWithDescription>(param => {
         const typeName = param.modelType || "any";
@@ -361,6 +364,11 @@ function addImports(
   operationGroupFile.addImportDeclaration({
     namespaceImport: "Mappers",
     moduleSpecifier: "../models/mappers"
+  });
+
+  operationGroupFile.addImportDeclaration({
+    namespaceImport: "Parameters",
+    moduleSpecifier: "../models/parameters"
   });
 
   operationGroupFile.addImportDeclaration({
