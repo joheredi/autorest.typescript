@@ -4,6 +4,7 @@
 import { ClientDetails } from "../models/clientDetails";
 import { UnionDetails } from "../models/unionDetails";
 import { ModelDetails, PropertyDetails } from "../models/modelDetails";
+import { isNil } from "lodash";
 
 import {
   CodeModel,
@@ -96,7 +97,6 @@ function getAllParameters(
   const operationParams = getOperationParameters(codeModel);
   const globalParams = codeModel.globalParameters || [];
   const allParams = dedupeParams([...operationParams, ...globalParams]);
-
   return allParams.map(transformParameter);
 }
 

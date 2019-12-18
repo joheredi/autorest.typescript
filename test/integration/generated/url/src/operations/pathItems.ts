@@ -28,27 +28,52 @@ export class PathItems {
 
   /**
    * send globalStringPath='globalStringPath', pathItemStringPath='pathItemStringPath', localStringPath='localStringPath', globalStringQuery='globalStringQuery', pathItemStringQuery='pathItemStringQuery', localStringQuery='localStringQuery'
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param options The options parameters.
    */
-  getAllWithValues(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  getAllWithValues(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param callback The callback.
    */
-  getAllWithValues(callback: coreHttp.ServiceCallback<any>): void;
+  getAllWithValues(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param options The options parameters.
    * @param callback The callback.
    */
   getAllWithValues(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   getAllWithValues(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { pathItemStringPath, globalStringPath, localStringPath, options },
       getAllWithValuesOperationSpec,
       callback
     );
@@ -56,27 +81,52 @@ export class PathItems {
 
   /**
    * send globalStringPath='globalStringPath', pathItemStringPath='pathItemStringPath', localStringPath='localStringPath', globalStringQuery=null, pathItemStringQuery='pathItemStringQuery', localStringQuery='localStringQuery'
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param options The options parameters.
    */
-  getGlobalQueryNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  getGlobalQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param callback The callback.
    */
-  getGlobalQueryNull(callback: coreHttp.ServiceCallback<any>): void;
+  getGlobalQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param options The options parameters.
    * @param callback The callback.
    */
   getGlobalQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   getGlobalQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { pathItemStringPath, globalStringPath, localStringPath, options },
       getGlobalQueryNullOperationSpec,
       callback
     );
@@ -84,29 +134,52 @@ export class PathItems {
 
   /**
    * send globalStringPath=globalStringPath, pathItemStringPath='pathItemStringPath', localStringPath='localStringPath', globalStringQuery=null, pathItemStringQuery='pathItemStringQuery', localStringQuery=null
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param options The options parameters.
    */
   getGlobalAndLocalQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options?: coreHttp.RequestOptionsBase
   ): Promise<any>;
   /**
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param callback The callback.
    */
-  getGlobalAndLocalQueryNull(callback: coreHttp.ServiceCallback<any>): void;
+  getGlobalAndLocalQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param options The options parameters.
    * @param callback The callback.
    */
   getGlobalAndLocalQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   getGlobalAndLocalQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { pathItemStringPath, globalStringPath, localStringPath, options },
       getGlobalAndLocalQueryNullOperationSpec,
       callback
     );
@@ -114,29 +187,52 @@ export class PathItems {
 
   /**
    * send globalStringPath='globalStringPath', pathItemStringPath='pathItemStringPath', localStringPath='localStringPath', globalStringQuery='globalStringQuery', pathItemStringQuery=null, localStringQuery=null
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param options The options parameters.
    */
   getLocalPathItemQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options?: coreHttp.RequestOptionsBase
   ): Promise<any>;
   /**
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param callback The callback.
    */
-  getLocalPathItemQueryNull(callback: coreHttp.ServiceCallback<any>): void;
+  getLocalPathItemQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param pathItemStringPath A string value 'pathItemStringPath' that appears in the path
+   * @param globalStringPath A string value 'globalItemStringPath' that appears in the path
+   * @param localStringPath should contain value 'localStringPath'
    * @param options The options parameters.
    * @param callback The callback.
    */
   getLocalPathItemQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   getLocalPathItemQueryNull(
+    pathItemStringPath: string,
+    globalStringPath: string,
+    localStringPath: string,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { pathItemStringPath, globalStringPath, localStringPath, options },
       getLocalPathItemQueryNullOperationSpec,
       callback
     );
@@ -155,6 +251,16 @@ const getAllWithValuesOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [
+    Parameters.pathItemStringQuery,
+    Parameters.globalStringQuery,
+    Parameters.localStringQuery
+  ],
+  urlParameters: [
+    Parameters.pathItemStringPath,
+    Parameters.globalStringPath,
+    Parameters.localStringPath
+  ],
   serializer
 };
 const getGlobalQueryNullOperationSpec: coreHttp.OperationSpec = {
@@ -166,6 +272,16 @@ const getGlobalQueryNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [
+    Parameters.pathItemStringQuery,
+    Parameters.globalStringQuery,
+    Parameters.localStringQuery
+  ],
+  urlParameters: [
+    Parameters.pathItemStringPath,
+    Parameters.globalStringPath,
+    Parameters.localStringPath
+  ],
   serializer
 };
 const getGlobalAndLocalQueryNullOperationSpec: coreHttp.OperationSpec = {
@@ -177,6 +293,16 @@ const getGlobalAndLocalQueryNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [
+    Parameters.pathItemStringQuery,
+    Parameters.globalStringQuery,
+    Parameters.localStringQuery
+  ],
+  urlParameters: [
+    Parameters.pathItemStringPath,
+    Parameters.globalStringPath,
+    Parameters.localStringPath
+  ],
   serializer
 };
 const getLocalPathItemQueryNullOperationSpec: coreHttp.OperationSpec = {
@@ -188,5 +314,15 @@ const getLocalPathItemQueryNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [
+    Parameters.pathItemStringQuery,
+    Parameters.globalStringQuery,
+    Parameters.localStringQuery
+  ],
+  urlParameters: [
+    Parameters.pathItemStringPath,
+    Parameters.globalStringPath,
+    Parameters.localStringPath
+  ],
   serializer
 };

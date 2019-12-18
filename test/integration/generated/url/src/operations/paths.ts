@@ -392,27 +392,35 @@ export class Paths {
 
   /**
    * Get null (should throw)
+   * @param stringPath null string value
    * @param options The options parameters.
    */
-  stringNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  stringNull(
+    stringPath: string,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param stringPath null string value
    * @param callback The callback.
    */
-  stringNull(callback: coreHttp.ServiceCallback<any>): void;
+  stringNull(stringPath: string, callback: coreHttp.ServiceCallback<any>): void;
   /**
+   * @param stringPath null string value
    * @param options The options parameters.
    * @param callback The callback.
    */
   stringNull(
+    stringPath: string,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   stringNull(
+    stringPath: string,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { stringPath, options },
       stringNullOperationSpec,
       callback
     );
@@ -420,27 +428,38 @@ export class Paths {
 
   /**
    * Get using uri with 'green color' in path parameter
+   * @param enumPath send the value green
    * @param options The options parameters.
    */
-  enumValid(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  enumValid(
+    enumPath: Models.UriColor,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param enumPath send the value green
    * @param callback The callback.
    */
-  enumValid(callback: coreHttp.ServiceCallback<any>): void;
+  enumValid(
+    enumPath: Models.UriColor,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param enumPath send the value green
    * @param options The options parameters.
    * @param callback The callback.
    */
   enumValid(
+    enumPath: Models.UriColor,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   enumValid(
+    enumPath: Models.UriColor,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { enumPath, options },
       enumValidOperationSpec,
       callback
     );
@@ -448,27 +467,38 @@ export class Paths {
 
   /**
    * Get null (should throw on the client before the request is sent on wire)
+   * @param enumPath send the value green
    * @param options The options parameters.
    */
-  enumNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  enumNull(
+    enumPath: Models.UriColor,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param enumPath send the value green
    * @param callback The callback.
    */
-  enumNull(callback: coreHttp.ServiceCallback<any>): void;
+  enumNull(
+    enumPath: Models.UriColor,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param enumPath send the value green
    * @param options The options parameters.
    * @param callback The callback.
    */
   enumNull(
+    enumPath: Models.UriColor,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   enumNull(
+    enumPath: Models.UriColor,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { enumPath, options },
       enumNullOperationSpec,
       callback
     );
@@ -476,27 +506,38 @@ export class Paths {
 
   /**
    * Get '啊齄丂狛狜隣郎隣兀﨩' multibyte value as utf-8 encoded byte array
+   * @param bytePath '啊齄丂狛狜隣郎隣兀﨩' multibyte value as utf-8 encoded byte array
    * @param options The options parameters.
    */
-  byteMultiByte(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  byteMultiByte(
+    bytePath: Uint8Array,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param bytePath '啊齄丂狛狜隣郎隣兀﨩' multibyte value as utf-8 encoded byte array
    * @param callback The callback.
    */
-  byteMultiByte(callback: coreHttp.ServiceCallback<any>): void;
+  byteMultiByte(
+    bytePath: Uint8Array,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param bytePath '啊齄丂狛狜隣郎隣兀﨩' multibyte value as utf-8 encoded byte array
    * @param options The options parameters.
    * @param callback The callback.
    */
   byteMultiByte(
+    bytePath: Uint8Array,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   byteMultiByte(
+    bytePath: Uint8Array,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { bytePath, options },
       byteMultiByteOperationSpec,
       callback
     );
@@ -532,27 +573,35 @@ export class Paths {
 
   /**
    * Get null as byte array (should throw)
+   * @param bytePath '啊齄丂狛狜隣郎隣兀﨩' multibyte value as utf-8 encoded byte array
    * @param options The options parameters.
    */
-  byteNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  byteNull(
+    bytePath: Uint8Array,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param bytePath '啊齄丂狛狜隣郎隣兀﨩' multibyte value as utf-8 encoded byte array
    * @param callback The callback.
    */
-  byteNull(callback: coreHttp.ServiceCallback<any>): void;
+  byteNull(bytePath: Uint8Array, callback: coreHttp.ServiceCallback<any>): void;
   /**
+   * @param bytePath '啊齄丂狛狜隣郎隣兀﨩' multibyte value as utf-8 encoded byte array
    * @param options The options parameters.
    * @param callback The callback.
    */
   byteNull(
+    bytePath: Uint8Array,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   byteNull(
+    bytePath: Uint8Array,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { bytePath, options },
       byteNullOperationSpec,
       callback
     );
@@ -588,27 +637,32 @@ export class Paths {
 
   /**
    * Get null as date - this should throw or be unusable on the client side, depending on date representation
+   * @param datePath null as date (should throw)
    * @param options The options parameters.
    */
-  dateNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  dateNull(datePath: any, options?: coreHttp.RequestOptionsBase): Promise<any>;
   /**
+   * @param datePath null as date (should throw)
    * @param callback The callback.
    */
-  dateNull(callback: coreHttp.ServiceCallback<any>): void;
+  dateNull(datePath: any, callback: coreHttp.ServiceCallback<any>): void;
   /**
+   * @param datePath null as date (should throw)
    * @param options The options parameters.
    * @param callback The callback.
    */
   dateNull(
+    datePath: any,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   dateNull(
+    datePath: any,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { datePath, options },
       dateNullOperationSpec,
       callback
     );
@@ -644,27 +698,38 @@ export class Paths {
 
   /**
    * Get null as date-time, should be disallowed or throw depending on representation of date-time
+   * @param dateTimePath null as date-time
    * @param options The options parameters.
    */
-  dateTimeNull(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  dateTimeNull(
+    dateTimePath: any,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param dateTimePath null as date-time
    * @param callback The callback.
    */
-  dateTimeNull(callback: coreHttp.ServiceCallback<any>): void;
+  dateTimeNull(
+    dateTimePath: any,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param dateTimePath null as date-time
    * @param options The options parameters.
    * @param callback The callback.
    */
   dateTimeNull(
+    dateTimePath: any,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   dateTimeNull(
+    dateTimePath: any,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { dateTimePath, options },
       dateTimeNullOperationSpec,
       callback
     );
@@ -672,27 +737,38 @@ export class Paths {
 
   /**
    * Get 'lorem' encoded value as 'bG9yZW0' (base64url)
+   * @param base64UrlPath base64url encoded value
    * @param options The options parameters.
    */
-  base64Url(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  base64Url(
+    base64UrlPath: Uint8Array,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param base64UrlPath base64url encoded value
    * @param callback The callback.
    */
-  base64Url(callback: coreHttp.ServiceCallback<any>): void;
+  base64Url(
+    base64UrlPath: Uint8Array,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param base64UrlPath base64url encoded value
    * @param options The options parameters.
    * @param callback The callback.
    */
   base64Url(
+    base64UrlPath: Uint8Array,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   base64Url(
+    base64UrlPath: Uint8Array,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { base64UrlPath, options },
       base64UrlOperationSpec,
       callback
     );
@@ -700,27 +776,35 @@ export class Paths {
 
   /**
    * Get an array of string ['ArrayPath1', 'begin!*'();:@ &=+$,/?#[]end' , null, ''] using the csv-array format
+   * @param arrayPath an array of string ['ArrayPath1', 'begin!*'();:@ &=+$,/?#[]end' , null, ''] using the csv-array format
    * @param options The options parameters.
    */
-  arrayCsvInPath(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  arrayCsvInPath(
+    arrayPath: any,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param arrayPath an array of string ['ArrayPath1', 'begin!*'();:@ &=+$,/?#[]end' , null, ''] using the csv-array format
    * @param callback The callback.
    */
-  arrayCsvInPath(callback: coreHttp.ServiceCallback<any>): void;
+  arrayCsvInPath(arrayPath: any, callback: coreHttp.ServiceCallback<any>): void;
   /**
+   * @param arrayPath an array of string ['ArrayPath1', 'begin!*'();:@ &=+$,/?#[]end' , null, ''] using the csv-array format
    * @param options The options parameters.
    * @param callback The callback.
    */
   arrayCsvInPath(
+    arrayPath: any,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   arrayCsvInPath(
+    arrayPath: any,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { arrayPath, options },
       arrayCsvInPathOperationSpec,
       callback
     );
@@ -728,27 +812,38 @@ export class Paths {
 
   /**
    * Get the date 2016-04-13 encoded value as '1460505600' (Unix time)
+   * @param unixTimeUrlPath Unix time encoded value
    * @param options The options parameters.
    */
-  unixTimeUrl(options?: coreHttp.RequestOptionsBase): Promise<any>;
+  unixTimeUrl(
+    unixTimeUrlPath: any,
+    options?: coreHttp.RequestOptionsBase
+  ): Promise<any>;
   /**
+   * @param unixTimeUrlPath Unix time encoded value
    * @param callback The callback.
    */
-  unixTimeUrl(callback: coreHttp.ServiceCallback<any>): void;
+  unixTimeUrl(
+    unixTimeUrlPath: any,
+    callback: coreHttp.ServiceCallback<any>
+  ): void;
   /**
+   * @param unixTimeUrlPath Unix time encoded value
    * @param options The options parameters.
    * @param callback The callback.
    */
   unixTimeUrl(
+    unixTimeUrlPath: any,
     options: coreHttp.RequestOptionsBase,
     callback: coreHttp.ServiceCallback<any>
   ): void;
   unixTimeUrl(
+    unixTimeUrlPath: any,
     options?: coreHttp.RequestOptionsBase,
     callback?: coreHttp.ServiceCallback<any>
   ): Promise<any> {
     return this.client.sendOperationRequest(
-      { options },
+      { unixTimeUrlPath, options },
       unixTimeUrlOperationSpec,
       callback
     );
@@ -766,6 +861,7 @@ const getBooleanTrueOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.boolPath],
   serializer
 };
 const getBooleanFalseOperationSpec: coreHttp.OperationSpec = {
@@ -776,6 +872,7 @@ const getBooleanFalseOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.boolPath],
   serializer
 };
 const getIntOneMillionOperationSpec: coreHttp.OperationSpec = {
@@ -786,6 +883,7 @@ const getIntOneMillionOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.intPath],
   serializer
 };
 const getIntNegativeOneMillionOperationSpec: coreHttp.OperationSpec = {
@@ -796,6 +894,7 @@ const getIntNegativeOneMillionOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.intPath],
   serializer
 };
 const getTenBillionOperationSpec: coreHttp.OperationSpec = {
@@ -806,6 +905,7 @@ const getTenBillionOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.longPath],
   serializer
 };
 const getNegativeTenBillionOperationSpec: coreHttp.OperationSpec = {
@@ -816,6 +916,7 @@ const getNegativeTenBillionOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.longPath],
   serializer
 };
 const floatScientificPositiveOperationSpec: coreHttp.OperationSpec = {
@@ -826,6 +927,7 @@ const floatScientificPositiveOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.floatPath],
   serializer
 };
 const floatScientificNegativeOperationSpec: coreHttp.OperationSpec = {
@@ -836,6 +938,7 @@ const floatScientificNegativeOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.floatPath],
   serializer
 };
 const doubleDecimalPositiveOperationSpec: coreHttp.OperationSpec = {
@@ -846,6 +949,7 @@ const doubleDecimalPositiveOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.doublePath],
   serializer
 };
 const doubleDecimalNegativeOperationSpec: coreHttp.OperationSpec = {
@@ -856,6 +960,7 @@ const doubleDecimalNegativeOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.doublePath],
   serializer
 };
 const stringUnicodeOperationSpec: coreHttp.OperationSpec = {
@@ -866,6 +971,7 @@ const stringUnicodeOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.stringPath],
   serializer
 };
 const stringUrlEncodedOperationSpec: coreHttp.OperationSpec = {
@@ -877,6 +983,7 @@ const stringUrlEncodedOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.stringPath],
   serializer
 };
 const stringEmptyOperationSpec: coreHttp.OperationSpec = {
@@ -887,6 +994,7 @@ const stringEmptyOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.stringPath],
   serializer
 };
 const stringNullOperationSpec: coreHttp.OperationSpec = {
@@ -897,6 +1005,7 @@ const stringNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.stringPath],
   serializer
 };
 const enumValidOperationSpec: coreHttp.OperationSpec = {
@@ -907,6 +1016,7 @@ const enumValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.enumPath],
   serializer
 };
 const enumNullOperationSpec: coreHttp.OperationSpec = {
@@ -917,6 +1027,7 @@ const enumNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.enumPath],
   serializer
 };
 const byteMultiByteOperationSpec: coreHttp.OperationSpec = {
@@ -927,6 +1038,7 @@ const byteMultiByteOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.bytePath],
   serializer
 };
 const byteEmptyOperationSpec: coreHttp.OperationSpec = {
@@ -937,6 +1049,7 @@ const byteEmptyOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.bytePath],
   serializer
 };
 const byteNullOperationSpec: coreHttp.OperationSpec = {
@@ -947,6 +1060,7 @@ const byteNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.bytePath],
   serializer
 };
 const dateValidOperationSpec: coreHttp.OperationSpec = {
@@ -957,6 +1071,7 @@ const dateValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.datePath],
   serializer
 };
 const dateNullOperationSpec: coreHttp.OperationSpec = {
@@ -967,6 +1082,7 @@ const dateNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.datePath],
   serializer
 };
 const dateTimeValidOperationSpec: coreHttp.OperationSpec = {
@@ -977,6 +1093,7 @@ const dateTimeValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.dateTimePath],
   serializer
 };
 const dateTimeNullOperationSpec: coreHttp.OperationSpec = {
@@ -987,6 +1104,7 @@ const dateTimeNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.dateTimePath],
   serializer
 };
 const base64UrlOperationSpec: coreHttp.OperationSpec = {
@@ -997,6 +1115,7 @@ const base64UrlOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.base64UrlPath],
   serializer
 };
 const arrayCsvInPathOperationSpec: coreHttp.OperationSpec = {
@@ -1008,6 +1127,7 @@ const arrayCsvInPathOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.arrayPath],
   serializer
 };
 const unixTimeUrlOperationSpec: coreHttp.OperationSpec = {
@@ -1018,5 +1138,6 @@ const unixTimeUrlOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  urlParameters: [Parameters.unixTimeUrlPath],
   serializer
 };

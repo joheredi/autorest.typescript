@@ -11,7 +11,7 @@ import * as Mappers from "../models/mappers";
 
 export const $host: coreHttp.OperationParameter = {
   parameterPath: "$host",
-  mapper: { type: { name: "String" }, serializedName: "string", required: true }
+  mapper: { type: { name: "String" }, serializedName: "$host", required: true }
 };
 export const boolPath: coreHttp.OperationParameter = {
   parameterPath: "boolPath",
@@ -89,7 +89,7 @@ export const bytePath: coreHttp.OperationParameter = {
 export const datePath: coreHttp.OperationParameter = {
   parameterPath: "datePath",
   mapper: {
-    type: { name: "String" },
+    type: { name: "Date" },
     serializedName: "datePath",
     defaultValue: "2012-01-01",
     isConstant: true
@@ -98,7 +98,7 @@ export const datePath: coreHttp.OperationParameter = {
 export const dateTimePath: coreHttp.OperationParameter = {
   parameterPath: "dateTimePath",
   mapper: {
-    type: { name: "String" },
+    type: { name: "DateTime" },
     serializedName: "dateTimePath",
     defaultValue: "2012-01-01T01:01:01Z",
     isConstant: true
@@ -202,7 +202,7 @@ export const byteQuery: coreHttp.OperationParameter = {
 export const dateQuery: coreHttp.OperationParameter = {
   parameterPath: "dateQuery",
   mapper: {
-    type: { name: "String" },
+    type: { name: "Date" },
     serializedName: "dateQuery",
     defaultValue: "2012-01-01",
     isConstant: true
@@ -211,7 +211,7 @@ export const dateQuery: coreHttp.OperationParameter = {
 export const dateTimeQuery: coreHttp.OperationParameter = {
   parameterPath: "dateTimeQuery",
   mapper: {
-    type: { name: "String" },
+    type: { name: "DateTime" },
     serializedName: "dateTimeQuery",
     defaultValue: "2012-01-01T01:01:01Z",
     isConstant: true

@@ -11,7 +11,7 @@ import * as Mappers from "../models/mappers";
 
 export const $host: coreHttp.OperationParameter = {
   parameterPath: "$host",
-  mapper: { type: { name: "String" }, serializedName: "string", required: true }
+  mapper: { type: { name: "String" }, serializedName: "$host", required: true }
 };
 export const apiVersion: coreHttp.OperationParameter = {
   parameterPath: "apiVersion",

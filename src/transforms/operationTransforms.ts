@@ -9,7 +9,8 @@ import {
   ChoiceSchema,
   OperationGroup,
   ParameterLocation,
-  ConstantSchema
+  ConstantSchema,
+  Parameter
 } from "@azure-tools/codemodel";
 import { normalizeName, NameType } from "../utils/nameUtils";
 import {
@@ -33,13 +34,28 @@ export function transformOperationSpec(
   // Extract protocol information
   const requestSpec = extractSpecRequest(operationDetails);
   const httpInfo = extractHttpDetails(operationDetails.request);
-  const queryParameters = requestSpec && requestSpec.queryParameters;
+  const parameters = operationDetails.request.parameters || [];
+  const queryParameters = getParametersRef(parameters, ParameterLocation.Query);
+  const urlParameters = getParametersRef(parameters, ParameterLocation.Path);
+  // if (urlParameters && urlParameters.length) {
+  //   throw new Error(JSON.stringify(urlParameters));
+  // }
   return {
     ...httpInfo,
     responses: extractSpecResponses(operationDetails),
     requestBody: requestSpec,
-    ...(queryParameters && queryParameters.length && { queryParameters })
+    ...(queryParameters && queryParameters.length && { queryParameters }),
+    ...(urlParameters && urlParameters.length && { urlParameters })
   };
+}
+
+function getParametersRef(
+  params: OperationRequestParameterDetails[],
+  location?: ParameterLocation
+) {
+  return params
+    .filter(p => (!location ? !location : p.location === location))
+    .map(p => `Parameters.${p.name}`);
 }
 
 export function extractHttpDetails({ path, method }: OperationRequestDetails) {
@@ -78,7 +94,6 @@ export function extractSpecRequest(
   }
 
   return {
-    queryParameters: queryParams.map(extractQueryParam),
     parameterPath: parameters.map(p => p.name)[0],
     mapper: parameters[0].mapper
   };

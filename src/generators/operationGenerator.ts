@@ -81,6 +81,9 @@ function generateOperation(
 function buildSpec(spec: OperationSpecDetails): string {
   const responses = buildResponses(spec);
   const requestBody = buildRequestBody(spec);
+  const urlParams = spec.urlParameters
+    ? `urlParameters: [${spec.urlParameters.join(",")}],`
+    : "";
   const queryParams = spec.queryParameters
     ? `queryParameters: [${spec.queryParameters.join(",")}],`
     : "";
@@ -88,7 +91,7 @@ function buildSpec(spec: OperationSpecDetails): string {
     spec.httpMethod
   }", responses: {${responses.join(
     ", "
-  )}},${requestBody}${queryParams}serializer
+  )}},${requestBody}${queryParams}${urlParams}serializer
     }`;
 }
 
@@ -97,7 +100,7 @@ function buildSpec(spec: OperationSpecDetails): string {
  * to insert in generated files
  */
 function buildRequestBody({ requestBody }: OperationSpecDetails): string {
-  if (!requestBody) {
+  if (!requestBody || !requestBody.mapper) {
     return "";
   }
 
@@ -124,7 +127,7 @@ function buildResponses({ responses }: OperationSpecDetails): string[] {
     // Check whether we have an actual mapper or a string reference
     const bodyMapper = responses[code].bodyMapper;
     const isCompositeMapper =
-      bodyMapper &&
+      !!bodyMapper &&
       !isString(bodyMapper) &&
       bodyMapper.type.name === MapperType.Composite;
 
@@ -227,7 +230,9 @@ function addOperations(
     const params = parameters
       .filter(
         param =>
-          param.location === ParameterLocation.Body &&
+          [ParameterLocation.Body, ParameterLocation.Path].includes(
+            param.location
+          ) &&
           param.required &&
           !param.isConstant
       )

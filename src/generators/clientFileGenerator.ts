@@ -9,6 +9,7 @@ import {
   normalizeName,
   NameType
 } from "../utils/nameUtils";
+import { OperationRequestParameterDetails } from "../models/operationDetails";
 
 export function generateClient(clientDetails: ClientDetails, project: Project) {
   const modelsName = getModelsName(clientDetails.className);
@@ -64,6 +65,10 @@ export function generateClient(clientDetails: ClientDetails, project: Project) {
     })
   );
 
+  const requiredParams = clientDetails.parameters.filter(
+    p => p.isGlobal && p.required
+  );
+
   const clientConstructor = clientClass.addConstructor({
     docs: [
       // TODO: Parameter list will need to be generated based on real
@@ -72,6 +77,10 @@ export function generateClient(clientDetails: ClientDetails, project: Project) {
 @param options The parameter options`
     ],
     parameters: [
+      ...requiredParams.map(p => ({
+        name: p.name,
+        type: "any"
+      })),
       {
         name: "options",
         hasQuestionToken: true,
@@ -81,7 +90,9 @@ export function generateClient(clientDetails: ClientDetails, project: Project) {
   });
 
   clientConstructor.addStatements([
-    "super(options);",
+    `super(${
+      requiredParams.length ? `${requiredParams.map(p => p.name)},` : ""
+    }options);`,
     ...operations.map(
       ({ name, typeName }) => `this.${name} = new ${typeName}(this)`
     )
@@ -102,3 +113,5 @@ export function generateClient(clientDetails: ClientDetails, project: Project) {
     moduleSpecifier: "./operations"
   });
 }
+
+function getRequierSuper(oaram: OperationRequestParameterDetails) {}

@@ -9,6 +9,7 @@ import { normalizeName, NameType } from "../utils/nameUtils";
 import { transformMapper, getMapperClassName } from "./mapperTransforms";
 import { getTypeForSchema } from "../utils/schemaHelpers";
 import { Schema } from "js-yaml";
+import { isNil } from "lodash";
 
 export function getParameterName(parameter: Parameter): string {
   const { name: originalName } = getLanguageMetadata(parameter.language);
@@ -50,6 +51,8 @@ export function transformParameter(
   const required = parameter.required;
   const mapper = getMapper(parameter);
   const isConstant = parameter.schema.type === SchemaType.Constant;
+  const isGlobal =
+    !!parameter.extensions && !isNil(parameter.extensions["x-ms-priority"]);
   return {
     name,
     description: metadata.description,
@@ -58,7 +61,8 @@ export function transformParameter(
     mapper,
     serializedName: metadata.serializedName,
     ...(required && { required }),
-    ...(isConstant && { isConstant })
+    ...(isConstant && { isConstant }),
+    isGlobal
   };
 }
 

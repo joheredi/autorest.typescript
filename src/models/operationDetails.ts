@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ParameterLocation, HttpMethod } from "@azure-tools/codemodel";
+import {
+  ParameterLocation,
+  HttpMethod,
+  BooleanSchema
+} from "@azure-tools/codemodel";
 import { KnownMediaType } from "@azure-tools/codegen";
 import { Mapper } from "@azure/core-http";
 
@@ -17,6 +21,7 @@ export interface OperationRequestParameterDetails {
   mapper: Mapper | string;
   location: ParameterLocation;
   serializedName?: string;
+  isGlobal?: boolean;
 }
 
 /**
@@ -59,6 +64,7 @@ export interface OperationSpecDetails {
   responses: OperationSpecResponses;
   requestBody?: OperationSpecRequest;
   queryParameters?: string[];
+  urlParameters?: string[];
 }
 
 /**
@@ -79,7 +85,6 @@ export type OperationSpecResponses = {
 };
 
 export type OperationSpecRequest = {
-  queryParameters: string[];
   parameterPath: string;
   mapper: Mapper | string;
 };

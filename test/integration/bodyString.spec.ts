@@ -73,8 +73,6 @@ describe("Integration tests for BodyString", () => {
       });
     });
 
-    // TODO: Reenable after investigating why the following error is thrown:
-    // test/utils/stringToByteArray.ts:6:16 - error TS2304: Cannot find name 'TextEncoder'.
     it("should correctly serialize and deserialize base64url encoded string", function(done) {
       client.string.getBase64UrlEncoded(function(error, result) {
         ok(!error, "response should not contain errors");

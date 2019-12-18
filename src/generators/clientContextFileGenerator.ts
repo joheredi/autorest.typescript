@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Project } from "ts-morph";
+import { Project, Scope } from "ts-morph";
 import { normalizeName, NameType } from "../utils/nameUtils";
 import { ClientDetails } from "../models/clientDetails";
 import { PackageDetails } from "../models/packageDetails";
+import { ParameterLocation, Parameter } from "@azure-tools/codemodel";
+import { OperationRequestParameterDetails } from "../models/operationDetails";
 
 export function generateClientContext(
   clientDetails: ClientDetails,
@@ -47,12 +49,30 @@ export function generateClientContext(
     isExported: true
   });
 
+  const globalParams = clientDetails.parameters.filter(p => p.isGlobal);
+
+  // throw new Error(JSON.stringify(clientDetails.parameters));
+  globalParams.forEach(param => {
+    contextClass.addProperty({
+      name: `${param.name}`,
+      type: "string",
+      hasQuestionToken: !param.required
+    });
+  });
+
+  const requiredParams = globalParams.filter(p => p.required);
+  const optionalParams = globalParams.filter(p => !p.required);
+
   const classConstructor = contextClass.addConstructor({
     docs: [
       `Initializes a new instance of the ${clientContextClassName} class.\n
 @param options The parameter options`
     ],
     parameters: [
+      ...requiredParams.map(p => ({
+        name: p.name,
+        type: "any"
+      })),
       {
         name: "options",
         hasQuestionToken: true,
@@ -73,6 +93,22 @@ export function generateClientContext(
      }\n`,
     `super(undefined, options);\n\n`,
     `this.baseUri = options.baseUri || this.baseUri || "http://localhost:3000";
-     this.requestContentType = "application/json; charset=utf-8";`
+     this.requestContentType = "application/json; charset=utf-8";`,
+    ...requiredParams.map(getRequiredParamAssignment),
+    ...optionalParams.map(getOptionalParamAssignment)
   ]);
+}
+
+function getRequiredParamAssignment(
+  parameter: OperationRequestParameterDetails
+): string {
+  return `this.${parameter.name} = ${parameter.name}`;
+}
+
+function getOptionalParamAssignment({
+  name
+}: OperationRequestParameterDetails) {
+  return `if (options.${name} !== null && options.${name} !== undefined) {
+      this.${name} = options.${name};
+    }`;
 }

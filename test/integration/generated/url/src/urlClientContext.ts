@@ -13,12 +13,15 @@ const packageName = "url";
 const packageVersion = "1.0.0-preview1";
 
 export class UrlClientContext extends coreHttp.ServiceClient {
+  globalStringPath: string;
+  globalStringQuery?: string;
+
   /**
    * Initializes a new instance of the UrlClientContext class.
    *
    * @param options The parameter options
    */
-  constructor(options?: any) {
+  constructor(globalStringPath: any, options?: any) {
     if (!options) {
       options = {};
     }
@@ -32,5 +35,12 @@ export class UrlClientContext extends coreHttp.ServiceClient {
 
     this.baseUri = options.baseUri || this.baseUri || "http://localhost:3000";
     this.requestContentType = "application/json; charset=utf-8";
+    this.globalStringPath = globalStringPath;
+    if (
+      options.globalStringQuery !== null &&
+      options.globalStringQuery !== undefined
+    ) {
+      this.globalStringQuery = options.globalStringQuery;
+    }
   }
 }

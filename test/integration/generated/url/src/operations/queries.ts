@@ -990,6 +990,7 @@ const getBooleanTrueOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.boolQuery],
   serializer
 };
 const getBooleanFalseOperationSpec: coreHttp.OperationSpec = {
@@ -1000,6 +1001,7 @@ const getBooleanFalseOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.boolQuery],
   serializer
 };
 const getBooleanNullOperationSpec: coreHttp.OperationSpec = {
@@ -1010,6 +1012,7 @@ const getBooleanNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.boolQuery],
   serializer
 };
 const getIntOneMillionOperationSpec: coreHttp.OperationSpec = {
@@ -1020,6 +1023,7 @@ const getIntOneMillionOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.intQuery],
   serializer
 };
 const getIntNegativeOneMillionOperationSpec: coreHttp.OperationSpec = {
@@ -1030,6 +1034,7 @@ const getIntNegativeOneMillionOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.intQuery],
   serializer
 };
 const getIntNullOperationSpec: coreHttp.OperationSpec = {
@@ -1040,6 +1045,7 @@ const getIntNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.intQuery],
   serializer
 };
 const getTenBillionOperationSpec: coreHttp.OperationSpec = {
@@ -1050,6 +1056,7 @@ const getTenBillionOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.longQuery],
   serializer
 };
 const getNegativeTenBillionOperationSpec: coreHttp.OperationSpec = {
@@ -1060,6 +1067,7 @@ const getNegativeTenBillionOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.longQuery],
   serializer
 };
 const getLongNullOperationSpec: coreHttp.OperationSpec = {
@@ -1070,6 +1078,7 @@ const getLongNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.longQuery],
   serializer
 };
 const floatScientificPositiveOperationSpec: coreHttp.OperationSpec = {
@@ -1080,6 +1089,7 @@ const floatScientificPositiveOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.floatQuery],
   serializer
 };
 const floatScientificNegativeOperationSpec: coreHttp.OperationSpec = {
@@ -1090,6 +1100,7 @@ const floatScientificNegativeOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.floatQuery],
   serializer
 };
 const floatNullOperationSpec: coreHttp.OperationSpec = {
@@ -1100,6 +1111,7 @@ const floatNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.floatQuery],
   serializer
 };
 const doubleDecimalPositiveOperationSpec: coreHttp.OperationSpec = {
@@ -1110,6 +1122,7 @@ const doubleDecimalPositiveOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.doubleQuery],
   serializer
 };
 const doubleDecimalNegativeOperationSpec: coreHttp.OperationSpec = {
@@ -1120,6 +1133,7 @@ const doubleDecimalNegativeOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.doubleQuery],
   serializer
 };
 const doubleNullOperationSpec: coreHttp.OperationSpec = {
@@ -1130,6 +1144,7 @@ const doubleNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.doubleQuery],
   serializer
 };
 const stringUnicodeOperationSpec: coreHttp.OperationSpec = {
@@ -1140,6 +1155,7 @@ const stringUnicodeOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.stringQuery],
   serializer
 };
 const stringUrlEncodedOperationSpec: coreHttp.OperationSpec = {
@@ -1151,6 +1167,7 @@ const stringUrlEncodedOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.stringQuery],
   serializer
 };
 const stringEmptyOperationSpec: coreHttp.OperationSpec = {
@@ -1161,6 +1178,7 @@ const stringEmptyOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.stringQuery],
   serializer
 };
 const stringNullOperationSpec: coreHttp.OperationSpec = {
@@ -1171,6 +1189,7 @@ const stringNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.stringQuery],
   serializer
 };
 const enumValidOperationSpec: coreHttp.OperationSpec = {
@@ -1181,6 +1200,7 @@ const enumValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.enumQuery],
   serializer
 };
 const enumNullOperationSpec: coreHttp.OperationSpec = {
@@ -1191,6 +1211,7 @@ const enumNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.enumQuery],
   serializer
 };
 const byteMultiByteOperationSpec: coreHttp.OperationSpec = {
@@ -1201,6 +1222,7 @@ const byteMultiByteOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.byteQuery],
   serializer
 };
 const byteEmptyOperationSpec: coreHttp.OperationSpec = {
@@ -1211,6 +1233,7 @@ const byteEmptyOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.byteQuery],
   serializer
 };
 const byteNullOperationSpec: coreHttp.OperationSpec = {
@@ -1221,6 +1244,7 @@ const byteNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.byteQuery],
   serializer
 };
 const dateValidOperationSpec: coreHttp.OperationSpec = {
@@ -1231,6 +1255,7 @@ const dateValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.dateQuery],
   serializer
 };
 const dateNullOperationSpec: coreHttp.OperationSpec = {
@@ -1241,6 +1266,7 @@ const dateNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.dateQuery],
   serializer
 };
 const dateTimeValidOperationSpec: coreHttp.OperationSpec = {
@@ -1251,6 +1277,7 @@ const dateTimeValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.dateTimeQuery],
   serializer
 };
 const dateTimeNullOperationSpec: coreHttp.OperationSpec = {
@@ -1261,6 +1288,7 @@ const dateTimeNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.dateTimeQuery],
   serializer
 };
 const arrayStringCsvValidOperationSpec: coreHttp.OperationSpec = {
@@ -1271,6 +1299,7 @@ const arrayStringCsvValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.arrayQuery],
   serializer
 };
 const arrayStringCsvNullOperationSpec: coreHttp.OperationSpec = {
@@ -1281,6 +1310,7 @@ const arrayStringCsvNullOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.arrayQuery],
   serializer
 };
 const arrayStringCsvEmptyOperationSpec: coreHttp.OperationSpec = {
@@ -1291,6 +1321,7 @@ const arrayStringCsvEmptyOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.arrayQuery],
   serializer
 };
 const arrayStringSsvValidOperationSpec: coreHttp.OperationSpec = {
@@ -1301,6 +1332,7 @@ const arrayStringSsvValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.arrayQuery],
   serializer
 };
 const arrayStringTsvValidOperationSpec: coreHttp.OperationSpec = {
@@ -1311,6 +1343,7 @@ const arrayStringTsvValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.arrayQuery],
   serializer
 };
 const arrayStringPipesValidOperationSpec: coreHttp.OperationSpec = {
@@ -1321,5 +1354,6 @@ const arrayStringPipesValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
+  queryParameters: [Parameters.arrayQuery],
   serializer
 };
