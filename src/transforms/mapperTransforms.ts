@@ -170,16 +170,19 @@ function buildMapper(
     ...(numberSchema.multipleOf && { MultipleOf: numberSchema.multipleOf })
   };
 
-  const mappeType = type as MapperType;
+  const xml = schema.serialization?.xml;
+  const xmlName = schema.serialization?.xml?.name || serializedName;
+  const mapperType = type as MapperType;
   return {
-    ...{ type: mappeType },
+    ...{ type: mapperType },
     ...(serializedName && { serializedName }),
     ...(!!schema.defaultValue && {
       defaultValue: schema.defaultValue
     }),
     ...(required && { required }),
     ...(readOnly && { readOnly }),
-    ...(hasConstraints && { constraints })
+    ...(hasConstraints && { constraints }),
+    ...(xml && { xmlName })
   };
 }
 
@@ -230,6 +233,7 @@ function transformObjectMapper(pipelineValue: PipelineValue) {
   const className = getMapperClassName(schema);
   const objectSchema = schema as ObjectSchema;
   const { discriminator, discriminatorValue } = objectSchema;
+  const xmlSerialization = objectSchema.serialization?.xml;
 
   let modelProperties = processProperties(objectSchema.properties);
   const parents = objectSchema.parents ? objectSchema.parents.all : [];
@@ -317,20 +321,25 @@ function transformArrayMapper(pipelineValue: PipelineValue) {
   }
 
   const arraySchema = schema as ArraySchema;
-
   const elementSchema = arraySchema.elementType;
+  const elementMapper = getMapperOrRef(elementSchema);
+  const elementXml = elementSchema.serialization?.xml;
+  const xmlElementName = elementXml?.name;
+
   const mapper = buildMapper(
     schema,
     {
       name: MapperType.Sequence,
-      element: getMapperOrRef(elementSchema)
+      element: elementMapper
     },
     options
   );
 
+  const arrayMapper: Mapper = { ...mapper, xmlElementName };
+
   return {
     schema,
-    mapper,
+    mapper: arrayMapper,
     isHandled: true
   };
 }
