@@ -106,11 +106,12 @@ function buildSpec(spec: OperationSpecDetails): string {
   const queryParams = buildParameters(spec, "queryParameters");
   const urlParams = buildParameters(spec, "urlParameters");
   const headerParams = buildParameters(spec, "headerParameters");
+  const isXml = spec.isXml ? "isXML: true," : "";
   return `{ path: "${spec.path}", httpMethod: "${
     spec.httpMethod
   }", responses: {${responses.join(
     ", "
-  )}},${requestBody}${queryParams}${urlParams}${headerParams}serializer
+  )}},${requestBody}${queryParams}${urlParams}${headerParams}${isXml}serializer
     }`;
 }
 

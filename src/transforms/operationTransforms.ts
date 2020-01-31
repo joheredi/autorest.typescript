@@ -30,6 +30,7 @@ import { getMapperTypeFromSchema, transformMapper } from "./mapperTransforms";
 import { ParameterDetails } from "../models/parameterDetails";
 import { PropertyKind, TypeDetails } from "../models/modelDetails";
 import { TOPLEVEL_OPERATIONGROUP } from "./constants";
+import { KnownMediaType } from "@azure-tools/codegen";
 
 export function transformOperationSpec(
   operationDetails: OperationDetails,
@@ -48,9 +49,15 @@ export function transformOperationSpec(
   if (headerParameters && headerParameters.length) {
     throw new Error(`${JSON.stringify(headerParameters)}`);
   }
+
+  const isXml = operationDetails.responses.some(
+    r => r.mediaType === KnownMediaType.Xml
+  );
+
   return {
     ...httpInfo,
     responses: extractSpecResponses(operationDetails),
+    isXml,
     requestBody,
     ...(queryParameters && queryParameters.length && { queryParameters }),
     ...(urlParameters && urlParameters.length && { urlParameters }),

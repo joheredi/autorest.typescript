@@ -50,6 +50,7 @@ export interface OperationSpecDetails {
   requestBody?: ParameterDetails;
   queryParameters?: ParameterDetails[];
   urlParameters?: ParameterDetails[];
+  isXml: boolean;
 }
 
 /**

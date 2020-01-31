@@ -170,8 +170,8 @@ function buildMapper(
     ...(numberSchema.multipleOf && { MultipleOf: numberSchema.multipleOf })
   };
 
-  const xml = schema.serialization?.xml;
   const xmlName = schema.serialization?.xml?.name || serializedName;
+  const xmlIsAttribute = !!schema.serialization?.xml?.attribute;
   const mapperType = type as MapperType;
   return {
     ...{ type: mapperType },
@@ -182,7 +182,8 @@ function buildMapper(
     ...(required && { required }),
     ...(readOnly && { readOnly }),
     ...(hasConstraints && { constraints }),
-    ...(xml && { xmlName })
+    ...(xmlName && { xmlName }),
+    ...(xmlIsAttribute && { xmlIsAttribute })
   };
 }
 
