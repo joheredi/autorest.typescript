@@ -71,16 +71,19 @@ export const Slideshow: coreHttp.CompositeMapper = {
       title: {
         type: { name: "String" },
         serializedName: "title",
+        xmlName: "title",
         xmlIsAttribute: true
       },
       date: {
         type: { name: "String" },
         serializedName: "date",
+        xmlName: "date",
         xmlIsAttribute: true
       },
       author: {
         type: { name: "String" },
         serializedName: "author",
+        xmlName: "author",
         xmlIsAttribute: true
       },
       slides: {
@@ -105,6 +108,7 @@ export const Slide: coreHttp.CompositeMapper = {
       type: {
         type: { name: "String" },
         serializedName: "type",
+        xmlName: "type",
         xmlIsAttribute: true
       },
       title: { type: { name: "String" }, serializedName: "title" },
@@ -152,6 +156,7 @@ export const AppleBarrel: coreHttp.CompositeMapper = {
           }
         },
         serializedName: "GoodApples",
+        xmlName: "GoodApples",
         xmlElementName: "Apple"
       },
       badApples: {
@@ -164,6 +169,7 @@ export const AppleBarrel: coreHttp.CompositeMapper = {
           }
         },
         serializedName: "BadApples",
+        xmlName: "BadApples",
         xmlElementName: "Apple"
       }
     }
@@ -207,6 +213,7 @@ export const ListContainersResponse: coreHttp.CompositeMapper = {
         type: { name: "String" },
         serializedName: "ServiceEndpoint",
         required: true,
+        xmlName: "ServiceEndpoint",
         xmlIsAttribute: true
       },
       prefix: {
@@ -225,7 +232,8 @@ export const ListContainersResponse: coreHttp.CompositeMapper = {
           name: "Sequence",
           element: { type: { name: "Composite", className: "Container" } }
         },
-        serializedName: "Containers"
+        serializedName: "Containers",
+        xmlName: "Containers"
       },
       nextMarker: {
         type: { name: "String" },
@@ -328,6 +336,7 @@ export const StorageServiceProperties: coreHttp.CompositeMapper = {
           element: { type: { name: "Composite", className: "CorsRule" } }
         },
         serializedName: "Cors",
+        xmlName: "Cors",
         xmlElementName: "CorsRule"
       },
       defaultServiceVersion: {
@@ -506,12 +515,14 @@ export const ListBlobsResponse: coreHttp.CompositeMapper = {
         type: { name: "String" },
         serializedName: "ServiceEndpoint",
         required: true,
+        xmlName: "ServiceEndpoint",
         xmlIsAttribute: true
       },
       containerName: {
         type: { name: "String" },
         serializedName: "ContainerName",
         required: true,
+        xmlName: "ContainerName",
         xmlIsAttribute: true
       },
       prefix: {

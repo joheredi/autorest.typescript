@@ -432,7 +432,7 @@ export class Xml {
 }
 // Operation Specifications
 
-const serializer = new coreHttp.Serializer(Mappers);
+const serializer = new coreHttp.Serializer(Mappers, true);
 
 const getComplexTypeRefNoMetaOperationSpec: coreHttp.OperationSpec = {
   path: "/xml/complex-type-ref-no-meta",
