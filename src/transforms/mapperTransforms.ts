@@ -170,7 +170,7 @@ function buildMapper(
     ...(numberSchema.multipleOf && { MultipleOf: numberSchema.multipleOf })
   };
 
-  const xmlName = schema.serialization?.xml?.name || serializedName;
+  const xmlName = schema.serialization?.xml?.name;
   const xmlIsAttribute = !!schema.serialization?.xml?.attribute;
   const mapperType = type as MapperType;
   return {
@@ -336,7 +336,10 @@ function transformArrayMapper(pipelineValue: PipelineValue) {
     options
   );
 
-  const arrayMapper: Mapper = { ...mapper, xmlElementName };
+  const arrayMapper: Mapper = {
+    ...mapper,
+    ...(xmlElementName && { xmlElementName })
+  };
 
   return {
     schema,

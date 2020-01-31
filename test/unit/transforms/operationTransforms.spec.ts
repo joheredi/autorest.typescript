@@ -37,7 +37,7 @@ const constantSchema = new ConstantSchema(
   "",
   {
     value: new ConstantValue("Some constant value"),
-    valueType: { type: SchemaType.String }
+    valueType: new StringSchema("string", "")
   }
 );
 
@@ -254,8 +254,7 @@ describe("OperationTransforms", () => {
         checkHttpMethodAndPath(operationSpec);
         const okResponse = operationSpec.responses[200];
         assert.deepEqual((okResponse.bodyMapper as Mapper).type, {
-          name: "Enum",
-          allowedValues: ["red color", "green-color", "blue_color"]
+          name: "String"
         });
         assert.deepEqual(
           operationSpec.responses.default.bodyMapper,
