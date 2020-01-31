@@ -169,8 +169,10 @@ function buildMapper(
     // TODO: Handle number exclusive min and max
     ...(numberSchema.multipleOf && { MultipleOf: numberSchema.multipleOf })
   };
-
-  const xmlName = schema.serialization?.xml?.name;
+  const xml = schema.serialization?.xml;
+  const xmlName = !!xml
+    ? schema.serialization?.xml?.name || serializedName
+    : undefined;
   const xmlIsAttribute = !!schema.serialization?.xml?.attribute;
   const mapperType = type as MapperType;
   return {
@@ -321,11 +323,15 @@ function transformArrayMapper(pipelineValue: PipelineValue) {
     return pipelineValue;
   }
 
+  const serializedName = getLanguageMetadata(schema.language).serializedName;
+
   const arraySchema = schema as ArraySchema;
   const elementSchema = arraySchema.elementType;
   const elementMapper = getMapperOrRef(elementSchema);
   const elementXml = elementSchema.serialization?.xml;
-  const xmlElementName = elementXml?.name;
+  const xmlElementName = !!elementXml
+    ? elementXml.name || serializedName
+    : undefined;
 
   const mapper = buildMapper(
     schema,

@@ -28,6 +28,7 @@ import {
 } from "./utils/parameterUtils";
 import { PropertyKind } from "../models/modelDetails";
 import { wrapString } from "./utils/stringUtils";
+import { KnownMediaType } from "@azure-tools/codegen";
 
 /**
  * Function that writes the code for all the operations.
@@ -329,13 +330,16 @@ export function addOperationSpecs(
   file: SourceFile,
   parameters: ParameterDetails[]
 ): void {
+  const isXml = operationGroupDetails.operations.some(o =>
+    o.responses.some(r => r.mediaType === KnownMediaType.Xml)
+  );
   file.addStatements("// Operation Specifications");
   file.addVariableStatement({
     declarationKind: VariableDeclarationKind.Const,
     declarations: [
       {
         name: "serializer",
-        initializer: "new coreHttp.Serializer(Mappers);"
+        initializer: `new coreHttp.Serializer(Mappers${isXml ? ", true" : ""});`
       }
     ]
   });
