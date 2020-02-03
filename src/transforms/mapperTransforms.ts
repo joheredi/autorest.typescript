@@ -171,7 +171,7 @@ function buildMapper(
   };
   const xml = schema.serialization?.xml;
   const xmlName = !!xml
-    ? schema.serialization?.xml?.name || serializedName
+    ? schema.serialization?.xml?.name || serializedName || serializedName
     : undefined;
   const xmlIsAttribute = !!schema.serialization?.xml?.attribute;
   const mapperType = type as MapperType;
@@ -236,8 +236,8 @@ function transformObjectMapper(pipelineValue: PipelineValue) {
   const className = getMapperClassName(schema);
   const objectSchema = schema as ObjectSchema;
   const { discriminator, discriminatorValue } = objectSchema;
-  const xmlSerialization = objectSchema.serialization?.xml;
 
+  const isXml = !!objectSchema.serialization?.xml;
   let modelProperties = processProperties(objectSchema.properties);
   const parents = objectSchema.parents ? objectSchema.parents.all : [];
   const immediateParents = objectSchema.parents
@@ -317,15 +317,18 @@ function transformDictionaryMapper(pipelineValue: PipelineValue) {
 }
 
 function transformArrayMapper(pipelineValue: PipelineValue) {
-  const { schema, options } = pipelineValue;
+  const { schema, options = {} } = pipelineValue;
 
   if (!isSchemaType([SchemaType.Array], schema)) {
     return pipelineValue;
   }
 
-  const serializedName = getLanguageMetadata(schema.language).serializedName;
+  const serializedName =
+    options.serializedName ||
+    getLanguageMetadata(schema.language).serializedName;
 
   const arraySchema = schema as ArraySchema;
+  const xmlName = serializedName;
   const elementSchema = arraySchema.elementType;
   const elementMapper = getMapperOrRef(elementSchema);
   const elementXml = elementSchema.serialization?.xml;
@@ -344,7 +347,8 @@ function transformArrayMapper(pipelineValue: PipelineValue) {
 
   const arrayMapper: Mapper = {
     ...mapper,
-    ...(xmlElementName && { xmlElementName })
+    ...(xmlElementName && { xmlElementName }),
+    ...(xmlName && { xmlName })
   };
 
   return {

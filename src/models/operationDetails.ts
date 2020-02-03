@@ -51,6 +51,7 @@ export interface OperationSpecDetails {
   queryParameters?: ParameterDetails[];
   urlParameters?: ParameterDetails[];
   isXml: boolean;
+  contentType?: string;
 }
 
 /**
