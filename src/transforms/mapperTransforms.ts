@@ -28,6 +28,7 @@ import { getLanguageMetadata } from "../utils/languageHelpers";
 import { isNil } from "lodash";
 import { normalizeName, NameType } from "../utils/nameUtils";
 import { KnownMediaType } from "@azure-tools/codegen";
+import { ClientOptions } from "../models/clientDetails";
 
 interface PipelineValue {
   schema: Schema;
@@ -69,13 +70,13 @@ export interface MapperInput {
 
 export async function transformMappers(
   codeModel: CodeModel,
-  serializationStyles: Set<KnownMediaType>
+  { serializationStyles }: ClientOptions
 ): Promise<Mapper[]> {
   if (!codeModel.schemas.objects) {
     return [];
   }
 
-  const hasXmlMetadata = serializationStyles.has(KnownMediaType.Xml);
+  const hasXmlMetadata = serializationStyles?.has(KnownMediaType.Xml);
   return codeModel.schemas.objects.map(objectSchema =>
     transformMapper({ schema: objectSchema, options: { hasXmlMetadata } })
   );
@@ -222,11 +223,11 @@ function getXmlMetadata(
   const elementSchema = (schema as ArraySchema).elementType;
   let xmlElementName: string | undefined = undefined;
   if (elementSchema) {
-    const elementDefaultName =
-      serializedName ||
-      getLanguageMetadata(elementSchema.language).serializedName;
+    const languageMetadata = getLanguageMetadata(elementSchema.language);
     xmlElementName =
-      elementSchema.serialization?.xml?.name || elementDefaultName;
+      elementSchema.serialization?.xml?.name ||
+      languageMetadata.serializedName ||
+      languageMetadata.name;
   }
 
   const defaultName =
