@@ -23,6 +23,7 @@ export interface OperationResponseDetails {
   statusCodes: string[]; // Can be a status code number or "default"
   mediaType?: KnownMediaType;
   bodyMapper?: Mapper | string;
+  headersMapper?: Mapper | string;
   typeDetails: TypeDetails;
   isError?: boolean;
 }
@@ -67,6 +68,7 @@ export interface OperationGroupDetails {
 
 export interface OperationSpecResponse {
   bodyMapper?: Mapper | string;
+  headersMapper?: Mapper | string;
 }
 
 export type OperationSpecResponses = {

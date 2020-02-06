@@ -1,3 +1,7 @@
+import { OperationGroup, Operation } from "@azure-tools/codemodel";
+import { getLanguageMetadata } from "./languageHelpers";
+import { TOPLEVEL_OPERATIONGROUP } from "../transforms/constants";
+
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 const ReservedModelNames = ["Error"];
@@ -12,6 +16,23 @@ export enum NameType {
   File,
   Interface,
   Property
+}
+
+export function getOperationFullName(
+  operationGroup: OperationGroup,
+  operation: Operation
+) {
+  const groupName = normalizeName(
+    getLanguageMetadata(operationGroup.language).name ||
+      TOPLEVEL_OPERATIONGROUP,
+    NameType.Property
+  );
+  const operationName = normalizeName(
+    getLanguageMetadata(operation.language).name,
+    NameType.Property
+  );
+
+  return `${groupName}_${operationName}`;
 }
 
 export function guardReservedNames(name: string): string {

@@ -14,11 +14,12 @@ import {
 import { normalizeName, NameType } from "../utils/nameUtils";
 import { ClientDetails } from "../models/clientDetails";
 import { transformOperationSpec } from "../transforms/operationTransforms";
-import { MapperType } from "@azure/core-http";
+import { MapperType, Mapper } from "@azure/core-http";
 import {
   OperationGroupDetails,
   OperationSpecDetails,
-  OperationDetails
+  OperationDetails,
+  OperationSpecResponse
 } from "../models/operationDetails";
 import { isString } from "util";
 import { ParameterDetails } from "../models/parameterDetails";
@@ -163,28 +164,36 @@ function buildResponses({ responses }: OperationSpecDetails): string[] {
   const responseCodes = Object.keys(responses);
   let parsedResponses: string[] = [];
   responseCodes.forEach(code => {
-    // Check whether we have an actual mapper or a string reference
-    const bodyMapper = responses[code].bodyMapper;
-    const isCompositeMapper =
-      bodyMapper &&
-      !isString(bodyMapper) &&
-      bodyMapper.type.name === MapperType.Composite;
-
-    if (isCompositeMapper) {
-      parsedResponses.push(`${code}: ${JSON.stringify(responses[code])}`);
-    } else if (bodyMapper) {
-      // Mapper is a reference to an existing mapper in the Mappers file
-      const bodyMapperString = `bodyMapper: ${
-        isString(bodyMapper) ? bodyMapper : JSON.stringify(bodyMapper)
-      }`;
-
-      parsedResponses.push(`${code}: {
-        ${bodyMapperString}
-      }`);
-    }
+    const responseString = getResponseString(responses[code]);
+    return parsedResponses.push(`${code}: {${responseString}}`);
   });
 
   return parsedResponses;
+}
+
+function getResponseString(responseSpec: OperationSpecResponse) {
+  const { bodyMapper, headersMapper } = responseSpec;
+  const bodyMapperString = bodyMapper
+    ? `bodyMapper: ${getMapperString(bodyMapper)},`
+    : "";
+  const headersMapperString = headersMapper
+    ? `headersMapper: ${getMapperString(headersMapper)},`
+    : "";
+
+  const responseString = `${bodyMapperString}${headersMapperString}`;
+  return responseString ? responseString : "";
+}
+
+function getMapperString(mapper?: Mapper | string) {
+  if (!mapper) {
+    return "";
+  }
+
+  if (isString(mapper)) {
+    return mapper;
+  }
+
+  return JSON.stringify(mapper);
 }
 
 function getOptionsParameter(
