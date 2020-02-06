@@ -70,13 +70,13 @@ export interface MapperInput {
 
 export async function transformMappers(
   codeModel: CodeModel,
-  { serializationStyles }: ClientOptions
+  { mediaTypes }: ClientOptions
 ): Promise<Mapper[]> {
   if (!codeModel.schemas.objects) {
     return [];
   }
 
-  const hasXmlMetadata = serializationStyles?.has(KnownMediaType.Xml);
+  const hasXmlMetadata = mediaTypes?.has(KnownMediaType.Xml);
   return codeModel.schemas.objects.map(objectSchema =>
     transformMapper({ schema: objectSchema, options: { hasXmlMetadata } })
   );
