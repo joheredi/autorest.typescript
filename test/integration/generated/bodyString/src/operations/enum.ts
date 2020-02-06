@@ -127,9 +127,7 @@ const getNotExpandableOperationSpec: coreHttp.OperationSpec = {
         serializedName: "Colors"
       }
     },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -137,11 +135,7 @@ const getNotExpandableOperationSpec: coreHttp.OperationSpec = {
 const putNotExpandableOperationSpec: coreHttp.OperationSpec = {
   path: "/string/enum/notExpandable",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.stringBody5,
   urlParameters: [Parameters.$host],
   serializer
@@ -159,9 +153,7 @@ const getReferencedOperationSpec: coreHttp.OperationSpec = {
         serializedName: "Colors"
       }
     },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -169,11 +161,7 @@ const getReferencedOperationSpec: coreHttp.OperationSpec = {
 const putReferencedOperationSpec: coreHttp.OperationSpec = {
   path: "/string/enum/Referenced",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.enumStringBody,
   urlParameters: [Parameters.$host],
   serializer
@@ -182,12 +170,8 @@ const getReferencedConstantOperationSpec: coreHttp.OperationSpec = {
   path: "/string/enum/ReferencedConstant",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.RefColorConstant
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.RefColorConstant },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -195,11 +179,7 @@ const getReferencedConstantOperationSpec: coreHttp.OperationSpec = {
 const putReferencedConstantOperationSpec: coreHttp.OperationSpec = {
   path: "/string/enum/ReferencedConstant",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.enumStringBody1,
   urlParameters: [Parameters.$host],
   serializer

@@ -105,12 +105,8 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/array/valid",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.ArrayWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.ArrayWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -118,11 +114,7 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
 const putValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/array/valid",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody12,
   urlParameters: [Parameters.$host],
   serializer
@@ -131,12 +123,8 @@ const getEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/array/empty",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.ArrayWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.ArrayWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -144,11 +132,7 @@ const getEmptyOperationSpec: coreHttp.OperationSpec = {
 const putEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/array/empty",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody12,
   urlParameters: [Parameters.$host],
   serializer
@@ -157,12 +141,8 @@ const getNotProvidedOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/array/notprovided",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.ArrayWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.ArrayWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer

@@ -118,12 +118,8 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/dictionary/typed/valid",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DictionaryWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DictionaryWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -131,11 +127,7 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
 const putValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/dictionary/typed/valid",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody13,
   urlParameters: [Parameters.$host],
   serializer
@@ -144,12 +136,8 @@ const getEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/dictionary/typed/empty",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DictionaryWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DictionaryWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -157,11 +145,7 @@ const getEmptyOperationSpec: coreHttp.OperationSpec = {
 const putEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/dictionary/typed/empty",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody13,
   urlParameters: [Parameters.$host],
   serializer
@@ -170,12 +154,8 @@ const getNullOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/dictionary/typed/null",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DictionaryWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DictionaryWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -184,12 +164,8 @@ const getNotProvidedOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/dictionary/typed/notprovided",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DictionaryWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DictionaryWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer

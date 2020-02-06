@@ -110,11 +110,7 @@ const getAllWithValuesOperationSpec: coreHttp.OperationSpec = {
   path:
     "/pathitem/nullable/globalStringPath/{globalStringPath}/pathItemStringPath/{pathItemStringPath}/localStringPath/{localStringPath}/globalStringQuery/pathItemStringQuery/localStringQuery",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   queryParameters: [
     Parameters.pathItemStringQuery,
     Parameters.globalStringQuery,
@@ -132,11 +128,7 @@ const getGlobalQueryNullOperationSpec: coreHttp.OperationSpec = {
   path:
     "/pathitem/nullable/globalStringPath/{globalStringPath}/pathItemStringPath/{pathItemStringPath}/localStringPath/{localStringPath}/null/pathItemStringQuery/localStringQuery",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   queryParameters: [
     Parameters.pathItemStringQuery,
     Parameters.globalStringQuery,
@@ -154,11 +146,7 @@ const getGlobalAndLocalQueryNullOperationSpec: coreHttp.OperationSpec = {
   path:
     "/pathitem/nullable/globalStringPath/{globalStringPath}/pathItemStringPath/{pathItemStringPath}/localStringPath/{localStringPath}/null/pathItemStringQuery/null",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   queryParameters: [
     Parameters.pathItemStringQuery,
     Parameters.globalStringQuery,
@@ -176,11 +164,7 @@ const getLocalPathItemQueryNullOperationSpec: coreHttp.OperationSpec = {
   path:
     "/pathitem/nullable/globalStringPath/{globalStringPath}/pathItemStringPath/{pathItemStringPath}/localStringPath/{localStringPath}/globalStringQuery/null/null",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   queryParameters: [
     Parameters.pathItemStringQuery,
     Parameters.globalStringQuery,

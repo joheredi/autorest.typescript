@@ -45,11 +45,7 @@ const serializer = new coreHttp.Serializer(Mappers, false);
 const getValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/flatten/valid",
   httpMethod: "GET",
-  responses: {
-    200: {
-      bodyMapper: Mappers.MyBaseType
-    }
-  },
+  responses: { 200: { bodyMapper: Mappers.MyBaseType } },
   urlParameters: [Parameters.$host],
   serializer
 };

@@ -48,11 +48,7 @@ const serializer = new coreHttp.Serializer(Mappers, false);
 const getEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/customuri",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.accountName, Parameters.host],
   serializer
 };

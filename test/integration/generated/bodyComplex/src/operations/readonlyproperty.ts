@@ -62,12 +62,8 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/readonlyproperty/valid",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.ReadonlyObj
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.ReadonlyObj },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -75,11 +71,7 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
 const putValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/readonlyproperty/valid",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody17,
   urlParameters: [Parameters.$host],
   serializer

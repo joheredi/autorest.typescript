@@ -343,12 +343,8 @@ const getIntOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/integer",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.IntWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.IntWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -356,11 +352,7 @@ const getIntOperationSpec: coreHttp.OperationSpec = {
 const putIntOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/integer",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody1,
   urlParameters: [Parameters.$host],
   serializer
@@ -369,12 +361,8 @@ const getLongOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/long",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.LongWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.LongWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -382,11 +370,7 @@ const getLongOperationSpec: coreHttp.OperationSpec = {
 const putLongOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/long",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody2,
   urlParameters: [Parameters.$host],
   serializer
@@ -395,12 +379,8 @@ const getFloatOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/float",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.FloatWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.FloatWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -408,11 +388,7 @@ const getFloatOperationSpec: coreHttp.OperationSpec = {
 const putFloatOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/float",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody3,
   urlParameters: [Parameters.$host],
   serializer
@@ -421,12 +397,8 @@ const getDoubleOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/double",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DoubleWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DoubleWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -434,11 +406,7 @@ const getDoubleOperationSpec: coreHttp.OperationSpec = {
 const putDoubleOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/double",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody4,
   urlParameters: [Parameters.$host],
   serializer
@@ -447,12 +415,8 @@ const getBoolOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/bool",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.BooleanWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.BooleanWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -460,11 +424,7 @@ const getBoolOperationSpec: coreHttp.OperationSpec = {
 const putBoolOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/bool",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody5,
   urlParameters: [Parameters.$host],
   serializer
@@ -473,12 +433,8 @@ const getStringOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/string",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.StringWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.StringWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -486,11 +442,7 @@ const getStringOperationSpec: coreHttp.OperationSpec = {
 const putStringOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/string",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody6,
   urlParameters: [Parameters.$host],
   serializer
@@ -499,12 +451,8 @@ const getDateOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/date",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DateWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DateWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -512,11 +460,7 @@ const getDateOperationSpec: coreHttp.OperationSpec = {
 const putDateOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/date",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody7,
   urlParameters: [Parameters.$host],
   serializer
@@ -525,12 +469,8 @@ const getDateTimeOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/datetime",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DatetimeWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DatetimeWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -538,11 +478,7 @@ const getDateTimeOperationSpec: coreHttp.OperationSpec = {
 const putDateTimeOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/datetime",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody8,
   urlParameters: [Parameters.$host],
   serializer
@@ -551,12 +487,8 @@ const getDateTimeRfc1123OperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/datetimerfc1123",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Datetimerfc1123Wrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Datetimerfc1123Wrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -564,11 +496,7 @@ const getDateTimeRfc1123OperationSpec: coreHttp.OperationSpec = {
 const putDateTimeRfc1123OperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/datetimerfc1123",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody9,
   urlParameters: [Parameters.$host],
   serializer
@@ -577,12 +505,8 @@ const getDurationOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/duration",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DurationWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DurationWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -590,11 +514,7 @@ const getDurationOperationSpec: coreHttp.OperationSpec = {
 const putDurationOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/duration",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody10,
   urlParameters: [Parameters.$host],
   serializer
@@ -603,12 +523,8 @@ const getByteOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/byte",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.ByteWrapper
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.ByteWrapper },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -616,11 +532,7 @@ const getByteOperationSpec: coreHttp.OperationSpec = {
 const putByteOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/primitive/byte",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody11,
   urlParameters: [Parameters.$host],
   serializer

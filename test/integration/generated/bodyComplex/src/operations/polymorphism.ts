@@ -230,12 +230,8 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/polymorphism/valid",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Fish
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Fish },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -243,11 +239,7 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
 const putValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/polymorphism/valid",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody15,
   urlParameters: [Parameters.$host],
   serializer
@@ -256,12 +248,8 @@ const getDotSyntaxOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/polymorphism/dotsyntax",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DotFish
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DotFish },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -270,12 +258,8 @@ const getComposedWithDiscriminatorOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/polymorphism/composedWithDiscriminator",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DotFishMarket
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DotFishMarket },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -284,12 +268,8 @@ const getComposedWithoutDiscriminatorOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/polymorphism/composedWithoutDiscriminator",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.DotFishMarket
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.DotFishMarket },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -298,12 +278,8 @@ const getComplicatedOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/polymorphism/complicated",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Salmon
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Salmon },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -311,11 +287,7 @@ const getComplicatedOperationSpec: coreHttp.OperationSpec = {
 const putComplicatedOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/polymorphism/complicated",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody16,
   urlParameters: [Parameters.$host],
   serializer
@@ -324,12 +296,8 @@ const putMissingDiscriminatorOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/polymorphism/missingdiscriminator",
   httpMethod: "PUT",
   responses: {
-    200: {
-      bodyMapper: Mappers.Salmon
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Salmon },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   requestBody: Parameters.complexBody16,
   urlParameters: [Parameters.$host],
@@ -338,11 +306,7 @@ const putMissingDiscriminatorOperationSpec: coreHttp.OperationSpec = {
 const putValidMissingRequiredOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/polymorphism/missingrequired/invalid",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody15,
   urlParameters: [Parameters.$host],
   serializer

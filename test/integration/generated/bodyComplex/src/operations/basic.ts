@@ -114,12 +114,8 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/basic/valid",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Basic
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Basic },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -127,11 +123,7 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
 const putValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/basic/valid",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody,
   queryParameters: [Parameters.apiVersion],
   urlParameters: [Parameters.$host],
@@ -141,12 +133,8 @@ const getInvalidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/basic/invalid",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Basic
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Basic },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -155,12 +143,8 @@ const getEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/basic/empty",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Basic
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Basic },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -169,12 +153,8 @@ const getNullOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/basic/null",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Basic
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Basic },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -183,12 +163,8 @@ const getNotProvidedOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/basic/notprovided",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Basic
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Basic },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer

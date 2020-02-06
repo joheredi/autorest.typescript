@@ -407,121 +407,77 @@ const serializer = new coreHttp.Serializer(Mappers, false);
 const getBooleanTrueOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/bool/true/{boolPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.boolPath],
   serializer
 };
 const getBooleanFalseOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/bool/false/{boolPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.boolPath1],
   serializer
 };
 const getIntOneMillionOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/int/1000000/{intPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.intPath],
   serializer
 };
 const getIntNegativeOneMillionOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/int/-1000000/{intPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.intPath1],
   serializer
 };
 const getTenBillionOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/long/10000000000/{longPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.longPath],
   serializer
 };
 const getNegativeTenBillionOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/long/-10000000000/{longPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.longPath1],
   serializer
 };
 const floatScientificPositiveOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/float/1.034E+20/{floatPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.floatPath],
   serializer
 };
 const floatScientificNegativeOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/float/-1.034E-20/{floatPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.floatPath1],
   serializer
 };
 const doubleDecimalPositiveOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/double/9999999.999/{doublePath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.doublePath],
   serializer
 };
 const doubleDecimalNegativeOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/double/-9999999.999/{doublePath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.doublePath1],
   serializer
 };
 const stringUnicodeOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/string/unicode/{stringPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.stringPath],
   serializer
 };
@@ -529,154 +485,98 @@ const stringUrlEncodedOperationSpec: coreHttp.OperationSpec = {
   path:
     "/paths/string/begin%21%2A%27%28%29%3B%3A%40%20%26%3D%2B%24%2C%2F%3F%23%5B%5Dend/{stringPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.stringPath1],
   serializer
 };
 const stringUrlNonEncodedOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/string/begin!*'();:@&=+$,end/{stringPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.stringPath2],
   serializer
 };
 const stringEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/string/empty/{stringPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.stringPath3],
   serializer
 };
 const stringNullOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/string/null/{stringPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 400: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.stringPath4],
   serializer
 };
 const enumValidOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/enum/green%20color/{enumPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.enumPath],
   serializer
 };
 const enumNullOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/string/null/{enumPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 400: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.enumPath],
   serializer
 };
 const byteMultiByteOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/byte/multibyte/{bytePath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.bytePath],
   serializer
 };
 const byteEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/byte/empty/{bytePath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.bytePath1],
   serializer
 };
 const byteNullOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/byte/null/{bytePath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 400: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.bytePath],
   serializer
 };
 const dateValidOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/date/2012-01-01/{datePath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.datePath],
   serializer
 };
 const dateNullOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/date/null/{datePath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 400: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.datePath1],
   serializer
 };
 const dateTimeValidOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/datetime/2012-01-01T01%3A01%3A01Z/{dateTimePath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.dateTimePath],
   serializer
 };
 const dateTimeNullOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/datetime/null/{dateTimePath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 400: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.dateTimePath1],
   serializer
 };
 const base64UrlOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/string/bG9yZW0/{base64UrlPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.base64UrlPath],
   serializer
 };
@@ -684,22 +584,14 @@ const arrayCsvInPathOperationSpec: coreHttp.OperationSpec = {
   path:
     "/paths/array/ArrayPath1%2cbegin%21%2A%27%28%29%3B%3A%40%20%26%3D%2B%24%2C%2F%3F%23%5B%5Dend%2c%2c/{arrayPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.arrayPath],
   serializer
 };
 const unixTimeUrlOperationSpec: coreHttp.OperationSpec = {
   path: "/paths/int/1460505600/{unixTimeUrlPath}",
   httpMethod: "GET",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   urlParameters: [Parameters.$host, Parameters.unixTimeUrlPath],
   serializer
 };

@@ -64,12 +64,8 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/inheritance/valid",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: Mappers.Siamese
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: Mappers.Siamese },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -77,11 +73,7 @@ const getValidOperationSpec: coreHttp.OperationSpec = {
 const putValidOperationSpec: coreHttp.OperationSpec = {
   path: "/complex/inheritance/valid",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.complexBody14,
   urlParameters: [Parameters.$host],
   serializer

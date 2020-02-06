@@ -207,12 +207,8 @@ const getNullOperationSpec: coreHttp.OperationSpec = {
   path: "/string/null",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: { type: { name: "String" }, serializedName: "string" }
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: { type: { name: "String" }, serializedName: "string" } },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -220,11 +216,7 @@ const getNullOperationSpec: coreHttp.OperationSpec = {
 const putNullOperationSpec: coreHttp.OperationSpec = {
   path: "/string/null",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.stringBody,
   urlParameters: [Parameters.$host],
   serializer
@@ -233,12 +225,8 @@ const getEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/string/empty",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: { type: { name: "String" }, serializedName: "string" }
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: { type: { name: "String" }, serializedName: "string" } },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -246,11 +234,7 @@ const getEmptyOperationSpec: coreHttp.OperationSpec = {
 const putEmptyOperationSpec: coreHttp.OperationSpec = {
   path: "/string/empty",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.stringBody1,
   urlParameters: [Parameters.$host],
   serializer
@@ -259,12 +243,8 @@ const getMbcsOperationSpec: coreHttp.OperationSpec = {
   path: "/string/mbcs",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: { type: { name: "String" }, serializedName: "string" }
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: { type: { name: "String" }, serializedName: "string" } },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -272,11 +252,7 @@ const getMbcsOperationSpec: coreHttp.OperationSpec = {
 const putMbcsOperationSpec: coreHttp.OperationSpec = {
   path: "/string/mbcs",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.stringBody2,
   urlParameters: [Parameters.$host],
   serializer
@@ -285,12 +261,8 @@ const getWhitespaceOperationSpec: coreHttp.OperationSpec = {
   path: "/string/whitespace",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: { type: { name: "String" }, serializedName: "string" }
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: { type: { name: "String" }, serializedName: "string" } },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -298,11 +270,7 @@ const getWhitespaceOperationSpec: coreHttp.OperationSpec = {
 const putWhitespaceOperationSpec: coreHttp.OperationSpec = {
   path: "/string/whitespace",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.stringBody3,
   urlParameters: [Parameters.$host],
   serializer
@@ -311,12 +279,8 @@ const getNotProvidedOperationSpec: coreHttp.OperationSpec = {
   path: "/string/notProvided",
   httpMethod: "GET",
   responses: {
-    200: {
-      bodyMapper: { type: { name: "String" }, serializedName: "string" }
-    },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    200: { bodyMapper: { type: { name: "String" }, serializedName: "string" } },
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -328,9 +292,7 @@ const getBase64EncodedOperationSpec: coreHttp.OperationSpec = {
     200: {
       bodyMapper: { type: { name: "Base64Url" }, serializedName: "byte-array" }
     },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -342,9 +304,7 @@ const getBase64UrlEncodedOperationSpec: coreHttp.OperationSpec = {
     200: {
       bodyMapper: { type: { name: "Base64Url" }, serializedName: "byte-array" }
     },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
@@ -352,11 +312,7 @@ const getBase64UrlEncodedOperationSpec: coreHttp.OperationSpec = {
 const putBase64UrlEncodedOperationSpec: coreHttp.OperationSpec = {
   path: "/string/base64UrlEncoding",
   httpMethod: "PUT",
-  responses: {
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
-  },
+  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
   requestBody: Parameters.stringBody4,
   urlParameters: [Parameters.$host],
   serializer
@@ -368,9 +324,7 @@ const getNullBase64UrlEncodedOperationSpec: coreHttp.OperationSpec = {
     200: {
       bodyMapper: { type: { name: "Base64Url" }, serializedName: "byte-array" }
     },
-    default: {
-      bodyMapper: Mappers.ErrorModel
-    }
+    default: { bodyMapper: Mappers.ErrorModel }
   },
   urlParameters: [Parameters.$host],
   serializer
