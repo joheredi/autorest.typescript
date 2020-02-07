@@ -384,6 +384,13 @@ export interface JSONOutput {
 }
 
 /**
+ * An interface representing xml_getHeadersHeaders.
+ */
+export interface XmlGetHeadersHeaders {
+  customHeader?: string;
+}
+
+/**
  * Defines values for PublicAccessType.
  */
 export type PublicAccessType = "container" | "blob";
@@ -442,14 +449,14 @@ export type XmlGetComplexTypeRefNoMetaResponse = RootWithRefAndNoMeta & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: RootWithRefAndNoMeta;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -462,14 +469,14 @@ export type XmlGetComplexTypeRefWithMetaResponse = RootWithRefAndMeta & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: RootWithRefAndMeta;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -482,14 +489,14 @@ export type XmlGetSimpleResponse = Slideshow & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Slideshow;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -502,14 +509,29 @@ export type XmlGetWrappedListsResponse = AppleBarrel & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: AppleBarrel;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+  };
+};
+
+/**
+ * Contains response data for the getHeaders operation.
+ */
+export type XmlGetHeadersResponse = XmlGetHeadersHeaders & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: XmlGetHeadersHeaders;
   };
 };
 
@@ -522,14 +544,14 @@ export type XmlGetEmptyListResponse = Slideshow & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Slideshow;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -542,14 +564,14 @@ export type XmlGetEmptyWrappedListsResponse = AppleBarrel & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: AppleBarrel;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -562,14 +584,14 @@ export type XmlGetRootListResponse = Banana[] & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Banana[];
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -582,14 +604,14 @@ export type XmlGetRootListSingleItemResponse = Banana[] & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Banana[];
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -602,14 +624,14 @@ export type XmlGetEmptyRootListResponse = Banana[] & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Banana[];
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -622,14 +644,14 @@ export type XmlGetEmptyChildElementResponse = Banana & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Banana;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -642,14 +664,14 @@ export type XmlListContainersResponse = ListContainersResponse & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: ListContainersResponse;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -662,14 +684,14 @@ export type XmlGetServicePropertiesResponse = StorageServiceProperties & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: StorageServiceProperties;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -682,14 +704,14 @@ export type XmlGetAclsResponse = SignedIdentifier[] & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: SignedIdentifier[];
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -702,14 +724,14 @@ export type XmlListBlobsResponse = ListBlobsResponse & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: ListBlobsResponse;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -722,13 +744,13 @@ export type XmlJsonOutputResponse = JSONOutput & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: JSONOutput;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };

@@ -38,21 +38,21 @@ export type StringGetNullResponse = {
   /**
    * The parsed response body.
    */
-  body: String;
+  body: string;
 
   /**
    * The underlying HTTP response.
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: String;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -63,21 +63,21 @@ export type StringGetEmptyResponse = {
   /**
    * The parsed response body.
    */
-  body: String;
+  body: string;
 
   /**
    * The underlying HTTP response.
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: String;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -88,21 +88,21 @@ export type StringGetMbcsResponse = {
   /**
    * The parsed response body.
    */
-  body: String;
+  body: string;
 
   /**
    * The underlying HTTP response.
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: String;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -113,21 +113,21 @@ export type StringGetWhitespaceResponse = {
   /**
    * The parsed response body.
    */
-  body: String;
+  body: string;
 
   /**
    * The underlying HTTP response.
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: String;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -138,21 +138,21 @@ export type StringGetNotProvidedResponse = {
   /**
    * The parsed response body.
    */
-  body: String;
+  body: string;
 
   /**
    * The underlying HTTP response.
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: String;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -170,14 +170,14 @@ export type StringGetBase64EncodedResponse = {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Uint8Array;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -195,14 +195,14 @@ export type StringGetBase64UrlEncodedResponse = {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Uint8Array;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -220,14 +220,14 @@ export type StringGetNullBase64UrlEncodedResponse = {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Uint8Array;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -245,14 +245,14 @@ export type EnumGetNotExpandableResponse = {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Colors;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -270,14 +270,14 @@ export type EnumGetReferencedResponse = {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: Colors;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };
 
@@ -290,13 +290,13 @@ export type EnumGetReferencedConstantResponse = RefColorConstant & {
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The response body as text (string format)
-     */
-    bodyAsText: string;
-
-    /**
      * The response body as parsed JSON or XML
      */
     parsedBody: RefColorConstant;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
   };
 };

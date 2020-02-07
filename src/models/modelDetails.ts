@@ -86,5 +86,6 @@ export interface TypeDetails {
 export enum PropertyKind {
   Primitive,
   Enum,
-  Composite
+  Composite,
+  Intersection
 }

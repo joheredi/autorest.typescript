@@ -47,11 +47,11 @@ export class Header {
    */
   responseExistingKey(
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseExistingKeyResponse> {
     return this.client.sendOperationRequest(
       { options },
       responseExistingKeyOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseExistingKeyResponse>;
   }
 
   /**
@@ -75,11 +75,11 @@ export class Header {
    */
   responseProtectedKey(
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseProtectedKeyResponse> {
     return this.client.sendOperationRequest(
       { options },
       responseProtectedKeyOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseProtectedKeyResponse>;
   }
 
   /**
@@ -108,11 +108,11 @@ export class Header {
   responseInteger(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseIntegerResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseIntegerOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseIntegerResponse>;
   }
 
   /**
@@ -141,11 +141,11 @@ export class Header {
   responseLong(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseLongResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseLongOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseLongResponse>;
   }
 
   /**
@@ -174,11 +174,11 @@ export class Header {
   responseFloat(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseFloatResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseFloatOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseFloatResponse>;
   }
 
   /**
@@ -207,11 +207,11 @@ export class Header {
   responseDouble(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseDoubleResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseDoubleOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseDoubleResponse>;
   }
 
   /**
@@ -240,11 +240,11 @@ export class Header {
   responseBool(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseBoolResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseBoolOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseBoolResponse>;
   }
 
   /**
@@ -271,11 +271,11 @@ export class Header {
   responseString(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseStringResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseStringOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseStringResponse>;
   }
 
   /**
@@ -304,11 +304,11 @@ export class Header {
   responseDate(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseDateResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseDateOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseDateResponse>;
   }
 
   /**
@@ -337,11 +337,11 @@ export class Header {
   responseDatetime(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseDatetimeResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseDatetimeOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseDatetimeResponse>;
   }
 
   /**
@@ -368,11 +368,11 @@ export class Header {
   responseDatetimeRfc1123(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseDatetimeRfc1123Response> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseDatetimeRfc1123OperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseDatetimeRfc1123Response>;
   }
 
   /**
@@ -400,11 +400,11 @@ export class Header {
   responseDuration(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseDurationResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseDurationOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseDurationResponse>;
   }
 
   /**
@@ -432,11 +432,11 @@ export class Header {
   responseByte(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseByteResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseByteOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseByteResponse>;
   }
 
   /**
@@ -463,11 +463,11 @@ export class Header {
   responseEnum(
     scenario: string,
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.HeaderResponseEnumResponse> {
     return this.client.sendOperationRequest(
       { scenario, options },
       responseEnumOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.HeaderResponseEnumResponse>;
   }
 
   /**
@@ -498,7 +498,10 @@ const paramExistingKeyOperationSpec: coreHttp.OperationSpec = {
 const responseExistingKeyOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/existingkey",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseExistingKeyHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   serializer
 };
@@ -513,7 +516,10 @@ const paramProtectedKeyOperationSpec: coreHttp.OperationSpec = {
 const responseProtectedKeyOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/protectedkey",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseProtectedKeyHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   serializer
 };
@@ -528,7 +534,10 @@ const paramIntegerOperationSpec: coreHttp.OperationSpec = {
 const responseIntegerOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/integer",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseIntegerHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -544,7 +553,10 @@ const paramLongOperationSpec: coreHttp.OperationSpec = {
 const responseLongOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/long",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseLongHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -560,7 +572,10 @@ const paramFloatOperationSpec: coreHttp.OperationSpec = {
 const responseFloatOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/float",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseFloatHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -576,7 +591,10 @@ const paramDoubleOperationSpec: coreHttp.OperationSpec = {
 const responseDoubleOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/double",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseDoubleHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -592,7 +610,10 @@ const paramBoolOperationSpec: coreHttp.OperationSpec = {
 const responseBoolOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/bool",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseBoolHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -608,7 +629,10 @@ const paramStringOperationSpec: coreHttp.OperationSpec = {
 const responseStringOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/string",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseStringHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -624,7 +648,10 @@ const paramDateOperationSpec: coreHttp.OperationSpec = {
 const responseDateOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/date",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseDateHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -640,7 +667,10 @@ const paramDatetimeOperationSpec: coreHttp.OperationSpec = {
 const responseDatetimeOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/datetime",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseDatetimeHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -656,7 +686,10 @@ const paramDatetimeRfc1123OperationSpec: coreHttp.OperationSpec = {
 const responseDatetimeRfc1123OperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/datetimerfc1123",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseDatetimeRfc1123Headers },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -672,7 +705,10 @@ const paramDurationOperationSpec: coreHttp.OperationSpec = {
 const responseDurationOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/duration",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseDurationHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -688,7 +724,10 @@ const paramByteOperationSpec: coreHttp.OperationSpec = {
 const responseByteOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/byte",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseByteHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer
@@ -704,7 +743,10 @@ const paramEnumOperationSpec: coreHttp.OperationSpec = {
 const responseEnumOperationSpec: coreHttp.OperationSpec = {
   path: "/header/response/prim/enum",
   httpMethod: "POST",
-  responses: { 200: {}, default: { bodyMapper: Mappers.ErrorModel } },
+  responses: {
+    200: { headersMapper: Mappers.HeaderResponseEnumHeaders },
+    default: { bodyMapper: Mappers.ErrorModel }
+  },
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.scenario],
   serializer

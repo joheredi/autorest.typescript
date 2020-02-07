@@ -144,11 +144,11 @@ export class Xml {
    */
   getHeaders(
     options?: coreHttp.RequestOptionsBase
-  ): Promise<coreHttp.RestResponse> {
+  ): Promise<Models.XmlGetHeadersResponse> {
     return this.client.sendOperationRequest(
       { options },
       getHeadersOperationSpec
-    ) as Promise<coreHttp.RestResponse>;
+    ) as Promise<Models.XmlGetHeadersResponse>;
   }
 
   /**

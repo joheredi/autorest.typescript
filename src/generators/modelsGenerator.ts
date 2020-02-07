@@ -9,9 +9,10 @@ import {
   SourceFile,
   Writers,
   WriterFunction,
-  OptionalKind
+  OptionalKind,
+  WriterFunctionOrValue
 } from "ts-morph";
-import { keys } from "lodash";
+import { keys, isEmpty } from "lodash";
 import {
   ObjectKind,
   PolymorphicObjectDetails,
@@ -24,6 +25,7 @@ import { normalizeName, NameType } from "../utils/nameUtils";
 import { filterOperationParameters } from "./utils/parameterUtils";
 import { OperationDetails } from "../models/operationDetails";
 import { ParameterDetails } from "../models/parameterDetails";
+import { isPrimitive } from "util";
 
 export function generateModels(clientDetails: ClientDetails, project: Project) {
   const modelsIndexFile = project.createSourceFile(
@@ -78,40 +80,34 @@ function writeResponseTypes(
   const responseName = `${operationType.typeName}Response`;
 
   responses
-    .filter(r => !r.isError && !!r.bodyMapper)
+    .filter(r => !r.isError && (!!r.bodyMapper || !!r.headersMapper))
     .forEach(response => {
       // Define possible values for response
-      const responseType = response.typeDetails || {
-        typeName: "string",
-        kind: PropertyKind.Primitive
-      };
+      const bodyType = response.bodyType;
 
-      response.typeDetails.typeName;
-      const responseValueType = responseType.typeName;
-
-      if (responseType.isConstant) {
-        if (responseType.defaultValue === undefined) {
+      if (bodyType && bodyType.isConstant) {
+        if (bodyType.defaultValue === undefined) {
           throw new Error(
             `OperationResponse type does not have a defaultValue (operation: ${name})`
           );
         }
 
-        if (responseType.typeName === undefined) {
+        if (bodyType.typeName === undefined) {
           throw new Error(
             `OperationResponse type does not have a modelTypeName (operation: ${name})`
           );
         }
 
-        let defaultValue = responseType.defaultValue;
+        let defaultValue = bodyType.defaultValue;
 
         // Get quoted value for string
-        if (responseType.typeName === "string" && defaultValue !== "null") {
+        if (bodyType.typeName === "string" && defaultValue !== "null") {
           defaultValue = `"${defaultValue}"`;
         }
 
         modelsIndexFile.addTypeAlias({
-          name: responseValueType,
-          docs: [`Defines values for ${responseType.typeName}.`],
+          name: bodyType.typeName,
+          docs: [`Defines values for ${bodyType.typeName}.`],
           isExported: true,
           type: defaultValue,
           leadingTrivia: writer => writer.blankLine()
@@ -122,63 +118,108 @@ function writeResponseTypes(
         name: responseName,
         docs: [`Contains response data for the ${name} operation.`],
         isExported: true,
-        type: generateResponseType(responseValueType, responseType),
+        type: generateResponseType(bodyType, response.headersType),
         leadingTrivia: writer => writer.blankLine()
       });
     });
 }
 
-function generateResponseType(
-  bodyType: string,
-  typeDetails: TypeDetails
-): WriterFunction {
-  const bodyName = normalizeName(bodyType, NameType.Interface);
-  const bodyTypeName = bodyName;
-  const bodyProperty: OptionalKind<PropertySignatureStructure> = {
-    name: "body",
-    type: bodyTypeName,
-    docs: ["The parsed response body."]
-  };
+function getResponseHeaders(headers?: TypeDetails) {
+  if (!headers) {
+    return undefined;
+  }
 
-  // TODO: These will change based on whether the response has
-  // a body, headers, etc
-  const responseProperties: OptionalKind<PropertySignatureStructure>[] = [
-    {
-      name: "bodyAsText",
-      docs: ["The response body as text (string format)"],
-      type: "string",
-      leadingTrivia: writer => writer.blankLine()
+  const name = normalizeName(headers.typeName, NameType.Interface);
+
+  return {
+    name,
+    isIntersection: true,
+    innerProperties: [
+      {
+        name: "parsedHeaders",
+        docs: ["The parsed HTTP response headers."],
+        type: name
+      } as OptionalKind<PropertySignatureStructure>
+    ]
+  };
+}
+
+function getResponseBody(body?: TypeDetails) {
+  if (!body) {
+    return undefined;
+  }
+
+  const name = normalizeName(body.typeName, NameType.Interface);
+  const isIntersection = body.kind === PropertyKind.Composite;
+
+  return {
+    name,
+    primitive: !isIntersection && {
+      name: "body",
+      type: body.typeName,
+      docs: ["The parsed response body."]
     },
+    isIntersection,
+    innerProperties: [
+      {
+        name: "parsedBody",
+        docs: ["The response body as parsed JSON or XML"],
+        type: name,
+        leadingTrivia: writer => writer.blankLine()
+      } as OptionalKind<PropertySignatureStructure>,
+      {
+        name: "bodyAsText",
+        docs: ["The response body as text (string format)"],
+        type: "string",
+        leadingTrivia: writer => writer.blankLine()
+      } as OptionalKind<PropertySignatureStructure>
+    ]
+  };
+}
+
+function generateResponseType(
+  bodyType?: TypeDetails,
+  headersType?: TypeDetails
+): WriterFunction {
+  const headers = getResponseHeaders(headersType);
+  const body = getResponseBody(bodyType);
+  const responseProperties: OptionalKind<PropertySignatureStructure>[] = [
+    ...(body ? body.innerProperties : []),
+    ...(headers ? headers.innerProperties : [])
+  ];
+  const innerProperties: OptionalKind<PropertySignatureStructure>[] = [
     {
-      name: "parsedBody",
-      docs: ["The response body as parsed JSON or XML"],
-      type: bodyTypeName,
+      name: "_response",
+      docs: ["The underlying HTTP response."],
+      type: Writers.intersectionType(
+        "coreHttp.HttpResponse",
+        Writers.objectType({
+          properties: responseProperties
+        })
+      ),
       leadingTrivia: writer => writer.blankLine()
     }
   ];
 
-  const isComposite = typeDetails.kind === PropertyKind.Composite;
+  if (body && body.primitive) {
+    innerProperties.unshift(body.primitive);
+  }
 
   const innerTypeWriter = Writers.objectType({
-    properties: [
-      ...(isComposite ? [] : [bodyProperty]),
-      {
-        name: "_response",
-        docs: ["The underlying HTTP response."],
-        type: Writers.intersectionType(
-          "coreHttp.HttpResponse",
-          Writers.objectType({
-            properties: responseProperties
-          })
-        ),
-        leadingTrivia: writer => writer.blankLine()
-      }
-    ]
+    properties: innerProperties
   });
 
-  return isComposite
-    ? Writers.intersectionType(bodyTypeName, innerTypeWriter)
-    : innerTypeWriter;
+  if (body?.isIntersection) {
+    if (headers) {
+      return Writers.intersectionType(body.name, headers.name, innerTypeWriter);
+    } else {
+      return Writers.intersectionType(body.name, innerTypeWriter);
+    }
+  } else if (headers) {
+    return Writers.intersectionType(headers.name, innerTypeWriter);
+  }
+
+  return innerTypeWriter;
 }
 
 const writeChoices = (

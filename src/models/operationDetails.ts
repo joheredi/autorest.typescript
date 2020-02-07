@@ -24,7 +24,8 @@ export interface OperationResponseDetails {
   mediaType?: KnownMediaType;
   bodyMapper?: Mapper | string;
   headersMapper?: Mapper | string;
-  typeDetails: TypeDetails;
+  bodyType?: TypeDetails;
+  headersType?: TypeDetails;
   isError?: boolean;
 }
 

@@ -15,8 +15,7 @@ import {
   ArraySchema,
   DictionarySchema,
   DateTimeSchema,
-  CodeModel,
-  OperationGroup
+  CodeModel
 } from "@azure-tools/codemodel";
 import {
   BaseMapper,
@@ -27,14 +26,10 @@ import {
 } from "@azure/core-http";
 import { getLanguageMetadata } from "../utils/languageHelpers";
 import { isNil } from "lodash";
-import {
-  normalizeName,
-  NameType,
-  getOperationFullName
-} from "../utils/nameUtils";
+import { normalizeName, NameType } from "../utils/nameUtils";
 import { KnownMediaType } from "@azure-tools/codegen";
 import { ClientOptions } from "../models/clientDetails";
-import { headersToSchema } from "../utils/headersToSchema";
+import { extractHeaders } from "../utils/extractHeaders";
 
 interface PipelineValue {
   schema: Schema;
@@ -85,7 +80,7 @@ export async function transformMappers(
   const hasXmlMetadata = mediaTypes?.has(KnownMediaType.Xml);
   return [
     ...codeModel.schemas.objects,
-    ...getResponseHeaders(codeModel.operationGroups)
+    ...extractHeaders(codeModel.operationGroups)
   ].map(objectSchema =>
     transformMapper({ schema: objectSchema, options: { hasXmlMetadata } })
   );
@@ -200,25 +195,6 @@ function buildMapper(
     ...(hasConstraints && { constraints }),
     ...xmlMetadata
   };
-}
-
-function getResponseHeaders(operationGroups: OperationGroup[]) {
-  let responseHeaders: ObjectSchema[] = [];
-
-  operationGroups.forEach(operationGroup =>
-    operationGroup.operations.forEach(operation =>
-      operation.responses?.forEach(response => {
-        const operationName = getOperationFullName(operationGroup, operation);
-        const headers = response.protocol.http?.headers;
-        if (headers) {
-          const headerSchema = headersToSchema(headers, operationName);
-          headerSchema && responseHeaders.push(headerSchema);
-        }
-      })
-    )
-  );
-
-  return responseHeaders;
 }
 
 function transformPrimitiveMapper(pipelineValue: PipelineValue) {

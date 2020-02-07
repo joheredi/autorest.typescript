@@ -17,9 +17,310 @@ export interface ErrorModel {
 }
 
 /**
+ * An interface representing header_responseExistingKeyHeaders.
+ */
+export interface HeaderResponseExistingKeyHeaders {
+  userAgent?: string;
+}
+
+/**
+ * An interface representing header_responseProtectedKeyHeaders.
+ */
+export interface HeaderResponseProtectedKeyHeaders {
+  contentType?: string;
+}
+
+/**
+ * An interface representing header_responseIntegerHeaders.
+ */
+export interface HeaderResponseIntegerHeaders {
+  value?: number;
+}
+
+/**
+ * An interface representing header_responseLongHeaders.
+ */
+export interface HeaderResponseLongHeaders {
+  value?: number;
+}
+
+/**
+ * An interface representing header_responseFloatHeaders.
+ */
+export interface HeaderResponseFloatHeaders {
+  value?: number;
+}
+
+/**
+ * An interface representing header_responseDoubleHeaders.
+ */
+export interface HeaderResponseDoubleHeaders {
+  value?: number;
+}
+
+/**
+ * An interface representing header_responseBoolHeaders.
+ */
+export interface HeaderResponseBoolHeaders {
+  value?: boolean;
+}
+
+/**
+ * An interface representing header_responseStringHeaders.
+ */
+export interface HeaderResponseStringHeaders {
+  value?: string;
+}
+
+/**
+ * An interface representing header_responseDateHeaders.
+ */
+export interface HeaderResponseDateHeaders {
+  value?: Date;
+}
+
+/**
+ * An interface representing header_responseDatetimeHeaders.
+ */
+export interface HeaderResponseDatetimeHeaders {
+  value?: Date;
+}
+
+/**
+ * An interface representing header_responseDatetimeRfc1123Headers.
+ */
+export interface HeaderResponseDatetimeRfc1123Headers {
+  value?: Date;
+}
+
+/**
+ * An interface representing header_responseDurationHeaders.
+ */
+export interface HeaderResponseDurationHeaders {
+  value?: string;
+}
+
+/**
+ * An interface representing header_responseByteHeaders.
+ */
+export interface HeaderResponseByteHeaders {
+  value?: Uint8Array;
+}
+
+/**
+ * An interface representing header_responseEnumHeaders.
+ */
+export interface HeaderResponseEnumHeaders {
+  value?: GreyscaleColors;
+}
+
+/**
  * Defines values for GreyscaleColors.
  */
 export type GreyscaleColors = "White" | "black" | "GREY";
+
+/**
+ * Contains response data for the responseExistingKey operation.
+ */
+export type HeaderResponseExistingKeyResponse = HeaderResponseExistingKeyHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseExistingKeyHeaders;
+  };
+};
+
+/**
+ * Contains response data for the responseProtectedKey operation.
+ */
+export type HeaderResponseProtectedKeyResponse = HeaderResponseProtectedKeyHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseProtectedKeyHeaders;
+  };
+};
+
+/**
+ * Contains response data for the responseInteger operation.
+ */
+export type HeaderResponseIntegerResponse = HeaderResponseIntegerHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseIntegerHeaders;
+  };
+};
+
+/**
+ * Contains response data for the responseLong operation.
+ */
+export type HeaderResponseLongResponse = HeaderResponseLongHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseLongHeaders;
+  };
+};
+
+/**
+ * Contains response data for the responseFloat operation.
+ */
+export type HeaderResponseFloatResponse = HeaderResponseFloatHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseFloatHeaders;
+  };
+};
+
+/**
+ * Contains response data for the responseDouble operation.
+ */
+export type HeaderResponseDoubleResponse = HeaderResponseDoubleHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseDoubleHeaders;
+  };
+};
+
+/**
+ * Contains response data for the responseBool operation.
+ */
+export type HeaderResponseBoolResponse = HeaderResponseBoolHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseBoolHeaders;
+  };
+};
 
 /**
  * Optional parameters.
@@ -33,6 +334,93 @@ export interface HeaderParamStringOptionalParams
 }
 
 /**
+ * Contains response data for the responseString operation.
+ */
+export type HeaderResponseStringResponse = HeaderResponseStringHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseStringHeaders;
+  };
+};
+
+/**
+ * Contains response data for the responseDate operation.
+ */
+export type HeaderResponseDateResponse = HeaderResponseDateHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseDateHeaders;
+  };
+};
+
+/**
+ * Contains response data for the responseDatetime operation.
+ */
+export type HeaderResponseDatetimeResponse = HeaderResponseDatetimeHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseDatetimeHeaders;
+  };
+};
+
+/**
  * Optional parameters.
  */
 export interface HeaderParamDatetimeRfc1123OptionalParams
@@ -44,6 +432,93 @@ export interface HeaderParamDatetimeRfc1123OptionalParams
 }
 
 /**
+ * Contains response data for the responseDatetimeRfc1123 operation.
+ */
+export type HeaderResponseDatetimeRfc1123Response = HeaderResponseDatetimeRfc1123Headers & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseDatetimeRfc1123Headers;
+  };
+};
+
+/**
+ * Contains response data for the responseDuration operation.
+ */
+export type HeaderResponseDurationResponse = HeaderResponseDurationHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseDurationHeaders;
+  };
+};
+
+/**
+ * Contains response data for the responseByte operation.
+ */
+export type HeaderResponseByteResponse = HeaderResponseByteHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseByteHeaders;
+  };
+};
+
+/**
  * Optional parameters.
  */
 export interface HeaderParamEnumOptionalParams
@@ -53,3 +528,32 @@ export interface HeaderParamEnumOptionalParams
    */
   value?: GreyscaleColors;
 }
+
+/**
+ * Contains response data for the responseEnum operation.
+ */
+export type HeaderResponseEnumResponse = HeaderResponseEnumHeaders & {
+  /**
+   * The parsed response body.
+   */
+  body: any;
+
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: any;
+
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+    /**
+     * The parsed HTTP response headers.
+     */
+    parsedHeaders: HeaderResponseEnumHeaders;
+  };
+};
