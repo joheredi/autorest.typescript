@@ -9,7 +9,8 @@ import {
   SourceFile,
   Writers,
   WriterFunction,
-  OptionalKind
+  OptionalKind,
+  WriterFunctionOrValue
 } from "ts-morph";
 import { keys } from "lodash";
 import {
@@ -22,7 +23,10 @@ import {
 } from "../models/modelDetails";
 import { normalizeName, NameType } from "../utils/nameUtils";
 import { filterOperationParameters } from "./utils/parameterUtils";
-import { OperationDetails } from "../models/operationDetails";
+import {
+  OperationDetails,
+  OperationResponseDetails
+} from "../models/operationDetails";
 import { ParameterDetails } from "../models/parameterDetails";
 
 export function generateModels(clientDetails: ClientDetails, project: Project) {
@@ -78,15 +82,14 @@ function writeResponseTypes(
   const responseName = `${operationType.typeName}Response`;
 
   responses
-    .filter(r => !r.isError && !!r.bodyMapper)
+    .filter(r => !r.isError && !!r.mappers.bodyMapper)
     .forEach(response => {
       // Define possible values for response
-      const responseType = response.typeDetails || {
+      const responseType = response.types.bodyType || {
         typeName: "string",
         kind: PropertyKind.Primitive
       };
 
-      response.typeDetails.typeName;
       const responseValueType = responseType.typeName;
 
       if (responseType.isConstant) {
@@ -122,62 +125,111 @@ function writeResponseTypes(
         name: responseName,
         docs: [`Contains response data for the ${name} operation.`],
         isExported: true,
-        type: generateResponseType(responseValueType, responseType),
+        type: generateResponseType(response),
         leadingTrivia: writer => writer.blankLine()
       });
     });
 }
 
-function generateResponseType(
-  bodyType: string,
-  typeDetails: TypeDetails
-): WriterFunction {
-  const bodyName = normalizeName(bodyType, NameType.Interface);
-  const bodyTypeName = bodyName;
-  const bodyProperty: OptionalKind<PropertySignatureStructure> = {
-    name: "body",
-    type: bodyTypeName,
-    docs: ["The parsed response body."]
+interface GeneratedResponseDetails {
+  typeName: string;
+  mainProperties?: OptionalKind<PropertySignatureStructure>[];
+  internalResponseProperties: OptionalKind<PropertySignatureStructure>[];
+}
+
+function getBodyProperties({
+  types: { bodyType }
+}: OperationResponseDetails): GeneratedResponseDetails | undefined {
+  if (!bodyType) {
+    return;
+  }
+
+  const isPrimitive = bodyType.kind === PropertyKind.Primitive;
+  const isComposite = bodyType.kind === PropertyKind.Composite;
+
+  const typeName = isPrimitive
+    ? bodyType.typeName
+    : normalizeName(bodyType.typeName, NameType.Interface);
+
+  return {
+    typeName,
+    mainProperties: !isComposite
+      ? [
+          {
+            name: "body", // Is there any extension that overrides this?
+            type: typeName,
+            docs: ["The parsed response body."]
+          }
+        ]
+      : [],
+    internalResponseProperties: [
+      {
+        name: "bodyAsText",
+        type: "string",
+        leadingTrivia: writer => writer.blankLine(),
+        docs: ["The response body as text (string format)"]
+      }
+    ]
   };
+}
 
-  // TODO: These will change based on whether the response has
-  // a body, headers, etc
-  const responseProperties: OptionalKind<PropertySignatureStructure>[] = [
-    {
-      name: "bodyAsText",
-      docs: ["The response body as text (string format)"],
-      type: "string",
-      leadingTrivia: writer => writer.blankLine()
-    },
-    {
-      name: "parsedBody",
-      docs: ["The response body as parsed JSON or XML"],
-      type: bodyTypeName,
-      leadingTrivia: writer => writer.blankLine()
-    }
-  ];
+function getHeadersProperties({
+  types: { headersType }
+}: OperationResponseDetails): GeneratedResponseDetails | undefined {
+  if (!headersType) {
+    return;
+  }
 
-  const isComposite = typeDetails.kind === PropertyKind.Composite;
+  const typeName = normalizeName(headersType.typeName, NameType.Interface);
+
+  return {
+    typeName,
+    internalResponseProperties: [
+      {
+        name: "parsedHeaders",
+        docs: ["The parsed HTTP response headers."],
+        type: typeName
+      }
+    ],
+    mainProperties: []
+  };
+}
+
+function generateResponseType(
+  operationResponse: OperationResponseDetails
+): WriterFunction {
+  const headersProperties = getHeadersProperties(operationResponse);
+  const bodyProperties = getBodyProperties(operationResponse);
+  const isBodyComposite =
+    operationResponse.types.bodyType?.kind === PropertyKind.Composite;
 
   const innerTypeWriter = Writers.objectType({
     properties: [
-      ...(isComposite ? [] : [bodyProperty]),
+      ...(bodyProperties?.mainProperties || []),
       {
         name: "_response",
         docs: ["The underlying HTTP response."],
         type: Writers.intersectionType(
           "coreHttp.HttpResponse",
           Writers.objectType({
-            properties: responseProperties
+            properties: [
+              ...(bodyProperties?.internalResponseProperties || []),
+              ...(headersProperties?.internalResponseProperties || [])
+            ]
           })
         ),
         leadingTrivia: writer => writer.blankLine()
       }
     ]
   });
+  const parameters = [
+    bodyProperties?.typeName || "",
+    headersProperties?.typeName || "",
+    innerTypeWriter
+  ].filter(p => p !== "") as any;
 
-  return isComposite
-    ? Writers.intersectionType(bodyTypeName, innerTypeWriter)
+  return isBodyComposite
+    ? Writers.intersectionType.apply(Writers, parameters)
     : innerTypeWriter;
 }
 

@@ -324,11 +324,6 @@ export type BasicGetValidResponse = Basic & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: Basic;
   };
 };
 
@@ -344,11 +339,6 @@ export type BasicGetInvalidResponse = Basic & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: Basic;
   };
 };
 
@@ -364,11 +354,6 @@ export type BasicGetEmptyResponse = Basic & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: Basic;
   };
 };
 
@@ -384,11 +369,6 @@ export type BasicGetNullResponse = Basic & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: Basic;
   };
 };
 
@@ -404,11 +384,6 @@ export type BasicGetNotProvidedResponse = Basic & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: Basic;
   };
 };
 
@@ -424,11 +399,6 @@ export type PrimitiveGetIntResponse = IntWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: IntWrapper;
   };
 };
 
@@ -444,11 +414,6 @@ export type PrimitiveGetLongResponse = LongWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: LongWrapper;
   };
 };
 
@@ -464,11 +429,6 @@ export type PrimitiveGetFloatResponse = FloatWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: FloatWrapper;
   };
 };
 
@@ -484,11 +444,6 @@ export type PrimitiveGetDoubleResponse = DoubleWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DoubleWrapper;
   };
 };
 
@@ -504,11 +459,6 @@ export type PrimitiveGetBoolResponse = BooleanWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: BooleanWrapper;
   };
 };
 
@@ -524,11 +474,6 @@ export type PrimitiveGetStringResponse = StringWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: StringWrapper;
   };
 };
 
@@ -544,11 +489,6 @@ export type PrimitiveGetDateResponse = DateWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DateWrapper;
   };
 };
 
@@ -564,11 +504,6 @@ export type PrimitiveGetDateTimeResponse = DatetimeWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DatetimeWrapper;
   };
 };
 
@@ -584,11 +519,6 @@ export type PrimitiveGetDateTimeRfc1123Response = Datetimerfc1123Wrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: Datetimerfc1123Wrapper;
   };
 };
 
@@ -604,11 +534,6 @@ export type PrimitiveGetDurationResponse = DurationWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DurationWrapper;
   };
 };
 
@@ -624,11 +549,6 @@ export type PrimitiveGetByteResponse = ByteWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: ByteWrapper;
   };
 };
 
@@ -644,11 +564,6 @@ export type ArrayGetValidResponse = ArrayWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: ArrayWrapper;
   };
 };
 
@@ -664,11 +579,6 @@ export type ArrayGetEmptyResponse = ArrayWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: ArrayWrapper;
   };
 };
 
@@ -684,11 +594,6 @@ export type ArrayGetNotProvidedResponse = ArrayWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: ArrayWrapper;
   };
 };
 
@@ -704,11 +609,6 @@ export type DictionaryGetValidResponse = DictionaryWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DictionaryWrapper;
   };
 };
 
@@ -724,11 +624,6 @@ export type DictionaryGetEmptyResponse = DictionaryWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DictionaryWrapper;
   };
 };
 
@@ -744,11 +639,6 @@ export type DictionaryGetNullResponse = DictionaryWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DictionaryWrapper;
   };
 };
 
@@ -764,11 +654,6 @@ export type DictionaryGetNotProvidedResponse = DictionaryWrapper & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DictionaryWrapper;
   };
 };
 
@@ -784,11 +669,6 @@ export type InheritanceGetValidResponse = Siamese & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: Siamese;
   };
 };
 
@@ -804,11 +684,6 @@ export type PolymorphismGetValidResponse = FishUnion & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: FishUnion;
   };
 };
 
@@ -824,11 +699,6 @@ export type PolymorphismGetDotSyntaxResponse = DotFishUnion & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DotFishUnion;
   };
 };
 
@@ -844,11 +714,6 @@ export type PolymorphismGetComposedWithDiscriminatorResponse = DotFishMarket & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DotFishMarket;
   };
 };
 
@@ -864,11 +729,6 @@ export type PolymorphismGetComposedWithoutDiscriminatorResponse = DotFishMarket 
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: DotFishMarket;
   };
 };
 
@@ -884,11 +744,6 @@ export type PolymorphismGetComplicatedResponse = SalmonUnion & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: SalmonUnion;
   };
 };
 
@@ -904,11 +759,6 @@ export type PolymorphismPutMissingDiscriminatorResponse = SalmonUnion & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: SalmonUnion;
   };
 };
 
@@ -924,11 +774,6 @@ export type PolymorphicrecursiveGetValidResponse = FishUnion & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: FishUnion;
   };
 };
 
@@ -944,11 +789,6 @@ export type ReadonlypropertyGetValidResponse = ReadonlyObj & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: ReadonlyObj;
   };
 };
 
@@ -964,10 +804,5 @@ export type FlattencomplexGetValidResponse = MyBaseTypeUnion & {
      * The response body as text (string format)
      */
     bodyAsText: string;
-
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: MyBaseTypeUnion;
   };
 };
