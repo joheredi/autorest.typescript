@@ -316,7 +316,7 @@ export function writeOperations(
 
 function getResponseType(operation: OperationDetails) {
   const hasSuccessResponse = operation.responses.some(
-    r => !r.isError && !!r.bodyMapper
+    r => !r.isError && (!!r.bodyMapper || !!r.headersMapper)
   );
 
   const responseName = hasSuccessResponse ? operation.typeDetails.typeName : "";

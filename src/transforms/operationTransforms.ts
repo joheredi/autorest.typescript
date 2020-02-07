@@ -185,22 +185,26 @@ export function transformOperationResponse(
     ? getMapperFromSchema(headersObject)
     : undefined;
 
+  const headersType = headersObject && getTypeForSchema(headersObject);
+
   if (!(response as SchemaResponse).schema) {
     return {
       statusCodes: httpInfo?.statusCodes,
       headersMapper,
-      typeDetails: {
+      bodyType: {
         typeName: "",
         isConstant: false,
         kind: PropertyKind.Primitive,
         isError
-      }
+      },
+      headersType
     } as OperationResponseDetails;
   }
 
   const schemaResponse = response as SchemaResponse;
-  const typeDetails = getTypeForSchema(schemaResponse.schema);
-  if (!typeDetails) {
+  let bodyType = getTypeForSchema(schemaResponse.schema);
+
+  if (!bodyType) {
     throw new Error(
       `Unable to extract responseType for ${schemaResponse.schema.type}`
     );
@@ -215,7 +219,8 @@ export function transformOperationResponse(
       mediaType,
       bodyMapper,
       headersMapper,
-      typeDetails,
+      bodyType,
+      headersType,
       isError: isDefault || isError
     };
   } else {
