@@ -135,6 +135,13 @@ interface PartialMapperType {
   additionalProperties?: Mapper;
 }
 
+function getDiscriminatorValue(schema: ObjectSchema | Schema) {
+  return (
+    (schema.extensions && schema.extensions["x-ms-discriminator-value"]) ||
+    (schema as ObjectSchema).discriminatorValue
+  );
+}
+
 function buildMapper(
   schema: Schema,
   type: PartialMapperType,
@@ -144,13 +151,9 @@ function buildMapper(
   const readOnly = !!options.readOnly;
   // Handle x-ms-discriminator-value Extension. More info:
   // https://github.com/Azure/autorest/tree/master/docs/extensions/swagger-extensions-examples/x-ms-discriminator-value
-  const msDiscriminatorValue =
-    schema.extensions && schema.extensions["x-ms-discriminator-value"];
 
   const serializedName =
-    msDiscriminatorValue ||
-    options.serializedName ||
-    getLanguageMetadata(schema.language).name;
+    getDiscriminatorValue(schema) || options.serializedName;
 
   const arraySchema = schema as ArraySchema;
   arraySchema.elementType;
@@ -215,32 +218,42 @@ function transformPrimitiveMapper(pipelineValue: PipelineValue) {
   };
 }
 
-function getXmlMetadata(
-  schema: Schema,
-  { hasXmlMetadata, serializedName }: EntityOptions
-) {
-  if (!hasXmlMetadata) {
+interface XmlMetadata {
+  serializedName?: string;
+  xmlName?: string;
+  xmlIsAttribute?: boolean;
+  xmlIsWrapped?: boolean;
+  xmlElementName?: string;
+}
+
+function getXmlMetadata(schema: Schema, options: EntityOptions): XmlMetadata {
+  if (!options.hasXmlMetadata) {
     return {};
   }
 
   let xmlElementName: string | undefined = undefined;
   if (schema.type === SchemaType.Array) {
     const elementSchema = (schema as ArraySchema).elementType;
-    const languageMetadata = getLanguageMetadata(elementSchema.language);
+    const elementLanguageMetadata = getLanguageMetadata(elementSchema.language);
     xmlElementName =
       elementSchema.serialization?.xml?.name ||
-      languageMetadata.serializedName ||
-      languageMetadata.name;
+      elementLanguageMetadata.serializedName;
   }
 
-  const defaultName =
-    serializedName || getLanguageMetadata(schema.language).serializedName;
+  const languageMetadata = getLanguageMetadata(schema.language);
+  const mainSerializedName =
+    options.serializedName ||
+    languageMetadata.serializedName ||
+    languageMetadata.name; // We should not fallback to this since prenamer can change it
+
   const { name, attribute: xmlIsAttribute, wrapped: xmlIsWrapped } =
     schema.serialization?.xml || {};
 
-  const xmlName = name || defaultName;
+  const xmlName = name || mainSerializedName;
+  const serializedName = mainSerializedName;
 
   return {
+    ...(serializedName && { serializedName }),
     ...(xmlName && { xmlName }),
     ...(xmlIsAttribute && { xmlIsAttribute }),
     ...(xmlIsWrapped && { xmlIsWrapped }),
@@ -482,12 +495,11 @@ function transformConstantMapper(pipelineValue: PipelineValue): PipelineValue {
   if (!isSchemaType([SchemaType.Constant], schema)) {
     return pipelineValue;
   }
-  const serializedName =
-    (options && options.serializedName) ||
-    getLanguageMetadata(schema.language).serializedName ||
-    getLanguageMetadata(schema.language).name;
 
   const constantSchema = schema as ConstantSchema;
+  const serializedName =
+    options?.serializedName ||
+    getLanguageMetadata(schema.language).serializedName;
 
   const mapper: Mapper = {
     ...transformMapper({ schema: constantSchema.valueType }),

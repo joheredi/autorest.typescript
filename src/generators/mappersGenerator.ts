@@ -4,6 +4,7 @@
 import { ClientDetails } from "../models/clientDetails";
 import { Project, VariableDeclarationKind, CodeBlockWriter } from "ts-morph";
 import { NameType, normalizeName } from "../utils/nameUtils";
+import { createClientLogger, setLogLevel } from "@azure/logger";
 import {
   MapperType,
   Mapper,
@@ -14,11 +15,16 @@ import {
 import { ModelProperties } from "../transforms/mapperTransforms";
 import { keys, isEmpty, isString, isNil } from "lodash";
 import { getStringForValue } from "../utils/valueHelpers";
+import { isPolymorphicObject } from "../utils/schemaHelpers";
+import { PolymorphicObjectDetails } from "../models/modelDetails";
 
 export function generateMappers(
   clientDetails: ClientDetails,
   project: Project
 ) {
+  setLogLevel("verbose");
+  const logger = createClientLogger("generateMappers");
+  logger.warning("Hello!");
   const mappersFile = project.createSourceFile(
     `${clientDetails.srcPath}/models/mappers.ts`,
     undefined,
@@ -36,35 +42,25 @@ export function generateMappers(
    */
   let discriminators: { [key: string]: string } = {};
 
-  for (const mapper of clientDetails.mappers) {
-    const serializedName = mapper.serializedName;
-    if (mapper.type.name === MapperType.Composite && serializedName) {
+  clientDetails.objects
+    .filter(object => isPolymorphicObject(object))
+    .forEach(object => {
+      // Get all the objects wiith discriminator or discriminatorValue
+      const { name, discriminatorPath } = <PolymorphicObjectDetails>object;
+      discriminators[discriminatorPath] = name;
+    });
+
+  clientDetails.mappers.forEach(mapper => {
+    if (mapper.type.name === MapperType.Composite) {
       const compositeMapper = mapper as CompositeMapper;
-
-      if (!compositeMapper.type.className) {
-        throw new Error("Composite mapper type does not have a class name");
-      }
-
-      if (compositeMapper.type.polymorphicDiscriminator) {
-        const { uberParent, className } = compositeMapper.type;
-        if (!uberParent || !className) {
-          throw new Error(
-            `Expected CompositeMapper with polymorphicDiscriminator to specify uberParent property (uberParent: ${uberParent}, className: ${className})`
-          );
-        }
-
-        if (uberParent === className) {
-          discriminators[serializedName] = className;
-        } else {
-          discriminators[`${uberParent}.${serializedName}`] = className;
-        }
-      }
-
       mappersFile.addVariableStatement({
         isExported: true,
         declarations: [
           {
-            name: normalizeName(compositeMapper.type.className, NameType.Class),
+            name: normalizeName(
+              compositeMapper.type.className || "MISSING_MAPPER",
+              NameType.Class
+            ),
             type: "coreHttp.CompositeMapper",
             initializer: writer => writeMapper(writer, mapper)
           }
@@ -72,12 +68,8 @@ export function generateMappers(
         declarationKind: VariableDeclarationKind.Const,
         leadingTrivia: writer => writer.blankLine()
       });
-    } else {
-      throw new Error(
-        `Don't know how to create a mapper for type ${mapper.type.name}`
-      );
     }
-  }
+  });
 
   !isEmpty(discriminators) &&
     mappersFile.addVariableStatement({

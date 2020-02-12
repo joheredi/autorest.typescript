@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { TypeDetails, PropertyKind } from "../models/modelDetails";
+import {
+  TypeDetails,
+  PropertyKind,
+  PolymorphicObjectDetails
+} from "../models/modelDetails";
 
 import {
   Schema,
@@ -116,4 +120,13 @@ function getElementTypeName(elementType: TypeDetails) {
 export function isSchemaResponse(response: any): response is SchemaResponse {
   // check fields that should exist to determine if this is a SchemaResponse
   return typeof response.schema !== "undefined";
+}
+
+export function isPolymorphicObject(
+  object: any
+): object is PolymorphicObjectDetails {
+  return (
+    typeof object.discriminatorPath !== "undefined" ||
+    typeof object.discriminatorValues !== "undefined"
+  );
 }

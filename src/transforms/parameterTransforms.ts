@@ -127,27 +127,31 @@ export function populateOperationParameters(
   operationName: string,
   hasXmlMetadata: boolean
 ): void {
-  const parameterSerializedName = getParameterName(parameter);
-  const description = getLanguageMetadata(parameter.language).description;
+  const { description, name } = getLanguageMetadata(parameter.language);
+  // serializedName is the name used over the wire, so we should not normalize this
+  const serializedName = getParameterSerializedName(parameter);
 
-  if (!parameterSerializedName) {
+  // TODO: remove this normalization when enabling modelerfour prenamer
+  const normalizedName = normalizeName(name, NameType.Property);
+
+  if (!serializedName) {
     throw new Error(
       `Couldn't get parameter serializedName for operation: ${operationName}`
     );
   }
-  const sameNameParams = operationParameters.filter(
-    p => p.serializedName === parameterSerializedName
+
+  const sameSerailizedNameParams = operationParameters.filter(
+    p => p.serializedName === serializedName
   );
 
-  if (!sameNameParams.length) {
-    const name = normalizeName(parameterSerializedName, NameType.Property);
+  if (!sameSerailizedNameParams.length) {
     const collectionFormat = getCollectionFormat(parameter);
     const typeDetails = getTypeForSchema(parameter.schema);
     const paramDetails: ParameterDetails = {
-      nameRef: name,
+      nameRef: normalizedName,
       description,
-      name,
-      serializedName: parameterSerializedName,
+      name: normalizedName,
+      serializedName,
       operationsIn: [operationName],
       location: getParameterLocation(parameter),
       required: getParameterRequired(parameter),
@@ -155,7 +159,7 @@ export function populateOperationParameters(
       parameterPath: getParameterPath(parameter),
       mapper: getMapperOrRef(
         parameter.schema,
-        parameterSerializedName,
+        serializedName,
         parameter.required,
         hasXmlMetadata
       ),
@@ -176,8 +180,8 @@ export function populateOperationParameters(
   disambiguateParameter(
     parameter,
     operationParameters,
-    parameterSerializedName,
-    sameNameParams,
+    serializedName,
+    sameSerailizedNameParams,
     operationName,
     hasXmlMetadata
   );
@@ -275,13 +279,12 @@ function getCollectionFormat(parameter: Parameter): string | undefined {
   return getStyle(queryCollectionFormat);
 }
 
-function getParameterName(parameter: Parameter) {
+function getParameterSerializedName(parameter: Parameter) {
   const fromExtension =
     parameter.extensions && parameter.extensions["x-ms-requestBody-name"];
-  const parameterSerializedName = getLanguageMetadata(parameter.language)
-    .serializedName;
+  const { serializedName } = getLanguageMetadata(parameter.language);
 
-  return fromExtension || parameterSerializedName;
+  return fromExtension || serializedName;
 }
 
 export function disambiguateParameter(

@@ -396,7 +396,7 @@ function withDiscriminator(
   model: ObjectDetails,
   properties: PropertySignatureStructure[]
 ): PropertySignatureStructure[] {
-  const discriminator = (model as PolymorphicObjectDetails).discriminator;
+  const discriminator = (model as PolymorphicObjectDetails).discriminatorValues;
   if (!discriminator) {
     return properties;
   }

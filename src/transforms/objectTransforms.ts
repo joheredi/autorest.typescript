@@ -60,17 +60,16 @@ export function transformObject(
 }
 
 export function transformProperty(property: Property): PropertyDetails {
-  const metadata = getLanguageMetadata(property.language);
+  const { name, description } = getLanguageMetadata(property.language);
   const { typeName, isConstant, defaultValue } = getTypeForSchema(
     property.schema
   );
   const typeDetails = getTypeForSchema(property.schema);
 
   return {
-    name: normalizeName(metadata.name, NameType.Property),
-    description: !metadata.description.startsWith("MISSING")
-      ? metadata.description
-      : undefined,
+    // TODO: remove this once prenamer from modelerfour is enabled
+    name: normalizeName(name, NameType.Property),
+    description: description,
     serializedName: property.serializedName,
     type: typeName,
     required: !!property.required,
@@ -197,7 +196,7 @@ function transformPolymorphicObject(
   schema: ObjectSchema,
   uberParents: ObjectDetails[]
 ): PolymorphicObjectDetails {
-  let uberParent: ObjectSchema | undefined = schema;
+  let uberParent: ObjectSchema = schema;
   const allParents = schema.parents && schema.parents.all;
   if (allParents && allParents.length) {
     const uberParentSchema = allParents.find(p => {
@@ -226,9 +225,11 @@ function transformPolymorphicObject(
   const uberParentName = getLanguageMetadata(uberParent.language).name;
   const unionName = `${normalizeName(uberParentName, NameType.Interface)}Union`;
 
+  let discriminatorPath: string | undefined;
   let discriminator: { [key: string]: string[] } = {};
 
   if (schema === uberParent && schema.children) {
+    discriminatorPath = `${uberParentName}`;
     const discriminatorProperty = uberParent.discriminator!.property
       .serializedName;
 
@@ -248,11 +249,16 @@ function transformPolymorphicObject(
     discriminator = !childDiscriminators.length
       ? {}
       : { [`"${discriminatorProperty}"`]: childDiscriminators };
+  } else {
+    discriminatorPath = schema.discriminatorValue
+      ? `${uberParentName}.${schema.discriminatorValue}`
+      : undefined;
   }
 
   return {
-    discriminator,
+    discriminatorValues: discriminator,
     unionName,
+    discriminatorPath,
     ...objectDetails
   } as PolymorphicObjectDetails;
 }
