@@ -17,6 +17,7 @@ import {
 } from "@azure-tools/codemodel";
 import { normalizeName, NameType } from "../utils/nameUtils";
 import {
+  OperationCapabilities,
   OperationGroupDetails,
   OperationDetails,
   OperationResponseDetails,
@@ -218,6 +219,35 @@ export function transformOperationResponse(
   };
 }
 
+
+function getOperationCapabilities(operation: Operation): OperationCapabilities {
+  const extensions = operation.extensions;
+  if (!extensions) {
+    return {};
+  }
+  const paging = extensions["x-ms-pageable"];
+
+  let capabilities = {};
+
+  if (paging){
+    if (!paging.nextLinkName) {
+      throw new Error(`Operation: ${operation.language.default.name} nextLinkName property is required for 'x-ms-pageable' extension`)
+    }
+
+    capabilities = {
+      ...capabilities,
+      paging: {
+        nextLinkName: paging.nextLinkName,
+        value: paging.nextValue,
+        // TODO: Do we need to normalize this?
+        operationName: paging.operationName
+      }
+    }
+  }
+
+  return capabilities;
+}
+
 export async function transformOperation(
   operation: Operation,
   operationGroupName: string
@@ -237,6 +267,7 @@ export async function transformOperation(
     kind: PropertyKind.Composite
   };
 
+  const capabilities = getOperationCapabilities(operation);
   const request = transformOperationRequest(operation.request);
   const responses = responsesAndErrors.map(response =>
     transformOperationResponse(response, operationFullName)
@@ -245,6 +276,7 @@ export async function transformOperation(
 
   return {
     name,
+    capabilities,
     typeDetails,
     fullName: operationFullName.toLowerCase(),
     apiVersions: operation.apiVersions

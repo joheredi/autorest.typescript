@@ -47,6 +47,29 @@ export interface OperationResponseDetails {
   isError?: boolean;
 }
 
+export interface PagingConfig {
+  /*
+   * Specifies the name of the property in the response which contains
+   * the link to the next page
+   */
+  nextLinkName: string;
+  /*
+   * Overrides the name of the property that contains the current page.
+   * The default value is "value"
+   */
+  value?: string;
+  /*
+   * Overrides the name of the operation for receiving the next page
+   * The default value is "listNext"
+   */
+  operationName: string;
+}
+
+
+export interface OperationCapabilities {
+  paging?: PagingConfig;
+}
+
 /**
  * Details of an operation, transformed from Operation.
  */
@@ -59,6 +82,7 @@ export interface OperationDetails {
   responses: OperationResponseDetails[];
   typeDetails: TypeDetails;
   mediaTypes: Set<KnownMediaType>;
+  capabilities: OperationCapabilities
 }
 
 /**
