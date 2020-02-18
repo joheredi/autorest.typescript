@@ -15,6 +15,7 @@ export enum NameType {
   Class,
   File,
   Interface,
+  Enum,
   Property
 }
 
@@ -50,6 +51,7 @@ function getCasingConvention(nameType: NameType) {
   switch (nameType) {
     case NameType.Class:
     case NameType.Interface:
+    case NameType.Enum:
       return CasingConvention.Pascal;
     case NameType.File:
     case NameType.Property:

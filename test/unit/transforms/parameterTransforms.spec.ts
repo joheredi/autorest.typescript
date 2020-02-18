@@ -38,11 +38,11 @@ describe("parameterTransforms", () => {
         ...(extensions && { extensions })
       }
     );
-    const request = { parameters: [param1] } as Request;
+    const requests = [{ parameters: [param1] } as Request];
     const op1 = new OperationGroup("OperationGroup1", {
       operations: [
         {
-          request,
+          requests,
           language: {
             default: {
               name: "operation1",
@@ -125,13 +125,13 @@ describe("parameterTransforms", () => {
         }
       );
 
-      const request = { parameters: [param1] } as Request;
-      const request2 = { parameters: [param2] } as Request;
+      const requests = [{ parameters: [param1] } as Request];
+      const requests2 = [{ parameters: [param2] } as Request];
 
       const op1 = new OperationGroup("OperationGroup1", {
         operations: [
           {
-            request,
+            requests,
             language: {
               default: {
                 name: "operation1",
@@ -145,7 +145,7 @@ describe("parameterTransforms", () => {
       const op2 = new OperationGroup("OperationGroup2", {
         operations: [
           {
-            request: request2,
+            requests: requests2,
             language: {
               default: {
                 name: "operation2",
@@ -197,13 +197,13 @@ describe("parameterTransforms", () => {
         }
       );
       const operationParameters = [param1];
-      const request = { parameters: operationParameters } as Request;
-      const request2 = { parameters: operationParameters } as Request;
+      const requests = [{ parameters: operationParameters } as Request];
+      const requests2 = [{ parameters: operationParameters } as Request];
 
       const op1 = new OperationGroup("OperationGroup1", {
         operations: [
           {
-            request,
+            requests,
             language: {
               default: {
                 name: "operation1",
@@ -217,7 +217,7 @@ describe("parameterTransforms", () => {
       const op2 = new OperationGroup("OperationGroup2", {
         operations: [
           {
-            request: request2,
+            requests: requests2,
             language: {
               default: {
                 name: "operation2",
@@ -282,13 +282,13 @@ describe("parameterTransforms", () => {
       );
 
       const operationParameters = [param1, param2];
-      const request = { parameters: operationParameters } as Request;
+      const requests = [{ parameters: operationParameters } as Request];
 
       codeModel.operationGroups = [
         new OperationGroup("OperationGroup1", {
           operations: [
             {
-              request,
+              requests,
               language: {
                 default: {
                   name: "operation1",

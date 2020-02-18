@@ -42,7 +42,7 @@ export function getTypeForSchema(schema: Schema): TypeDetails {
     case SchemaType.Choice:
     case SchemaType.SealedChoice:
       const { name: choiceName } = getLanguageMetadata(schema.language);
-      typeName = choiceName;
+      typeName = normalizeName(choiceName, NameType.Interface);
       kind = PropertyKind.Enum;
       break;
     case SchemaType.Constant:

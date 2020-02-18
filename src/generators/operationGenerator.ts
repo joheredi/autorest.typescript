@@ -22,6 +22,8 @@ import { ParameterDetails } from "../models/parameterDetails";
 import { KnownMediaType } from "@azure-tools/codegen";
 import { writeOperation, writePagingOperation } from "./utils";
 import { getLanguageMetadata } from "../utils/languageHelpers";
+import { isSchemaResponse } from "../utils/schemaHelpers";
+import { SchemaResponse } from "@azure-tools/codemodel";
 
 /**
  * Function that writes the code for all the operations.
@@ -81,7 +83,11 @@ function generateOperation(
     { overwrite: true }
   );
 
-  addImports(operationGroupFile, clientDetails);
+  const hasPageableOperation = clientDetails.operationGroups.some(og =>
+    og.operations.some(op => op.paging)
+  );
+
+  addImports(operationGroupFile, clientDetails, hasPageableOperation);
   addClass(operationGroupFile, operationGroupDetails, clientDetails);
   addOperationSpecs(
     operationGroupDetails,
@@ -299,7 +305,8 @@ export function addOperationSpecs(
  */
 function addImports(
   operationGroupFile: SourceFile,
-  { className, sourceFileName }: ClientDetails
+  { className, sourceFileName }: ClientDetails,
+  hasPageableOperation: boolean
 ) {
   operationGroupFile.addImportDeclaration({
     namespaceImport: "coreHttp",
@@ -325,4 +332,11 @@ function addImports(
     namedImports: [className],
     moduleSpecifier: `../${sourceFileName}`
   });
+
+  if (hasPageableOperation) {
+    operationGroupFile.addImportDeclaration({
+      namedImports: ["PagedAsyncIterableIterator"],
+      moduleSpecifier: "@azure/core-paging"
+    });
+  }
 }

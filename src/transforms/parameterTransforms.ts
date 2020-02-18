@@ -285,8 +285,7 @@ function getCollectionFormat(parameter: Parameter): string | undefined {
 function getParameterName(parameter: Parameter) {
   const fromExtension =
     parameter.extensions && parameter.extensions["x-ms-requestBody-name"];
-  const parameterSerializedName = getLanguageMetadata(parameter.language)
-    .serializedName;
+  const parameterSerializedName = getLanguageMetadata(parameter.language).name;
 
   return fromExtension || parameterSerializedName;
 }

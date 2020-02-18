@@ -2,7 +2,8 @@ import {
   OptionalKind,
   ParameterDeclarationStructure,
   ClassDeclaration,
-  Scope
+  Scope,
+  SourceFile
 } from "ts-morph";
 import { normalizeName, NameType } from "../../utils/nameUtils";
 import { OperationDetails } from "../../models/operationDetails";
@@ -28,6 +29,14 @@ export interface GenerateOperationOptions {
   namePrefix?: string;
 }
 
+export function getAllParameters(
+  parameters: ParameterDetails[],
+  operation: OperationDetails
+) {
+  const paramDeclarations = getParameterDeclarations(parameters, operation);
+  return [...paramDeclarations, getOptionsParameter(operation, parameters)];
+}
+
 export function writeOperation({
   operation,
   parameters,
@@ -35,28 +44,8 @@ export function writeOperation({
   options: { namePrefix, isPrivate, isClientOperation } = {}
 }: GenerateOperationParameters) {
   const responseName = getResponseType(operation);
-  const paramDeclarations = filterOperationParameters(
-    parameters,
-    operation
-  ).map<ParameterWithDescription>(param => {
-    const { typeName, kind } = param.typeDetails;
-    const type =
-      kind === PropertyKind.Primitive
-        ? typeName
-        : `Models.${normalizeName(typeName, NameType.Class)}`;
-
-    return {
-      name: param.name,
-      description: param.description,
-      type,
-      hasQuestionToken: !param.required
-    };
-  });
-
-  const allParams = [
-    ...paramDeclarations,
-    getOptionsParameter(operation, parameters)
-  ];
+  const paramDeclarations = getParameterDeclarations(parameters, operation);
+  const allParams = getAllParameters(parameters, operation);
 
   const operationMethod = operationGroupClass.addMethod({
     name: normalizeName(
@@ -77,6 +66,28 @@ export function writeOperation({
       operation.name
     }OperationSpec) as Promise<${responseName}>`
   );
+}
+
+function getParameterDeclarations(
+  parameters: ParameterDetails[],
+  operation: OperationDetails
+) {
+  return filterOperationParameters(parameters, operation).map<
+    ParameterWithDescription
+  >(param => {
+    const { typeName, kind } = param.typeDetails;
+    const type =
+      kind === PropertyKind.Primitive
+        ? typeName
+        : `Models.${normalizeName(typeName, NameType.Class)}`;
+
+    return {
+      name: param.name,
+      description: param.description,
+      type,
+      hasQuestionToken: !param.required
+    };
+  });
 }
 
 function getResponseType(operation: OperationDetails) {
@@ -111,7 +122,7 @@ function getOptionsParameter(
   };
 }
 
-function generateOperationJSDoc(
+export function generateOperationJSDoc(
   params: ParameterWithDescription[] = [],
   description: string = ""
 ): string {

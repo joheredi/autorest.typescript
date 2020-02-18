@@ -172,7 +172,7 @@ function writeClientOperations(
       topLevelGroup,
       classDeclaration,
       clientDetails.parameters,
-      true // isInline
+      true // isClientOperation
     );
     addOperationSpecs(topLevelGroup, file, clientDetails.parameters);
   }

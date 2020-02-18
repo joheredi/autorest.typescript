@@ -53,6 +53,7 @@ export interface OperationResponseDetails {
 export interface PagingDetails {
   group: string;
   member: string;
+  valueTypes: TypeDetails[];
   itemName?: string;
   nextLinkName: string;
 }
