@@ -48,6 +48,16 @@ export interface OperationResponseDetails {
 }
 
 /**
+ * Metadata about operation paging
+ */
+export interface PagingDetails {
+  group: string;
+  member: string;
+  itemName?: string;
+  nextLinkName: string;
+}
+
+/**
  * Details of an operation, transformed from Operation.
  */
 export interface OperationDetails {
@@ -59,6 +69,7 @@ export interface OperationDetails {
   responses: OperationResponseDetails[];
   typeDetails: TypeDetails;
   mediaTypes: Set<KnownMediaType>;
+  paging?: PagingDetails;
 }
 
 /**
