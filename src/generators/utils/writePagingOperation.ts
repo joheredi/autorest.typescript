@@ -11,11 +11,14 @@ export function writePagingOperation(params: GenerateOperationParameters) {
 }
 
 function generateFetchingFunction(params: GenerateOperationParameters) {
-  const { operation } = params;
+  const { operation, options } = params;
   const { paging, name } = operation;
   if (!paging) {
     throw new Error(`Expected paging metadata for operation ${name}`);
   }
 
-  writeOperation(params);
+  writeOperation({
+    ...params,
+    options: { ...options, isPrivate: true, namePrefix: "fetch_" }
+  });
 }

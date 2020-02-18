@@ -21,6 +21,7 @@ import { isString } from "util";
 import { ParameterDetails } from "../models/parameterDetails";
 import { KnownMediaType } from "@azure-tools/codegen";
 import { writeOperation, writePagingOperation } from "./utils";
+import { getLanguageMetadata } from "../utils/languageHelpers";
 
 /**
  * Function that writes the code for all the operations.
