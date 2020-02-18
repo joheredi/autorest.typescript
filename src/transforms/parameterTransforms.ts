@@ -88,9 +88,16 @@ const extractOperationParameters = (codeModel: CodeModel) =>
       ...og.operations.reduce<OperationParameterDetails[]>(
         (operations, operation) => {
           const opName = getLanguageMetadata(operation.language).name;
+
+          // TODO: Issue #567 support multiple requests
+          if (!operation.requests || !operation.requests.length) {
+            throw new Error(
+              `Expected at least one request defined for operation ${opName}`
+            );
+          }
           const operationName = `${groupName}_${opName}`.toLowerCase();
           const operationParams: OperationParameterDetails[] = (
-            operation.request.parameters || []
+            operation.requests[0].parameters || []
           ).map(p => ({ parameter: p, operationName }));
           return [...operations, ...operationParams];
         },

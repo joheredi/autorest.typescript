@@ -28,7 +28,7 @@ More information about these can be found [here](https://github.com/Azure/autore
 ```yaml
 version: 3.0.6192
 use-extension:
-  "@autorest/modelerfour": "4.6.197"
+  "@autorest/modelerfour": "4.7.207"
 
 modelerfour:
   prenamer: true

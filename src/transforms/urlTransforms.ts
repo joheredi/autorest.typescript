@@ -19,9 +19,19 @@ export async function transformBaseUrl(
 
   if (!$host) {
     // No support yet for multi-baseUrl yet Issue #553
-    const { request } = codeModel.operationGroups[0].operations[0];
+
+    const { requests, language } = codeModel.operationGroups[0].operations[0];
+    const { name } = getLanguageMetadata(language);
+
+    // TODO: Issue #567 support multiple requests
+    if (!requests || !requests.length) {
+      throw new Error(
+        `Expected at least one request defined for operation ${name}`
+      );
+    }
+
     isCustom = true;
-    baseUrl = request.protocol.http!.uri;
+    baseUrl = requests[0].protocol.http!.uri;
   } else {
     baseUrl = $host.clientDefaultValue;
   }

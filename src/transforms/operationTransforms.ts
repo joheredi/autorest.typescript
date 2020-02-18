@@ -237,7 +237,13 @@ export async function transformOperation(
     kind: PropertyKind.Composite
   };
 
-  const request = transformOperationRequest(operation.request);
+  // TODO: Issue #567 support multiple requests
+  if (!operation.requests || !operation.requests.length) {
+    throw new Error(
+      `Expected at least one request defined for operation ${name}`
+    );
+  }
+  const request = transformOperationRequest(operation.requests[0]);
   const responses = responsesAndErrors.map(response =>
     transformOperationResponse(response, operationFullName)
   );
