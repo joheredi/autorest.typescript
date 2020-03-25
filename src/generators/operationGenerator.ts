@@ -197,6 +197,54 @@ function buildMapper(
   return `${mapperName}: ${mapperString},`;
 }
 
+/**
+ * This function gets the parameter groups specified in the swagger
+ * by the parameter grouping extension x-ms-parameter-grouping
+ */
+function getGroupedParameters(
+  operation: OperationDetails,
+  parameters: ParameterDetails[],
+  importedModels: Set<string>
+): ParameterWithDescription[] {
+  // We get the parameters that are used by this specific operation, including
+  // any optional ones.
+  // We extract these from the parameters collection to make sure we reuse them
+  // when needed, instead of creating duplicate ones.
+  const groupedParams = filterOperationParameters(parameters, operation, {
+    includeGroupedParameters: true,
+    includeOptional: true
+  })
+    .filter(({ parameter }) => parameter.groupedBy)
+    // Extracting the grouped by property which will always be defined
+    // because of the filter above
+    .map(({ parameter: { groupedBy } }) => groupedBy!);
+
+  if (!groupedParams.length) {
+    return [];
+  }
+
+  const { name, description } = getLanguageMetadata(groupedParams[0].language);
+  const type = normalizeName(name, NameType.Interface);
+
+  // Add the model for import
+  importedModels.add(type);
+
+  return [
+    {
+      name,
+      type,
+      description
+    }
+  ];
+}
+
+/**
+ * This function takes care of Typescript generator specific Optional parameters grouping
+ * When the parameter grouping is not used in swagger, we by default group optional parameters
+ * to provide a simpler interface.
+ * When the parameter grouping extension is used, we should honor it instead of using this
+ * grouping strategy since the extension would provide metadata about specifics such as expected parameter name
+ */
 function getOptionsParameter(
   operation: OperationDetails,
   parameters: ParameterDetails[],
@@ -321,9 +369,32 @@ export function writeOperations(
       };
     });
 
+    const operationParameters = filterOperationParameters(
+      parameters,
+      operation,
+      {
+        includeOptional: true
+      }
+    );
+    const hasOptionalParams = operationParameters.some(p => !p.required);
+    const hasGroupedParams = operationParameters.some(
+      p => p.parameter.groupedBy
+    );
+
+    // Only use our custom optional grouping if the parameter grouping extension
+    // is not used in the swagger, if so, respect the regular grouping.
+    // When the operation doesn't have any defined optional parameters, use it as well
+    // to add coreHttp.OperationOptions.
+    const useCustomGrouping = !hasOptionalParams || !hasGroupedParams;
+
+    const optionsGroup = useCustomGrouping
+      ? [getOptionsParameter(operation, parameters, importedModels)]
+      : [];
+
     const allParams = [
       ...paramDeclarations,
-      getOptionsParameter(operation, parameters, importedModels)
+      ...getGroupedParameters(operation, parameters, importedModels),
+      ...optionsGroup
     ];
 
     const operationMethod = operationGroupClass.addMethod({
@@ -333,7 +404,7 @@ export function writeOperations(
       docs: [generateOperationJSDoc(allParams, operation.description)]
     });
 
-    const sendParams = paramDeclarations.map(p => p.name).join(",");
+    const sendParams = allParams.map(p => p.name).join(",");
 
     if (operation.mediaTypes.size > 1) {
       // This condition implies that the user can specify a contentType,
@@ -351,9 +422,9 @@ export function writeOperations(
     operationMethod.addStatements(
       `return this${
         isInline ? "" : ".client"
-      }.sendOperationRequest({${sendParams}${
-        !!sendParams ? "," : ""
-      } options}, ${operation.name}OperationSpec) as Promise<${responseName}>`
+      }.sendOperationRequest({${sendParams}}, ${
+        operation.name
+      }OperationSpec) as Promise<${responseName}>`
     );
   });
 }
@@ -407,9 +478,7 @@ function writeMultiMediaTypeOperationBody(
   statements += conditionals.join(" else ");
   statements += `return this${
     isInline ? "" : ".client"
-  }.sendOperationRequest({${sendParams}${
-    !!sendParams ? "," : ""
-  } options}, operationSpec) as Promise<${responseName}>`;
+  }.sendOperationRequest({${sendParams}}, operationSpec) as Promise<${responseName}>`;
   operationMethod.addStatements(statements);
 }
 

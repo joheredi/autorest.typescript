@@ -12,6 +12,7 @@ interface ParameterFilterOptions {
   includeUriParameters?: boolean;
   includeGlobalParameters?: boolean;
   includeConstantParameters?: boolean;
+  includeGroupedParameters?: boolean;
 }
 
 /**
@@ -28,9 +29,16 @@ export function filterOperationParameters(
     includeOptional,
     includeClientParams,
     includeGlobalParameters,
-    includeConstantParameters
+    includeConstantParameters,
+    includeGroupedParameters
   }: ParameterFilterOptions = {}
 ) {
+  // We may want to filter out any parameter that is grouped by here.
+  // This is so that we can place the group parameter instead.
+  // We already have logic to group optional parameters
+  const groupedFilter = (param: ParameterDetails) =>
+    !!(includeGroupedParameters || !param.parameter.groupedBy);
+
   const optionalFilter = (param: ParameterDetails) =>
     !!(includeOptional || param.required);
 
@@ -51,6 +59,7 @@ export function filterOperationParameters(
 
   return parameters.filter(
     param =>
+      groupedFilter(param) &&
       globalFilter(param) &&
       isInOperation(param) &&
       optionalFilter(param) &&
