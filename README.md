@@ -35,6 +35,8 @@ modelerfour:
   prenamer: true
   # this will flatten modelers marked with 'x-ms-client-flatten'
   flatten-models: true
+  # enables parameter grouping via x-ms-parameter-grouping
+  group-parameters: true
 
 pipeline:
   typescript: # <- name of plugin
