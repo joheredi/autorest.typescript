@@ -35,6 +35,7 @@ import {
   LrosaDsPutAsyncRelativeRetryNoStatusResponse,
   LrosaDsPutAsyncRelativeRetryNoStatusPayloadOptionalParams,
   LrosaDsPutAsyncRelativeRetryNoStatusPayloadResponse,
+  LrosaDsDelete204SucceededResponse,
   LrosaDsDeleteAsyncRelativeRetryNoStatusResponse,
   LrosaDsPost202NoLocationOptionalParams,
   LrosaDsPost202NoLocationResponse,
@@ -450,14 +451,14 @@ export class LrosaDs {
    */
   async delete204Succeeded(
     options?: coreHttp.OperationOptions
-  ): Promise<LROPoller<coreHttp.RestResponse>> {
+  ): Promise<LROPoller<LrosaDsDelete204SucceededResponse>> {
     const args = { options };
     const sendOperation = (
       args: coreHttp.OperationArguments,
       spec: coreHttp.OperationSpec
     ) =>
       this.client.sendOperationRequest(args, spec) as Promise<
-        coreHttp.RestResponse
+        LrosaDsDelete204SucceededResponse
       >;
     const initialOperationResult = await sendOperation(
       args,
@@ -838,7 +839,8 @@ const putNonRetry400OperationSpec: coreHttp.OperationSpec = {
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Product
+      bodyMapper: Mappers.Product,
+      headersMapper: Mappers.LrosaDsPutNonRetry400Headers
     }
   },
   requestBody: Parameters.product,
@@ -851,7 +853,8 @@ const putNonRetry201Creating400OperationSpec: coreHttp.OperationSpec = {
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Product
+      bodyMapper: Mappers.Product,
+      headersMapper: Mappers.LrosaDsPutNonRetry201Creating400Headers
     }
   },
   requestBody: Parameters.product,
@@ -864,7 +867,8 @@ const putNonRetry201Creating400InvalidJsonOperationSpec: coreHttp.OperationSpec 
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Product
+      bodyMapper: Mappers.Product,
+      headersMapper: Mappers.LrosaDsPutNonRetry201Creating400InvalidJsonHeaders
     }
   },
   requestBody: Parameters.product,
@@ -984,7 +988,8 @@ const putError201NoProvisioningStatePayloadOperationSpec: coreHttp.OperationSpec
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Product
+      bodyMapper: Mappers.Product,
+      headersMapper: Mappers.LrosaDsPutError201NoProvisioningStatePayloadHeaders
     }
   },
   requestBody: Parameters.product,
@@ -1030,7 +1035,9 @@ const delete204SucceededOperationSpec: coreHttp.OperationSpec = {
   path: "/lro/error/delete/204/nolocation",
   httpMethod: "DELETE",
   responses: {
-    204: {},
+    204: {
+      headersMapper: Mappers.LrosaDsDelete204SucceededHeaders
+    },
     default: {
       bodyMapper: Mappers.CloudError
     }
@@ -1089,9 +1096,9 @@ const put200InvalidJsonOperationSpec: coreHttp.OperationSpec = {
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Product
-    },
-    204: {}
+      bodyMapper: Mappers.Product,
+      headersMapper: Mappers.LrosaDsPut200InvalidJsonHeaders
+    }
   },
   requestBody: Parameters.product,
   urlParameters: [Parameters.$host],

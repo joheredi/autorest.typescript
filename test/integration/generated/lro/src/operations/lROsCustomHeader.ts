@@ -185,7 +185,8 @@ const put201CreatingSucceeded200OperationSpec: coreHttp.OperationSpec = {
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Product
+      bodyMapper: Mappers.Product,
+      headersMapper: Mappers.LROsCustomHeaderPut201CreatingSucceeded200Headers
     }
   },
   requestBody: Parameters.product,

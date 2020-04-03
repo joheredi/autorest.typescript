@@ -257,7 +257,8 @@ const put201CreatingSucceeded200OperationSpec: coreHttp.OperationSpec = {
   httpMethod: "PUT",
   responses: {
     200: {
-      bodyMapper: Mappers.Product
+      bodyMapper: Mappers.Product,
+      headersMapper: Mappers.LRORetrysPut201CreatingSucceeded200Headers
     }
   },
   requestBody: Parameters.product,
@@ -287,7 +288,9 @@ const deleteProvisioning202Accepted200SucceededOperationSpec: coreHttp.Operation
   httpMethod: "DELETE",
   responses: {
     200: {
-      bodyMapper: Mappers.Product
+      bodyMapper: Mappers.Product,
+      headersMapper:
+        Mappers.LRORetrysDeleteProvisioning202Accepted200SucceededHeaders
     }
   },
   urlParameters: [Parameters.$host],
