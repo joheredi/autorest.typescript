@@ -1,6 +1,7 @@
 import { LROStrategy, BaseResult, LROOperationState } from "./models";
 import { OperationSpec, OperationResponse } from "@azure/core-http";
 import { terminalStates } from "./constants";
+import { isEmpty } from "lodash";
 
 export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
   lastOperation: operation,
@@ -87,11 +88,11 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
         throw new Error("Unable to determine polling url");
       }
 
-      const pollingSpec: OperationSpec = {
+      const pollingSpec: OperationSpec = injectMissingResponses({
         ...lastOperation.spec,
         httpMethod: "GET",
         path: lastKnownPollingUrl
-      };
+      });
 
       // Execute the polling operation
       pollCount += 1;
@@ -105,7 +106,6 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
 
       // Update lastOperation result
       lastOperation.result = result;
-      lastOperation;
       return lastOperation;
     }
   };
@@ -116,30 +116,30 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
  * for the polling operations
  */
 function injectMissingResponses(operationSpec: OperationSpec): OperationSpec {
-  const possibleResponses = ["200", "201", "202", "204"];
-  let baseResponse: OperationResponse;
+  const acceptedResponses = ["200", "201", "202", "204"];
 
-  possibleResponses.forEach(pr => {
-    const response = operationSpec.responses[pr];
-    if (baseResponse) {
-      return;
+  // Use an already defined accepted response as base;
+  const baseResponse = acceptedResponses.reduce((acc, status) => {
+    if (!isEmpty(acc)) {
+      return acc;
     }
 
+    const response = operationSpec.responses[status];
     if (response) {
-      baseResponse = response;
-      return;
+      acc = response;
     }
-  });
 
-  const existingKeys = Object.keys(operationSpec.responses);
-  const responses = possibleResponses
-    .filter(r => !existingKeys.includes(r))
-    .reduce((acc, curr) => {
-      return { ...acc, [`${curr}`]: baseResponse };
-    }, {});
+    return acc;
+  }, {} as OperationResponse);
 
-  return {
-    ...operationSpec,
-    responses: { ...operationSpec.responses, ...responses }
-  };
+  const responses = acceptedResponses.reduce((responses, status) => {
+    let currentResponse = operationSpec.responses[status];
+    if (!currentResponse) {
+      currentResponse = { ...baseResponse };
+    }
+
+    return { ...responses, [`"${status}"`]: currentResponse };
+  }, {} as { [responseCode: string]: OperationResponse });
+
+  return { ...operationSpec, responses };
 }
