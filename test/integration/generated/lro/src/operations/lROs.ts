@@ -1046,7 +1046,8 @@ export class LROs {
       initialOperationArguments: args,
       initialOperationSpec: postDoubleHeadersFinalLocationGetOperationSpec,
       initialOperationResult,
-      sendOperation
+      sendOperation,
+      finalStateVia: "location"
     });
   }
 
@@ -1076,7 +1077,8 @@ export class LROs {
       initialOperationArguments: args,
       initialOperationSpec: postDoubleHeadersFinalAzureHeaderGetOperationSpec,
       initialOperationResult,
-      sendOperation
+      sendOperation,
+      finalStateVia: "azure-async-operation"
     });
   }
 

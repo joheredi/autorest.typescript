@@ -8,7 +8,7 @@
 
 import { Poller } from "@azure/core-lro";
 import { OperationSpec, OperationArguments, delay } from "@azure/core-http";
-import { BaseResult, LROOperationState } from "./models";
+import { BaseResult, LROOperationState, FinalStateVia } from "./models";
 import { makeOperation } from "./operation";
 
 export type SendOperationFn<TResult extends BaseResult> = (
@@ -37,6 +37,10 @@ export interface LROPollerOptions<TResult extends BaseResult> {
    * Function to execute an operation based on an operation spec and arguments
    */
   sendOperation: SendOperationFn<TResult>;
+  /**
+   * Optional information on where to poll, defaults to "Location"
+   */
+  finalStateVia?: FinalStateVia;
 }
 
 export class LROPoller<TResult extends BaseResult> extends Poller<
@@ -50,7 +54,8 @@ export class LROPoller<TResult extends BaseResult> extends Poller<
     initialOperationResult,
     initialOperationSpec,
     sendOperation,
-    intervalInMs = 2000
+    intervalInMs = 2000,
+    finalStateVia = "location"
   }: LROPollerOptions<TResult>) {
     const state: LROOperationState<TResult> = {
       // Initial operation will become the last operation
@@ -60,7 +65,8 @@ export class LROPoller<TResult extends BaseResult> extends Poller<
         result: initialOperationResult
       },
       sendOperation,
-      result: initialOperationResult
+      result: initialOperationResult,
+      finalStateVia
     };
 
     const operation = makeOperation(state);

@@ -13,6 +13,7 @@ import {
   LROStrategy
 } from "./models";
 import { createBodyPollingStrategy } from "./bodyPollingStrategy";
+import { createAzureAsyncOperationStrategy } from "./azureAsyncOperationStrategy";
 
 /**
  * Creates a copy of the operation from a given State
@@ -98,8 +99,8 @@ function getStrategyFromResult<TResult extends BaseResult>(
     lastOperation: { spec, result }
   } = state;
 
-  if (result.azureAsyncOperation) {
-    throw new Error("Azure-AsyncOperation strategy is not yet implemented");
+  if (result.azureAsyncOperation || result.operationLocation) {
+    return createAzureAsyncOperationStrategy(state);
   }
 
   if (result.location) {

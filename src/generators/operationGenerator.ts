@@ -596,11 +596,14 @@ function writeNoOverloadsOperationBody(
   const sendParams = parameterDeclarations.map(p => p.name).join(",");
   const operationSpecName = `${operation.name}OperationSpec`;
   if (operation.isLRO) {
+    const finalStateVia =
+      operation.lroOptions && operation.lroOptions["final-state-via"];
     writeLROOperationBody(
       sendParams,
       responseName,
       operationSpecName,
-      operationMethod
+      operationMethod,
+      finalStateVia
     );
   } else {
     operationMethod.addStatements(
@@ -617,8 +620,12 @@ function writeLROOperationBody(
   sendParams: string,
   responseName: string,
   operationSpecName: string,
-  methodDeclaration: MethodDeclaration
+  methodDeclaration: MethodDeclaration,
+  finalStateVia?: string
 ) {
+  const finalStateStr = finalStateVia
+    ? `finalStateVia: "${finalStateVia.toLowerCase()}"`
+    : "";
   const operationBody = `
   const args = {${sendParams}};
   const sendOperation = (args: coreHttp.OperationArguments, spec: coreHttp.OperationSpec) =>  this.client.sendOperationRequest(args, spec) as Promise<${responseName}>;
@@ -628,7 +635,8 @@ function writeLROOperationBody(
     initialOperationArguments: args,
     initialOperationSpec: ${operationSpecName},
     initialOperationResult,
-    sendOperation
+    sendOperation,
+    ${finalStateStr}
   });
   `;
 
@@ -711,7 +719,14 @@ function writeMultiMediaTypeOperationBody(
       isInline ? "" : ".client"
     }.sendOperationRequest(operationArguments, operationSpec) as Promise<${responseName}>`;
   } else {
-    `
+    const finalStateVia =
+      operation.lroOptions && operation.lroOptions["final-state-via"];
+
+    const finalStateStr = finalStateVia
+      ? `finalStateVia: "${finalStateVia.toLowerCase()}"`
+      : "";
+
+    statements += `
     const sendOperation = (args: coreHttp.OperationArguments, spec: coreHttp.OperationSpec) =>  this.client.sendOperationRequest(args, spec) as Promise<${responseName}>;
     const initialOperationResult = await sendOperation(operationArguments, operationSpec);
 
@@ -719,7 +734,8 @@ function writeMultiMediaTypeOperationBody(
       initialOperationArguments: operationArguments,
       initialOperationSpec: operationSpec
       initialOperationResult,
-      sendOperation
+      sendOperation,
+      ${finalStateStr}
     });
     `;
   }

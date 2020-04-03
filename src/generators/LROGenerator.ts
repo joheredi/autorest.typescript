@@ -12,7 +12,12 @@ export async function generateLROFiles(
   }
 
   const lroFiles = [
+    {
+      name: "azureAsyncOperationStrategy",
+      file: "./src/lro/azureAsyncOperationStrategy.ts"
+    },
     { name: "bodyPollingStrategy", file: "./src/lro/bodyPollingStrategy.ts" },
+    { name: "constants", file: "./src/lro/constants.ts" },
     { name: "lroPoller", file: "./src/lro/lroPoller.ts" },
     { name: "models", file: "./src/lro/models.ts" },
     { name: "operation", file: "./src/lro/operation.ts" }

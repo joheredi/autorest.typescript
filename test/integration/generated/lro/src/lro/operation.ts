@@ -13,6 +13,7 @@ import {
   LROStrategy
 } from "./models";
 import { createBodyPollingStrategy } from "./bodyPollingStrategy";
+import { createAzureAsyncOperationStrategy } from "./azureAsyncOperationStrategy";
 
 /**
  * Creates a copy of the operation from a given State
@@ -60,9 +61,14 @@ async function update<TResult extends BaseResult>(
     state.result = state.lastOperation.result;
     state.isCompleted = true;
   } else {
-    const result = await lroStrategy.poll();
-    state.lastOperation = result;
-    state.result = state.lastOperation.result;
+    try {
+      const result = await lroStrategy.poll();
+      state.lastOperation = result;
+      state.result = state.lastOperation.result;
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
   }
 
   // Return operation
@@ -98,8 +104,8 @@ function getStrategyFromResult<TResult extends BaseResult>(
     lastOperation: { spec, result }
   } = state;
 
-  if (result.azureAsyncOperation) {
-    throw new Error("Azure-AsyncOperation strategy is not yet implemented");
+  if (result.azureAsyncOperation || result.operationLocation) {
+    return createAzureAsyncOperationStrategy(state);
   }
 
   if (result.location) {
