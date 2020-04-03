@@ -1,5 +1,5 @@
 import { LROStrategy, BaseResult, LROOperationState } from "./models";
-import { OperationSpec } from "@azure/core-http";
+import { OperationSpec, OperationResponse } from "@azure/core-http";
 import { terminalStates } from "./constants";
 
 export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
@@ -108,5 +108,38 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
       lastOperation;
       return lastOperation;
     }
+  };
+}
+
+/**
+ * Temporary workaround for issue where SWAGGER doesn't define all possible response codes
+ * for the polling operations
+ */
+function injectMissingResponses(operationSpec: OperationSpec): OperationSpec {
+  const possibleResponses = ["200", "201", "202", "204"];
+  let baseResponse: OperationResponse;
+
+  possibleResponses.forEach(pr => {
+    const response = operationSpec.responses[pr];
+    if (baseResponse) {
+      return;
+    }
+
+    if (response) {
+      baseResponse = response;
+      return;
+    }
+  });
+
+  const existingKeys = Object.keys(operationSpec.responses);
+  const responses = possibleResponses
+    .filter(r => !existingKeys.includes(r))
+    .reduce((acc, curr) => {
+      return { ...acc, [`${curr}`]: baseResponse };
+    }, {});
+
+  return {
+    ...operationSpec,
+    responses: { ...operationSpec.responses, ...responses }
   };
 }
