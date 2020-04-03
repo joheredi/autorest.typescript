@@ -9,7 +9,7 @@ describe("AzureAsyncOperationStrategy", () => {
   beforeEach(() => {
     originalOperation = {
       args: {},
-      spec: { path: "originalPath" } as any,
+      spec: { path: "originalPath", responses: {} } as any,
       result: { azureAsyncOperation: "someUrl" }
     };
   });

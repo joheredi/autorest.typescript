@@ -62,6 +62,7 @@ export interface LROOperationState<TResult extends BaseResult>
     spec: OperationSpec
   ) => Promise<TResult>;
   finalStateVia?: FinalStateVia;
+  pollingStrategy?: LROStrategy<TResult>;
 }
 
 export interface LROStrategy<TResult extends BaseResult> {

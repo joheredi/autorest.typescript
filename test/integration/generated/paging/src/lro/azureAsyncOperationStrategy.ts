@@ -7,8 +7,9 @@
  */
 
 import { LROStrategy, BaseResult, LROOperationState } from "./models";
-import { OperationSpec } from "@azure/core-http";
+import { OperationSpec, OperationResponse } from "@azure/core-http";
 import { terminalStates } from "./constants";
+import { isEmpty } from "lodash";
 
 export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
   lastOperation: operation,
@@ -95,11 +96,11 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
         throw new Error("Unable to determine polling url");
       }
 
-      const pollingSpec: OperationSpec = {
+      const pollingSpec: OperationSpec = injectMissingResponses({
         ...lastOperation.spec,
         httpMethod: "GET",
         path: lastKnownPollingUrl
-      };
+      });
 
       // Execute the polling operation
       pollCount += 1;
@@ -113,8 +114,40 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
 
       // Update lastOperation result
       lastOperation.result = result;
-      lastOperation;
       return lastOperation;
     }
   };
+}
+
+/**
+ * Temporary workaround for issue where SWAGGER doesn't define all possible response codes
+ * for the polling operations
+ */
+function injectMissingResponses(operationSpec: OperationSpec): OperationSpec {
+  const acceptedResponses = ["200", "201", "202", "204"];
+
+  // Use an already defined accepted response as base;
+  const baseResponse = acceptedResponses.reduce((acc, status) => {
+    if (!isEmpty(acc)) {
+      return acc;
+    }
+
+    const response = operationSpec.responses[status];
+    if (response) {
+      acc = response;
+    }
+
+    return acc;
+  }, {} as OperationResponse);
+
+  const responses = acceptedResponses.reduce((responses, status) => {
+    let currentResponse = operationSpec.responses[status];
+    if (!currentResponse) {
+      currentResponse = { ...baseResponse };
+    }
+
+    return { ...responses, [`"${status}"`]: currentResponse };
+  }, {} as { [responseCode: string]: OperationResponse });
+
+  return { ...operationSpec, responses };
 }
