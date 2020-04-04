@@ -13,7 +13,12 @@ import {
   OperationGroup,
   ParameterLocation,
   ConstantSchema,
-  CodeModel
+  CodeModel,
+  HttpHeader,
+  StringSchema,
+  NumberSchema,
+  ObjectSchema,
+  Property
 } from "@azure-tools/codemodel";
 import { normalizeName, NameType } from "../utils/nameUtils";
 import {
@@ -31,9 +36,10 @@ import { getTypeForSchema, isSchemaResponse } from "../utils/schemaHelpers";
 import { getMapperTypeFromSchema, transformMapper } from "./mapperTransforms";
 import { ParameterDetails } from "../models/parameterDetails";
 import { PropertyKind, TypeDetails } from "../models/modelDetails";
-import { KnownMediaType } from "@azure-tools/codegen";
+import { KnownMediaType, isEqual } from "@azure-tools/codegen";
 import { headersToSchema } from "../utils/headersToSchema";
 import { extractPaginationDetails } from "../utils/extractPaginationDetails";
+import { uniqWith } from "lodash";
 
 export function transformOperationSpec(
   operationDetails: OperationDetails,
@@ -187,20 +193,103 @@ export function transformOperationRequest(
   };
 }
 
+function getLROBodySchema(responseSchema: SchemaResponse) {
+  if (responseSchema.schema.type === SchemaType.Object) {
+    const schema = responseSchema.schema as ObjectSchema;
+    const properties = schema.properties || [];
+
+    if (
+      !properties.some(p =>
+        ["properties.provisioningstate", "provisioningstate"].includes(
+          p.serializedName.toLowerCase()
+        )
+      )
+    ) {
+      const provisioningState = new Property(
+        "provisioningState",
+        "",
+        new StringSchema("string", ""),
+        { serializedName: "properties.provisioningState" }
+      );
+
+      properties.push(provisioningState);
+    }
+
+    if (!properties.some(p => p.serializedName.toLowerCase() === "status")) {
+      const status = new Property(
+        "status",
+        "",
+        new StringSchema("string", ""),
+        {
+          serializedName: "status"
+        }
+      );
+
+      properties.push(status);
+    }
+
+    schema.properties = properties;
+  }
+
+  return responseSchema;
+}
+
+function getLROHeaders(headers: HttpHeader[]): HttpHeader[] {
+  const azureAsyncOperationHeader = new HttpHeader(
+    "Azure-AsyncOperation",
+    new StringSchema("string", "")
+  );
+
+  const operationLocation = new HttpHeader(
+    "Operation-Location",
+    new StringSchema("string", "")
+  );
+
+  const location = new HttpHeader("Location", new StringSchema("string", ""));
+
+  const retryAfter = new HttpHeader(
+    "Retry-After",
+    new NumberSchema("number", "", SchemaType.Integer, 32)
+  );
+
+  const headersToAdd = [
+    ...headers,
+    azureAsyncOperationHeader,
+    operationLocation,
+    location,
+    retryAfter
+  ];
+
+  return uniqWith(
+    headersToAdd,
+    (a, b) => a.header.toLowerCase() === b.header.toLowerCase()
+  );
+}
+
 /**
  * Build OperationResponseDetails by extracting body and header information
  * from the response
  */
 export function transformOperationResponse(
   response: SchemaResponse | Response,
-  operationFullName: string
+  operationFullName: string,
+  isLRO: boolean
 ): OperationResponseDetails {
   const httpInfo = response.protocol.http;
-  const isError =
-    !!response.extensions && !!response.extensions["x-ms-error-response"];
-
   if (!httpInfo) {
     throw new Error("Operation does not specify HTTP response details.");
+  }
+
+  const isError =
+    Boolean(
+      response.extensions && !!response.extensions["x-ms-error-response"]
+    ) || httpInfo.statusCodes.indexOf("default") > -1;
+
+  if (isLRO && !isError) {
+    httpInfo.headers = getLROHeaders(httpInfo.headers || []);
+    if (isSchemaResponse(response)) {
+      response = getLROBodySchema(response);
+    }
   }
 
   // Transform Headers to am ObjectSchema to represent headers as an object
@@ -223,14 +312,12 @@ export function transformOperationResponse(
     headersType: headersSchema ? getTypeForSchema(headersSchema) : undefined
   };
 
-  const isDefault = httpInfo.statusCodes.indexOf("default") > -1;
-
   return {
     statusCodes: httpInfo.statusCodes,
     mediaType: httpInfo.knownMediaType,
     mappers,
     types,
-    isError: isDefault || isError
+    isError
   };
 }
 
@@ -274,7 +361,7 @@ export async function transformOperation(
 
   const requests = codeModelRequests.map(transformOperationRequest);
   let responses = responsesAndErrors.map(response =>
-    transformOperationResponse(response, operationFullName)
+    transformOperationResponse(response, operationFullName, isLRO)
   );
   const hasMultipleResponses = responses.filter(r => !r.isError).length > 1;
 
@@ -282,11 +369,13 @@ export async function transformOperation(
   // this is because LRO operations swagger defines initial and final operation
   // responses in the same operation.
   if (isLRO && hasMultipleResponses) {
-    responses = responses.filter(
+    const firstSuccess = responses.find(
       response =>
         response.statusCodes.includes("200") ||
         response.statusCodes.includes("204")
     );
+
+    responses = firstSuccess ? [firstSuccess] : responses;
   }
 
   const mediaTypes = await getOperationMediaTypes(requests, responses);

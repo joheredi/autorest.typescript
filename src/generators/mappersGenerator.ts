@@ -17,7 +17,7 @@ import {
   PolymorphicDiscriminator
 } from "@azure/core-http";
 import { ModelProperties } from "../transforms/mapperTransforms";
-import { keys, isEmpty, isString, isNil } from "lodash";
+import { keys, isEmpty, isString, isNil, uniqWith } from "lodash";
 import { getStringForValue } from "../utils/valueHelpers";
 import { PolymorphicObjectDetails, ObjectKind } from "../models/modelDetails";
 import { logger } from "../utils/logger";
@@ -49,29 +49,33 @@ export function generateMappers(
  * This function writes to the mappers.ts file all the mappers to be used by @azure/core-http for serialization
  */
 function writeMappers(sourceFile: SourceFile, { mappers }: ClientDetails) {
-  mappers.forEach(mapper => {
-    if (!(mapper as CompositeMapper).type.className) {
-      logger.warning(`Expected a mapper with a className, skipping generation`);
-      logger.verbose(JSON.stringify(mapper));
-      return;
-    }
+  uniqWith(mappers, (a, b) => a.serializedName === b.serializedName).forEach(
+    mapper => {
+      if (!(mapper as CompositeMapper).type.className) {
+        logger.warning(
+          `Expected a mapper with a className, skipping generation`
+        );
+        logger.verbose(JSON.stringify(mapper));
+        return;
+      }
 
-    sourceFile.addVariableStatement({
-      isExported: true,
-      declarations: [
-        {
-          name: normalizeName(
-            (mapper as CompositeMapper).type.className || "MISSING_MAPPER",
-            NameType.Class
-          ),
-          type: "coreHttp.CompositeMapper",
-          initializer: writer => writeMapper(writer, mapper)
-        }
-      ],
-      declarationKind: VariableDeclarationKind.Const,
-      leadingTrivia: writer => writer.blankLine()
-    });
-  });
+      sourceFile.addVariableStatement({
+        isExported: true,
+        declarations: [
+          {
+            name: normalizeName(
+              (mapper as CompositeMapper).type.className || "MISSING_MAPPER",
+              NameType.Class
+            ),
+            type: "coreHttp.CompositeMapper",
+            initializer: writer => writeMapper(writer, mapper)
+          }
+        ],
+        declarationKind: VariableDeclarationKind.Const,
+        leadingTrivia: writer => writer.blankLine()
+      });
+    }
+  );
 }
 
 function getAllPolymorphicObjects({
