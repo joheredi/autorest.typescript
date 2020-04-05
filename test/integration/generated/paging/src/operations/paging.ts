@@ -677,7 +677,8 @@ const getMultiplePagesLROOperationSpec: coreHttp.OperationSpec = {
   httpMethod: "POST",
   responses: {
     202: {
-      bodyMapper: Mappers.ProductResult
+      bodyMapper: Mappers.ProductResult,
+      headersMapper: Mappers.PagingGetMultiplePagesLROHeaders
     },
     default: {}
   },
@@ -855,7 +856,8 @@ const getMultiplePagesLRONextOperationSpec: coreHttp.OperationSpec = {
   httpMethod: "POST",
   responses: {
     202: {
-      bodyMapper: Mappers.ProductResult
+      bodyMapper: Mappers.ProductResult,
+      headersMapper: Mappers.PagingGetMultiplePagesLRONextHeaders
     },
     default: {}
   },

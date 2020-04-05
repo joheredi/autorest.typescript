@@ -133,8 +133,10 @@ function getStrategyFromResult<TResult extends BaseResult>(
 }
 
 /**
- * Temporary workaround for issue where SWAGGER doesn't define all possible response codes
- * for the polling operations
+ * SWAGGER doesn't require to define all possible response codes
+ * for the polling operations, since we need to send operation specs
+ * to coreHttp we'll inject possible response codes. The stub responses
+ * will be a clone of the first success response defined
  */
 function injectMissingResponses(operationSpec: OperationSpec): OperationSpec {
   const acceptedResponses = ["200", "201", "202", "204"];

@@ -65,7 +65,12 @@ export const ProductResult: coreHttp.CompositeMapper = {
         },
         serializedName: "values"
       },
-      nextLink: { type: { name: "String" }, serializedName: "nextLink" }
+      nextLink: { type: { name: "String" }, serializedName: "nextLink" },
+      provisioningState: {
+        type: { name: "String" },
+        serializedName: "properties.provisioningState"
+      },
+      status: { type: { name: "String" }, serializedName: "status" }
     }
   }
 };
@@ -98,6 +103,46 @@ export const OperationResult: coreHttp.CompositeMapper = {
     className: "OperationResult",
     modelProperties: {
       status: { type: { name: "String" }, serializedName: "status" }
+    }
+  }
+};
+
+export const PagingGetMultiplePagesLROHeaders: coreHttp.CompositeMapper = {
+  serializedName: "paging_getMultiplePagesLROHeaders",
+  type: {
+    name: "Composite",
+    className: "PagingGetMultiplePagesLROHeaders",
+    modelProperties: {
+      azureAsyncOperation: {
+        type: { name: "String" },
+        serializedName: "azure-asyncoperation"
+      },
+      operationLocation: {
+        type: { name: "String" },
+        serializedName: "operation-location"
+      },
+      location: { type: { name: "String" }, serializedName: "location" },
+      retryAfter: { type: { name: "Number" }, serializedName: "retry-after" }
+    }
+  }
+};
+
+export const PagingGetMultiplePagesLRONextHeaders: coreHttp.CompositeMapper = {
+  serializedName: "paging_getMultiplePagesLRONextHeaders",
+  type: {
+    name: "Composite",
+    className: "PagingGetMultiplePagesLRONextHeaders",
+    modelProperties: {
+      azureAsyncOperation: {
+        type: { name: "String" },
+        serializedName: "azure-asyncoperation"
+      },
+      operationLocation: {
+        type: { name: "String" },
+        serializedName: "operation-location"
+      },
+      location: { type: { name: "String" }, serializedName: "location" },
+      retryAfter: { type: { name: "Number" }, serializedName: "retry-after" }
     }
   }
 };

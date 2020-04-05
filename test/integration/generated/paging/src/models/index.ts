@@ -25,6 +25,8 @@ export interface ProductProperties {
 export interface ProductResult {
   values?: Product[];
   nextLink?: string;
+  provisioningState?: string;
+  status?: string;
 }
 
 export interface OdataProductResult {
@@ -37,6 +39,26 @@ export interface OperationResult {
    * The status of the request
    */
   status?: OperationResultStatus;
+}
+
+/**
+ * Defines headers for paging_getMultiplePagesLRO operation.
+ */
+export interface PagingGetMultiplePagesLROHeaders {
+  azureAsyncOperation?: string;
+  operationLocation?: string;
+  location?: string;
+  retryAfter?: number;
+}
+
+/**
+ * Defines headers for paging_getMultiplePagesLRONext operation.
+ */
+export interface PagingGetMultiplePagesLRONextHeaders {
+  azureAsyncOperation?: string;
+  operationLocation?: string;
+  location?: string;
+  retryAfter?: number;
 }
 
 /**
@@ -444,22 +466,27 @@ export interface PagingGetMultiplePagesLROOptionalParams
 /**
  * Contains response data for the getMultiplePagesLRO operation.
  */
-export type PagingGetMultiplePagesLROResponse = ProductResult & {
-  /**
-   * The underlying HTTP response.
-   */
-  _response: coreHttp.HttpResponse & {
+export type PagingGetMultiplePagesLROResponse = PagingGetMultiplePagesLROHeaders &
+  ProductResult & {
     /**
-     * The response body as text (string format)
+     * The underlying HTTP response.
      */
-    bodyAsText: string;
+    _response: coreHttp.HttpResponse & {
+      /**
+       * The response body as text (string format)
+       */
+      bodyAsText: string;
 
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: ProductResult;
+      /**
+       * The response body as parsed JSON or XML
+       */
+      parsedBody: ProductResult;
+      /**
+       * The parsed HTTP response headers.
+       */
+      parsedHeaders: PagingGetMultiplePagesLROHeaders;
+    };
   };
-};
 
 /**
  * Contains response data for the nextFragment operation.
@@ -756,22 +783,27 @@ export interface PagingGetMultiplePagesLRONextOptionalParams
 /**
  * Contains response data for the getMultiplePagesLRONext operation.
  */
-export type PagingGetMultiplePagesLRONextResponse = ProductResult & {
-  /**
-   * The underlying HTTP response.
-   */
-  _response: coreHttp.HttpResponse & {
+export type PagingGetMultiplePagesLRONextResponse = PagingGetMultiplePagesLRONextHeaders &
+  ProductResult & {
     /**
-     * The response body as text (string format)
+     * The underlying HTTP response.
      */
-    bodyAsText: string;
+    _response: coreHttp.HttpResponse & {
+      /**
+       * The response body as text (string format)
+       */
+      bodyAsText: string;
 
-    /**
-     * The response body as parsed JSON or XML
-     */
-    parsedBody: ProductResult;
+      /**
+       * The response body as parsed JSON or XML
+       */
+      parsedBody: ProductResult;
+      /**
+       * The parsed HTTP response headers.
+       */
+      parsedHeaders: PagingGetMultiplePagesLRONextHeaders;
+    };
   };
-};
 
 /**
  * Optional parameters.
