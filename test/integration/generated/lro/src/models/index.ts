@@ -34,6 +34,7 @@ export interface Resource {
 export type Product = Resource & {
   provisioningState?: string;
   readonly provisioningStateValues?: ProductPropertiesProvisioningStateValues;
+  status?: string;
 };
 
 export interface CloudError {
@@ -44,6 +45,8 @@ export interface CloudError {
 export interface Sku {
   name?: string;
   id?: string;
+  provisioningState?: string;
+  status?: string;
 }
 
 export interface SubResource {
@@ -56,6 +59,7 @@ export interface SubResource {
 export type SubProduct = SubResource & {
   provisioningState?: string;
   readonly provisioningStateValues?: SubProductPropertiesProvisioningStateValues;
+  status?: string;
 };
 
 export interface OperationResult {

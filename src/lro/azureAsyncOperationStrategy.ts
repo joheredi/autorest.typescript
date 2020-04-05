@@ -1,13 +1,16 @@
-import { LROStrategy, BaseResult, LROOperationState } from "./models";
-import { OperationSpec, OperationResponse } from "@azure/core-http";
+import {
+  LROStrategy,
+  BaseResult,
+  LROOperationState,
+  LastOperation
+} from "./models";
+import { OperationSpec } from "@azure/core-http";
 import { terminalStates } from "./constants";
-import { isEmpty } from "lodash";
 
-export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
-  lastOperation: operation,
-  sendOperation,
-  finalStateVia
-}: LROOperationState<TResult>): LROStrategy<TResult> {
+export function createAzureAsyncOperationStrategy<TResult extends BaseResult>(
+  state: LROOperationState<TResult>
+): LROStrategy<TResult> {
+  const { lastOperation: operation, sendOperation, finalStateVia } = state;
   const originalOperation = operation;
   let pollCount = 0;
   let lastOperation = { ...operation };
@@ -27,43 +30,20 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
       return terminalStates.includes(status);
     },
     sendFinalRequest: async () => {
-      if (
-        lastOperation.result.status &&
-        lastOperation.result.status.toLowerCase() !== "succeeded"
-      ) {
+      if (!shouldPerformFinalGet(lastOperation, originalOperation)) {
         return lastOperation;
       }
 
-      const originalMethod = originalOperation.spec.httpMethod;
-      const finalGetSpec: OperationSpec = {
-        ...originalOperation.spec,
-        httpMethod: "GET"
-      };
-
-      const sendFinalGet = async (path?: string) => {
-        // Send final GET request to the Original URL
-        const finalResult = await sendOperation(originalOperation.args, {
-          ...finalGetSpec,
-          ...(path && { path })
-        });
-        lastOperation.result = finalResult;
-
+      if (originalOperation.spec.httpMethod === "PUT") {
+        lastOperation = await sendFinalGet(state, originalOperation);
         return lastOperation;
-      };
-
-      // DELETE operations do not require a final GET, just return the lastOperation
-      if (originalMethod === "DELETE") {
-        return lastOperation;
-      }
-
-      if (originalMethod === "PUT") {
-        return sendFinalGet();
       }
 
       if (originalOperation.result.location) {
         switch (finalStateVia) {
           case "original-uri":
-            return sendFinalGet();
+            lastOperation = await sendFinalGet(state, originalOperation);
+            return lastOperation;
           case "azure-async-operation":
             return lastOperation;
           case "location":
@@ -76,7 +56,12 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
               throw new Error("Couldn't determine final GET URL from location");
             }
 
-            return sendFinalGet(location);
+            lastOperation = await sendFinalGet(
+              state,
+              originalOperation,
+              location
+            );
+            return lastOperation;
         }
       }
 
@@ -88,15 +73,17 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
         throw new Error("Unable to determine polling url");
       }
 
-      const pollingSpec: OperationSpec = injectMissingResponses({
+      const pollingArgs = lastOperation.args;
+      const pollingSpec: OperationSpec = {
         ...lastOperation.spec,
         httpMethod: "GET",
         path: lastKnownPollingUrl
-      });
+      };
 
       // Execute the polling operation
       pollCount += 1;
-      const result = await sendOperation(lastOperation.args, pollingSpec);
+
+      const result = await sendOperation(pollingArgs, pollingSpec);
 
       // Update latest polling url
       lastKnownPollingUrl =
@@ -105,41 +92,63 @@ export function createAzureAsyncOperationStrategy<TResult extends BaseResult>({
         lastKnownPollingUrl;
 
       // Update lastOperation result
-      lastOperation.result = result;
+      lastOperation = {
+        args: pollingArgs,
+        spec: pollingSpec,
+        result
+      };
+
       return lastOperation;
     }
   };
 }
 
-/**
- * Temporary workaround for issue where SWAGGER doesn't define all possible response codes
- * for the polling operations
- */
-function injectMissingResponses(operationSpec: OperationSpec): OperationSpec {
-  const acceptedResponses = ["200", "201", "202", "204"];
+function shouldPerformFinalGet<TResult extends BaseResult>(
+  lastOperation: LastOperation<TResult>,
+  originalOperation: LastOperation<TResult>
+) {
+  if (
+    lastOperation.result.status &&
+    lastOperation.result.status.toLowerCase() !== "succeeded"
+  ) {
+    return false;
+  }
 
-  // Use an already defined accepted response as base;
-  const baseResponse = acceptedResponses.reduce((acc, status) => {
-    if (!isEmpty(acc)) {
-      return acc;
-    }
+  if (originalOperation.spec.httpMethod === "DELETE") {
+    return false;
+  }
 
-    const response = operationSpec.responses[status];
-    if (response) {
-      acc = response;
-    }
+  if (
+    originalOperation.spec.httpMethod !== "PUT" &&
+    !originalOperation.result.location
+  ) {
+    return false;
+  }
 
-    return acc;
-  }, {} as OperationResponse);
+  return true;
+}
 
-  const responses = acceptedResponses.reduce((responses, status) => {
-    let currentResponse = operationSpec.responses[status];
-    if (!currentResponse) {
-      currentResponse = { ...baseResponse };
-    }
+async function sendFinalGet<TResult extends BaseResult>(
+  state: LROOperationState<TResult>,
+  originalOperation: LastOperation<TResult>,
+  path?: string
+): Promise<LastOperation<TResult>> {
+  const finalGetSpec: OperationSpec = {
+    ...originalOperation.spec,
+    httpMethod: "GET"
+  };
 
-    return { ...responses, [`"${status}"`]: currentResponse };
-  }, {} as { [responseCode: string]: OperationResponse });
+  // Send final GET request to the Original URL
+  const spec = {
+    ...finalGetSpec,
+    ...(path && { path })
+  };
 
-  return { ...operationSpec, responses };
+  const finalResult = await state.sendOperation(originalOperation.args, spec);
+
+  return {
+    args: originalOperation.args,
+    spec,
+    result: finalResult
+  };
 }

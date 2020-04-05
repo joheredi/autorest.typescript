@@ -1,14 +1,20 @@
 import { Poller } from "@azure/core-lro";
-import { OperationSpec, OperationArguments, delay } from "@azure/core-http";
+import {
+  OperationSpec,
+  OperationArguments,
+  delay,
+  OperationResponse,
+} from "@azure/core-http";
 import {
   BaseResult,
   LROOperationState,
   FinalStateVia,
-  LROStrategy
+  LROStrategy,
 } from "./models";
 import { makeOperation } from "./operation";
 import { createAzureAsyncOperationStrategy } from "./azureAsyncOperationStrategy";
 import { createBodyPollingStrategy } from "./bodyPollingStrategy";
+import { isEmpty } from "lodash";
 
 export type SendOperationFn<TResult extends BaseResult> = (
   args: OperationArguments,
@@ -54,18 +60,18 @@ export class LROPoller<TResult extends BaseResult> extends Poller<
     initialOperationSpec,
     sendOperation,
     intervalInMs = 2000,
-    finalStateVia = "location"
+    finalStateVia = "location",
   }: LROPollerOptions<TResult>) {
     const state: LROOperationState<TResult> = {
       // Initial operation will become the last operation
       lastOperation: {
         args: initialOperationArguments,
-        spec: initialOperationSpec,
-        result: initialOperationResult
+        spec: injectMissingResponses(initialOperationSpec),
+        result: initialOperationResult,
       },
       sendOperation,
-      result: initialOperationResult,
-      finalStateVia
+      finalStateVia,
+      isStarted: true,
     };
 
     const pollingStrategy: LROStrategy<TResult> = getStrategyFromResult(state);
@@ -100,7 +106,7 @@ function getStrategyFromResult<TResult extends BaseResult>(
   state: LROOperationState<TResult>
 ): LROStrategy<TResult> {
   const {
-    lastOperation: { spec, result }
+    lastOperation: { spec, result },
   } = state;
 
   if (result.azureAsyncOperation || result.operationLocation) {
@@ -116,4 +122,39 @@ function getStrategyFromResult<TResult extends BaseResult>(
   }
 
   throw new Error("Unknown Long Running Operation strategy");
+}
+
+/**
+ * SWAGGER doesn't require to define all possible response codes
+ * for the polling operations, since we need to send operation specs
+ * to coreHttp we'll inject possible response codes. The stub responses
+ * will be a clone of the first success response defined
+ */
+function injectMissingResponses(operationSpec: OperationSpec): OperationSpec {
+  const acceptedResponses = ["200", "201", "202", "204"];
+
+  // Use an already defined accepted response as base;
+  const baseResponse = acceptedResponses.reduce((acc, status) => {
+    if (!isEmpty(acc)) {
+      return acc;
+    }
+
+    const response = operationSpec.responses[status];
+    if (response) {
+      acc = response;
+    }
+
+    return acc;
+  }, {} as OperationResponse);
+
+  const responses = acceptedResponses.reduce((responses, status) => {
+    let currentResponse = operationSpec.responses[status];
+    if (!currentResponse) {
+      currentResponse = { ...baseResponse };
+    }
+
+    return { ...responses, [`"${status}"`]: currentResponse };
+  }, {} as { [responseCode: string]: OperationResponse });
+
+  return { ...operationSpec, responses };
 }

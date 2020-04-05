@@ -50,16 +50,18 @@ async function update<TResult extends BaseResult>(
     throw new Error("No pollingStrategy is defined");
   }
 
+  if (state.result) {
+    return makeOperation({ ...state, isCompleted: true });
+  }
+
   // Check if last result is terminal
   if (lroStrategy.isTerminal()) {
-    const result = await lroStrategy.sendFinalRequest();
-    state.lastOperation = result;
-    state.result = state.lastOperation.result;
-    state.isCompleted = true;
+    const finalOperation = await lroStrategy.sendFinalRequest();
+    state.lastOperation = finalOperation;
+    state.result = finalOperation.result;
   } else {
-    const result = await lroStrategy.poll();
-    state.lastOperation = result;
-    state.result = state.lastOperation.result;
+    const lastOperation = await lroStrategy.poll();
+    state.lastOperation = lastOperation;
   }
 
   // Return operation

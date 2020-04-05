@@ -48,7 +48,8 @@ export const Product: coreHttp.CompositeMapper = {
         type: { name: "String" },
         serializedName: "properties.provisioningStateValues",
         readOnly: true
-      }
+      },
+      status: { type: { name: "String" }, serializedName: "status" }
     }
   }
 };
@@ -72,7 +73,12 @@ export const Sku: coreHttp.CompositeMapper = {
     className: "Sku",
     modelProperties: {
       name: { type: { name: "String" }, serializedName: "name" },
-      id: { type: { name: "String" }, serializedName: "id" }
+      id: { type: { name: "String" }, serializedName: "id" },
+      provisioningState: {
+        type: { name: "String" },
+        serializedName: "properties.provisioningState"
+      },
+      status: { type: { name: "String" }, serializedName: "status" }
     }
   }
 };
@@ -103,7 +109,8 @@ export const SubProduct: coreHttp.CompositeMapper = {
         type: { name: "String" },
         serializedName: "properties.provisioningStateValues",
         readOnly: true
-      }
+      },
+      status: { type: { name: "String" }, serializedName: "status" }
     }
   }
 };
