@@ -8,6 +8,7 @@
 
 import * as coreHttp from "@azure/core-http";
 import * as Models from "./models";
+import { isFunction } from "lodash";
 
 const packageName = "lro";
 const packageVersion = "1.0.0-preview1";
@@ -30,6 +31,11 @@ export class LROClientContext extends coreHttp.ServiceClient {
       options.userAgent = `${packageName}/${packageVersion} ${defaultUserAgent}`;
     }
 
+    options = {
+      ...options,
+      requestPolicyFactories: (defaults) => [...defaults, lroPolicy()],
+    };
+
     super(undefined, options);
 
     this.requestContentType = "application/json; charset=utf-8";
@@ -39,4 +45,51 @@ export class LROClientContext extends coreHttp.ServiceClient {
     // Assigning values to Constant parameters
     this.$host = options.$host || "http://localhost:3000";
   }
+}
+function lroPolicy() {
+  return {
+    create: (
+      nextPolicy: coreHttp.RequestPolicy,
+      options: coreHttp.RequestPolicyOptions
+    ) => {
+      return new LROPolicy(nextPolicy, options);
+    },
+  };
+}
+
+class LROPolicy extends coreHttp.BaseRequestPolicy {
+  constructor(
+    nextPolicy: coreHttp.RequestPolicy,
+    options: coreHttp.RequestPolicyOptions
+  ) {
+    super(nextPolicy, options);
+  }
+
+  public async sendRequest(
+    webResource: coreHttp.WebResource
+  ): Promise<coreHttp.HttpOperationResponse> {
+    const shouldDeserialize = webResource.onDownloadProgress as
+      | boolean
+      | ((response: coreHttp.HttpOperationResponse) => boolean)
+      | undefined;
+
+    webResource.shouldDeserialize = shouldDeserialize;
+    console.log("About to send a request!");
+    console.log(`Should deserialize: ${!!webResource.shouldDeserialize}`);
+    let result = await this._nextPolicy.sendRequest(webResource);
+    const lroData = getLROData(result);
+    result.parsedBody = { ...result.parsedBody, lroData };
+    return result;
+  }
+}
+
+function getLROData(result: coreHttp.HttpOperationResponse) {
+  const { status, properties } = JSON.parse(result.bodyAsText || "{}");
+  return {
+    azureAsyncOperation: result.headers.get("azure-asyncoperation"),
+    operationLocation: result.headers.get("operation-location"),
+    location: result.headers.get("location"),
+    status,
+    provisioningState: properties.provisioningState,
+  };
 }

@@ -9,7 +9,7 @@
 import {
   OperationArguments,
   OperationSpec,
-  RestResponse
+  RestResponse,
 } from "@azure/core-http";
 import { PollOperationState, PollOperation } from "@azure/core-lro";
 
@@ -17,6 +17,14 @@ export type FinalStateVia =
   | "azure-async-operation"
   | "location"
   | "original-uri";
+
+export interface LROData {
+  azureAsyncOperation?: string;
+  operationLocation?: string;
+  location?: string;
+  status?: string;
+  provisioningState?: string;
+}
 
 export interface BaseResult extends RestResponse {
   /**
@@ -46,6 +54,8 @@ export interface BaseResult extends RestResponse {
   properties?: {
     provisioningState?: string;
   };
+
+  lroData?: LROData;
 }
 
 export interface LastOperation<TResult extends BaseResult> {

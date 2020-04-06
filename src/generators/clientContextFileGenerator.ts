@@ -7,7 +7,7 @@ import {
   ConstructorDeclaration,
   CodeBlockWriter,
   ClassDeclaration,
-  SourceFile
+  SourceFile,
 } from "ts-morph";
 import { normalizeName, NameType } from "../utils/nameUtils";
 import { ClientDetails } from "../models/clientDetails";
@@ -23,7 +23,7 @@ export function generateClientContext(
   project: Project
 ) {
   const clientParams = clientDetails.parameters.filter(
-    param => param.implementationLocation === ImplementationLocation.Client
+    (param) => param.implementationLocation === ImplementationLocation.Client
   );
   const clientContextClassName = `${clientDetails.className}Context`;
   const clientContextFileName = normalizeName(
@@ -35,7 +35,7 @@ export function generateClientContext(
     `${clientDetails.srcPath}/${clientContextFileName}.ts`,
     undefined,
     {
-      overwrite: true
+      overwrite: true,
     }
   );
 
@@ -48,13 +48,73 @@ export function generateClientContext(
   const classConstructor = buildConstructor(contextClass, {
     clientContextClassName,
     clientClassName: clientDetails.className,
-    clientParams
+    clientParams,
   });
 
-  writeConstructorBody(classConstructor, {
-    clientParams,
-    clientDetails
-  });
+  const hasLRO = clientDetails.operationGroups.some((og) =>
+    og.operations.some((o) => o.isLRO)
+  );
+
+  writeConstructorBody(
+    classConstructor,
+    {
+      clientParams,
+      clientDetails,
+    },
+    hasLRO
+  );
+
+  writeLroPolicy(sourceFile, hasLRO);
+}
+
+function writeLroPolicy(sourceFile: SourceFile, isLRO: boolean) {
+  if (!isLRO) {
+    return;
+  }
+
+  const LROPolicy = `function lroPolicy() {
+    return {
+      create: (
+        nextPolicy: coreHttp.RequestPolicy,
+        options: coreHttp.RequestPolicyOptions
+      ) => {
+        return new LROPolicy(nextPolicy, options);
+      },
+    };
+  }
+  
+  class LROPolicy extends coreHttp.BaseRequestPolicy {
+    constructor(
+      nextPolicy: coreHttp.RequestPolicy,
+      options: coreHttp.RequestPolicyOptions
+    ) {
+      super(nextPolicy, options);
+    }
+  
+    public async sendRequest(
+      webResource: coreHttp.WebResource
+    ): Promise<coreHttp.HttpOperationResponse> {
+      console.log("About to send a request!");
+      let result = await this._nextPolicy.sendRequest(webResource);
+      const lroData = getLROData(result);
+      result.parsedBody = { ...result.parsedBody, lroData };
+      return result;
+    }
+  }
+  
+  function getLROData(result: coreHttp.HttpOperationResponse) {
+    const { status, properties } = JSON.parse(result.bodyAsText || "{}");
+    return {
+      azureAsyncOperation: result.headers.get("azure-asyncoperation"),
+      operationLocation: result.headers.get("operation-location"),
+      location: result.headers.get("location"),
+      status,
+      provisioningState: properties.provisioningState,
+    };
+  }
+  `;
+
+  sourceFile.addStatements(LROPolicy);
 }
 
 interface WriteConstructorBodyParameters {
@@ -65,12 +125,12 @@ interface WriteConstructorBodyParameters {
 function writeImports(sourceFile: SourceFile) {
   sourceFile.addImportDeclaration({
     namespaceImport: "coreHttp",
-    moduleSpecifier: "@azure/core-http"
+    moduleSpecifier: "@azure/core-http",
   });
 
   sourceFile.addImportDeclaration({
     namespaceImport: "Models",
-    moduleSpecifier: "./models"
+    moduleSpecifier: "./models",
   });
 }
 
@@ -81,7 +141,7 @@ function writePackageInfo(
   sourceFile.addStatements([
     `\n\n`,
     `const packageName = "${packageDetails.name || ""}";`,
-    `const packageVersion = "${packageDetails.version || ""}";`
+    `const packageVersion = "${packageDetails.version || ""}";`,
   ]);
 }
 
@@ -91,12 +151,12 @@ function writeClassProperties(
 ) {
   contextClass.addProperties(
     clientParams
-      .filter(p => !p.isSynthetic)
-      .map(param => {
+      .filter((p) => !p.isSynthetic)
+      .map((param) => {
         return {
           name: param.name,
           type: param.typeDetails.typeName,
-          hasQuestionToken: !param.required
+          hasQuestionToken: !param.required,
         } as PropertyDeclarationStructure;
       })
   );
@@ -104,7 +164,8 @@ function writeClassProperties(
 
 function writeConstructorBody(
   classConstructor: ConstructorDeclaration,
-  { clientParams, clientDetails }: WriteConstructorBodyParameters
+  { clientParams, clientDetails }: WriteConstructorBodyParameters,
+  hasLRO: boolean
 ) {
   const requiredParams = getRequiredParameters(clientParams);
   const addBlankLine = true;
@@ -113,7 +174,10 @@ function writeConstructorBody(
   classConstructor.addStatements([
     writeStatements(getRequiredParamChecks(requiredParams), addBlankLine),
     writeStatement(
-      writeDefaultOptions(clientParams.some(p => p.name === "credentials"))
+      writeDefaultOptions(
+        clientParams.some((p) => p.name === "credentials"),
+        hasLRO
+      )
     ),
     writeStatement(getEndpointStatement(clientDetails.endpoint), addBlankLine),
     requiredParameters.length ? "// Parameter assignments" : "",
@@ -121,7 +185,7 @@ function writeConstructorBody(
     constantParameters.length
       ? "// Assigning values to Constant parameters"
       : "",
-    writeStatements(constantParameters, addBlankLine)
+    writeStatements(constantParameters, addBlankLine),
   ]);
 }
 
@@ -137,11 +201,16 @@ const writeStatement = (content: string, shouldAddBlankLine = false) => (
 const writeStatements = (lines: string[], shouldAddBlankLine = false) => (
   writer: CodeBlockWriter
 ) => {
-  lines.forEach(line => writer.writeLine(line));
+  lines.forEach((line) => writer.writeLine(line));
   shouldAddBlankLine && writer.blankLine();
 };
 
-function writeDefaultOptions(hasCredentials: boolean) {
+function writeDefaultOptions(hasCredentials: boolean, hasLRO: boolean) {
+  const LROPolicy = ` options = {
+    ...options,
+    requestPolicyFactories: (defaults) => [lroPolicy()],
+  };`;
+
   return `// Initializing default values for options
   if (!options) {
      options = {};
@@ -151,6 +220,8 @@ function writeDefaultOptions(hasCredentials: boolean) {
      const defaultUserAgent = coreHttp.getDefaultUserAgentValue();
      options.userAgent = \`\${packageName}/\${packageVersion} \${defaultUserAgent}\`;
    }
+
+   ${hasLRO ? LROPolicy : ""}
   
   super(${hasCredentials ? "credentials" : `undefined`}, options);
   
@@ -163,7 +234,7 @@ function buildClass(sourceFile: SourceFile, clientContextClassName: string) {
   return sourceFile.addClass({
     name: clientContextClassName,
     extends: "coreHttp.ServiceClient",
-    isExported: true
+    isExported: true,
   });
 }
 
@@ -178,17 +249,17 @@ function buildConstructor(
   {
     clientContextClassName,
     clientParams,
-    clientClassName
+    clientClassName,
   }: BuildContructorParams
 ) {
   const requiredParams = getRequiredParameters(clientParams);
-  const hasClientOptionalParams = clientParams.some(p => !p.required);
+  const hasClientOptionalParams = clientParams.some((p) => !p.required);
   const docs = [
     `Initializes a new instance of the ${clientContextClassName} class.`,
     ...formatJsDocParam(requiredParams),
-    `@param options The parameter options`
+    `@param options The parameter options`,
   ]
-    .filter(d => !!d)
+    .filter((d) => !!d)
     .join("\n");
 
   const clientOptionsParameterType = hasClientOptionalParams
@@ -197,16 +268,16 @@ function buildConstructor(
   return contextClass.addConstructor({
     docs: [docs],
     parameters: [
-      ...requiredParams.map(p => ({
+      ...requiredParams.map((p) => ({
         name: p.name,
-        type: p.typeDetails.typeName
+        type: p.typeDetails.typeName,
       })),
       {
         name: "options",
         hasQuestionToken: true,
-        type: clientOptionsParameterType
-      }
-    ]
+        type: clientOptionsParameterType,
+      },
+    ],
   });
 }
 
@@ -216,7 +287,7 @@ function getRequiredParameters(parameters: ParameterDetails[]) {
    * Constants are also exluded since they have defined value
    */
   return parameters.filter(
-    p => p.required && p.schemaType !== SchemaType.Constant && !p.defaultValue
+    (p) => p.required && p.schemaType !== SchemaType.Constant && !p.defaultValue
   );
 }
 
@@ -230,7 +301,7 @@ function getConstantClientParamAssignments(
   clientParameters: ParameterDetails[]
 ) {
   return clientParameters
-    .filter(p => !!p.defaultValue || p.schemaType === SchemaType.Constant)
+    .filter((p) => !!p.defaultValue || p.schemaType === SchemaType.Constant)
     .map(
       ({ name, defaultValue }) =>
         `this.${name} = options.${name} ||  ${defaultValue}`

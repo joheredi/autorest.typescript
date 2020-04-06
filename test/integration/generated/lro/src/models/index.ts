@@ -34,7 +34,6 @@ export interface Resource {
 export type Product = Resource & {
   provisioningState?: string;
   readonly provisioningStateValues?: ProductPropertiesProvisioningStateValues;
-  status?: string;
 };
 
 export interface CloudError {
@@ -45,8 +44,6 @@ export interface CloudError {
 export interface Sku {
   name?: string;
   id?: string;
-  provisioningState?: string;
-  status?: string;
 }
 
 export interface SubResource {
@@ -59,7 +56,6 @@ export interface SubResource {
 export type SubProduct = SubResource & {
   provisioningState?: string;
   readonly provisioningStateValues?: SubProductPropertiesProvisioningStateValues;
-  status?: string;
 };
 
 export interface OperationResult {
@@ -82,113 +78,10 @@ export interface OperationResultError {
 }
 
 /**
- * Defines headers for lROs_put200Succeeded operation.
- */
-export interface LROsPut200SucceededHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_put200Succeeded operation.
- */
-export interface LROsPut200SucceededHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_put200SucceededNoState operation.
- */
-export interface LROsPut200SucceededNoStateHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_put202Retry200 operation.
- */
-export interface LROsPut202Retry200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_put201CreatingSucceeded200 operation.
- */
-export interface LROsPut201CreatingSucceeded200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_put201CreatingSucceeded200 operation.
- */
-export interface LROsPut201CreatingSucceeded200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_put200UpdatingSucceeded204 operation.
- */
-export interface LROsPut200UpdatingSucceeded204Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_put201CreatingFailed200 operation.
- */
-export interface LROsPut201CreatingFailed200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_put201CreatingFailed200 operation.
- */
-export interface LROsPut201CreatingFailed200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_put200Acceptedcanceled200 operation.
- */
-export interface LROsPut200Acceptedcanceled200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
  * Defines headers for lROs_putNoHeaderInRetry operation.
  */
 export interface LROsPutNoHeaderInRetryHeaders {
   location?: string;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  retryAfter?: number;
 }
 
 /**
@@ -198,7 +91,6 @@ export interface LROsPutAsyncRetrySucceededHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -207,8 +99,6 @@ export interface LROsPutAsyncRetrySucceededHeaders {
 export interface LROsPutAsyncNoRetrySucceededHeaders {
   azureAsyncOperation?: string;
   location?: string;
-  operationLocation?: string;
-  retryAfter?: number;
 }
 
 /**
@@ -218,7 +108,6 @@ export interface LROsPutAsyncRetryFailedHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -227,8 +116,6 @@ export interface LROsPutAsyncRetryFailedHeaders {
 export interface LROsPutAsyncNoRetrycanceledHeaders {
   azureAsyncOperation?: string;
   location?: string;
-  operationLocation?: string;
-  retryAfter?: number;
 }
 
 /**
@@ -236,77 +123,12 @@ export interface LROsPutAsyncNoRetrycanceledHeaders {
  */
 export interface LROsPutAsyncNoHeaderInRetryHeaders {
   azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_putNonResource operation.
- */
-export interface LROsPutNonResourceHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_putAsyncNonResource operation.
- */
-export interface LROsPutAsyncNonResourceHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_putSubResource operation.
- */
-export interface LROsPutSubResourceHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_putAsyncSubResource operation.
- */
-export interface LROsPutAsyncSubResourceHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
 }
 
 /**
  * Defines headers for lROs_deleteProvisioning202Accepted200Succeeded operation.
  */
 export interface LROsDeleteProvisioning202Accepted200SucceededHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_deleteProvisioning202Accepted200Succeeded operation.
- */
-export interface LROsDeleteProvisioning202Accepted200SucceededHeaders {
-  location?: string;
-  retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lROs_deleteProvisioning202DeletingFailed200 operation.
- */
-export interface LROsDeleteProvisioning202DeletingFailed200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -317,46 +139,12 @@ export interface LROsDeleteProvisioning202DeletingFailed200Headers {
 export interface LROsDeleteProvisioning202DeletingFailed200Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
  * Defines headers for lROs_deleteProvisioning202Deletingcanceled200 operation.
  */
 export interface LROsDeleteProvisioning202Deletingcanceled200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_deleteProvisioning202Deletingcanceled200 operation.
- */
-export interface LROsDeleteProvisioning202Deletingcanceled200Headers {
-  location?: string;
-  retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lROs_delete204Succeeded operation.
- */
-export interface LROsDelete204SucceededHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_delete202Retry200 operation.
- */
-export interface LROsDelete202Retry200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -367,18 +155,6 @@ export interface LROsDelete202Retry200Headers {
 export interface LROsDelete202Retry200Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lROs_delete202NoRetry204 operation.
- */
-export interface LROsDelete202NoRetry204Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
 }
 
 /**
@@ -387,8 +163,6 @@ export interface LROsDelete202NoRetry204Headers {
 export interface LROsDelete202NoRetry204Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -396,19 +170,6 @@ export interface LROsDelete202NoRetry204Headers {
  */
 export interface LROsDeleteNoHeaderInRetryHeaders {
   location?: string;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_deleteNoHeaderInRetry operation.
- */
-export interface LROsDeleteNoHeaderInRetryHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
 }
 
 /**
@@ -416,19 +177,6 @@ export interface LROsDeleteNoHeaderInRetryHeaders {
  */
 export interface LROsDeleteAsyncNoHeaderInRetryHeaders {
   location?: string;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_deleteAsyncNoHeaderInRetry operation.
- */
-export interface LROsDeleteAsyncNoHeaderInRetryHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
 }
 
 /**
@@ -438,7 +186,6 @@ export interface LROsDeleteAsyncRetrySucceededHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -448,7 +195,6 @@ export interface LROsDeleteAsyncNoRetrySucceededHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -458,7 +204,6 @@ export interface LROsDeleteAsyncRetryFailedHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -466,27 +211,6 @@ export interface LROsDeleteAsyncRetryFailedHeaders {
  */
 export interface LROsDeleteAsyncRetrycanceledHeaders {
   azureAsyncOperation?: string;
-  location?: string;
-  retryAfter?: number;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lROs_post200WithPayload operation.
- */
-export interface LROsPost200WithPayloadHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_post200WithPayload operation.
- */
-export interface LROsPost200WithPayloadHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -497,8 +221,6 @@ export interface LROsPost200WithPayloadHeaders {
 export interface LROsPost202Retry200Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -507,38 +229,6 @@ export interface LROsPost202Retry200Headers {
 export interface LROsPost202NoRetry204Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lROs_postDoubleHeadersFinalLocationGet operation.
- */
-export interface LROsPostDoubleHeadersFinalLocationGetHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_postDoubleHeadersFinalAzureHeaderGet operation.
- */
-export interface LROsPostDoubleHeadersFinalAzureHeaderGetHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_postDoubleHeadersFinalAzureHeaderGetDefault operation.
- */
-export interface LROsPostDoubleHeadersFinalAzureHeaderGetDefaultHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
 }
 
 /**
@@ -546,27 +236,6 @@ export interface LROsPostDoubleHeadersFinalAzureHeaderGetDefaultHeaders {
  */
 export interface LROsPostAsyncRetrySucceededHeaders {
   azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROs_postAsyncRetrySucceeded operation.
- */
-export interface LROsPostAsyncRetrySucceededHeaders {
-  azureAsyncOperation?: string;
-  location?: string;
-  retryAfter?: number;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lROs_postAsyncNoRetrySucceeded operation.
- */
-export interface LROsPostAsyncNoRetrySucceededHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -578,7 +247,6 @@ export interface LROsPostAsyncNoRetrySucceededHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -588,7 +256,6 @@ export interface LROsPostAsyncRetryFailedHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -596,27 +263,6 @@ export interface LROsPostAsyncRetryFailedHeaders {
  */
 export interface LROsPostAsyncRetrycanceledHeaders {
   azureAsyncOperation?: string;
-  location?: string;
-  retryAfter?: number;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lRORetrys_put201CreatingSucceeded200 operation.
- */
-export interface LRORetrysPut201CreatingSucceeded200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lRORetrys_put201CreatingSucceeded200 operation.
- */
-export interface LRORetrysPut201CreatingSucceeded200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -628,17 +274,6 @@ export interface LRORetrysPutAsyncRelativeRetrySucceededHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lRORetrys_deleteProvisioning202Accepted200Succeeded operation.
- */
-export interface LRORetrysDeleteProvisioning202Accepted200SucceededHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
 }
 
 /**
@@ -647,8 +282,6 @@ export interface LRORetrysDeleteProvisioning202Accepted200SucceededHeaders {
 export interface LRORetrysDeleteProvisioning202Accepted200SucceededHeaders {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -657,8 +290,6 @@ export interface LRORetrysDeleteProvisioning202Accepted200SucceededHeaders {
 export interface LRORetrysDelete202Retry200Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -668,7 +299,6 @@ export interface LRORetrysDeleteAsyncRelativeRetrySucceededHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -677,8 +307,6 @@ export interface LRORetrysDeleteAsyncRelativeRetrySucceededHeaders {
 export interface LRORetrysPost202Retry200Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -686,67 +314,6 @@ export interface LRORetrysPost202Retry200Headers {
  */
 export interface LRORetrysPostAsyncRelativeRetrySucceededHeaders {
   azureAsyncOperation?: string;
-  location?: string;
-  retryAfter?: number;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lrosaDs_putNonRetry400 operation.
- */
-export interface LrosaDsPutNonRetry400Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lrosaDs_putNonRetry400 operation.
- */
-export interface LrosaDsPutNonRetry400Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lrosaDs_putNonRetry201Creating400 operation.
- */
-export interface LrosaDsPutNonRetry201Creating400Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lrosaDs_putNonRetry201Creating400 operation.
- */
-export interface LrosaDsPutNonRetry201Creating400Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lrosaDs_putNonRetry201Creating400InvalidJson operation.
- */
-export interface LrosaDsPutNonRetry201Creating400InvalidJsonHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lrosaDs_putNonRetry201Creating400InvalidJson operation.
- */
-export interface LrosaDsPutNonRetry201Creating400InvalidJsonHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -758,7 +325,6 @@ export interface LrosaDsPutAsyncRelativeRetry400Headers {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -767,8 +333,6 @@ export interface LrosaDsPutAsyncRelativeRetry400Headers {
 export interface LrosaDsDeleteNonRetry400Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -777,8 +341,6 @@ export interface LrosaDsDeleteNonRetry400Headers {
 export interface LrosaDsDelete202NonRetry400Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -788,7 +350,6 @@ export interface LrosaDsDeleteAsyncRelativeRetry400Headers {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -797,8 +358,6 @@ export interface LrosaDsDeleteAsyncRelativeRetry400Headers {
 export interface LrosaDsPostNonRetry400Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -807,8 +366,6 @@ export interface LrosaDsPostNonRetry400Headers {
 export interface LrosaDsPost202NonRetry400Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -816,27 +373,6 @@ export interface LrosaDsPost202NonRetry400Headers {
  */
 export interface LrosaDsPostAsyncRelativeRetry400Headers {
   azureAsyncOperation?: string;
-  location?: string;
-  retryAfter?: number;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lrosaDs_putError201NoProvisioningStatePayload operation.
- */
-export interface LrosaDsPutError201NoProvisioningStatePayloadHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lrosaDs_putError201NoProvisioningStatePayload operation.
- */
-export interface LrosaDsPutError201NoProvisioningStatePayloadHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -848,7 +384,6 @@ export interface LrosaDsPutAsyncRelativeRetryNoStatusHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -856,17 +391,6 @@ export interface LrosaDsPutAsyncRelativeRetryNoStatusHeaders {
  */
 export interface LrosaDsPutAsyncRelativeRetryNoStatusPayloadHeaders {
   azureAsyncOperation?: string;
-  location?: string;
-  retryAfter?: number;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lrosaDs_delete204Succeeded operation.
- */
-export interface LrosaDsDelete204SucceededHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -878,7 +402,6 @@ export interface LrosaDsDeleteAsyncRelativeRetryNoStatusHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -887,8 +410,6 @@ export interface LrosaDsDeleteAsyncRelativeRetryNoStatusHeaders {
 export interface LrosaDsPost202NoLocationHeaders {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -896,27 +417,6 @@ export interface LrosaDsPost202NoLocationHeaders {
  */
 export interface LrosaDsPostAsyncRelativeRetryNoPayloadHeaders {
   azureAsyncOperation?: string;
-  location?: string;
-  retryAfter?: number;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lrosaDs_put200InvalidJson operation.
- */
-export interface LrosaDsPut200InvalidJsonHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lrosaDs_put200InvalidJson operation.
- */
-export interface LrosaDsPut200InvalidJsonHeaders {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -928,7 +428,6 @@ export interface LrosaDsPutAsyncRelativeRetryInvalidHeaderHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -938,7 +437,6 @@ export interface LrosaDsPutAsyncRelativeRetryInvalidJsonPollingHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -947,8 +445,6 @@ export interface LrosaDsPutAsyncRelativeRetryInvalidJsonPollingHeaders {
 export interface LrosaDsDelete202RetryInvalidHeaderHeaders {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -958,7 +454,6 @@ export interface LrosaDsDeleteAsyncRelativeRetryInvalidHeaderHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -968,7 +463,6 @@ export interface LrosaDsDeleteAsyncRelativeRetryInvalidJsonPollingHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -977,8 +471,6 @@ export interface LrosaDsDeleteAsyncRelativeRetryInvalidJsonPollingHeaders {
 export interface LrosaDsPost202RetryInvalidHeaderHeaders {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -988,7 +480,6 @@ export interface LrosaDsPostAsyncRelativeRetryInvalidHeaderHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -998,7 +489,6 @@ export interface LrosaDsPostAsyncRelativeRetryInvalidJsonPollingHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -1006,27 +496,6 @@ export interface LrosaDsPostAsyncRelativeRetryInvalidJsonPollingHeaders {
  */
 export interface LROsCustomHeaderPutAsyncRetrySucceededHeaders {
   azureAsyncOperation?: string;
-  location?: string;
-  retryAfter?: number;
-  operationLocation?: string;
-}
-
-/**
- * Defines headers for lROsCustomHeader_put201CreatingSucceeded200 operation.
- */
-export interface LROsCustomHeaderPut201CreatingSucceeded200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
-  location?: string;
-  retryAfter?: number;
-}
-
-/**
- * Defines headers for lROsCustomHeader_put201CreatingSucceeded200 operation.
- */
-export interface LROsCustomHeaderPut201CreatingSucceeded200Headers {
-  azureAsyncOperation?: string;
-  operationLocation?: string;
   location?: string;
   retryAfter?: number;
 }
@@ -1037,8 +506,6 @@ export interface LROsCustomHeaderPut201CreatingSucceeded200Headers {
 export interface LROsCustomHeaderPost202Retry200Headers {
   location?: string;
   retryAfter?: number;
-  azureAsyncOperation?: string;
-  operationLocation?: string;
 }
 
 /**
@@ -1048,7 +515,6 @@ export interface LROsCustomHeaderPostAsyncRetrySucceededHeaders {
   azureAsyncOperation?: string;
   location?: string;
   retryAfter?: number;
-  operationLocation?: string;
 }
 
 /**
@@ -1111,27 +577,22 @@ export interface LROsPut200SucceededOptionalParams
 /**
  * Contains response data for the put200Succeeded operation.
  */
-export type LROsPut200SucceededResponse = LROsPut200SucceededHeaders &
-  Product & {
+export type LROsPut200SucceededResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPut200SucceededHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -1147,27 +608,22 @@ export interface LROsPut200SucceededNoStateOptionalParams
 /**
  * Contains response data for the put200SucceededNoState operation.
  */
-export type LROsPut200SucceededNoStateResponse = LROsPut200SucceededNoStateHeaders &
-  Product & {
+export type LROsPut200SucceededNoStateResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPut200SucceededNoStateHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -1183,27 +639,22 @@ export interface LROsPut202Retry200OptionalParams
 /**
  * Contains response data for the put202Retry200 operation.
  */
-export type LROsPut202Retry200Response = LROsPut202Retry200Headers &
-  Product & {
+export type LROsPut202Retry200Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPut202Retry200Headers;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -1219,27 +670,22 @@ export interface LROsPut201CreatingSucceeded200OptionalParams
 /**
  * Contains response data for the put201CreatingSucceeded200 operation.
  */
-export type LROsPut201CreatingSucceeded200Response = LROsPut201CreatingSucceeded200Headers &
-  Product & {
+export type LROsPut201CreatingSucceeded200Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPut201CreatingSucceeded200Headers;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -1255,27 +701,22 @@ export interface LROsPut200UpdatingSucceeded204OptionalParams
 /**
  * Contains response data for the put200UpdatingSucceeded204 operation.
  */
-export type LROsPut200UpdatingSucceeded204Response = LROsPut200UpdatingSucceeded204Headers &
-  Product & {
+export type LROsPut200UpdatingSucceeded204Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPut200UpdatingSucceeded204Headers;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -1291,27 +732,22 @@ export interface LROsPut201CreatingFailed200OptionalParams
 /**
  * Contains response data for the put201CreatingFailed200 operation.
  */
-export type LROsPut201CreatingFailed200Response = LROsPut201CreatingFailed200Headers &
-  Product & {
+export type LROsPut201CreatingFailed200Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPut201CreatingFailed200Headers;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -1327,27 +763,22 @@ export interface LROsPut200Acceptedcanceled200OptionalParams
 /**
  * Contains response data for the put200Acceptedcanceled200 operation.
  */
-export type LROsPut200Acceptedcanceled200Response = LROsPut200Acceptedcanceled200Headers &
-  Product & {
+export type LROsPut200Acceptedcanceled200Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPut200Acceptedcanceled200Headers;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -1579,27 +1010,22 @@ export interface LROsPutNonResourceOptionalParams
 /**
  * Contains response data for the putNonResource operation.
  */
-export type LROsPutNonResourceResponse = LROsPutNonResourceHeaders &
-  Sku & {
+export type LROsPutNonResourceResponse = Sku & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Sku;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPutNonResourceHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Sku;
   };
+};
 
 /**
  * Optional parameters.
@@ -1615,27 +1041,22 @@ export interface LROsPutAsyncNonResourceOptionalParams
 /**
  * Contains response data for the putAsyncNonResource operation.
  */
-export type LROsPutAsyncNonResourceResponse = LROsPutAsyncNonResourceHeaders &
-  Sku & {
+export type LROsPutAsyncNonResourceResponse = Sku & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Sku;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPutAsyncNonResourceHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Sku;
   };
+};
 
 /**
  * Optional parameters.
@@ -1651,27 +1072,22 @@ export interface LROsPutSubResourceOptionalParams
 /**
  * Contains response data for the putSubResource operation.
  */
-export type LROsPutSubResourceResponse = LROsPutSubResourceHeaders &
-  SubProduct & {
+export type LROsPutSubResourceResponse = SubProduct & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: SubProduct;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPutSubResourceHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: SubProduct;
   };
+};
 
 /**
  * Optional parameters.
@@ -1687,195 +1103,120 @@ export interface LROsPutAsyncSubResourceOptionalParams
 /**
  * Contains response data for the putAsyncSubResource operation.
  */
-export type LROsPutAsyncSubResourceResponse = LROsPutAsyncSubResourceHeaders &
-  SubProduct & {
-    /**
-     * The underlying HTTP response.
-     */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
-
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: SubProduct;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPutAsyncSubResourceHeaders;
-    };
-  };
-
-/**
- * Contains response data for the deleteProvisioning202Accepted200Succeeded operation.
- */
-export type LROsDeleteProvisioning202Accepted200SucceededResponse = LROsDeleteProvisioning202Accepted200SucceededHeaders &
-  Product & {
-    /**
-     * The underlying HTTP response.
-     */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
-
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsDeleteProvisioning202Accepted200SucceededHeaders;
-    };
-  };
-
-/**
- * Contains response data for the deleteProvisioning202DeletingFailed200 operation.
- */
-export type LROsDeleteProvisioning202DeletingFailed200Response = LROsDeleteProvisioning202DeletingFailed200Headers &
-  Product & {
-    /**
-     * The underlying HTTP response.
-     */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
-
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsDeleteProvisioning202DeletingFailed200Headers;
-    };
-  };
-
-/**
- * Contains response data for the deleteProvisioning202Deletingcanceled200 operation.
- */
-export type LROsDeleteProvisioning202Deletingcanceled200Response = LROsDeleteProvisioning202Deletingcanceled200Headers &
-  Product & {
-    /**
-     * The underlying HTTP response.
-     */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
-
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsDeleteProvisioning202Deletingcanceled200Headers;
-    };
-  };
-
-/**
- * Contains response data for the delete204Succeeded operation.
- */
-export type LROsDelete204SucceededResponse = LROsDelete204SucceededHeaders & {
+export type LROsPutAsyncSubResourceResponse = SubProduct & {
   /**
    * The underlying HTTP response.
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The parsed HTTP response headers.
+     * The response body as text (string format)
      */
-    parsedHeaders: LROsDelete204SucceededHeaders;
+    bodyAsText: string;
+
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: SubProduct;
+  };
+};
+
+/**
+ * Contains response data for the deleteProvisioning202Accepted200Succeeded operation.
+ */
+export type LROsDeleteProvisioning202Accepted200SucceededResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
+  };
+};
+
+/**
+ * Contains response data for the deleteProvisioning202DeletingFailed200 operation.
+ */
+export type LROsDeleteProvisioning202DeletingFailed200Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
+  };
+};
+
+/**
+ * Contains response data for the deleteProvisioning202Deletingcanceled200 operation.
+ */
+export type LROsDeleteProvisioning202Deletingcanceled200Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
+    /**
+     * The response body as text (string format)
+     */
+    bodyAsText: string;
+
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
 };
 
 /**
  * Contains response data for the delete202Retry200 operation.
  */
-export type LROsDelete202Retry200Response = LROsDelete202Retry200Headers &
-  Product & {
-    /**
-     * The underlying HTTP response.
-     */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
-
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsDelete202Retry200Headers;
-    };
-  };
-
-/**
- * Contains response data for the delete202NoRetry204 operation.
- */
-export type LROsDelete202NoRetry204Response = LROsDelete202NoRetry204Headers &
-  Product & {
-    /**
-     * The underlying HTTP response.
-     */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
-
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsDelete202NoRetry204Headers;
-    };
-  };
-
-/**
- * Contains response data for the deleteNoHeaderInRetry operation.
- */
-export type LROsDeleteNoHeaderInRetryResponse = LROsDeleteNoHeaderInRetryHeaders & {
+export type LROsDelete202Retry200Response = Product & {
   /**
    * The underlying HTTP response.
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The parsed HTTP response headers.
+     * The response body as text (string format)
      */
-    parsedHeaders: LROsDeleteNoHeaderInRetryHeaders;
+    bodyAsText: string;
+
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
 };
 
 /**
- * Contains response data for the deleteAsyncNoHeaderInRetry operation.
+ * Contains response data for the delete202NoRetry204 operation.
  */
-export type LROsDeleteAsyncNoHeaderInRetryResponse = LROsDeleteAsyncNoHeaderInRetryHeaders & {
+export type LROsDelete202NoRetry204Response = Product & {
   /**
    * The underlying HTTP response.
    */
   _response: coreHttp.HttpResponse & {
     /**
-     * The parsed HTTP response headers.
+     * The response body as text (string format)
      */
-    parsedHeaders: LROsDeleteAsyncNoHeaderInRetryHeaders;
+    bodyAsText: string;
+
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
 };
 
@@ -1942,27 +1283,22 @@ export type LROsDeleteAsyncRetrycanceledResponse = LROsDeleteAsyncRetrycanceledH
 /**
  * Contains response data for the post200WithPayload operation.
  */
-export type LROsPost200WithPayloadResponse = LROsPost200WithPayloadHeaders &
-  Sku & {
+export type LROsPost200WithPayloadResponse = Sku & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Sku;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPost200WithPayloadHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Sku;
   };
+};
 
 /**
  * Optional parameters.
@@ -2029,77 +1365,62 @@ export type LROsPost202NoRetry204Response = LROsPost202NoRetry204Headers &
 /**
  * Contains response data for the postDoubleHeadersFinalLocationGet operation.
  */
-export type LROsPostDoubleHeadersFinalLocationGetResponse = LROsPostDoubleHeadersFinalLocationGetHeaders &
-  Product & {
+export type LROsPostDoubleHeadersFinalLocationGetResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPostDoubleHeadersFinalLocationGetHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Contains response data for the postDoubleHeadersFinalAzureHeaderGet operation.
  */
-export type LROsPostDoubleHeadersFinalAzureHeaderGetResponse = LROsPostDoubleHeadersFinalAzureHeaderGetHeaders &
-  Product & {
+export type LROsPostDoubleHeadersFinalAzureHeaderGetResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPostDoubleHeadersFinalAzureHeaderGetHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Contains response data for the postDoubleHeadersFinalAzureHeaderGetDefault operation.
  */
-export type LROsPostDoubleHeadersFinalAzureHeaderGetDefaultResponse = LROsPostDoubleHeadersFinalAzureHeaderGetDefaultHeaders &
-  Product & {
+export type LROsPostDoubleHeadersFinalAzureHeaderGetDefaultResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPostDoubleHeadersFinalAzureHeaderGetDefaultHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -2115,27 +1436,22 @@ export interface LROsPostAsyncRetrySucceededOptionalParams
 /**
  * Contains response data for the postAsyncRetrySucceeded operation.
  */
-export type LROsPostAsyncRetrySucceededResponse = LROsPostAsyncRetrySucceededHeaders &
-  Product & {
+export type LROsPostAsyncRetrySucceededResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPostAsyncRetrySucceededHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -2151,27 +1467,22 @@ export interface LROsPostAsyncNoRetrySucceededOptionalParams
 /**
  * Contains response data for the postAsyncNoRetrySucceeded operation.
  */
-export type LROsPostAsyncNoRetrySucceededResponse = LROsPostAsyncNoRetrySucceededHeaders &
-  Product & {
+export type LROsPostAsyncNoRetrySucceededResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsPostAsyncNoRetrySucceededHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -2239,27 +1550,22 @@ export interface LRORetrysPut201CreatingSucceeded200OptionalParams
 /**
  * Contains response data for the put201CreatingSucceeded200 operation.
  */
-export type LRORetrysPut201CreatingSucceeded200Response = LRORetrysPut201CreatingSucceeded200Headers &
-  Product & {
+export type LRORetrysPut201CreatingSucceeded200Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LRORetrysPut201CreatingSucceeded200Headers;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -2300,27 +1606,22 @@ export type LRORetrysPutAsyncRelativeRetrySucceededResponse = LRORetrysPutAsyncR
 /**
  * Contains response data for the deleteProvisioning202Accepted200Succeeded operation.
  */
-export type LRORetrysDeleteProvisioning202Accepted200SucceededResponse = LRORetrysDeleteProvisioning202Accepted200SucceededHeaders &
-  Product & {
+export type LRORetrysDeleteProvisioning202Accepted200SucceededResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LRORetrysDeleteProvisioning202Accepted200SucceededHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Contains response data for the delete202Retry200 operation.
@@ -2418,27 +1719,22 @@ export interface LrosaDsPutNonRetry400OptionalParams
 /**
  * Contains response data for the putNonRetry400 operation.
  */
-export type LrosaDsPutNonRetry400Response = LrosaDsPutNonRetry400Headers &
-  Product & {
+export type LrosaDsPutNonRetry400Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LrosaDsPutNonRetry400Headers;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -2454,27 +1750,22 @@ export interface LrosaDsPutNonRetry201Creating400OptionalParams
 /**
  * Contains response data for the putNonRetry201Creating400 operation.
  */
-export type LrosaDsPutNonRetry201Creating400Response = LrosaDsPutNonRetry201Creating400Headers &
-  Product & {
+export type LrosaDsPutNonRetry201Creating400Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LrosaDsPutNonRetry201Creating400Headers;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -2490,27 +1781,22 @@ export interface LrosaDsPutNonRetry201Creating400InvalidJsonOptionalParams
 /**
  * Contains response data for the putNonRetry201Creating400InvalidJson operation.
  */
-export type LrosaDsPutNonRetry201Creating400InvalidJsonResponse = LrosaDsPutNonRetry201Creating400InvalidJsonHeaders &
-  Product & {
+export type LrosaDsPutNonRetry201Creating400InvalidJsonResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LrosaDsPutNonRetry201Creating400InvalidJsonHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -2685,27 +1971,22 @@ export interface LrosaDsPutError201NoProvisioningStatePayloadOptionalParams
 /**
  * Contains response data for the putError201NoProvisioningStatePayload operation.
  */
-export type LrosaDsPutError201NoProvisioningStatePayloadResponse = LrosaDsPutError201NoProvisioningStatePayloadHeaders &
-  Product & {
+export type LrosaDsPutError201NoProvisioningStatePayloadResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LrosaDsPutError201NoProvisioningStatePayloadHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -2778,21 +2059,6 @@ export type LrosaDsPutAsyncRelativeRetryNoStatusPayloadResponse = LrosaDsPutAsyn
       parsedHeaders: LrosaDsPutAsyncRelativeRetryNoStatusPayloadHeaders;
     };
   };
-
-/**
- * Contains response data for the delete204Succeeded operation.
- */
-export type LrosaDsDelete204SucceededResponse = LrosaDsDelete204SucceededHeaders & {
-  /**
-   * The underlying HTTP response.
-   */
-  _response: coreHttp.HttpResponse & {
-    /**
-     * The parsed HTTP response headers.
-     */
-    parsedHeaders: LrosaDsDelete204SucceededHeaders;
-  };
-};
 
 /**
  * Contains response data for the deleteAsyncRelativeRetryNoStatus operation.
@@ -2875,27 +2141,22 @@ export interface LrosaDsPut200InvalidJsonOptionalParams
 /**
  * Contains response data for the put200InvalidJson operation.
  */
-export type LrosaDsPut200InvalidJsonResponse = LrosaDsPut200InvalidJsonHeaders &
-  Product & {
+export type LrosaDsPut200InvalidJsonResponse = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LrosaDsPut200InvalidJsonHeaders;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.
@@ -3142,27 +2403,22 @@ export interface LROsCustomHeaderPut201CreatingSucceeded200OptionalParams
 /**
  * Contains response data for the put201CreatingSucceeded200 operation.
  */
-export type LROsCustomHeaderPut201CreatingSucceeded200Response = LROsCustomHeaderPut201CreatingSucceeded200Headers &
-  Product & {
+export type LROsCustomHeaderPut201CreatingSucceeded200Response = Product & {
+  /**
+   * The underlying HTTP response.
+   */
+  _response: coreHttp.HttpResponse & {
     /**
-     * The underlying HTTP response.
+     * The response body as text (string format)
      */
-    _response: coreHttp.HttpResponse & {
-      /**
-       * The response body as text (string format)
-       */
-      bodyAsText: string;
+    bodyAsText: string;
 
-      /**
-       * The response body as parsed JSON or XML
-       */
-      parsedBody: Product;
-      /**
-       * The parsed HTTP response headers.
-       */
-      parsedHeaders: LROsCustomHeaderPut201CreatingSucceeded200Headers;
-    };
+    /**
+     * The response body as parsed JSON or XML
+     */
+    parsedBody: Product;
   };
+};
 
 /**
  * Optional parameters.

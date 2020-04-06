@@ -18,7 +18,7 @@ import {
   StringSchema,
   NumberSchema,
   ObjectSchema,
-  Property
+  Property,
 } from "@azure-tools/codemodel";
 import { normalizeName, NameType } from "../utils/nameUtils";
 import {
@@ -29,7 +29,7 @@ import {
   OperationSpecDetails,
   OperationSpecResponses,
   OperationResponseMappers,
-  OperationResponseTypes
+  OperationResponseTypes,
 } from "../models/operationDetails";
 import { getLanguageMetadata } from "../utils/languageHelpers";
 import { getTypeForSchema, isSchemaResponse } from "../utils/schemaHelpers";
@@ -61,7 +61,7 @@ export function transformOperationSpec(
       requestBody,
       queryParameters,
       urlParameters,
-      headerParameters
+      headerParameters,
     } = getGroupedParameters(parameters, operationFullName, request.mediaType);
 
     const name = hasMultipleRequests
@@ -75,7 +75,7 @@ export function transformOperationSpec(
       ...(urlParameters && urlParameters.length && { urlParameters }),
       ...(headerParameters && headerParameters.length && { headerParameters }),
       ...(isXML && { isXML }),
-      name
+      name,
     });
   }
 
@@ -85,13 +85,13 @@ export function transformOperationSpec(
 export function extractHttpDetails({ path, method }: OperationRequestDetails) {
   return {
     path,
-    httpMethod: method.toUpperCase() as HttpMethods
+    httpMethod: method.toUpperCase() as HttpMethods,
   };
 }
 
 export function extractSpecResponses({
   name,
-  responses
+  responses,
 }: OperationDetails): OperationSpecResponses {
   if (!responses || !responses.length) {
     throw new Error(`The operation ${name} contains no responses`);
@@ -127,7 +127,7 @@ export function getSpecType(responseSchema: Schema, expand = false): SpecType {
       constantProps = expand
         ? {
             isConstant: true,
-            defaultValue: constantSchema.value.value
+            defaultValue: constantSchema.value.value,
           }
         : undefined;
       break;
@@ -138,7 +138,7 @@ export function getSpecType(responseSchema: Schema, expand = false): SpecType {
     case SchemaType.SealedChoice:
       const choiceSchema = responseSchema as ChoiceSchema;
       typeName = "Enum";
-      allowedValues = choiceSchema.choices.map(choice => choice.value);
+      allowedValues = choiceSchema.choices.map((choice) => choice.value);
       break;
     case SchemaType.Object:
       const name = getLanguageMetadata(responseSchema.language).name;
@@ -151,13 +151,13 @@ export function getSpecType(responseSchema: Schema, expand = false): SpecType {
 
   let result = {
     name: typeName as any,
-    reference
+    reference,
   };
 
   return {
     ...result,
     ...(!!allowedValues && { allowedValues }),
-    ...(!!constantProps && { constantProps })
+    ...(!!constantProps && { constantProps }),
   };
 }
 
@@ -189,7 +189,7 @@ export function transformOperationRequest(
     path: request.protocol.http.path,
     method: request.protocol.http.method,
     mediaType: request.protocol.http.knownMediaType,
-    parameters: request.parameters
+    parameters: request.parameters,
   };
 }
 
@@ -199,7 +199,7 @@ function getLROBodySchema(responseSchema: SchemaResponse) {
     const properties = schema.properties || [];
 
     if (
-      !properties.some(p =>
+      !properties.some((p) =>
         ["properties.provisioningstate", "provisioningstate"].includes(
           p.serializedName.toLowerCase()
         )
@@ -215,13 +215,13 @@ function getLROBodySchema(responseSchema: SchemaResponse) {
       properties.push(provisioningState);
     }
 
-    if (!properties.some(p => p.serializedName.toLowerCase() === "status")) {
+    if (!properties.some((p) => p.serializedName.toLowerCase() === "status")) {
       const status = new Property(
         "status",
         "",
         new StringSchema("string", ""),
         {
-          serializedName: "status"
+          serializedName: "status",
         }
       );
 
@@ -257,7 +257,7 @@ function getLROHeaders(headers: HttpHeader[]): HttpHeader[] {
     azureAsyncOperationHeader,
     operationLocation,
     location,
-    retryAfter
+    retryAfter,
   ];
 
   return uniqWith(
@@ -285,12 +285,12 @@ export function transformOperationResponse(
       response.extensions && !!response.extensions["x-ms-error-response"]
     ) || httpInfo.statusCodes.indexOf("default") > -1;
 
-  if (isLRO && !isError) {
-    httpInfo.headers = getLROHeaders(httpInfo.headers || []);
-    if (isSchemaResponse(response)) {
-      response = getLROBodySchema(response);
-    }
-  }
+  // if (isLRO && !isError) {
+  //   httpInfo.headers = getLROHeaders(httpInfo.headers || []);
+  //   if (isSchemaResponse(response)) {
+  //     response = getLROBodySchema(response);
+  //   }
+  // }
 
   // Transform Headers to am ObjectSchema to represent headers as an object
   const headersSchema = headersToSchema(httpInfo.headers, operationFullName);
@@ -302,14 +302,14 @@ export function transformOperationResponse(
       : undefined,
     headersMapper: headersSchema
       ? getMapperForSchema(headersSchema, mediaType)
-      : undefined
+      : undefined,
   };
 
   const types: OperationResponseTypes = {
     bodyType: isSchemaResponse(response)
       ? getTypeForSchema(response.schema)
       : undefined,
-    headersType: headersSchema ? getTypeForSchema(headersSchema) : undefined
+    headersType: headersSchema ? getTypeForSchema(headersSchema) : undefined,
   };
 
   return {
@@ -317,7 +317,7 @@ export function transformOperationResponse(
     mediaType: httpInfo.knownMediaType,
     mappers,
     types,
-    isError
+    isError,
   };
 }
 
@@ -331,7 +331,7 @@ export async function transformOperation(
   const operationFullName = `${operationGroupName}_${name}`;
   const responsesAndErrors = [
     ...(operation.responses || []),
-    ...(operation.exceptions || [])
+    ...(operation.exceptions || []),
   ];
   const typeName = `${normalizeName(
     operationGroupName,
@@ -341,7 +341,7 @@ export async function transformOperation(
   const typeDetails: TypeDetails = {
     typeName,
     kind: PropertyKind.Composite,
-    usedModels: [typeName]
+    usedModels: [typeName],
   };
 
   const isLRO: boolean = Boolean(
@@ -360,17 +360,17 @@ export async function transformOperation(
   }
 
   const requests = codeModelRequests.map(transformOperationRequest);
-  let responses = responsesAndErrors.map(response =>
+  let responses = responsesAndErrors.map((response) =>
     transformOperationResponse(response, operationFullName, isLRO)
   );
-  const hasMultipleResponses = responses.filter(r => !r.isError).length > 1;
+  const hasMultipleResponses = responses.filter((r) => !r.isError).length > 1;
 
   // If this is an LRO operation only consider the success response,
   // this is because LRO operations swagger defines initial and final operation
   // responses in the same operation.
   if (isLRO && hasMultipleResponses) {
     const firstSuccess = responses.find(
-      response =>
+      (response) =>
         response.statusCodes.includes("200") ||
         response.statusCodes.includes("204")
     );
@@ -385,7 +385,7 @@ export async function transformOperation(
     typeDetails,
     fullName: operationFullName.toLowerCase(),
     apiVersions: operation.apiVersions
-      ? operation.apiVersions.map(v => v.version)
+      ? operation.apiVersions.map((v) => v.version)
       : [],
     description: metadata.description,
     requests,
@@ -393,7 +393,7 @@ export async function transformOperation(
     mediaTypes,
     pagination,
     isLRO,
-    lroOptions
+    lroOptions,
   };
 }
 
@@ -402,7 +402,7 @@ export function transformOperationGroups(
 ): Promise<OperationGroupDetails[]> {
   const clientName = getLanguageMetadata(codeModel.language).name;
   return Promise.all(
-    codeModel.operationGroups.map(operationGroup =>
+    codeModel.operationGroups.map((operationGroup) =>
       transformOperationGroup(operationGroup, clientName)
     )
   );
@@ -417,7 +417,7 @@ export async function transformOperationGroup(
   const name = normalizeName(metadata.name || clientName, NameType.Property);
 
   const operations = await Promise.all(
-    operationGroup.operations.map(operation =>
+    operationGroup.operations.map((operation) =>
       transformOperation(operation, name)
     )
   );
@@ -428,7 +428,7 @@ export async function transformOperationGroup(
     key: operationGroup.$key,
     operations,
     isTopLevel,
-    mediaTypes
+    mediaTypes,
   };
 }
 
@@ -444,8 +444,8 @@ async function getOperationMediaTypes(
 ) {
   const mediaTypes = new Set<KnownMediaType>();
 
-  requests.forEach(r => r.mediaType && mediaTypes.add(r.mediaType));
-  responses.forEach(r => r.mediaType && mediaTypes.add(r.mediaType));
+  requests.forEach((r) => r.mediaType && mediaTypes.add(r.mediaType));
+  responses.forEach((r) => r.mediaType && mediaTypes.add(r.mediaType));
 
   return mediaTypes;
 }
@@ -455,7 +455,7 @@ function getGroupedParameters(
   operationFullname: string,
   mediaType?: KnownMediaType
 ) {
-  const operationParams = parameters.filter(p => {
+  const operationParams = parameters.filter((p) => {
     // Ensure parameters are specific to the operation.
     const matchesOperation =
       p.operationsIn && p.operationsIn.indexOf(operationFullname) > -1;
@@ -467,20 +467,22 @@ function getGroupedParameters(
   });
   return {
     requestBody: operationParams.find(
-      p => p.location === ParameterLocation.Body
+      (p) => p.location === ParameterLocation.Body
     ),
     queryParameters: operationParams.filter(
-      p => p.location === ParameterLocation.Query
+      (p) => p.location === ParameterLocation.Query
     ),
     urlParameters: operationParams.filter(
-      p =>
+      (p) =>
         p.location === ParameterLocation.Path ||
         p.location === ParameterLocation.Uri
     ),
     headerParameters: operationParams.filter(
-      p => p.location === ParameterLocation.Header
+      (p) => p.location === ParameterLocation.Header
     ),
-    cookie: operationParams.filter(p => p.location === ParameterLocation.Cookie)
+    cookie: operationParams.filter(
+      (p) => p.location === ParameterLocation.Cookie
+    ),
   };
 }
 
@@ -495,7 +497,7 @@ function getMapperForSchema(
     reference ||
     transformMapper({
       schema: responseSchema,
-      options: { hasXmlMetadata: mediaType === KnownMediaType.Xml }
+      options: { hasXmlMetadata: mediaType === KnownMediaType.Xml },
     })
   );
 }
