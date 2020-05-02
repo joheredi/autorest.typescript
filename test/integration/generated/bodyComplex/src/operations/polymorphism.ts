@@ -365,7 +365,7 @@ const putMissingDiscriminatorOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
-  requestBody: Parameters.complexBody18,
+  requestBody: Parameters.complexBody19,
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.contentType],
   serializer
@@ -379,7 +379,7 @@ const putValidMissingRequiredOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
-  requestBody: Parameters.complexBody19,
+  requestBody: Parameters.complexBody20,
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.contentType],
   serializer

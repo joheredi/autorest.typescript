@@ -109,7 +109,9 @@ function generateOperation(
   );
 }
 
-function writeGetOperationOptions(operationGroupClass: ClassDeclaration) {
+export function writeGetOperationOptions(
+  operationGroupClass: ClassDeclaration
+) {
   operationGroupClass.addMethod({
     scope: Scope.Private,
     name: "getOperationOptions<TOptions extends coreHttp.OperationOptions>",
@@ -649,7 +651,8 @@ function writeNoOverloadsOperationBody(
       responseName,
       operationSpecName,
       operationMethod,
-      finalStateVia
+      finalStateVia,
+      isInline
     );
   } else {
     operationMethod.addStatements(
@@ -667,7 +670,8 @@ function writeLROOperationBody(
   responseName: string,
   operationSpecName: string,
   methodDeclaration: MethodDeclaration,
-  finalStateVia?: string
+  finalStateVia?: string,
+  isInline?: boolean
 ) {
   const finalStateStr = finalStateVia
     ? `finalStateVia: "${finalStateVia.toLowerCase()}"`
@@ -675,7 +679,9 @@ function writeLROOperationBody(
 
   const operationBody = `
   const args: coreHttp.OperationArguments  = {${sendParams}};
-  const sendOperation = (args: coreHttp.OperationArguments, spec: coreHttp.OperationSpec) =>  this.client.sendOperationRequest(args, spec) as Promise<${responseName}>;
+  const sendOperation = (args: coreHttp.OperationArguments, spec: coreHttp.OperationSpec) =>  this${
+    isInline ? "" : ".client"
+  }.sendOperationRequest(args, spec) as Promise<${responseName}>;
   const initialOperationResult = await sendOperation(args, ${operationSpecName});
 
   return new LROPoller({
@@ -779,7 +785,9 @@ function writeMultiMediaTypeOperationBody(
       : "";
 
     statements += `
-    const sendOperation = (args: coreHttp.OperationArguments, spec: coreHttp.OperationSpec) =>  this.client.sendOperationRequest(args, spec) as Promise<${responseName}>;
+    const sendOperation = (args: coreHttp.OperationArguments, spec: coreHttp.OperationSpec) =>  this${
+      isInline ? "" : ".client"
+    }.sendOperationRequest(args, spec) as Promise<${responseName}>;
     const initialOperationResult = await sendOperation(operationArguments, operationSpec);
 
     return new LROPoller({

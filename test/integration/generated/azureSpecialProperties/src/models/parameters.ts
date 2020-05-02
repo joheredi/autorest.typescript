@@ -133,6 +133,18 @@ export const apiVersion3: coreHttp.OperationQueryParameter = {
   }
 };
 
+export const apiVersion4: coreHttp.OperationQueryParameter = {
+  parameterPath: "apiVersion",
+  mapper: {
+    defaultValue: "2.0",
+    isConstant: true,
+    serializedName: "api-version",
+    type: {
+      name: "String"
+    }
+  }
+};
+
 export const unencodedPathParam: coreHttp.OperationURLParameter = {
   parameterPath: "unencodedPathParam",
   mapper: {

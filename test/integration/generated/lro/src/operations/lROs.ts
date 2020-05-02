@@ -1841,7 +1841,7 @@ const putAsyncSubResourceOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.CloudError
     }
   },
-  requestBody: Parameters.product1,
+  requestBody: Parameters.product2,
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.contentType],
   serializer

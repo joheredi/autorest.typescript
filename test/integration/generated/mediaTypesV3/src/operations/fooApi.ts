@@ -190,7 +190,7 @@ const postSend$binaryOperationSpec: coreHttp.OperationSpec = {
   httpMethod: "POST",
   responses: { 202: {}, 400: {} },
   requestBody: Parameters.data,
-  queryParameters: [Parameters.excluded1],
+  queryParameters: [Parameters.excluded],
   urlParameters: [Parameters.$host, Parameters.thing],
   headerParameters: [Parameters.contentType],
   serializer
@@ -199,9 +199,9 @@ const postSend$textOperationSpec: coreHttp.OperationSpec = {
   path: "/foo/api/v1/things/{thing}",
   httpMethod: "POST",
   responses: { 202: {}, 400: {} },
-  requestBody: Parameters.data1,
-  queryParameters: [Parameters.excluded1],
+  requestBody: Parameters.data2,
+  queryParameters: [Parameters.excluded],
   urlParameters: [Parameters.$host, Parameters.thing],
-  headerParameters: [Parameters.contentType1],
+  headerParameters: [Parameters.contentType2],
   serializer
 };

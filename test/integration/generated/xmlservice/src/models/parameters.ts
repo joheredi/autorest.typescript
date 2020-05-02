@@ -123,6 +123,18 @@ export const properties: coreHttp.OperationParameter = {
 export const comp2: coreHttp.OperationQueryParameter = {
   parameterPath: "comp",
   mapper: {
+    defaultValue: "properties",
+    isConstant: true,
+    serializedName: "comp",
+    type: {
+      name: "String"
+    }
+  }
+};
+
+export const comp3: coreHttp.OperationQueryParameter = {
+  parameterPath: "comp",
+  mapper: {
     defaultValue: "acl",
     isConstant: true,
     serializedName: "comp",
@@ -155,6 +167,42 @@ export const properties1: coreHttp.OperationParameter = {
     type: {
       name: "Sequence",
       element: { type: { name: "Composite", className: "SignedIdentifier" } }
+    }
+  }
+};
+
+export const comp4: coreHttp.OperationQueryParameter = {
+  parameterPath: "comp",
+  mapper: {
+    defaultValue: "acl",
+    isConstant: true,
+    serializedName: "comp",
+    type: {
+      name: "String"
+    }
+  }
+};
+
+export const restype2: coreHttp.OperationQueryParameter = {
+  parameterPath: "restype",
+  mapper: {
+    defaultValue: "container",
+    isConstant: true,
+    serializedName: "restype",
+    type: {
+      name: "String"
+    }
+  }
+};
+
+export const restype3: coreHttp.OperationQueryParameter = {
+  parameterPath: "restype",
+  mapper: {
+    defaultValue: "container",
+    isConstant: true,
+    serializedName: "restype",
+    type: {
+      name: "String"
     }
   }
 };

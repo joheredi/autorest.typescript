@@ -182,6 +182,28 @@ export const nextLink: coreHttp.OperationURLParameter = {
   skipEncoding: true
 };
 
+export const apiVersion2: coreHttp.OperationQueryParameter = {
+  parameterPath: ["customParameterGroup", "apiVersion"],
+  mapper: {
+    serializedName: "api_version",
+    required: true,
+    type: {
+      name: "String"
+    }
+  }
+};
+
+export const tenant2: coreHttp.OperationURLParameter = {
+  parameterPath: ["customParameterGroup", "tenant"],
+  mapper: {
+    serializedName: "tenant",
+    required: true,
+    type: {
+      name: "String"
+    }
+  }
+};
+
 export const nextLink1: coreHttp.OperationURLParameter = {
   parameterPath: "nextLink",
   mapper: {
@@ -230,6 +252,27 @@ export const nextLink4: coreHttp.OperationURLParameter = {
   skipEncoding: true
 };
 
+export const maxresults4: coreHttp.OperationParameter = {
+  parameterPath: ["pagingGetOdataMultiplePagesOptions", "maxresults"],
+  mapper: {
+    serializedName: "maxresults",
+    type: {
+      name: "Number"
+    }
+  }
+};
+
+export const timeout4: coreHttp.OperationParameter = {
+  parameterPath: ["pagingGetOdataMultiplePagesOptions", "timeout"],
+  mapper: {
+    defaultValue: 30,
+    serializedName: "timeout",
+    type: {
+      name: "Number"
+    }
+  }
+};
+
 export const nextLink5: coreHttp.OperationURLParameter = {
   parameterPath: "nextLink",
   mapper: {
@@ -240,6 +283,27 @@ export const nextLink5: coreHttp.OperationURLParameter = {
     }
   },
   skipEncoding: true
+};
+
+export const maxresults5: coreHttp.OperationParameter = {
+  parameterPath: ["pagingGetMultiplePagesWithOffsetOptions", "maxresults"],
+  mapper: {
+    serializedName: "maxresults",
+    type: {
+      name: "Number"
+    }
+  }
+};
+
+export const timeout5: coreHttp.OperationParameter = {
+  parameterPath: ["pagingGetMultiplePagesWithOffsetOptions", "timeout"],
+  mapper: {
+    defaultValue: 30,
+    serializedName: "timeout",
+    type: {
+      name: "Number"
+    }
+  }
 };
 
 export const nextLink6: coreHttp.OperationURLParameter = {
@@ -312,4 +376,25 @@ export const nextLink11: coreHttp.OperationURLParameter = {
     }
   },
   skipEncoding: true
+};
+
+export const maxresults6: coreHttp.OperationParameter = {
+  parameterPath: ["pagingGetMultiplePagesLroOptions", "maxresults"],
+  mapper: {
+    serializedName: "maxresults",
+    type: {
+      name: "Number"
+    }
+  }
+};
+
+export const timeout6: coreHttp.OperationParameter = {
+  parameterPath: ["pagingGetMultiplePagesLroOptions", "timeout"],
+  mapper: {
+    defaultValue: 30,
+    serializedName: "timeout",
+    type: {
+      name: "Number"
+    }
+  }
 };

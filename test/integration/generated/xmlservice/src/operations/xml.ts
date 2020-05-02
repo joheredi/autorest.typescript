@@ -853,7 +853,7 @@ const putServicePropertiesOperationSpec: coreHttp.OperationSpec = {
   httpMethod: "PUT",
   responses: { 201: {} },
   requestBody: Parameters.properties,
-  queryParameters: [Parameters.comp1, Parameters.restype],
+  queryParameters: [Parameters.restype, Parameters.comp2],
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.contentType],
   isXML: true,
@@ -879,7 +879,7 @@ const getAclsOperationSpec: coreHttp.OperationSpec = {
       }
     }
   },
-  queryParameters: [Parameters.comp2, Parameters.restype1],
+  queryParameters: [Parameters.comp3, Parameters.restype1],
   urlParameters: [Parameters.$host],
   isXML: true,
   serializer
@@ -889,7 +889,7 @@ const putAclsOperationSpec: coreHttp.OperationSpec = {
   httpMethod: "PUT",
   responses: { 201: {} },
   requestBody: Parameters.properties1,
-  queryParameters: [Parameters.comp2, Parameters.restype1],
+  queryParameters: [Parameters.comp4, Parameters.restype2],
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.contentType],
   isXML: true,
@@ -904,7 +904,7 @@ const listBlobsOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ListBlobsResponse
     }
   },
-  queryParameters: [Parameters.comp, Parameters.restype1],
+  queryParameters: [Parameters.comp, Parameters.restype3],
   urlParameters: [Parameters.$host],
   isXML: true,
   serializer

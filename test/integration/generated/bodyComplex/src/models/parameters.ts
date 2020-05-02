@@ -142,7 +142,7 @@ export const complexBody18: coreHttp.OperationParameter = {
 
 export const complexBody19: coreHttp.OperationParameter = {
   parameterPath: "complexBody",
-  mapper: Mappers.Fish
+  mapper: Mappers.Salmon
 };
 
 export const complexBody20: coreHttp.OperationParameter = {
@@ -151,6 +151,11 @@ export const complexBody20: coreHttp.OperationParameter = {
 };
 
 export const complexBody21: coreHttp.OperationParameter = {
+  parameterPath: "complexBody",
+  mapper: Mappers.Fish
+};
+
+export const complexBody22: coreHttp.OperationParameter = {
   parameterPath: "complexBody",
   mapper: Mappers.ReadonlyObj
 };

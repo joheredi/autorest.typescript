@@ -87,7 +87,7 @@ const putValidOperationSpec: coreHttp.OperationSpec = {
       bodyMapper: Mappers.ErrorModel
     }
   },
-  requestBody: Parameters.complexBody21,
+  requestBody: Parameters.complexBody22,
   urlParameters: [Parameters.$host],
   headerParameters: [Parameters.contentType],
   serializer

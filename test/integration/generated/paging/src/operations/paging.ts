@@ -822,8 +822,8 @@ const nextFragmentWithGroupingOperationSpec: coreHttp.OperationSpec = {
     },
     default: {}
   },
-  queryParameters: [Parameters.apiVersion1],
-  urlParameters: [Parameters.$host, Parameters.tenant1, Parameters.nextLink],
+  queryParameters: [Parameters.apiVersion2],
+  urlParameters: [Parameters.$host, Parameters.nextLink, Parameters.tenant2],
   serializer
 };
 const getNoItemNamePagesNextOperationSpec: coreHttp.OperationSpec = {
@@ -879,8 +879,8 @@ const getOdataMultiplePagesNextOperationSpec: coreHttp.OperationSpec = {
   urlParameters: [Parameters.$host, Parameters.nextLink4],
   headerParameters: [
     Parameters.clientRequestId,
-    Parameters.maxresults1,
-    Parameters.timeout1
+    Parameters.maxresults4,
+    Parameters.timeout4
   ],
   serializer
 };
@@ -896,8 +896,8 @@ const getMultiplePagesWithOffsetNextOperationSpec: coreHttp.OperationSpec = {
   urlParameters: [Parameters.$host, Parameters.offset, Parameters.nextLink5],
   headerParameters: [
     Parameters.clientRequestId,
-    Parameters.maxresults2,
-    Parameters.timeout2
+    Parameters.maxresults5,
+    Parameters.timeout5
   ],
   serializer
 };
@@ -982,8 +982,8 @@ const getMultiplePagesLRONextOperationSpec: coreHttp.OperationSpec = {
   urlParameters: [Parameters.$host, Parameters.nextLink11],
   headerParameters: [
     Parameters.clientRequestId,
-    Parameters.maxresults3,
-    Parameters.timeout3
+    Parameters.maxresults6,
+    Parameters.timeout6
   ],
   serializer
 };

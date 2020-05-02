@@ -77,10 +77,22 @@ export const excluded: coreHttp.OperationQueryParameter = {
   }
 };
 
-export const thing: coreHttp.OperationURLParameter = {
-  parameterPath: "thing",
+export const contentType2: coreHttp.OperationParameter = {
+  parameterPath: "contentType",
   mapper: {
-    serializedName: "thing",
+    defaultValue: "text/plain",
+    isConstant: true,
+    serializedName: "Content-Type",
+    type: {
+      name: "String"
+    }
+  }
+};
+
+export const data2: coreHttp.OperationParameter = {
+  parameterPath: "data",
+  mapper: {
+    serializedName: "data",
     required: true,
     type: {
       name: "String"
@@ -88,13 +100,13 @@ export const thing: coreHttp.OperationURLParameter = {
   }
 };
 
-export const excluded1: coreHttp.OperationQueryParameter = {
-  parameterPath: ["options", "excluded"],
+export const thing: coreHttp.OperationURLParameter = {
+  parameterPath: "thing",
   mapper: {
-    serializedName: "excluded",
+    serializedName: "thing",
+    required: true,
     type: {
-      name: "Sequence",
-      element: { type: { name: "String" } }
+      name: "String"
     }
   }
 };

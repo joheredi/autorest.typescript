@@ -47,17 +47,6 @@ export const numberBody: coreHttp.OperationParameter = {
 export const numberBody1: coreHttp.OperationParameter = {
   parameterPath: "numberBody",
   mapper: {
-    serializedName: "numberBody",
-    required: true,
-    type: {
-      name: "Number"
-    }
-  }
-};
-
-export const numberBody2: coreHttp.OperationParameter = {
-  parameterPath: "numberBody",
-  mapper: {
     defaultValue: 99999999.99,
     isConstant: true,
     serializedName: "numberBody",
@@ -67,7 +56,7 @@ export const numberBody2: coreHttp.OperationParameter = {
   }
 };
 
-export const numberBody3: coreHttp.OperationParameter = {
+export const numberBody2: coreHttp.OperationParameter = {
   parameterPath: "numberBody",
   mapper: {
     defaultValue: -99999999.99,
@@ -79,18 +68,7 @@ export const numberBody3: coreHttp.OperationParameter = {
   }
 };
 
-export const numberBody4: coreHttp.OperationParameter = {
-  parameterPath: "numberBody",
-  mapper: {
-    serializedName: "numberBody",
-    required: true,
-    type: {
-      name: "Number"
-    }
-  }
-};
-
-export const numberBody5: coreHttp.OperationParameter = {
+export const numberBody3: coreHttp.OperationParameter = {
   parameterPath: "numberBody",
   mapper: {
     defaultValue: 99999999.99,
@@ -102,7 +80,7 @@ export const numberBody5: coreHttp.OperationParameter = {
   }
 };
 
-export const numberBody6: coreHttp.OperationParameter = {
+export const numberBody4: coreHttp.OperationParameter = {
   parameterPath: "numberBody",
   mapper: {
     defaultValue: -99999999.99,

@@ -52,3 +52,8 @@ export const product1: coreHttp.OperationParameter = {
   parameterPath: ["options", "product"],
   mapper: Mappers.SubProduct
 };
+
+export const product2: coreHttp.OperationParameter = {
+  parameterPath: ["options", "product"],
+  mapper: Mappers.SubProduct
+};
