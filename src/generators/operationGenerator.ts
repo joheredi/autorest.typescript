@@ -581,10 +581,13 @@ export function writeOperations(
     );
     const responseName = getResponseType(operation, importedModels);
 
+    const returnType = operation.isLRO
+      ? `Promise<LROPoller<${responseName}>>`
+      : `Promise<${responseName}>`;
     const operationMethod = operationGroupClass.addMethod({
       name: normalizeName(operation.name, NameType.Property),
       parameters: baseMethodParameters,
-      returnType: `Promise<${responseName}>`,
+      returnType,
       docs: [
         generateOperationJSDoc(baseMethodParameters, operation.description)
       ],
@@ -603,9 +606,12 @@ export function writeOperations(
     }
 
     for (const overload of overloadParameterDeclarations) {
+      const returnType = operation.isLRO
+        ? `Promise<LROPoller<${responseName}>>`
+        : `Promise<${responseName}>`;
       operationMethod.addOverload({
         parameters: overload,
-        returnType: `Promise<${responseName}>`,
+        returnType,
         docs: [generateOperationJSDoc(overload, operation.description)]
       });
     }
@@ -792,7 +798,7 @@ function writeMultiMediaTypeOperationBody(
 
     return new LROPoller({
       initialOperationArguments: operationArguments,
-      initialOperationSpec: operationSpec
+      initialOperationSpec: operationSpec,
       initialOperationResult,
       sendOperation,
       ${finalStateStr}
