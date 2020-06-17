@@ -1,0 +1,89 @@
+parameters:
+  Artifacts: []
+  ServiceDirectory: not-specified
+  Matrix:
+    Linux_Node8:
+      OSVmImage: "ubuntu-18.04"
+      NodeTestVersion: "8.x"
+      TestType: "node"
+    Windows_Node10:
+      OSVmImage: "windows-2019"
+      NodeTestVersion: "10.x"
+      TestType: "node"
+    macOS_Node12:
+      OSVmImage: "macOS-10.15"
+      NodeTestVersion: "12.x"
+      TestType: "node"
+    Browser_Linux_Node12:
+      OSVmImage: "ubuntu-18.04"
+      NodeTestVersion: "12.x"
+      TestType: "browser"
+
+jobs:
+  - job: "Build"
+    variables:
+      - template: eng/pipelines/trmplates/variables/globals.yml@azure-sdk-for-js
+
+    pool:
+      vmImage: "$(OSVmImage)"
+
+    steps:
+      - script: |
+          echo "##vso[build.addbuildtag]Scheduled"
+        displayName: "Tag scheduled builds"
+        condition: and(always(),and(eq(variables['Build.SourceBranchName'],'master'),eq(variables['Build.Reason'],'Schedule')))
+
+      - template: eng/pipelines/trmplates/steps/common.yml@azure-sdk-for-js
+
+      - script: |
+          npm install
+        condition: and(succeeded(),ne(variables['SetDevVersion'],'true'))
+        displayName: "Install dependencies"
+
+      - script: |
+          npm run build
+        condition: and(succeeded(),ne(variables['SetDevVersion'],'true'))
+        displayName: "Build Package"
+
+      - script: |
+          npm pack
+        displayName: "Npm Pack"
+
+      - task: CopyFiles@2
+        inputs:
+          contents: |
+            *.tgz
+          targetFolder: $(Build.ArtifactStagingDirectory)
+          flattenFolders: true
+        displayName: "Copy package"
+
+      - task: PublishPipelineArtifact@1
+        condition: succeededOrFailed()
+        displayName: "Publish artifacts"
+        inputs:
+          artifactName: packages
+          path: $(Build.ArtifactStagingDirectory)
+
+  # Only run tests if the matrix has entries
+  - ${{ if ne(parameters.RunUnitTests, false) }}:
+      - job: "Test"
+
+    strategy:
+      matrix: ${{parameters.Matrix}}
+
+    pool:
+      vmImage: "$(OSVmImage)"
+
+    variables:
+      - template: eng/pipelines/trmplates/variables/globals.yml@azure-sdk-for-js
+
+    steps:
+      - template: eng/pipelines/trmplates/steps/common.yml@azure-sdk-for-js
+
+      - script: npm install
+        displayName: "Install Dependencies"
+
+      - script: npm run build
+        displayName: "Build"
+
+      - script: npm run test

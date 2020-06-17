@@ -1,0 +1,21 @@
+parameters:
+  Artifacts: []
+  ServiceDirectory: not-specified
+  IncludeRelease: true
+  TargetDocRepoOwner: "MicrosoftDocs"
+  TargetDocRepoName: "azure-docs-sdk-node"
+
+resources:
+  repositories:
+    - repository: azure-sdk-for-js
+      type: github
+      name: Azure/azure-sdk-for-js
+      endpoint: azure
+
+stages:
+  - stage: Build
+    jobs:
+      - template: ../jobs/archetype-external.yml
+        parameters:
+          ServiceDirectory: ${{parameters.ServiceDirectory}}
+          RunUnitTests: ${{parameters.RunUnitTests}}

@@ -1,0 +1,30 @@
+resources:
+  repositories:
+    - repository: azure-sdk-build-tools
+      type: git
+      name: internal/azure-sdk-build-tools
+    - repository: azure-sdk-tools
+      type: github
+      name: Azure/azure-sdk-tools
+      endpoint: azure
+    - repository: azure-sdk-for-js
+      type: github
+      name: Azure/azure-sdk-for-js
+      endpoint: azure
+
+trigger:
+  branches:
+    include:
+      - master
+      - v4x
+  paths:
+    include:
+      - src/
+
+stages:
+  - template: ./stages/archetype-external.yml
+    parameters:
+      ServiceDirectory: Autorest.Typescript
+      Artifacts:
+        - name: autorest-typescript
+          safeName: autoresttypescript
