@@ -27,7 +27,10 @@ stages:
               versionSpec: $(NodeVersion)
 
           - script: npm install
-          - script: npm build
+            displayName: "npm install"
+
+          - script: npm run build
+            displayName: "npm run build"
 
           # Test
           # Regenerate test clients
@@ -114,5 +117,6 @@ stages:
               artifact: AutorestTypescript
 
           # Get Package Version
+          - script: echo node -p -e "require('./$DROP_FOLDER/package.json').version"
           - script: echo "##vso[task.setvariable variable=version]1.0.0"
           - script: echo my pipeline variable is $(version)
