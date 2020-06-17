@@ -1,0 +1,118 @@
+trigger:
+  branches:
+    include:
+      - v6
+
+pr:
+  branches:
+    include:
+      - v6
+
+variables:
+  NodeVersion: "10.x"
+
+stages:
+  - stage: BuildAndTest
+    displayName: "Build and Test"
+    jobs:
+      - job: Build
+        displayName: "Build, regenerate and test"
+        pool:
+          vmImage: "Ubuntu 16.04"
+
+        steps:
+          - task: NodeTool@0
+            displayName: "Install Node 10"
+            inputs:
+              versionSpec: $(NodeVersion)
+
+          - script: npm install
+          - script: npm build
+
+          # Test
+          # Regenerate test clients
+          - task: gulp@0
+            displayName: "Run gulp regenerate"
+            inputs:
+              targets: regenerate
+              verbose: false
+          - task: gulp@0
+            displayName: "gulp testci"
+            inputs:
+              targets: testci
+              verbose: false
+          # Publish test results
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFiles: "**/test-results.xml"
+              testRunTitle: "Test results for JavaScript"
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/*coverage.xml"
+              reportDirectory: "$(System.DefaultWorkingDirectory)/**/coverage"
+
+          # Prepare for release
+          - script: npm pack
+          - task: CopyFiles@2
+            displayName: "Copy Package to: drop"
+            inputs:
+              Contents: "*.tgz"
+              TargetFolder: drop
+          - task: CopyFiles@2
+            displayName: "Copy package.json to: drop"
+            inputs:
+              Contents: "package.json"
+              TargetFolder: drop
+          - task: PublishBuildArtifacts@1
+            inputs:
+              targetPath: $(System.DefaultWorkingDirectory)/drop
+              artifactName: AutorestTypescript
+
+      - job: Check_Everything
+        pool:
+          vmImage: "Ubuntu 16.04"
+        steps:
+          - task: NodeTool@0
+            displayName: "Install Node 10"
+            inputs:
+              versionSpec: 10.x
+          - task: Npm@1
+            displayName: "npm install"
+            inputs:
+              command: custom
+              verbose: false
+              customCommand: install
+          - task: Npm@1
+            displayName: "npm run check:everything -- --azure-devops"
+            inputs:
+              command: custom
+              verbose: false
+              customCommand: run check:everything -- --azure-devops
+
+  - stage: Release
+    displayName: "Release Autorest.Typescript"
+    dependsOn: BuildAndTest
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+
+    jobs:
+      - job: Publish
+        displayName: "Publish to NPM"
+
+        pool:
+          vmImage: "Ubuntu 16.04"
+
+        steps:
+          - task: NodeTool@0
+            displayName: "Install Node 10"
+            inputs:
+              versionSpec: $(NodeVersion)
+
+          # Download Artifacts from Build Stage
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: AutorestTypescript
+
+          # Get Package Version
+          - script: echo "##vso[task.setvariable variable=version]1.0.0"
+          - script: echo my pipeline variable is $(version)
