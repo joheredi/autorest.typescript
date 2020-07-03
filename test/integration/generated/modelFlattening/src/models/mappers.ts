@@ -176,28 +176,6 @@ export const ResourceCollection: coreHttp.CompositeMapper = {
   }
 };
 
-export const BaseProduct: coreHttp.CompositeMapper = {
-  type: {
-    name: "Composite",
-    className: "BaseProduct",
-    modelProperties: {
-      productId: {
-        serializedName: "base_product_id",
-        required: true,
-        type: {
-          name: "String"
-        }
-      },
-      description: {
-        serializedName: "base_product_description",
-        type: {
-          name: "String"
-        }
-      }
-    }
-  }
-};
-
 export const SimpleProduct: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",
@@ -234,6 +212,22 @@ export const SimpleProduct: coreHttp.CompositeMapper = {
   }
 };
 
+export const ProductUrl: coreHttp.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "ProductUrl",
+    modelProperties: {
+      ...GenericUrl.type.modelProperties,
+      odataValue: {
+        serializedName: "@odata\\.value",
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
 export const GenericUrl: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",
@@ -249,14 +243,20 @@ export const GenericUrl: coreHttp.CompositeMapper = {
   }
 };
 
-export const ProductUrl: coreHttp.CompositeMapper = {
+export const BaseProduct: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "ProductUrl",
+    className: "BaseProduct",
     modelProperties: {
-      ...GenericUrl.type.modelProperties,
-      odataValue: {
-        serializedName: "@odata\\.value",
+      productId: {
+        serializedName: "base_product_id",
+        required: true,
+        type: {
+          name: "String"
+        }
+      },
+      description: {
+        serializedName: "base_product_description",
         type: {
           name: "String"
         }

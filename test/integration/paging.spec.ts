@@ -299,4 +299,13 @@ describe("Integration tests for Paging", () => {
       );
     });
   });
+
+  describe("#getPagingModelWithItemNameWithXMSClientName", () => {
+    it("succeeds", async () => {
+      const result = await client.paging.getPagingModelWithItemNameWithXMSClientName();
+      assert.deepEqual(result.indexes, [
+        { properties: { id: 1, name: "Product" } }
+      ]);
+    });
+  });
 });

@@ -314,19 +314,14 @@ export const DictionaryWrapper: coreHttp.CompositeMapper = {
   }
 };
 
-export const Pet: coreHttp.CompositeMapper = {
+export const Siamese: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "Pet",
+    className: "Siamese",
     modelProperties: {
-      id: {
-        serializedName: "id",
-        type: {
-          name: "Number"
-        }
-      },
-      name: {
-        serializedName: "name",
+      ...Cat.type.modelProperties,
+      breed: {
+        serializedName: "breed",
         type: {
           name: "String"
         }
@@ -374,14 +369,19 @@ export const Dog: coreHttp.CompositeMapper = {
   }
 };
 
-export const Siamese: coreHttp.CompositeMapper = {
+export const Pet: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",
-    className: "Siamese",
+    className: "Pet",
     modelProperties: {
-      ...Cat.type.modelProperties,
-      breed: {
-        serializedName: "breed",
+      id: {
+        serializedName: "id",
+        type: {
+          name: "Number"
+        }
+      },
+      name: {
+        serializedName: "name",
         type: {
           name: "String"
         }
@@ -581,9 +581,8 @@ export const MyBaseType: coreHttp.CompositeMapper = {
     },
     modelProperties: {
       kind: {
-        defaultValue: "Kind1",
-        isConstant: true,
         serializedName: "kind",
+        required: true,
         type: {
           name: "String"
         }

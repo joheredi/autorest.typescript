@@ -8,6 +8,29 @@
 
 import * as coreHttp from "@azure/core-http";
 
+export const Product: coreHttp.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "Product",
+    modelProperties: {
+      ...Resource.type.modelProperties,
+      provisioningState: {
+        serializedName: "properties.provisioningState",
+        type: {
+          name: "String"
+        }
+      },
+      provisioningStateValues: {
+        serializedName: "properties.provisioningStateValues",
+        readOnly: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
 export const Resource: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",
@@ -51,36 +74,13 @@ export const Resource: coreHttp.CompositeMapper = {
   }
 };
 
-export const Product: coreHttp.CompositeMapper = {
-  type: {
-    name: "Composite",
-    className: "Product",
-    modelProperties: {
-      ...Resource.type.modelProperties,
-      provisioningState: {
-        serializedName: "properties.provisioningState",
-        type: {
-          name: "String"
-        }
-      },
-      provisioningStateValues: {
-        serializedName: "properties.provisioningStateValues",
-        readOnly: true,
-        type: {
-          name: "String"
-        }
-      }
-    }
-  }
-};
-
 export const CloudError: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",
     className: "CloudError",
     modelProperties: {
-      status: {
-        serializedName: "status",
+      code: {
+        serializedName: "code",
         type: {
           name: "Number"
         }
@@ -116,22 +116,6 @@ export const Sku: coreHttp.CompositeMapper = {
   }
 };
 
-export const SubResource: coreHttp.CompositeMapper = {
-  type: {
-    name: "Composite",
-    className: "SubResource",
-    modelProperties: {
-      id: {
-        serializedName: "id",
-        readOnly: true,
-        type: {
-          name: "String"
-        }
-      }
-    }
-  }
-};
-
 export const SubProduct: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",
@@ -146,6 +130,22 @@ export const SubProduct: coreHttp.CompositeMapper = {
       },
       provisioningStateValues: {
         serializedName: "properties.provisioningStateValues",
+        readOnly: true,
+        type: {
+          name: "String"
+        }
+      }
+    }
+  }
+};
+
+export const SubResource: coreHttp.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "SubResource",
+    modelProperties: {
+      id: {
+        serializedName: "id",
         readOnly: true,
         type: {
           name: "String"

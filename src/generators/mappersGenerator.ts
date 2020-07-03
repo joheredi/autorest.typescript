@@ -32,26 +32,25 @@ export function generateMappers(
     return;
   }
   const mappersFile = project.createSourceFile(
-    `${clientDetails.srcPath}/models/mappers.ts`,
+    `${clientDetails.srcPath}/mappers/index.ts`,
     undefined,
     { overwrite: true }
   );
 
-  writeMappers(mappersFile, clientDetails);
+  writeMappers(mappersFile, project, clientDetails);
   writeDiscriminatorsMapping(mappersFile, clientDetails);
-
-  mappersFile.addImportDeclaration({
-    namespaceImport: "coreHttp",
-    moduleSpecifier: "@azure/core-http"
-  });
 }
 
 /**
  * This function writes to the mappers.ts file all the mappers to be used by @azure/core-http for serialization
  */
-function writeMappers(sourceFile: SourceFile, { mappers }: ClientDetails) {
+function writeMappers(
+  sourceFile: SourceFile,
+  project: Project,
+  clientDetails: ClientDetails
+) {
   const generatedMappers: Map<string, Mapper> = new Map<string, Mapper>();
-
+  const { mappers } = clientDetails;
   mappers.forEach(mapper => {
     const mapperClassName = (mapper as CompositeMapper).type.className;
     if (!mapperClassName) {
@@ -59,6 +58,14 @@ function writeMappers(sourceFile: SourceFile, { mappers }: ClientDetails) {
       logger.verbose(JSON.stringify(mapper));
       return;
     }
+
+    const parents = extractParents(mapper);
+    const fileName = normalizeName(mapperClassName, NameType.File);
+    const mapperFile = project.createSourceFile(
+      `${clientDetails.srcPath}/mappers/${fileName}.ts`,
+      undefined,
+      { overwrite: true }
+    );
 
     const existingMapper = generatedMappers.get(mapperClassName);
 
@@ -73,7 +80,18 @@ function writeMappers(sourceFile: SourceFile, { mappers }: ClientDetails) {
       );
     }
 
-    sourceFile.addVariableStatement({
+    mapperFile.addImportDeclarations([
+      {
+        namedImports: ["CompositeMapper"],
+        moduleSpecifier: "@azure/core-http"
+      },
+      {
+        namedImports: parents,
+        moduleSpecifier: "./"
+      }
+    ]);
+
+    mapperFile.addVariableStatement({
       isExported: true,
       declarations: [
         {
@@ -81,12 +99,17 @@ function writeMappers(sourceFile: SourceFile, { mappers }: ClientDetails) {
             (mapper as CompositeMapper).type.className || "MISSING_MAPPER",
             NameType.Class
           ),
-          type: "coreHttp.CompositeMapper",
+          type: "CompositeMapper",
           initializer: writer => writeMapper(writer, mapper)
         }
       ],
       declarationKind: VariableDeclarationKind.Const,
       leadingTrivia: writer => writer.blankLine()
+    });
+
+    sourceFile.addExportDeclaration({
+      namedExports: [mapperClassName],
+      moduleSpecifier: `./${fileName}`
     });
 
     // Keep track of the mapper we just generated

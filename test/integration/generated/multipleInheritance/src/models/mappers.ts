@@ -8,22 +8,6 @@
 
 import * as coreHttp from "@azure/core-http";
 
-export const Pet: coreHttp.CompositeMapper = {
-  type: {
-    name: "Composite",
-    className: "Pet",
-    modelProperties: {
-      name: {
-        serializedName: "name",
-        required: true,
-        type: {
-          name: "String"
-        }
-      }
-    }
-  }
-};
-
 export const Horse: coreHttp.CompositeMapper = {
   type: {
     name: "Composite",
@@ -34,6 +18,22 @@ export const Horse: coreHttp.CompositeMapper = {
         serializedName: "isAShowHorse",
         type: {
           name: "Boolean"
+        }
+      }
+    }
+  }
+};
+
+export const Pet: coreHttp.CompositeMapper = {
+  type: {
+    name: "Composite",
+    className: "Pet",
+    modelProperties: {
+      name: {
+        serializedName: "name",
+        required: true,
+        type: {
+          name: "String"
         }
       }
     }
