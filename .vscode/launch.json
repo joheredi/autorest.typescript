@@ -12,11 +12,19 @@
     },
     {
       "type": "node",
+      "request": "attach",
+      "name": "Attach - TestServer",
+      "port": 15647
+    },
+    {
+      "type": "node",
       "request": "launch",
       "name": "Launch Program",
       "program": "${workspaceFolder}\\dist\\src\\main.js",
       "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ]
     },
     {
       "type": "node",

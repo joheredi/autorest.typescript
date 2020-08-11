@@ -15,6 +15,7 @@ export interface OperationRequestDetails {
   method: HttpMethod;
   mediaType?: KnownMediaType;
   parameters?: Parameter[];
+  isMultipart?: boolean;
 }
 
 export type OperationResponseMapper = Mapper | string;
@@ -81,6 +82,7 @@ export interface OperationSpecDetails {
   httpMethod: string;
   responses: OperationSpecResponses;
   requestBody?: ParameterDetails;
+  formDataParameters?: ParameterDetails[];
   queryParameters?: ParameterDetails[];
   urlParameters?: ParameterDetails[];
   isXML?: boolean;

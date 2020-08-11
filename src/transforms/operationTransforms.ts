@@ -108,6 +108,7 @@ export function transformOperationSpec(
     const httpInfo = extractHttpDetails(request);
     const {
       requestBody,
+      formDataParameters,
       queryParameters,
       urlParameters,
       headerParameters
@@ -120,6 +121,7 @@ export function transformOperationSpec(
       ...httpInfo,
       responses: extractSpecResponses(operationDetails),
       requestBody,
+      ...(formDataParameters && formDataParameters.length && { formDataParameters }),
       ...(queryParameters && queryParameters.length && { queryParameters }),
       ...(urlParameters && urlParameters.length && { urlParameters }),
       ...(headerParameters && headerParameters.length && { headerParameters }),
@@ -182,9 +184,9 @@ export function getSpecType(responseSchema: Schema, expand = false): SpecType {
       typeName = getSpecType(constantSchema.valueType).name;
       constantProps = expand
         ? {
-            isConstant: true,
-            defaultValue: constantSchema.value.value
-          }
+          isConstant: true,
+          defaultValue: constantSchema.value.value
+        }
         : undefined;
       break;
     case SchemaType.String:
@@ -473,10 +475,23 @@ function getGroupedParameters(
       !mediaType || !p.targetMediaType || p.targetMediaType === mediaType;
     return Boolean(matchesOperation && matchesMediaType);
   });
+
+  let body: { requestBody?: ParameterDetails, formDataParameters?: ParameterDetails[] } = {};
+  if (operationParams.some(p => p.location === ParameterLocation.Body)) {
+    body = mediaType === "multipart" ? {
+      formDataParameters: operationParams.filter(
+        p => p.location === ParameterLocation.Body
+      )
+    } :
+      {
+        requestBody: operationParams.find(
+          p => p.location === ParameterLocation.Body
+        )
+      }
+  }
+
   return {
-    requestBody: operationParams.find(
-      p => p.location === ParameterLocation.Body
-    ),
+    ...body,
     queryParameters: operationParams.filter(
       p => p.location === ParameterLocation.Query
     ),

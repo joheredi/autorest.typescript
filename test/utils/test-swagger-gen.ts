@@ -103,6 +103,12 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
     packageName: "body-file",
     licenseHeader: true
   },
+  bodyFormData: {
+    swagger: "body-formdata.json ",
+    clientName: "BodyFormData",
+    packageName: "body-form-data",
+    licenseHeader: true
+  },
   bodyInteger: {
     swagger: "body-integer.json",
     clientName: "BodyIntegerClient",

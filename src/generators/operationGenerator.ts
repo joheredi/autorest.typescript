@@ -145,6 +145,7 @@ function buildSpec(spec: OperationSpecDetails): string {
   const responses = buildResponses(spec);
   const requestBody = buildRequestBody(spec);
   const queryParams = buildParameters(spec, "queryParameters");
+  const formDataParams = buildParameters(spec, "formDataParameters");
   const urlParams = buildParameters(spec, "urlParameters");
   const headerParams = buildParameters(spec, "headerParameters");
   const contentType = buildContentType(spec);
@@ -157,20 +158,25 @@ function buildSpec(spec: OperationSpecDetails): string {
 
   return `{ path: "${spec.path}", httpMethod: "${
     spec.httpMethod
-  }", responses: {${responses.join(
-    ", "
-  )}},${requestBody}${queryParams}${urlParams}${headerParams}${isXML}${contentType}${mediaType}${serializerName}
+    }", responses: {${responses.join(
+      ", "
+    )}},${requestBody}${formDataParams}${queryParams}${urlParams}${headerParams}${isXML}${contentType}${mediaType}${serializerName}
     }`;
 }
 
-function buildMediaType({ requestBody }: OperationSpecDetails) {
+function buildMediaType({ requestBody, formDataParameters }: OperationSpecDetails) {
+  const targetMediaType = requestBody?.targetMediaType || formDataParameters?.find(p => !!p)?.targetMediaType;
   if (requestBody?.targetMediaType) {
     return `mediaType: '${requestBody.targetMediaType}',`;
   }
   return "";
 }
 
-function buildContentType({ requestBody, isXML }: OperationSpecDetails) {
+function buildContentType({ requestBody, isXML, formDataParameters }: OperationSpecDetails) {
+  if (formDataParameters && formDataParameters.some(p => p.targetMediaType === "multipart")) {
+    return `contentType: "multipart/form-data",`;
+  }
+
   return requestBody && isXML
     ? "contentType: 'application/xml; charset=utf-8',"
     : "";
@@ -579,7 +585,7 @@ function getOperationParameterSignatures(
 function findLastRequiredParamIndex(
   params: ParameterWithDescription[]
 ): number {
-  for (let i = params.length; i--; ) {
+  for (let i = params.length; i--;) {
     if (!params[i].hasQuestionToken) {
       return i;
     }
@@ -744,9 +750,9 @@ function writeNoOverloadsOperationBody(
   } else {
     operationMethod.addStatements(
       `return this${
-        isInline ? "" : ".client"
+      isInline ? "" : ".client"
       }.sendOperationRequest({${sendParams}${
-        !!sendParams ? "," : ""
+      !!sendParams ? "," : ""
       }}, ${operationSpecName}) as Promise<${responseName}>`
     );
   }
@@ -768,7 +774,7 @@ function writeLROOperationBody(
   const args: coreHttp.OperationArguments  = {${sendParams}};
   const sendOperation = (args: coreHttp.OperationArguments, spec: coreHttp.OperationSpec) =>  this${
     isInline ? "" : ".client"
-  }.sendOperationRequest(args, spec) as Promise<${responseName}>;
+    }.sendOperationRequest(args, spec) as Promise<${responseName}>;
   const initialOperationResult = await sendOperation(args, ${operationSpecName});
 
   return new LROPoller({
@@ -836,16 +842,16 @@ function writeMultiMediaTypeOperationBody(
       operationSpec = ${operation.name}$${mediaType}OperationSpec
       operationArguments = {
         ${overloadParameters
-          .map((param, index) => `${param.name}: args[${index}]`)
-          .join(",")}
+        .map((param, index) => `${param.name}: args[${index}]`)
+        .join(",")}
       };
     `;
 
     conditionals.push(
       `if (
         ${contentTypeValues
-          .map(type => `args[${contentTypePosition}] === "${type}"`)
-          .join(" || ")}
+        .map(type => `args[${contentTypePosition}] === "${type}"`)
+        .join(" || ")}
         ) {
           ${assignments}
       }`
@@ -862,7 +868,7 @@ function writeMultiMediaTypeOperationBody(
   if (!operation.isLRO) {
     statements += `return this${
       isInline ? "" : ".client"
-    }.sendOperationRequest(operationArguments, operationSpec) as Promise<${responseName}>`;
+      }.sendOperationRequest(operationArguments, operationSpec) as Promise<${responseName}>`;
   } else {
     const finalStateVia =
       operation.lroOptions && operation.lroOptions["final-state-via"];
@@ -874,7 +880,7 @@ function writeMultiMediaTypeOperationBody(
     statements += `
     const sendOperation = (args: coreHttp.OperationArguments, spec: coreHttp.OperationSpec) =>  this${
       isInline ? "" : ".client"
-    }.sendOperationRequest(args, spec) as Promise<${responseName}>;
+      }.sendOperationRequest(args, spec) as Promise<${responseName}>;
     const initialOperationResult = await sendOperation(operationArguments, operationSpec);
 
     return new LROPoller({
@@ -951,7 +957,7 @@ function generateOperationJSDoc(
 
   return `${
     description ? wrapString(description) + "\n" : description
-  }${paramJSDoc}`;
+    }${paramJSDoc}`;
 }
 
 function hasMediaType(
