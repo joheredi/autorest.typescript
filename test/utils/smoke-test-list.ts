@@ -79,7 +79,7 @@ export const readmes: SpecDefinition[] = [
   {
     path:
       "./.tmp/specs/specification/cognitiveservices/data-plane/AnomalyDetector/readme.md",
-    buildTag: "ad" as any
+    buildTag: "ci_3"
   }
   // {
   //   path:
