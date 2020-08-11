@@ -76,6 +76,11 @@ export const readmes: SpecDefinition[] = [
     path: "./.tmp/specs/specification/msi/resource-manager/readme.md",
     buildTag: "ci_3"
   },
+  {
+    path:
+      "./.tmp/specs/specification/cognitiveservices/data-plane/AnomalyDetector/readme.md",
+    buildTag: "ad" as any
+  }
   // {
   //   path:
   //     "./.tmp/specs/specification/adhybridhealthservice/resource-manager/readme.md",
