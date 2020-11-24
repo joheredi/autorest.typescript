@@ -176,11 +176,7 @@ const writeStatements = (lines: string[], shouldAddBlankLine = false) => (
   shouldAddBlankLine && writer.blankLine();
 };
 
-function writeDefaultOptions(
-  hasCredentials: boolean,
-  hasLRO: boolean,
-  { endpoint }: EndpointDetails
-) {
+function writeDefaultOptions(hasCredentials: boolean, hasLRO: boolean) {
   const credsPolicy = hasCredentials
     ? `const credsPolicy = coreHttp.isTokenCredential(credentials)
         ? coreHttp.bearerTokenAuthenticationPolicy(
