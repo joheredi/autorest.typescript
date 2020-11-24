@@ -79,10 +79,13 @@ function writeImports(
   hasLRO: boolean,
   importedModels: Set<string>
 ) {
-  sourceFile.addImportDeclaration({
-    namespaceImport: "coreHttp",
-    moduleSpecifier: "@azure/core-http"
-  });
+  sourceFile.addImportDeclarations([
+    {
+      namespaceImport: "coreHttp",
+      moduleSpecifier: "@azure/core-http"
+    },
+    { namedImports: ["logger"], moduleSpecifier: "./logger" }
+  ]);
 
   if (importedModels.size) {
     sourceFile.addImportDeclaration({
@@ -173,17 +176,25 @@ const writeStatements = (lines: string[], shouldAddBlankLine = false) => (
   shouldAddBlankLine && writer.blankLine();
 };
 
-function writeDefaultOptions(hasCredentials: boolean, hasLRO: boolean) {
-  const policies = ` 
-  const defaultPipelines = Array.isArray(options.requestPolicyFactories)
-  ? options.requestPolicyFactories
-  : coreHttp.createPipelineFromOptions(options)
-      .requestPolicyFactories as coreHttp.RequestPolicyFactory[];
-
-  options = {
-      ...options,
-      requestPolicyFactories: [lroPolicy(), ...defaultPipelines]
-    };`;
+function writeDefaultOptions(
+  hasCredentials: boolean,
+  hasLRO: boolean,
+  { endpoint }: EndpointDetails
+) {
+  const credsPolicy = hasCredentials
+    ? `const credsPolicy = coreHttp.isTokenCredential(credentials)
+        ? coreHttp.bearerTokenAuthenticationPolicy(
+            credentials,
+            "https://management.azure.com/.default"
+          )
+        : coreHttp.signingPolicy(credentials);`
+    : "";
+  const addLROPolicy = hasLRO
+    ? `
+  if (Array.isArray(pipeline.requestPolicyFactories)) {
+    pipeline.requestPolicyFactories.unshift(lroPolicy());
+  }`
+    : "";
 
   return `// Initializing default values for options
   if (!options) {
@@ -194,13 +205,27 @@ function writeDefaultOptions(hasCredentials: boolean, hasLRO: boolean) {
      const defaultUserAgent = coreHttp.getDefaultUserAgentValue();
      options.userAgent = \`\${packageName}/\${packageVersion} \${defaultUserAgent}\`;
    }
-  
-   ${hasLRO ? policies : ""}
+ 
 
-  super(${hasCredentials ? "credentials" : `undefined`}, options);
-  
-  this.requestContentType = "application/json; charset=utf-8";
-  
+  const internalPipelineOptions: coreHttp.InternalPipelineOptions = {
+    ...options,
+    ...{
+      loggingOptions: {
+        logger: logger.info
+      }
+    }
+  };
+
+  ${credsPolicy}
+
+  const pipeline = coreHttp.createPipelineFromOptions(
+    internalPipelineOptions
+    ${hasCredentials ? ", credsPolicy" : ""}
+  );
+
+  ${addLROPolicy}
+
+  super(${hasCredentials ? "credentials" : `undefined`}, optionsWithDefaults);
   `;
 }
 
@@ -259,8 +284,7 @@ function buildConstructor(
       })),
       {
         name: "options",
-        hasQuestionToken: true,
-        type: clientOptionsParameterType
+        type: `${clientOptionsParameterType} = {}`
       }
     ]
   });

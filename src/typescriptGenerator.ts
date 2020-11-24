@@ -23,6 +23,7 @@ import { generateOperations } from "./generators/operationGenerator";
 import { generateParameters } from "./generators/parametersGenerator";
 import { generateLROFiles } from "./generators/LROGenerator";
 import { generateTracingFile } from "./generators/tracingFileGenerator";
+import { generateLoggerFile } from "./generators/loggerFileGenerator";
 import { TracingInfo } from "./models/clientDetails";
 
 const prettierTypeScriptOptions: prettier.Options = {
@@ -86,6 +87,7 @@ export async function generateTypeScriptLibrary(
     generateApiExtractorConfig(clientDetails, project);
   }
 
+  generateLoggerFile(clientDetails, project);
   generateClient(clientDetails, project);
   generateClientContext(clientDetails, packageDetails, project);
   generateModels(clientDetails, project);

@@ -30,6 +30,7 @@ export function generatePackageJson(
       "@azure/core-http": "^1.1.4",
       ...(clientDetails.tracing && {
         "@azure/core-tracing": "1.0.0-preview.9",
+        " @azure/logger": "^1.0.0",
         "@opentelemetry/api": "^0.10.2"
       }),
 
