@@ -221,7 +221,9 @@ function writeDefaultOptions(hasCredentials: boolean, hasLRO: boolean) {
 
   ${addLROPolicy}
 
-  super(${hasCredentials ? "credentials" : `undefined`}, optionsWithDefaults);
+  super(${hasCredentials ? "credentials" : `undefined`}, pipeline);
+
+  this.requestContentType = "application/json; charset=utf-8";
   `;
 }
 
