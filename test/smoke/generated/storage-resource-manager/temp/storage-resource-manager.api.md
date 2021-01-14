@@ -19,7 +19,7 @@ export type AccessTier = "Hot" | "Cool";
 
 // @public
 export interface AccountSasParameters {
-    iPAddressOrRange?: string;
+    IPAddressOrRange?: string;
     keyToSign?: string;
     permissions: Permissions_2;
     protocols?: HttpProtocol;
@@ -674,7 +674,7 @@ export type ImmutabilityPolicyUpdateType = string;
 // @public
 export interface IPRule {
     action?: "Allow";
-    iPAddressOrRange: string;
+    IPAddressOrRange: string;
 }
 
 // @public
@@ -1417,7 +1417,7 @@ export interface ServiceSasParameters {
     contentLanguage?: string;
     contentType?: string;
     identifier?: string;
-    iPAddressOrRange?: string;
+    IPAddressOrRange?: string;
     keyToSign?: string;
     partitionKeyEnd?: string;
     partitionKeyStart?: string;
@@ -1504,7 +1504,7 @@ export type StorageAccount = TrackedResource & {
     azureFilesIdentityBasedAuthentication?: AzureFilesIdentityBasedAuthentication;
     enableHttpsTrafficOnly?: boolean;
     readonly networkRuleSet?: NetworkRuleSet;
-    isHnsEnabled?: boolean;
+    IsHnsEnabled?: boolean;
     readonly geoReplicationStats?: GeoReplicationStats;
     readonly failoverInProgress?: boolean;
     largeFileSharesState?: LargeFileSharesState;
@@ -1527,7 +1527,7 @@ export interface StorageAccountCreateParameters {
     enableHttpsTrafficOnly?: boolean;
     encryption?: Encryption;
     identity?: Identity;
-    isHnsEnabled?: boolean;
+    IsHnsEnabled?: boolean;
     kind: Kind;
     largeFileSharesState?: LargeFileSharesState;
     location: string;

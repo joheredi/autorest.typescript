@@ -87,11 +87,7 @@ export function transformProperty({
     : schemaDescription;
 
   return {
-    name: normalizeName(
-      metadata.name,
-      NameType.Property,
-      true /** shouldGuard */
-    ),
+    name: metadata.name,
     description,
     serializedName: serializedName,
     type: typeName,
