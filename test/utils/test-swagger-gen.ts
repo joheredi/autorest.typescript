@@ -395,6 +395,11 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
     swaggerOrConfig: "test/integration/swaggers/petstore.json",
     clientName: "PetStore",
     packageName: "petstore"
+  },
+  textAnalytics: {
+    swaggerOrConfig: "test/integration/swaggers/text-analytics.md",
+    clientName: "TextAnalytics",
+    packageName: "@azure/ai-text-analytics"
   }
 };
 
