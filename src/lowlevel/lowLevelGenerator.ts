@@ -22,7 +22,8 @@ import {
   Project,
   PropertySignatureStructure,
   SourceFile,
-  StructureKind
+  StructureKind,
+  VariableDeclarationKind
 } from "ts-morph";
 
 import * as prettier from "prettier";
@@ -32,6 +33,8 @@ import { isSchemaResponse } from "../utils/schemaHelpers";
 import { request } from "http";
 import { isPrimitiveType } from "@azure/core-http/types/latest/src/util/utils";
 import { basename } from "path";
+import { getCredentialScopes } from "../transforms/optionsTransforms";
+import { transformBaseUrl } from "../transforms/urlTransforms";
 // import { isSchemaResponse } from "../utils/schemaHelpers";
 
 let importedModels = new Set<string>();
@@ -70,7 +73,8 @@ export async function generateLowlevelClient(host: Host) {
     }
   });
 
-  generateTypes(model, project);
+  await generateClientHelpers(host, model, project);
+  await generateTypes(model, project);
 
   // Save the source files to the virtual filesystem
   project.saveSync();
@@ -99,9 +103,9 @@ export async function generateLowlevelClient(host: Host) {
   }
 }
 
-function generateTypes(model: CodeModel, project: Project) {
+async function generateTypes(model: CodeModel, project: Project) {
   generateResponsesInterface(model, project);
-  generateRequestInterface(model, project);
+  await generateRequestInterface(model, project);
   generateModelInterfaces(model, project);
   generateParameterInterfaces(model, project);
 
@@ -320,6 +324,18 @@ function isPrimitiveSchema(schema: Schema): boolean {
   ].includes(schema.type);
 }
 
+function getTypeForSchema(schema: Schema) {
+  if (isPrimitiveSchema(schema)) {
+    return primitiveSchemaToType(schema);
+  } else if (schema.type === SchemaType.Array) {
+    const arraySchema = schema as ArraySchema;
+    let elementType = arraySchema.elementType.type.toString();
+    return `${elementType}[]`;
+  } else {
+    return schema.language.default.name;
+  }
+}
+
 function getPropertySignature(
   p: Property | Parameter,
   importedModels = new Set<string>()
@@ -342,7 +358,6 @@ function getPropertySignature(
       elementType = arraySchema.elementType.language.default.name;
       importedModels.add(elementType);
     }
-
     property = {
       name: propertyName,
       hasQuestionToken: !p.required,
@@ -351,6 +366,7 @@ function getPropertySignature(
     };
   } else {
     importedModels.add(p.schema.language.default.name);
+
     property = {
       name: p.language.default.name,
       hasQuestionToken: !p.required,
@@ -476,7 +492,7 @@ function primitiveSchemaToType(schema: PrimitiveSchema) {
 //   return Boolean((schema as ArraySchema).elementType);
 // }
 
-function generateRequestInterface(model: CodeModel, project: Project) {
+async function generateRequestInterface(model: CodeModel, project: Project) {
   const clientFile = project.createSourceFile(`src/types.ts`, undefined, {
     overwrite: true
   });
@@ -526,26 +542,7 @@ function generateRequestInterface(model: CodeModel, project: Project) {
     ]
   });
 
-  clientFile.addFunction({
-    name: "createTextAnalyticsClient",
-    parameters: [
-      {
-        name: "credentials",
-        type: "TokenCredential"
-      },
-      {
-        name: "endpoint",
-        type: "string"
-      },
-      {
-        name: "options",
-        type: "PipelineOptions",
-        hasQuestionToken: true
-      }
-    ],
-    returnType: "TextAnalyticsClient",
-    statements: [`throw new Error("Not implemented");`]
-  });
+  await generateCreaateClient(clientFile, model);
 
   clientFile.addImportDeclarations([
     {
@@ -582,6 +579,140 @@ function generateRequestInterface(model: CodeModel, project: Project) {
   }
 
   clientFile.addStatements(["export default createTextAnalyticsClient;"]);
+}
+
+async function generateCreaateClient(clientFile: SourceFile, model: CodeModel) {
+  const endpoint = await transformBaseUrl(model);
+  let baseUrl = endpoint.endpoint || "";
+  const globalParameters = model.globalParameters || [];
+  const clientParameters = globalParameters.map(param => ({
+    name: param.language.default.name,
+    type: getTypeForSchema(param.schema)
+  }));
+
+  if (endpoint.isCustom) {
+    const paramReplacements = globalParameters
+      .filter(p => p.protocol.http?.in === "uri")
+      .map(p => {
+        const parameterName = p.language.default.name;
+        return `replace(/\{${parameterName}\}/g, ${parameterName})`;
+      });
+
+    baseUrl = [`"${baseUrl}"`, ...paramReplacements].join(".");
+  } else {
+    baseUrl = `${baseUrl}`;
+  }
+
+  clientFile.addFunction({
+    name: "createTextAnalyticsClient",
+    parameters: [
+      {
+        name: "credentials",
+        type: "TokenCredential"
+      },
+      ...(clientParameters.length ? clientParameters : []),
+      {
+        name: "options",
+        type: "PipelineOptions",
+        hasQuestionToken: true
+      }
+    ],
+    returnType: "TextAnalyticsClient",
+    statements: [
+      `const baseUrl = ${baseUrl};`,
+      `throw new Error("Not implemented");`
+    ]
+  });
+}
+
+async function generateClientHelpers(
+  host: Host,
+  model: CodeModel,
+  project: Project
+) {
+  const credentialScopes = await getCredentialScopes(host);
+  const clientFile = project.createSourceFile(
+    `src/clientHelpers.ts`,
+    undefined,
+    {
+      overwrite: true
+    }
+  );
+  clientFile.addStatements("let cachedHttpsClient: HttpsClient | undefined;");
+
+  clientFile.addVariableStatement({
+    declarationKind: VariableDeclarationKind.Const,
+    declarations: [
+      {
+        name: "DEFAULT_SCOPE",
+        initializer: credentialScopes
+          ? `[${credentialScopes.map(c => `"${c}"`).join()}]`
+          : `""`
+      }
+    ]
+  });
+
+  generateCreateDefaultPipeline(clientFile);
+  generateGetCachedDefaultHttpsClient(clientFile);
+
+  clientFile.addImportDeclarations([
+    {
+      namedImports: [
+        "createPipelineFromOptions",
+        "PipelineOptions",
+        "bearerTokenAuthenticationPolicy",
+        "Pipeline",
+        "DefaultHttpsClient",
+        "HttpsClient"
+      ],
+      moduleSpecifier: "@azure/core-https"
+    },
+    {
+      namedImports: ["TokenCredential"],
+      moduleSpecifier: "@azure/core-auth"
+    }
+  ]);
+}
+
+function generateGetCachedDefaultHttpsClient(clientFile: SourceFile) {
+  const getCachedDefaultHttpsClient = clientFile.addFunction({
+    name: "getCachedDefaultHttpsClient",
+    isExported: true,
+    returnType: "HttpsClient"
+  });
+
+  getCachedDefaultHttpsClient.addStatements(`
+  if (!cachedHttpsClient) {
+    cachedHttpsClient = new DefaultHttpsClient();
+  }
+
+  return cachedHttpsClient;`);
+}
+
+function generateCreateDefaultPipeline(clientFile: SourceFile) {
+  const createDefaultPipelineFn = clientFile.addFunction({
+    name: "createDefaultPipeline",
+    isExported: true,
+    parameters: [
+      { name: "credential", type: "TokenCredential" },
+      { name: "options", type: "PipelineOptions = {}" }
+    ],
+    returnType: "Pipeline"
+  });
+
+  createDefaultPipelineFn.addStatements([
+    `
+    const pipeline = createPipelineFromOptions(options);
+    pipeline.addPolicy(
+      bearerTokenAuthenticationPolicy({
+        credential,
+        scopes: DEFAULT_SCOPE
+      })
+    );
+
+    return pipeline;
+    `
+  ]);
 }
 
 function getResponseInterfaceName(operation: Operation, response: Response) {

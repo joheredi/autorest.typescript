@@ -136,9 +136,13 @@ export interface RequestParameters {
 
 function createTextAnalyticsClient(
   credentials: TokenCredential,
-  endpoint: string,
+  Endpoint: string,
   options?: PipelineOptions
 ): TextAnalyticsClient {
+  const baseUrl = "{Endpoint}/text/analytics/v3.1-preview.3".replace(
+    /{Endpoint}/g,
+    Endpoint
+  );
   throw new Error("Not implemented");
 }
 export default createTextAnalyticsClient;
