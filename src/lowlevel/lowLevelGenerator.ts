@@ -1,17 +1,16 @@
 import {
   CodeModel,
-  Request,
   Response,
   codeModelSchema,
   Schema,
   SchemaType,
   PrimitiveSchema,
   ArraySchema,
-  ChoiceSchema,
-  SealedChoiceSchema,
   Operation,
   Property,
-  Parameter
+  Parameter,
+  ParameterLocation,
+  ObjectSchema
   //   ObjectSchema
 } from "@azure-tools/codemodel";
 import { Host, startSession } from "@autorest/extension-base";
@@ -27,14 +26,10 @@ import {
 } from "ts-morph";
 
 import * as prettier from "prettier";
-import { stringifyXML } from "@azure/core-http";
-import { sortObjectSchemasHierarchically } from "../utils/sortObjectSchemasHierarchically";
 import { isSchemaResponse } from "../utils/schemaHelpers";
-import { request } from "http";
-import { isPrimitiveType } from "@azure/core-http/types/latest/src/util/utils";
-import { basename } from "path";
 import { getCredentialScopes } from "../transforms/optionsTransforms";
 import { transformBaseUrl } from "../transforms/urlTransforms";
+import { HttpMethods } from "@azure/core-https";
 // import { isSchemaResponse } from "../utils/schemaHelpers";
 
 let importedModels = new Set<string>();
@@ -108,75 +103,7 @@ async function generateTypes(model: CodeModel, project: Project) {
   await generateRequestInterface(model, project);
   generateModelInterfaces(model, project);
   generateParameterInterfaces(model, project);
-
-  // generateResponseTypes(model, project);
 }
-
-// function generateResponseTypes(model: CodeModel, project: Project) {
-//   const clientFile = project.createSourceFile(
-//     `src/responseTypes.ts`,
-//     undefined,
-//     {
-//       overwrite: true
-//     }
-//   );
-
-//   model.operationGroups.forEach(og =>
-//     og.operations.forEach(o => {
-//       if (!o.responses || !o.responses.length) {
-//         return;
-//       }
-
-//       const response = o.responses[0];
-//       if (!isSchemaResponse(response)) {
-//         return;
-//       }
-//     })
-//   );
-// }
-
-// function schemaToType(
-//   schema: Schema,
-//   calculatedSchemas: WeakMap<Schema, string>
-// ): string {
-//   if (schema.type === SchemaType.Any) {
-//     return schema.type;
-//   }
-
-//   //   if (isPrimitiveSchema(schema)) {
-//   //     return primitiveSchemaToType(schema);
-//   //   }
-
-//   if (isArraySchema(schema)) {
-//     return arraySchemaToType(schema);
-//   }
-
-//   if (isSealedChoiceSchema(schema)) {
-//     return schemaToType(schema.choiceType, calculatedSchemas);
-//   }
-
-//   if (isChoiceSchema(schema)) {
-//     return choiceSchemaToType(schema);
-//   }
-
-//   return "any";
-// }
-
-// function choiceSchemaToType(schema: ChoiceSchema) {
-//   return schema.choices
-//     .map(c => {
-//       let value = c.value;
-//       if (schema.choiceType.type === SchemaType.String) {
-//         value = `"${value}"`;
-//       }
-//       return value;
-//     })
-//     .join("|");
-// }
-
-// interface ProcessedObject {
-//   interfaceName: string;
-// }
 
 function generateParameterInterfaces(model: CodeModel, project: Project) {
   const clientFile = project.createSourceFile(`src/parameters.ts`, undefined, {
@@ -409,42 +336,6 @@ function generateObjectInterfaces(model: CodeModel, file: SourceFile) {
   });
 }
 
-// function objectSchemaToType(
-//   schema: ObjectSchema,
-//   calculatedSchemas: WeakMap<Schema, string>
-// ) {
-//   const calculated = calculatedSchemas.get(schema);
-//   if (calculated) {
-//     return calculated;
-//   }
-//   if (!schema.properties) {
-//     return "{}";
-//   }
-
-//   schema.properties.map(property => {
-//     const name = property.language.default.name;
-//     const type = schemaToType(property.schema, calculatedSchemas);
-//     return `${name}`;
-//   });
-// }
-
-// function isObjectSchema(schema: Schema): schema is ObjectSchema {
-//   return schema.type === SchemaType.Object;
-// }
-
-// function isChoiceSchema(schema: Schema): schema is ChoiceSchema {
-//   return schema.type === SchemaType.Choice;
-// }
-
-// function isSealedChoiceSchema(schema: Schema): schema is SealedChoiceSchema {
-//   return schema.type === SchemaType.SealedChoice;
-// }
-
-// function arraySchemaToType(schema: ArraySchema) {
-//   const elementType = schemaToType(schema.elementType);
-//   return `${elementType}[]`;
-// }
-
 function primitiveSchemaToType(schema: PrimitiveSchema) {
   switch (schema.type) {
     case SchemaType.Integer:
@@ -469,28 +360,6 @@ function primitiveSchemaToType(schema: PrimitiveSchema) {
 
   throw new Error(`Unknown primitive schema ${schema.type}`);
 }
-
-// function isPrimitiveSchema(schema: Schema): schema is PrimitiveSchema {
-//   return [
-//     SchemaType.Char,
-//     SchemaType.Date,
-//     SchemaType.Time,
-//     SchemaType.DateTime,
-//     SchemaType.Duration,
-//     SchemaType.Credential,
-//     SchemaType.UnixTime,
-//     SchemaType.Uri,
-//     SchemaType.Uuid,
-//     SchemaType.Boolean,
-//     SchemaType.Integer,
-//     SchemaType.Number,
-//     SchemaType.String
-//   ].includes(schema.type);
-// }
-
-// function isArraySchema(schema: Schema): schema is ArraySchema {
-//   return Boolean((schema as ArraySchema).elementType);
-// }
 
 async function generateRequestInterface(model: CodeModel, project: Project) {
   const clientFile = project.createSourceFile(`src/types.ts`, undefined, {
@@ -542,11 +411,19 @@ async function generateRequestInterface(model: CodeModel, project: Project) {
     ]
   });
 
-  await generateCreaateClient(clientFile, model);
+  await generateCreateClient(clientFile, model);
+  model.operationGroups.forEach(og =>
+    og.operations.forEach(o => generateOperationsImplementation(o, clientFile))
+  );
 
   clientFile.addImportDeclarations([
     {
-      namedImports: ["RawHttpHeaders", "PipelineOptions"],
+      namedImports: [
+        "RawHttpHeaders",
+        "PipelineOptions",
+        "Pipeline",
+        "createPipelineRequest"
+      ],
       moduleSpecifier: "@azure/core-https"
     },
     {
@@ -578,10 +455,26 @@ async function generateRequestInterface(model: CodeModel, project: Project) {
     });
   }
 
+  clientFile.addImportDeclaration({
+    namedImports: ["createDefaultPipeline", "getCachedDefaultHttpsClient"],
+    moduleSpecifier: "./clientHelpers"
+  });
+
   clientFile.addStatements(["export default createTextAnalyticsClient;"]);
 }
 
-async function generateCreaateClient(clientFile: SourceFile, model: CodeModel) {
+interface requestImplementation {
+  route: string;
+  optionsType: string;
+  parameters?: {
+    queryParameters?: string[];
+    pathParameters?: string[];
+  };
+  headers?: string[];
+  body?: any;
+}
+
+async function generateCreateClient(clientFile: SourceFile, model: CodeModel) {
   const endpoint = await transformBaseUrl(model);
   let baseUrl = endpoint.endpoint || "";
   const globalParameters = model.globalParameters || [];
@@ -603,7 +496,15 @@ async function generateCreaateClient(clientFile: SourceFile, model: CodeModel) {
     baseUrl = `${baseUrl}`;
   }
 
-  clientFile.addFunction({
+  const functionSelection = getAllOperations(model).map(o => {
+    return `if(route === ${getRoute(o)}) {
+      return request${
+        o.language.default.name
+      }(pipeline, options)(route, options)
+    }`;
+  });
+
+  const createTextAnalyticsClientFn = clientFile.addFunction({
     name: "createTextAnalyticsClient",
     parameters: [
       {
@@ -620,7 +521,12 @@ async function generateCreaateClient(clientFile: SourceFile, model: CodeModel) {
     returnType: "TextAnalyticsClient",
     statements: [
       `const baseUrl = ${baseUrl};`,
-      `throw new Error("Not implemented");`
+      `const pipeline = createDefaultPipeline(credentials, options);`,
+      `return {
+        request: (route: string, options: any) => {
+          ${functionSelection.join("\n")}
+        }
+       } as TextAnalyticsClient`
     ]
   });
 }
@@ -769,7 +675,7 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
         isExported: true
       });
 
-      const responseProperties = [{ name: "status", type: statusCode }];
+      const responseProperties = [{ name: "status", type: "number" }];
 
       if (bodyType) {
         responseProperties.push({
@@ -818,18 +724,264 @@ function getAllOperations(model: CodeModel) {
   return operations;
 }
 
-// function getAllResponses(model: CodeModel) {
-//   let responses: Response[] = [];
-//   model.operationGroups.forEach(og =>
-//     og.operations
-//       .filter(o => o.responses && o.responses.length)
-//       .forEach(o => {
-//         responses.push(...o.responses!);
-//       })
-//   );
+function getOperationParameters(operation: Operation) {
+  return [
+    ...(operation.signatureParameters || []),
+    ...((operation.requests &&
+      operation.requests[0] &&
+      operation.requests[0].signatureParameters) ||
+      [])
+  ];
+}
 
-//   return responses;
-// }
+function getRoute(operation: Operation) {
+  if (operation.requests && operation.requests.length) {
+    const r = operation.requests[0];
+    return `"${r.protocol.http!.method.toUpperCase()} ${
+      r.protocol.http!.path
+    }"`;
+  }
+
+  throw new Error(
+    `Couldn't get route for operation ${operation.language.default.name}`
+  );
+}
+
+interface GroupedOperationParameters {
+  hasRequired: boolean;
+  queryParameters: string[];
+  pathParameters: string[];
+  body: string[];
+  headers: string[];
+}
+
+function getPathParameterHandle({
+  pathParameters
+}: GroupedOperationParameters) {
+  if (!pathParameters || !pathParameters.length) {
+    return "";
+  }
+  const parameterAssignments = pathParameters
+    .map(p => {
+      return `${p}: options.${p}`;
+    })
+    .join();
+  return [
+    `let replacedPath: string = route`,
+    `replacedPath = replacedPath.`,
+    pathParameters
+      .map(pp => {
+        return `replace(
+        /{${pathParameters}}/g,
+        options["${pathParameters}"]
+      )`;
+      })
+      .join(".")
+  ];
+}
+
+function getQueryParameterHandle({
+  queryParameters
+}: GroupedOperationParameters) {
+  if (!queryParameters || !queryParameters.length) {
+    return "";
+  }
+  return [
+    queryParameters
+      .map(qp => {
+        return `url.searchParams.append("${qp}", options["${qp}"].toString());`;
+      })
+      .join("\n")
+  ];
+}
+
+function getBodyHandle({ body }: GroupedOperationParameters) {
+  if (!body || !body.length) {
+    return "";
+  }
+  const parameterAssignments = body
+    .map(p => {
+      return `${p}: options.${p}`;
+    })
+    .join();
+  return `const body = {${parameterAssignments}}`;
+}
+
+function getHeadersHandlle({ headers }: GroupedOperationParameters) {
+  if (!headers || !headers.length) {
+    return "";
+  }
+  const parameterAssignments = headers
+    .map(p => {
+      return `${p}: options.${p}`;
+    })
+    .join();
+  return `const headers = {${parameterAssignments}}`;
+}
+
+function generateOperationsImplementation(
+  operation: Operation,
+  file: SourceFile
+) {
+  const project = new Project({
+    useInMemoryFileSystem: true,
+    manipulationSettings: {
+      indentationText: IndentationText.TwoSpaces
+    }
+  });
+
+  const tempFile = project.createSourceFile("temp.ts");
+
+  const parameters = getGroupedOperationParameters(operation);
+  const route = getRoute(operation);
+  const returnType = `Promise<${getOperationReturnType(operation)}>`;
+  const optionstype = getOperationOptionsType(operation);
+  const name = `request${operation.language.default.name}`;
+  const bodyHandle = getBodyHandle(parameters);
+  const pathHandle = getPathParameterHandle(parameters);
+  const subFunction = tempFile.addFunction({
+    // name,
+    parameters: [
+      { name: "route", type: route },
+      {
+        name: "options",
+        type: optionstype,
+        hasQuestionToken: !parameters.hasRequired
+      }
+    ],
+    isAsync: true,
+    returnType,
+    statements: [
+      ...pathHandle,
+      `const httpClient = getCachedDefaultHttpsClient();`,
+      `const url = new URL(\`\${baseUrl}/\${${
+        pathHandle ? "replacedPath" : "route"
+      }}\`);`,
+      ...getQueryParameterHandle(parameters),
+      bodyHandle,
+      getHeadersHandlle(parameters),
+      `const request = createPipelineRequest({
+        url: url.toString(),
+        method: "${getOperationMethod(operation)}",`,
+      ...(bodyHandle && [`body: JSON.stringify(body)`]),
+      `})`,
+      `const result = await pipeline.sendRequest(httpClient, request);`,
+      `return {
+        request,
+        headers: result.headers,
+        status: result.status,
+        parsedBody: JSON.parse(result.bodyAsText || "{}"),
+      };`
+    ]
+  });
+
+  file.addFunction({
+    name,
+    parameters: [
+      { name: "pipeline", type: "Pipeline" },
+      { name: "baseUrl", type: "string" }
+    ],
+    statements: writer => {
+      writer.write(`return ${subFunction.getFullText()}`);
+    }
+  });
+}
+
+function getGroupedOperationParameters(
+  operation: Operation
+): GroupedOperationParameters {
+  const parameters = getOperationParameters(operation);
+  const hasRequired = parameters.some(p => p.required);
+
+  const bodyProperties =
+    (
+      ((
+        parameters.filter(
+          p => p.protocol.http?.in === ParameterLocation.Body
+        )[0] || {}
+      ).schema as ObjectSchema) || {}
+    ).properties || [];
+
+  const body = bodyProperties.map(
+    p => p.language.default.serializedName || p.language.default.name
+  ) as string[];
+
+  return {
+    hasRequired,
+    queryParameters: parameters
+      .filter(p => p.protocol.http?.in === ParameterLocation.Query)
+      .map(
+        p => p.language.default.serializedName || p.language.default.name
+      ) as string[],
+    pathParameters: parameters
+      .filter(p => p.protocol.http?.in === ParameterLocation.Path)
+      .map(
+        p => p.language.default.serializedName || p.language.default.name
+      ) as string[],
+    body: body,
+    headers: parameters
+      .filter(p => p.protocol.http?.in === ParameterLocation.Header)
+      .map(
+        p => p.language.default.serializedName || p.language.default.name
+      ) as string[]
+  };
+}
+
+function getOperationMethod({ requests, language }: Operation): HttpMethods {
+  if (
+    requests &&
+    requests.length &&
+    requests[0].protocol.http! &&
+    requests[0].protocol.http!.method
+  ) {
+    return requests[0].protocol.http!.method.toUpperCase();
+  }
+  throw new Error(
+    `Couldn't find the operation method for ${language.default.name}`
+  );
+}
+
+function getOperationOptionsType(
+  operation: Operation,
+  importedParameters = new Set<string>()
+) {
+  const parameters = getOperationParameters(operation);
+  let optionsType = "RequestParameters";
+
+  if (parameters.length) {
+    const paramsName = `${operation.language.default.name}Parameters`;
+    importedParameters.add(paramsName);
+    optionsType = `${paramsName} & ${optionsType}`;
+  }
+
+  return optionsType;
+}
+
+function getOperationReturnType(
+  operation: Operation,
+  importedResponses = new Set<string>()
+) {
+  let returnType: string = "PipelineResponse";
+  if (operation.responses && operation.responses.length) {
+    const responses = [...operation.responses, ...(operation.exceptions || [])];
+
+    const responseTypes = responses
+      .filter(
+        r => r.protocol.http?.statusCodes && r.protocol.http?.statusCodes.length
+      )
+      .map(r => {
+        const responseName = getResponseInterfaceName(operation, r);
+        importedResponses.add(responseName);
+        return responseName;
+      });
+
+    if (responseTypes.length) {
+      returnType = responseTypes.join(" | ");
+    }
+  }
+
+  return returnType;
+}
 
 function getAllRequestOverrides(
   operations: Operation[],
@@ -840,44 +992,10 @@ function getAllRequestOverrides(
   operations.forEach(o =>
     (o.requests || [])
       .filter(r => r.protocol && r.protocol.http)
-      .forEach(r => {
-        let returnType: string = "PipelineResponse";
-        if (o.responses && o.responses.length) {
-          const responses = [...o.responses, ...(o.exceptions || [])];
-
-          const responseTypes = responses
-            .filter(
-              r =>
-                r.protocol.http?.statusCodes &&
-                r.protocol.http?.statusCodes.length
-            )
-            .map(r => {
-              const responseName = getResponseInterfaceName(o, r);
-              importedResponses.add(responseName);
-              return responseName;
-            });
-
-          if (responseTypes.length) {
-            returnType = responseTypes.join(" | ");
-          }
-        }
-
-        const parameters = [
-          ...(o.signatureParameters || []),
-          ...((o.requests &&
-            o.requests[0] &&
-            o.requests[0].signatureParameters) ||
-            [])
-        ];
+      .forEach(() => {
+        let returnType = getOperationReturnType(o, importedResponses);
+        const parameters = getOperationParameters(o);
         const isParameterOptional = !parameters.some(p => p.required);
-
-        let optionsType = "RequestParameters";
-
-        if (parameters.length) {
-          const paramsName = `${o.language.default.name}Parameters`;
-          importedParameters.add(paramsName);
-          optionsType = `${paramsName} & ${optionsType}`;
-        }
 
         let override: CallSignatureDeclarationStructure = {
           returnType: `Promise<${returnType}>`,
@@ -885,13 +1003,11 @@ function getAllRequestOverrides(
           parameters: [
             {
               name: "route",
-              type: `"${r.protocol.http!.method.toUpperCase()} ${
-                r.protocol.http!.path
-              }"`
+              type: getRoute(o)
             },
             {
               name: "options",
-              type: optionsType,
+              type: getOperationOptionsType(o, importedParameters),
               hasQuestionToken: isParameterOptional
             }
           ]
