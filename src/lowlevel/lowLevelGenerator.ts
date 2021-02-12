@@ -497,10 +497,8 @@ async function generateCreateClient(clientFile: SourceFile, model: CodeModel) {
   }
 
   const functionSelection = getAllOperations(model).map(o => {
-    return `if(route === ${getRoute(o)}) {
-      return request${
-        o.language.default.name
-      }(pipeline, options)(route, options)
+    return `if(route === ${getOperationRoute(o)}) {
+      return request${o.language.default.name}(pipeline, baseUrl)(options)
     }`;
   });
 
@@ -675,7 +673,7 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
         isExported: true
       });
 
-      const responseProperties = [{ name: "status", type: "number" }];
+      const responseProperties = [{ name: "status", type: statusCode }];
 
       if (bodyType) {
         responseProperties.push({
@@ -734,7 +732,18 @@ function getOperationParameters(operation: Operation) {
   ];
 }
 
-function getRoute(operation: Operation) {
+function getOperationPath(operation: Operation) {
+  if (operation.requests && operation.requests.length) {
+    const r = operation.requests[0];
+    return r.protocol.http!.path;
+  }
+
+  throw new Error(
+    `Couldn't get path for operation ${operation.language.default.name}`
+  );
+}
+
+function getOperationRoute(operation: Operation) {
   if (operation.requests && operation.requests.length) {
     const r = operation.requests[0];
     return `"${r.protocol.http!.method.toUpperCase()} ${
@@ -755,19 +764,20 @@ interface GroupedOperationParameters {
   headers: string[];
 }
 
-function getPathParameterHandle({
-  pathParameters
-}: GroupedOperationParameters) {
+function getPathParameterHandle(
+  { pathParameters }: GroupedOperationParameters,
+  path: string
+) {
   if (!pathParameters || !pathParameters.length) {
     return "";
   }
-  const parameterAssignments = pathParameters
+  pathParameters
     .map(p => {
       return `${p}: options.${p}`;
     })
     .join();
   return [
-    `let replacedPath: string = route`,
+    `let replacedPath: string = "${path}"`,
     `replacedPath = replacedPath.`,
     pathParameters
       .map(pp => {
@@ -789,7 +799,7 @@ function getQueryParameterHandle({
   return [
     queryParameters
       .map(qp => {
-        return `url.searchParams.append("${qp}", options["${qp}"].toString());`;
+        return `options["${qp}"] && url.searchParams.append("${qp}", options["${qp}"].toString());`;
       })
       .join("\n")
   ];
@@ -801,7 +811,7 @@ function getBodyHandle({ body }: GroupedOperationParameters) {
   }
   const parameterAssignments = body
     .map(p => {
-      return `${p}: options.${p}`;
+      return `${p}: options && options["${p}"]`;
     })
     .join();
   return `const body = {${parameterAssignments}}`;
@@ -833,16 +843,16 @@ function generateOperationsImplementation(
   const tempFile = project.createSourceFile("temp.ts");
 
   const parameters = getGroupedOperationParameters(operation);
-  const route = getRoute(operation);
+  const route = getOperationRoute(operation);
+  const path = getOperationPath(operation);
   const returnType = `Promise<${getOperationReturnType(operation)}>`;
   const optionstype = getOperationOptionsType(operation);
   const name = `request${operation.language.default.name}`;
   const bodyHandle = getBodyHandle(parameters);
-  const pathHandle = getPathParameterHandle(parameters);
+  const pathHandle = getPathParameterHandle(parameters, path);
   const subFunction = tempFile.addFunction({
     // name,
     parameters: [
-      { name: "route", type: route },
       {
         name: "options",
         type: optionstype,
@@ -854,8 +864,8 @@ function generateOperationsImplementation(
     statements: [
       ...pathHandle,
       `const httpClient = getCachedDefaultHttpsClient();`,
-      `const url = new URL(\`\${baseUrl}/\${${
-        pathHandle ? "replacedPath" : "route"
+      `const url = new URL(\`\${baseUrl}\${${
+        pathHandle ? "replacedPath" : `"${path}"`
       }}\`);`,
       ...getQueryParameterHandle(parameters),
       bodyHandle,
@@ -869,7 +879,7 @@ function generateOperationsImplementation(
       `return {
         request,
         headers: result.headers,
-        status: result.status,
+        status: result.status as any,
         parsedBody: JSON.parse(result.bodyAsText || "{}"),
       };`
     ]
@@ -1003,7 +1013,7 @@ function getAllRequestOverrides(
           parameters: [
             {
               name: "route",
-              type: getRoute(o)
+              type: getOperationRoute(o)
             },
             {
               name: "options",
