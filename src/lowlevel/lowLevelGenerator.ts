@@ -18,6 +18,7 @@ import { Host, startSession } from "@autorest/extension-base";
 import {
   CallSignatureDeclarationStructure,
   IndentationText,
+  OptionalKind,
   Project,
   PropertySignatureStructure,
   SourceFile,
@@ -99,6 +100,8 @@ export async function generateLowlevelClient(host: Host) {
 }
 
 async function generateTypes(model: CodeModel, project: Project) {
+  generatePathFirstClient(model, project);
+  generateVerbFirstClient(model, project);
   generateResponsesInterface(model, project);
   await generateRequestInterface(model, project);
   generateModelInterfaces(model, project);
@@ -108,6 +111,18 @@ async function generateTypes(model: CodeModel, project: Project) {
 function generateParameterInterfaces(model: CodeModel, project: Project) {
   const clientFile = project.createSourceFile(`src/parameters.ts`, undefined, {
     overwrite: true
+  });
+
+  const requestParameterType = `{
+    timeout?: number;
+    headers?: HttpHeaders;
+    body?: unknown;
+    queryParameters?: { [key: string]: any };
+  }`;
+  clientFile.addTypeAlias({
+    name: "RequestParameters",
+    type: requestParameterType,
+    isExported: true
   });
 
   let importedModels = new Set<string>();
@@ -130,34 +145,63 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
       if (signatureParameters.length) {
         const name = `${o.language.default.name}Parameters`;
 
-        let refs: string[] = [];
+        let refs: string[] = ["RequestParameters"];
         let properties: PropertySignatureStructure[] = [];
-        signatureParameters.forEach(p => {
-          const referencedModels = new Set<string>();
-          const x = getPropertySignature(p, referencedModels);
-          const model = [...referencedModels][0];
-          if (p.schema.type === SchemaType.Object) {
-            // is ref
-            refs.push(model);
-          } else {
-            // is primitive
-            properties.push(x);
-          }
+        const bodyParameter = signatureParameters.filter(
+          p => p.protocol.http?.in === "body"
+        );
 
-          if (model) {
-            importedModels.add(model);
-          }
-        });
+        const queryParameters = signatureParameters.filter(
+          p => p.protocol.http?.in === "query"
+        );
 
-        if (properties.length) {
-          const name = `${o.language.default.name}ParamProperties`;
+        const referencedModels = new Set<string>();
+        if (queryParameters.length) {
+          const name = `${o.language.default.name}QueryParamProperties`;
+          const propDef = queryParameters.map(p => {
+            return getPropertySignature(p, referencedModels);
+          });
+
           clientFile.addInterface({
             name: name,
-            properties
+            properties: propDef
+          });
+
+          const queryParamName = `${o.language.default.name}QueryParam`;
+
+          clientFile.addInterface({
+            name: queryParamName,
+            properties: [
+              {
+                name: "queryParameters",
+                type: name,
+                hasQuestionToken: !propDef.some(p => !p.hasQuestionToken)
+              }
+            ]
+          });
+
+          refs.push(queryParamName);
+        }
+
+        if (bodyParameter.length) {
+          const name = `${o.language.default.name}BodyParam`;
+          const body = getPropertySignature(bodyParameter[0], referencedModels);
+
+          clientFile.addInterface({
+            name: name,
+            properties: [
+              {
+                name: "body",
+                type: body.type,
+                hasQuestionToken: body.hasQuestionToken
+              }
+            ]
           });
 
           refs.push(name);
         }
+
+        referencedModels.forEach(m => importedModels.add(m));
 
         clientFile.addTypeAlias({
           name,
@@ -172,7 +216,8 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
     {
       namedImports: [...importedModels],
       moduleSpecifier: "./models"
-    }
+    },
+    { namedImports: ["HttpHeaders"], moduleSpecifier: "@azure/core-https" }
   ]);
 }
 
@@ -359,6 +404,201 @@ function primitiveSchemaToType(schema: PrimitiveSchema) {
   }
 
   throw new Error(`Unknown primitive schema ${schema.type}`);
+}
+
+type VerbFirstProps = {
+  options: string;
+  hasOptionalOptions?: boolean;
+  response: string;
+  pathParameters?: string[];
+};
+
+type VerbFirstPaths = { [key: string]: VerbFirstProps };
+
+function generateVerbFirstClient(model: CodeModel, project: Project) {
+  const clientFile = project.createSourceFile(
+    `src/verbFirstclient.ts`,
+    undefined,
+    {
+      overwrite: true
+    }
+  );
+
+  const importedParameters = new Set<string>();
+  const importedResponses = new Set<string>();
+  const pathDictionary: VerbFirstPaths = {};
+
+  for (const operationGroup of model.operationGroups) {
+    for (const operation of operationGroup.operations) {
+      for (const request of operation.requests || []) {
+        const path: string = (
+          (request.protocol.http?.path as string) || ""
+        ).replace(/\{(\w+)\}/gm, ":$1");
+        const method = (
+          (request.protocol.http?.method as string) || ""
+        ).toUpperCase();
+
+        const verbPath = `${method} ${path}`;
+        if (path && method) {
+          if (!pathDictionary[verbPath]) {
+            const hasOptionalOptions = !request.signatureParameters?.some(
+              p => p.required
+            );
+            const { pathParameters } = getGroupedOperationParameters(operation);
+            pathDictionary[verbPath] = {
+              options: getOperationOptionsType(operation, importedParameters),
+              hasOptionalOptions,
+              response: `Promise<${getOperationReturnType(
+                operation,
+                importedResponses
+              )}>`,
+              pathParameters
+            };
+          }
+        }
+      }
+    }
+  }
+
+  clientFile.addInterface({
+    name: "Routes",
+    properties: getVerbFirstRoutesInterfaceDefinition(pathDictionary)
+  });
+
+  if (importedParameters.size) {
+    clientFile.addImportDeclaration({
+      namedImports: [...importedParameters],
+      moduleSpecifier: "./parameters"
+    });
+  }
+
+  if (importedResponses.size) {
+    clientFile.addImportDeclaration({
+      namedImports: [...importedResponses],
+      moduleSpecifier: "./responses"
+    });
+  }
+}
+
+type Methods = {
+  [key: string]: {
+    optionsName: string;
+    hasOptionalOptions: boolean;
+    returnType: string;
+  };
+};
+type Paths = { [key: string]: Methods };
+
+function generatePathFirstClient(model: CodeModel, project: Project) {
+  const clientFile = project.createSourceFile(
+    `src/pathFirstclient.ts`,
+    undefined,
+    {
+      overwrite: true
+    }
+  );
+
+  // Get all paths
+  const importedParameters = new Set<string>();
+  const importedResponses = new Set<string>();
+  const pathDictionary: Paths = {};
+  for (const operationGroup of model.operationGroups) {
+    for (const operation of operationGroup.operations) {
+      for (const request of operation.requests || []) {
+        const path: string = (
+          (request.protocol.http?.path as string) || ""
+        ).replace(/\{(\w+)\}/gm, ":$1");
+        const method = request.protocol.http?.method;
+
+        if (path && method) {
+          if (!pathDictionary[path]) {
+            pathDictionary[path] = {};
+          }
+          const hasOptionalOptions = !request.signatureParameters?.some(
+            p => p.required
+          );
+          pathDictionary[path][method] = {
+            optionsName: getOperationOptionsType(operation, importedParameters),
+            hasOptionalOptions,
+            returnType: `Promise<${getOperationReturnType(
+              operation,
+              importedResponses
+            )}>`
+          };
+        }
+      }
+    }
+  }
+
+  clientFile.addInterface({
+    name: "Routes",
+    properties: getPathFirstRoutesInterfaceDefinition(pathDictionary)
+  });
+
+  if (importedParameters.size) {
+    clientFile.addImportDeclaration({
+      namedImports: [...importedParameters],
+      moduleSpecifier: "./parameters"
+    });
+  }
+
+  if (importedResponses.size) {
+    clientFile.addImportDeclaration({
+      namedImports: [...importedResponses],
+      moduleSpecifier: "./responses"
+    });
+  }
+}
+
+function getPathFirstRouteMethodsDefinition(methods: Methods): string {
+  const methodDefinitions: string[] = [];
+  for (const key of Object.keys(methods)) {
+    const method = methods[key];
+    const optionsName = method.hasOptionalOptions ? "options?" : "options";
+    methodDefinitions.push(
+      `${key}(${optionsName}: ${method.optionsName}): ${method.returnType}`
+    );
+  }
+
+  return `{${methodDefinitions.join(",")}}`;
+}
+
+function getPathFirstRoutesInterfaceDefinition(
+  paths: Paths
+): PropertySignatureStructure[] {
+  const properties: PropertySignatureStructure[] = [];
+
+  for (const key of Object.keys(paths)) {
+    properties.push({
+      name: `"${key}"`,
+      type: getPathFirstRouteMethodsDefinition(paths[key]),
+      kind: StructureKind.PropertySignature
+    });
+  }
+  return properties;
+}
+
+function getVerbFirstRoutesInterfaceDefinition(
+  paths: VerbFirstPaths
+): PropertySignatureStructure[] {
+  const properties: PropertySignatureStructure[] = [];
+
+  for (const key of Object.keys(paths)) {
+    properties.push({
+      name: `"${key}"`,
+      type: getVerbFirstPathProperties(paths[key]),
+      kind: StructureKind.PropertySignature
+    });
+  }
+  return properties;
+}
+
+function getVerbFirstPathProperties(verbProps: VerbFirstProps): string {
+  const pathParameters =
+    verbProps.pathParameters && verbProps.pathParameters.length
+      ? `[${verbProps.pathParameters.map(p => `string`).join(", ")}]`
+      : "[]";
+  return `{ options: ${verbProps.options}, response: ${verbProps.response}, pathParameters: ${pathParameters} }`;
 }
 
 async function generateRequestInterface(model: CodeModel, project: Project) {
@@ -628,6 +868,19 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
     overwrite: true
   });
 
+  clientFile.addTypeAliases([
+    {
+      name: "PipelineResponse",
+      type: `PipelineResponseInternal & {body: unknown}`,
+      isExported: true
+    },
+    {
+      name: "RequestUncheckedResponse",
+      type: `PipelineResponse & {body: any}`,
+      isExported: true
+    }
+  ]);
+
   let importedModels = new Set<string>();
 
   const operations = getAllOperations(model);
@@ -704,7 +957,10 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
   }
 
   clientFile.addImportDeclaration({
-    namedImports: ["PipelineResponse", "HttpHeaders"],
+    namedImports: [
+      "PipelineResponse as PipelineResponseInternal",
+      "HttpHeaders"
+    ],
     moduleSpecifier: "@azure/core-https"
   });
 }
@@ -955,16 +1211,11 @@ function getOperationOptionsType(
   operation: Operation,
   importedParameters = new Set<string>()
 ) {
-  const parameters = getOperationParameters(operation);
-  let optionsType = "RequestParameters";
+  // const parameters = getOperationParameters(operation);
+  const paramsName = `${operation.language.default.name}Parameters`;
+  importedParameters.add(paramsName);
 
-  if (parameters.length) {
-    const paramsName = `${operation.language.default.name}Parameters`;
-    importedParameters.add(paramsName);
-    optionsType = `${paramsName} & ${optionsType}`;
-  }
-
-  return optionsType;
+  return paramsName;
 }
 
 function getOperationReturnType(
