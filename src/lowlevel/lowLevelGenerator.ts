@@ -23,7 +23,11 @@ import {
   Project,
   PropertySignatureStructure,
   SourceFile,
-  StructureKind
+  StatementStructures,
+  StructureKind,
+  VariableDeclarationKind,
+  VariableStatementStructure,
+  WriterFunction
 } from "ts-morph";
 
 import * as prettier from "prettier";
@@ -486,6 +490,51 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
       clientFile
     )
   });
+  const clientName = model.language.default.name;
+  const commonClientParams = [
+    { name: "endpoint", type: "string" },
+    { name: "credentials", type: "TokenCredential | KeyCredential" }
+  ];
+  const clientIterfaceName = `${clientName}Client`;
+  const factoryTypeName = `${clientName}Factory`;
+  clientFile.addInterfaces([
+    {
+      isExported: true,
+      name: clientIterfaceName,
+      properties: [
+        { name: "path", type: "Routes" },
+        { name: "pathUnchecked", type: "PathUncheckedClient" }
+      ]
+    },
+    {
+      isExported: true,
+      name: factoryTypeName,
+      callSignatures: [
+        {
+          parameters: [
+            ...commonClientParams,
+            {
+              name: "options",
+              type: "ClientOptions",
+              hasQuestionToken: true /** TODO: Check if there are any required client params */
+            }
+          ]
+        }
+      ]
+    }
+  ]);
+
+  clientFile.addFunction({
+    isExported: true,
+    name: clientName,
+    parameters: [
+      ...commonClientParams,
+      { name: "options", type: "ClientOptions = {}" }
+    ],
+    returnType: clientIterfaceName,
+    isDefaultExport: true,
+    statements: getClientFactoryBody(clientIterfaceName)
+  });
 
   if (importedParameters.size) {
     clientFile.addImportDeclaration({
@@ -503,15 +552,45 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
 
   clientFile.addImportDeclarations([
     {
-      namedImports: [
-        "getClient",
-        "ClientOptions",
-        "PathUncheckedClient",
-        "RequestParameters"
-      ],
-      moduleSpecifier: "./responses"
+      namedImports: ["getClient", "ClientOptions", "PathUncheckedClient"],
+      moduleSpecifier: "@azure-rest/llc-shared"
     }
   ]);
+
+  clientFile.addImportDeclarations([
+    {
+      namedImports: ["KeyCredential", "TokenCredential"],
+      moduleSpecifier: "@azure/core-auth"
+    }
+  ]);
+}
+
+function getClientFactoryBody(
+  clientTypeName: string
+): string | WriterFunction | (string | WriterFunction | StatementStructures)[] {
+  const baseUrlStatement: VariableStatementStructure = {
+    kind: StructureKind.VariableStatement,
+    declarationKind: VariableDeclarationKind.Const,
+    declarations: [
+      { name: "baseUrl", initializer: "options.baseUrl || endpoint" } // TODO: Parametrized host
+    ]
+  };
+
+  const credentials = `options = {
+    ...options,
+    credentials: {
+      scopes: ["https://cognitiveservices.azure.com/.default"], //TODO: Read these values from autorest options or SWAGGER Security
+      apiKeyHeaderName: "Ocp-Apim-Subscription-Key"
+    }
+  }`;
+
+  const getClient = `return (getClient(
+    credentials,
+    baseUrl,
+    options
+  ) as unknown) as ${clientTypeName};`;
+
+  return [baseUrlStatement, credentials, getClient];
 }
 
 function generatePathFirstRouteMethodsDefinition(
