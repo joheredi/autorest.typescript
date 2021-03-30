@@ -400,6 +400,17 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
     swaggerOrConfig: "test/integration/swaggers/text-analytics.md",
     clientName: "TextAnalytics",
     packageName: "@azure/ai-text-analytics"
+  },
+  translate: {
+    swaggerOrConfig: "test/integration/swaggers/translate.md",
+    clientName: "DocumentTranslation",
+    packageName: "@azure/ai-document-translation"
+  },
+  pubsub: {
+    swaggerOrConfig:
+      "https://raw.githubusercontent.com/Azure/azure-rest-api-specs-pr/1ed645c7d01684c0e75a4b1a9f025b00a15114a5/specification/webpubsub/data-plane/WebPubSub/preview/2020-10-01/webpubsub.json?token=AFBBZGIZVDP2NYVX7LPNZMTALPF2K",
+    clientName: "PubSub",
+    packageName: "@azure/web-pubsub"
   }
 };
 

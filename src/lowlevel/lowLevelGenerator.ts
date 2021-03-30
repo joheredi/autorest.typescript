@@ -10,30 +10,24 @@ import {
   Property,
   Parameter,
   ParameterLocation,
-  ObjectSchema
-  //   ObjectSchema
+  ChoiceSchema,
+  HttpHeader
 } from "@azure-tools/codemodel";
 import { Host, startSession } from "@autorest/extension-base";
 
 import {
   CallSignatureDeclarationStructure,
   IndentationText,
+  MethodSignatureStructure,
   OptionalKind,
   Project,
   PropertySignatureStructure,
   SourceFile,
-  StructureKind,
-  VariableDeclarationKind
+  StructureKind
 } from "ts-morph";
 
 import * as prettier from "prettier";
 import { isSchemaResponse } from "../utils/schemaHelpers";
-import { getCredentialScopes } from "../transforms/optionsTransforms";
-import { transformBaseUrl } from "../transforms/urlTransforms";
-import { HttpMethods } from "@azure/core-https";
-// import { isSchemaResponse } from "../utils/schemaHelpers";
-
-let importedModels = new Set<string>();
 
 const prettierTypeScriptOptions: prettier.Options = {
   parser: "typescript",
@@ -69,7 +63,6 @@ export async function generateLowlevelClient(host: Host) {
     }
   });
 
-  await generateClientHelpers(host, model, project);
   await generateTypes(model, project);
 
   // Save the source files to the virtual filesystem
@@ -101,9 +94,7 @@ export async function generateLowlevelClient(host: Host) {
 
 async function generateTypes(model: CodeModel, project: Project) {
   generatePathFirstClient(model, project);
-  generateVerbFirstClient(model, project);
   generateResponsesInterface(model, project);
-  await generateRequestInterface(model, project);
   generateModelInterfaces(model, project);
   generateParameterInterfaces(model, project);
 }
@@ -112,19 +103,6 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
   const clientFile = project.createSourceFile(`src/parameters.ts`, undefined, {
     overwrite: true
   });
-
-  const requestParameterType = `{
-    timeout?: number;
-    headers?: HttpHeaders;
-    body?: unknown;
-    queryParameters?: { [key: string]: any };
-  }`;
-  clientFile.addTypeAlias({
-    name: "RequestParameters",
-    type: requestParameterType,
-    isExported: true
-  });
-
   let importedModels = new Set<string>();
 
   model.operationGroups.forEach(og =>
@@ -141,12 +119,10 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
         ...operationParameters,
         ...requestParameters
       ];
+      const name = `${o.language.default.name}Parameters`;
+      let refs: string[] = ["RequestParameters"];
 
       if (signatureParameters.length) {
-        const name = `${o.language.default.name}Parameters`;
-
-        let refs: string[] = ["RequestParameters"];
-        let properties: PropertySignatureStructure[] = [];
         const bodyParameter = signatureParameters.filter(
           p => p.protocol.http?.in === "body"
         );
@@ -208,16 +184,28 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
           isExported: true,
           type: refs.join(" & ")
         });
+      } else {
+        clientFile.addTypeAlias({
+          name,
+          isExported: true,
+          type: refs.join(" & ")
+        });
       }
     })
   );
 
   clientFile.addImportDeclarations([
     {
+      namedImports: ["RequestParameters"],
+      moduleSpecifier: "@azure-rest/llc-shared"
+    }
+  ]);
+
+  clientFile.addImportDeclarations([
+    {
       namedImports: [...importedModels],
       moduleSpecifier: "./models"
-    },
-    { namedImports: ["HttpHeaders"], moduleSpecifier: "@azure/core-https" }
+    }
   ]);
 }
 
@@ -270,7 +258,7 @@ function generateChoices(model: CodeModel, file: SourceFile) {
     file.addTypeAlias({
       name: choice.language.default.name,
       isExported: true,
-      type: choice.choiceType.type
+      type: choice.choices.map(choice => `"${choice.value}"`).join(" | ")
     });
   });
 }
@@ -296,18 +284,6 @@ function isPrimitiveSchema(schema: Schema): boolean {
   ].includes(schema.type);
 }
 
-function getTypeForSchema(schema: Schema) {
-  if (isPrimitiveSchema(schema)) {
-    return primitiveSchemaToType(schema);
-  } else if (schema.type === SchemaType.Array) {
-    const arraySchema = schema as ArraySchema;
-    let elementType = arraySchema.elementType.type.toString();
-    return `${elementType}[]`;
-  } else {
-    return schema.language.default.name;
-  }
-}
-
 function getPropertySignature(
   p: Property | Parameter,
   importedModels = new Set<string>()
@@ -318,20 +294,25 @@ function getPropertySignature(
   if (isPrimitiveSchema(p.schema)) {
     property = {
       name: propertyName,
+      docs: [{ description: p.language.default.description }],
       hasQuestionToken: !p.required,
       type: primitiveSchemaToType(p.schema),
       kind: StructureKind.PropertySignature
     };
   } else if (p.schema.type === SchemaType.Array) {
     const arraySchema = p.schema as ArraySchema;
-    let elementType = arraySchema.elementType.type.toString();
+    let elementType = "";
 
     if (arraySchema.elementType.type === SchemaType.Object) {
       elementType = arraySchema.elementType.language.default.name;
       importedModels.add(elementType);
+    } else {
+      elementType = primitiveSchemaToType(arraySchema.elementType);
     }
+
     property = {
       name: propertyName,
+      docs: [{ description: p.language.default.description }],
       hasQuestionToken: !p.required,
       type: `${elementType}[]`,
       kind: StructureKind.PropertySignature
@@ -341,6 +322,7 @@ function getPropertySignature(
 
     property = {
       name: p.language.default.name,
+      docs: [{ description: p.language.default.description }],
       hasQuestionToken: !p.required,
       type: p.schema.language.default.name,
       kind: StructureKind.PropertySignature
@@ -401,93 +383,33 @@ function primitiveSchemaToType(schema: PrimitiveSchema) {
       return "string";
     case SchemaType.Boolean:
       return "boolean";
+    case SchemaType.Choice:
+    case SchemaType.SealedChoice:
+      return (schema as ChoiceSchema).choices
+        .map(choice => `"${choice.value}"`)
+        .join(" | ");
   }
 
   throw new Error(`Unknown primitive schema ${schema.type}`);
 }
 
-type VerbFirstProps = {
-  options: string;
-  hasOptionalOptions?: boolean;
-  response: string;
-  pathParameters?: string[];
-};
-
-type VerbFirstPaths = { [key: string]: VerbFirstProps };
-
-function generateVerbFirstClient(model: CodeModel, project: Project) {
-  const clientFile = project.createSourceFile(
-    `src/verbFirstclient.ts`,
-    undefined,
-    {
-      overwrite: true
-    }
-  );
-
-  const importedParameters = new Set<string>();
-  const importedResponses = new Set<string>();
-  const pathDictionary: VerbFirstPaths = {};
-
-  for (const operationGroup of model.operationGroups) {
-    for (const operation of operationGroup.operations) {
-      for (const request of operation.requests || []) {
-        const path: string = (
-          (request.protocol.http?.path as string) || ""
-        ).replace(/\{(\w+)\}/gm, ":$1");
-        const method = (
-          (request.protocol.http?.method as string) || ""
-        ).toUpperCase();
-
-        const verbPath = `${method} ${path}`;
-        if (path && method) {
-          if (!pathDictionary[verbPath]) {
-            const hasOptionalOptions = !request.signatureParameters?.some(
-              p => p.required
-            );
-            const { pathParameters } = getGroupedOperationParameters(operation);
-            pathDictionary[verbPath] = {
-              options: getOperationOptionsType(operation, importedParameters),
-              hasOptionalOptions,
-              response: `Promise<${getOperationReturnType(
-                operation,
-                importedResponses
-              )}>`,
-              pathParameters
-            };
-          }
-        }
-      }
-    }
-  }
-
-  clientFile.addInterface({
-    name: "Routes",
-    properties: getVerbFirstRoutesInterfaceDefinition(pathDictionary)
-  });
-
-  if (importedParameters.size) {
-    clientFile.addImportDeclaration({
-      namedImports: [...importedParameters],
-      moduleSpecifier: "./parameters"
-    });
-  }
-
-  if (importedResponses.size) {
-    clientFile.addImportDeclaration({
-      namedImports: [...importedResponses],
-      moduleSpecifier: "./responses"
-    });
-  }
-}
+type PathParameter = { name: string; description?: string };
 
 type Methods = {
   [key: string]: {
     optionsName: string;
+    description: string;
     hasOptionalOptions: boolean;
     returnType: string;
   };
 };
-type Paths = { [key: string]: Methods };
+type Paths = {
+  [key: string]: {
+    name: string;
+    pathParameters: PathParameter[];
+    methods: Methods;
+  };
+};
 
 function generatePathFirstClient(model: CodeModel, project: Project) {
   const clientFile = project.createSourceFile(
@@ -504,26 +426,52 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
   const pathDictionary: Paths = {};
   for (const operationGroup of model.operationGroups) {
     for (const operation of operationGroup.operations) {
+      const operationName = operation.language.default.name;
+      const operationDescription = operation.language.default.description;
+      const pathParameters: PathParameter[] =
+        operation.parameters
+          ?.filter(p => p.protocol.http?.in === ParameterLocation.Path)
+          .map(p => {
+            return {
+              name:
+                p.language.default.serializedName || p.language.default.name,
+              description: p.language.default.description
+            };
+          }) || [];
+
       for (const request of operation.requests || []) {
-        const path: string = (
-          (request.protocol.http?.path as string) || ""
-        ).replace(/\{(\w+)\}/gm, ":$1");
+        const path: string = (request.protocol.http?.path as string) || "";
         const method = request.protocol.http?.method;
 
         if (path && method) {
           if (!pathDictionary[path]) {
-            pathDictionary[path] = {};
+            pathDictionary[path] = {
+              pathParameters,
+              methods: {},
+              name: operationName
+            };
           }
           const hasOptionalOptions = !request.signatureParameters?.some(
             p => p.required
           );
-          pathDictionary[path][method] = {
-            optionsName: getOperationOptionsType(operation, importedParameters),
-            hasOptionalOptions,
-            returnType: `Promise<${getOperationReturnType(
-              operation,
-              importedResponses
-            )}>`
+          pathDictionary[path] = {
+            name: operationName,
+            pathParameters,
+            methods: {
+              ...pathDictionary[path].methods,
+              [`${method}`]: {
+                description: operationDescription,
+                optionsName: getOperationOptionsType(
+                  operation,
+                  importedParameters
+                ),
+                hasOptionalOptions,
+                returnType: `Promise<${getOperationReturnType(
+                  operation,
+                  importedResponses
+                )}>`
+              }
+            }
           };
         }
       }
@@ -532,7 +480,11 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
 
   clientFile.addInterface({
     name: "Routes",
-    properties: getPathFirstRoutesInterfaceDefinition(pathDictionary)
+    isExported: true,
+    callSignatures: getPathFirstRoutesInterfaceDefinition(
+      pathDictionary,
+      clientFile
+    )
   });
 
   if (importedParameters.size) {
@@ -548,315 +500,73 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
       moduleSpecifier: "./responses"
     });
   }
+
+  clientFile.addImportDeclarations([
+    {
+      namedImports: [
+        "getClient",
+        "ClientOptions",
+        "PathUncheckedClient",
+        "RequestParameters"
+      ],
+      moduleSpecifier: "./responses"
+    }
+  ]);
 }
 
-function getPathFirstRouteMethodsDefinition(methods: Methods): string {
-  const methodDefinitions: string[] = [];
+function generatePathFirstRouteMethodsDefinition(
+  operationName: string,
+  methods: Methods,
+  file: SourceFile
+): void {
+  const methodDefinitions: OptionalKind<MethodSignatureStructure>[] = [];
   for (const key of Object.keys(methods)) {
     const method = methods[key];
-    const optionsName = method.hasOptionalOptions ? "options?" : "options";
-    methodDefinitions.push(
-      `${key}(${optionsName}: ${method.optionsName}): ${method.returnType}`
-    );
+    methodDefinitions.push({
+      name: key,
+      docs: [{ description: methods[key].description }],
+      parameters: [
+        {
+          name: "options",
+          hasQuestionToken: method.hasOptionalOptions,
+          type: method.optionsName
+        }
+      ],
+      returnType: method.returnType
+    });
   }
 
-  return `{${methodDefinitions.join(",")}}`;
+  file.addInterface({
+    methods: methodDefinitions,
+    name: operationName,
+    isExported: true
+  });
 }
 
 function getPathFirstRoutesInterfaceDefinition(
-  paths: Paths
-): PropertySignatureStructure[] {
-  const properties: PropertySignatureStructure[] = [];
-
+  paths: Paths,
+  sourcefile: SourceFile
+): CallSignatureDeclarationStructure[] {
+  const signatures: CallSignatureDeclarationStructure[] = [];
   for (const key of Object.keys(paths)) {
-    properties.push({
-      name: `"${key}"`,
-      type: getPathFirstRouteMethodsDefinition(paths[key]),
-      kind: StructureKind.PropertySignature
-    });
-  }
-  return properties;
-}
-
-function getVerbFirstRoutesInterfaceDefinition(
-  paths: VerbFirstPaths
-): PropertySignatureStructure[] {
-  const properties: PropertySignatureStructure[] = [];
-
-  for (const key of Object.keys(paths)) {
-    properties.push({
-      name: `"${key}"`,
-      type: getVerbFirstPathProperties(paths[key]),
-      kind: StructureKind.PropertySignature
-    });
-  }
-  return properties;
-}
-
-function getVerbFirstPathProperties(verbProps: VerbFirstProps): string {
-  const pathParameters =
-    verbProps.pathParameters && verbProps.pathParameters.length
-      ? `[${verbProps.pathParameters.map(p => `string`).join(", ")}]`
-      : "[]";
-  return `{ options: ${verbProps.options}, response: ${verbProps.response}, pathParameters: ${pathParameters} }`;
-}
-
-async function generateRequestInterface(model: CodeModel, project: Project) {
-  const clientFile = project.createSourceFile(`src/types.ts`, undefined, {
-    overwrite: true
-  });
-
-  let importedParameters = new Set<string>();
-  let importedResponses = new Set<string>();
-
-  const operations = getAllOperations(model);
-
-  const callOverrides = getAllRequestOverrides(
-    operations,
-    importedParameters,
-    importedResponses
-  );
-
-  clientFile.addInterface({
-    name: "Request",
-    isExported: true,
-    callSignatures: callOverrides,
-    leadingTrivia: writer => writer.blankLine()
-  });
-
-  clientFile.addInterface({
-    name: "TextAnalyticsClient",
-    isExported: true,
-    properties: [{ name: "request", type: "Request" }]
-  });
-
-  clientFile.addInterface({
-    name: "RequestParameters",
-    isExported: true,
-    properties: [
-      {
-        name: "baseUrl",
-        hasQuestionToken: true,
-        type: "string"
-      },
-      {
-        name: "headers",
-        hasQuestionToken: true,
-        type: "RawHttpHeaders"
-      },
-      {
-        name: "[parameter: string]",
-        type: "any"
-      }
-    ]
-  });
-
-  await generateCreateClient(clientFile, model);
-  model.operationGroups.forEach(og =>
-    og.operations.forEach(o => generateOperationsImplementation(o, clientFile))
-  );
-
-  clientFile.addImportDeclarations([
-    {
-      namedImports: [
-        "RawHttpHeaders",
-        "PipelineOptions",
-        "Pipeline",
-        "createPipelineRequest"
-      ],
-      moduleSpecifier: "@azure/core-https"
-    },
-    {
-      namedImports: ["TokenCredential"],
-      moduleSpecifier: "@azure/core-auth"
-    }
-  ]);
-
-  if (importedModels.size) {
-    clientFile.addImportDeclarations([
-      {
-        namedImports: [...importedModels],
-        moduleSpecifier: "./models"
-      }
-    ]);
-  }
-
-  if (importedParameters.size) {
-    clientFile.addImportDeclaration({
-      namedImports: [...importedParameters],
-      moduleSpecifier: "./parameters"
-    });
-  }
-
-  if (importedResponses.size) {
-    clientFile.addImportDeclaration({
-      namedImports: [...importedResponses],
-      moduleSpecifier: "./responses"
-    });
-  }
-
-  clientFile.addImportDeclaration({
-    namedImports: ["createDefaultPipeline", "getCachedDefaultHttpsClient"],
-    moduleSpecifier: "./clientHelpers"
-  });
-
-  clientFile.addStatements(["export default createTextAnalyticsClient;"]);
-}
-
-interface requestImplementation {
-  route: string;
-  optionsType: string;
-  parameters?: {
-    queryParameters?: string[];
-    pathParameters?: string[];
-  };
-  headers?: string[];
-  body?: any;
-}
-
-async function generateCreateClient(clientFile: SourceFile, model: CodeModel) {
-  const endpoint = await transformBaseUrl(model);
-  let baseUrl = endpoint.endpoint || "";
-  const globalParameters = model.globalParameters || [];
-  const clientParameters = globalParameters.map(param => ({
-    name: param.language.default.name,
-    type: getTypeForSchema(param.schema)
-  }));
-
-  if (endpoint.isCustom) {
-    const paramReplacements = globalParameters
-      .filter(p => p.protocol.http?.in === "uri")
-      .map(p => {
-        const parameterName = p.language.default.name;
-        return `replace(/\{${parameterName}\}/g, ${parameterName})`;
-      });
-
-    baseUrl = [`"${baseUrl}"`, ...paramReplacements].join(".");
-  } else {
-    baseUrl = `${baseUrl}`;
-  }
-
-  const functionSelection = getAllOperations(model).map(o => {
-    return `if(route === ${getOperationRoute(o)}) {
-      return request${o.language.default.name}(pipeline, baseUrl)(options)
-    }`;
-  });
-
-  const createTextAnalyticsClientFn = clientFile.addFunction({
-    name: "createTextAnalyticsClient",
-    parameters: [
-      {
-        name: "credentials",
-        type: "TokenCredential"
-      },
-      ...(clientParameters.length ? clientParameters : []),
-      {
-        name: "options",
-        type: "PipelineOptions",
-        hasQuestionToken: true
-      }
-    ],
-    returnType: "TextAnalyticsClient",
-    statements: [
-      `const baseUrl = ${baseUrl};`,
-      `const pipeline = createDefaultPipeline(credentials, options);`,
-      `return {
-        request: (route: string, options: any) => {
-          ${functionSelection.join("\n")}
-        }
-       } as TextAnalyticsClient`
-    ]
-  });
-}
-
-async function generateClientHelpers(
-  host: Host,
-  model: CodeModel,
-  project: Project
-) {
-  const credentialScopes = await getCredentialScopes(host);
-  const clientFile = project.createSourceFile(
-    `src/clientHelpers.ts`,
-    undefined,
-    {
-      overwrite: true
-    }
-  );
-  clientFile.addStatements("let cachedHttpsClient: HttpsClient | undefined;");
-
-  clientFile.addVariableStatement({
-    declarationKind: VariableDeclarationKind.Const,
-    declarations: [
-      {
-        name: "DEFAULT_SCOPE",
-        initializer: credentialScopes
-          ? `[${credentialScopes.map(c => `"${c}"`).join()}]`
-          : `""`
-      }
-    ]
-  });
-
-  generateCreateDefaultPipeline(clientFile);
-  generateGetCachedDefaultHttpsClient(clientFile);
-
-  clientFile.addImportDeclarations([
-    {
-      namedImports: [
-        "createPipelineFromOptions",
-        "PipelineOptions",
-        "bearerTokenAuthenticationPolicy",
-        "Pipeline",
-        "DefaultHttpsClient",
-        "HttpsClient"
-      ],
-      moduleSpecifier: "@azure/core-https"
-    },
-    {
-      namedImports: ["TokenCredential"],
-      moduleSpecifier: "@azure/core-auth"
-    }
-  ]);
-}
-
-function generateGetCachedDefaultHttpsClient(clientFile: SourceFile) {
-  const getCachedDefaultHttpsClient = clientFile.addFunction({
-    name: "getCachedDefaultHttpsClient",
-    isExported: true,
-    returnType: "HttpsClient"
-  });
-
-  getCachedDefaultHttpsClient.addStatements(`
-  if (!cachedHttpsClient) {
-    cachedHttpsClient = new DefaultHttpsClient();
-  }
-
-  return cachedHttpsClient;`);
-}
-
-function generateCreateDefaultPipeline(clientFile: SourceFile) {
-  const createDefaultPipelineFn = clientFile.addFunction({
-    name: "createDefaultPipeline",
-    isExported: true,
-    parameters: [
-      { name: "credential", type: "TokenCredential" },
-      { name: "options", type: "PipelineOptions = {}" }
-    ],
-    returnType: "Pipeline"
-  });
-
-  createDefaultPipelineFn.addStatements([
-    `
-    const pipeline = createPipelineFromOptions(options);
-    pipeline.addPolicy(
-      bearerTokenAuthenticationPolicy({
-        credential,
-        scopes: DEFAULT_SCOPE
-      })
+    generatePathFirstRouteMethodsDefinition(
+      paths[key].name,
+      paths[key].methods,
+      sourcefile
     );
-
-    return pipeline;
-    `
-  ]);
+    const pathParams = paths[key].pathParameters;
+    signatures.push({
+      parameters: [
+        { name: "path", type: `"${key}"` },
+        ...pathParams.map(p => {
+          return { name: p.name, type: "string", description: p.description };
+        })
+      ],
+      returnType: paths[key].name,
+      kind: StructureKind.CallSignature
+    });
+  }
+  return signatures;
 }
 
 function getResponseInterfaceName(operation: Operation, response: Response) {
@@ -867,19 +577,6 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
   const clientFile = project.createSourceFile(`src/responses.ts`, undefined, {
     overwrite: true
   });
-
-  clientFile.addTypeAliases([
-    {
-      name: "PipelineResponse",
-      type: `PipelineResponseInternal & {body: unknown}`,
-      isExported: true
-    },
-    {
-      name: "RequestUncheckedResponse",
-      type: `PipelineResponse & {body: any}`,
-      isExported: true
-    }
-  ]);
 
   let importedModels = new Set<string>();
 
@@ -893,7 +590,7 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
 
       const baseResponseName = `${o.language.default.name}${r.protocol.http?.statusCodes[0]}`;
       let bodyType: string | undefined;
-      let headersType = "HttpHeaders";
+      let headersType = "RawHttpHeaders";
       const isHeadersOptional =
         !r.protocol.http?.headers || !r.protocol.http?.headers.length;
 
@@ -906,14 +603,17 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
         const headersInterfaceName = `${baseResponseName}Headers`;
         clientFile.addInterface({
           name: headersInterfaceName,
-          properties: headersType = r.protocol.http?.headers.map((h: any) => ({
-            name: `"${h.header}"`,
-            type: "string",
-            hasQuestionToken: true
-          }))
+          properties: headersType = r.protocol.http?.headers.map(
+            (h: HttpHeader) => ({
+              name: `"${h.header.toLowerCase()}"`,
+              docs: [h.language.default.description],
+              type: "string",
+              hasQuestionToken: true
+            })
+          )
         });
 
-        headersType = `${headersInterfaceName} & HttpHeaders`;
+        headersType = `${headersInterfaceName} & RawHttpHeaders`;
       }
 
       const responseInterfaceName = `${baseResponseName}Properties`;
@@ -922,7 +622,7 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
 
       clientFile.addTypeAlias({
         name: responseTypeName,
-        type: `${responseInterfaceName} & PipelineResponse`,
+        type: `${responseInterfaceName} & HttpResponse`,
         isExported: true
       });
 
@@ -956,11 +656,15 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
     });
   }
 
+  clientFile.addImportDeclarations([
+    {
+      namedImports: ["HttpResponse"],
+      moduleSpecifier: "@azure-rest/llc-shared"
+    }
+  ]);
+
   clientFile.addImportDeclaration({
-    namedImports: [
-      "PipelineResponse as PipelineResponseInternal",
-      "HttpHeaders"
-    ],
+    namedImports: ["RawHttpHeaders"],
     moduleSpecifier: "@azure/core-https"
   });
 }
@@ -978,240 +682,10 @@ function getAllOperations(model: CodeModel) {
   return operations;
 }
 
-function getOperationParameters(operation: Operation) {
-  return [
-    ...(operation.signatureParameters || []),
-    ...((operation.requests &&
-      operation.requests[0] &&
-      operation.requests[0].signatureParameters) ||
-      [])
-  ];
-}
-
-function getOperationPath(operation: Operation) {
-  if (operation.requests && operation.requests.length) {
-    const r = operation.requests[0];
-    return r.protocol.http!.path;
-  }
-
-  throw new Error(
-    `Couldn't get path for operation ${operation.language.default.name}`
-  );
-}
-
-function getOperationRoute(operation: Operation) {
-  if (operation.requests && operation.requests.length) {
-    const r = operation.requests[0];
-    return `"${r.protocol.http!.method.toUpperCase()} ${
-      r.protocol.http!.path
-    }"`;
-  }
-
-  throw new Error(
-    `Couldn't get route for operation ${operation.language.default.name}`
-  );
-}
-
-interface GroupedOperationParameters {
-  hasRequired: boolean;
-  queryParameters: string[];
-  pathParameters: string[];
-  body: string[];
-  headers: string[];
-}
-
-function getPathParameterHandle(
-  { pathParameters }: GroupedOperationParameters,
-  path: string
-) {
-  if (!pathParameters || !pathParameters.length) {
-    return "";
-  }
-  pathParameters
-    .map(p => {
-      return `${p}: options.${p}`;
-    })
-    .join();
-  return [
-    `let replacedPath: string = "${path}"`,
-    `replacedPath = replacedPath.`,
-    pathParameters
-      .map(pp => {
-        return `replace(
-        /{${pathParameters}}/g,
-        options["${pathParameters}"]
-      )`;
-      })
-      .join(".")
-  ];
-}
-
-function getQueryParameterHandle({
-  queryParameters
-}: GroupedOperationParameters) {
-  if (!queryParameters || !queryParameters.length) {
-    return "";
-  }
-  return [
-    queryParameters
-      .map(qp => {
-        return `options["${qp}"] && url.searchParams.append("${qp}", options["${qp}"].toString());`;
-      })
-      .join("\n")
-  ];
-}
-
-function getBodyHandle({ body }: GroupedOperationParameters) {
-  if (!body || !body.length) {
-    return "";
-  }
-  const parameterAssignments = body
-    .map(p => {
-      return `${p}: options && options["${p}"]`;
-    })
-    .join();
-  return `const body = {${parameterAssignments}}`;
-}
-
-function getHeadersHandlle({ headers }: GroupedOperationParameters) {
-  if (!headers || !headers.length) {
-    return "";
-  }
-  const parameterAssignments = headers
-    .map(p => {
-      return `${p}: options.${p}`;
-    })
-    .join();
-  return `const headers = {${parameterAssignments}}`;
-}
-
-function generateOperationsImplementation(
-  operation: Operation,
-  file: SourceFile
-) {
-  const project = new Project({
-    useInMemoryFileSystem: true,
-    manipulationSettings: {
-      indentationText: IndentationText.TwoSpaces
-    }
-  });
-
-  const tempFile = project.createSourceFile("temp.ts");
-
-  const parameters = getGroupedOperationParameters(operation);
-  const route = getOperationRoute(operation);
-  const path = getOperationPath(operation);
-  const returnType = `Promise<${getOperationReturnType(operation)}>`;
-  const optionstype = getOperationOptionsType(operation);
-  const name = `request${operation.language.default.name}`;
-  const bodyHandle = getBodyHandle(parameters);
-  const pathHandle = getPathParameterHandle(parameters, path);
-  const subFunction = tempFile.addFunction({
-    // name,
-    parameters: [
-      {
-        name: "options",
-        type: optionstype,
-        hasQuestionToken: !parameters.hasRequired
-      }
-    ],
-    isAsync: true,
-    returnType,
-    statements: [
-      ...pathHandle,
-      `const httpClient = getCachedDefaultHttpsClient();`,
-      `const url = new URL(\`\${baseUrl}\${${
-        pathHandle ? "replacedPath" : `"${path}"`
-      }}\`);`,
-      ...getQueryParameterHandle(parameters),
-      bodyHandle,
-      getHeadersHandlle(parameters),
-      `const request = createPipelineRequest({
-        url: url.toString(),
-        method: "${getOperationMethod(operation)}",`,
-      ...(bodyHandle && [`body: JSON.stringify(body)`]),
-      `})`,
-      `const result = await pipeline.sendRequest(httpClient, request);`,
-      `return {
-        request,
-        headers: result.headers,
-        status: result.status as any,
-        parsedBody: JSON.parse(result.bodyAsText || "{}"),
-      };`
-    ]
-  });
-
-  file.addFunction({
-    name,
-    parameters: [
-      { name: "pipeline", type: "Pipeline" },
-      { name: "baseUrl", type: "string" }
-    ],
-    statements: writer => {
-      writer.write(`return ${subFunction.getFullText()}`);
-    }
-  });
-}
-
-function getGroupedOperationParameters(
-  operation: Operation
-): GroupedOperationParameters {
-  const parameters = getOperationParameters(operation);
-  const hasRequired = parameters.some(p => p.required);
-
-  const bodyProperties =
-    (
-      ((
-        parameters.filter(
-          p => p.protocol.http?.in === ParameterLocation.Body
-        )[0] || {}
-      ).schema as ObjectSchema) || {}
-    ).properties || [];
-
-  const body = bodyProperties.map(
-    p => p.language.default.serializedName || p.language.default.name
-  ) as string[];
-
-  return {
-    hasRequired,
-    queryParameters: parameters
-      .filter(p => p.protocol.http?.in === ParameterLocation.Query)
-      .map(
-        p => p.language.default.serializedName || p.language.default.name
-      ) as string[],
-    pathParameters: parameters
-      .filter(p => p.protocol.http?.in === ParameterLocation.Path)
-      .map(
-        p => p.language.default.serializedName || p.language.default.name
-      ) as string[],
-    body: body,
-    headers: parameters
-      .filter(p => p.protocol.http?.in === ParameterLocation.Header)
-      .map(
-        p => p.language.default.serializedName || p.language.default.name
-      ) as string[]
-  };
-}
-
-function getOperationMethod({ requests, language }: Operation): HttpMethods {
-  if (
-    requests &&
-    requests.length &&
-    requests[0].protocol.http! &&
-    requests[0].protocol.http!.method
-  ) {
-    return requests[0].protocol.http!.method.toUpperCase();
-  }
-  throw new Error(
-    `Couldn't find the operation method for ${language.default.name}`
-  );
-}
-
 function getOperationOptionsType(
   operation: Operation,
   importedParameters = new Set<string>()
 ) {
-  // const parameters = getOperationParameters(operation);
   const paramsName = `${operation.language.default.name}Parameters`;
   importedParameters.add(paramsName);
 
@@ -1222,7 +696,7 @@ function getOperationReturnType(
   operation: Operation,
   importedResponses = new Set<string>()
 ) {
-  let returnType: string = "PipelineResponse";
+  let returnType: string = "HttpResponse";
   if (operation.responses && operation.responses.length) {
     const responses = [...operation.responses, ...(operation.exceptions || [])];
 
@@ -1242,40 +716,4 @@ function getOperationReturnType(
   }
 
   return returnType;
-}
-
-function getAllRequestOverrides(
-  operations: Operation[],
-  importedParameters = new Set<string>(),
-  importedResponses = new Set<string>()
-) {
-  let overrides: CallSignatureDeclarationStructure[] = [];
-  operations.forEach(o =>
-    (o.requests || [])
-      .filter(r => r.protocol && r.protocol.http)
-      .forEach(() => {
-        let returnType = getOperationReturnType(o, importedResponses);
-        const parameters = getOperationParameters(o);
-        const isParameterOptional = !parameters.some(p => p.required);
-
-        let override: CallSignatureDeclarationStructure = {
-          returnType: `Promise<${returnType}>`,
-          kind: StructureKind.CallSignature,
-          parameters: [
-            {
-              name: "route",
-              type: getOperationRoute(o)
-            },
-            {
-              name: "options",
-              type: getOperationOptionsType(o, importedParameters),
-              hasQuestionToken: isParameterOptional
-            }
-          ]
-        };
-        overrides.push(override);
-      })
-  );
-
-  return overrides;
 }
