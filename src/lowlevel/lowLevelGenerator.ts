@@ -11,7 +11,8 @@ import {
   ParameterLocation,
   ChoiceSchema,
   HttpHeader,
-  ConstantSchema
+  ConstantSchema,
+  DictionarySchema
 } from "@azure-tools/codemodel";
 
 import {
@@ -260,10 +261,9 @@ function generateSealedChoices(model: CodeModel, file: SourceFile) {
 
 function generateDictionaries(model: CodeModel, file: SourceFile) {
   (model.schemas.dictionaries || []).forEach(dictionary => {
-    const elementType = isPrimitiveSchema(dictionary.elementType)
-      ? primitiveSchemaToType(dictionary.elementType)
-      : dictionary.elementType.type;
-    const type = `{[key: string]: ${elementType}}`;
+    let elementType = getTypeForSchema(dictionary.elementType);
+
+    const type = `{[key: string]: ${elementType.typeName}}`;
     file.addTypeAlias({
       name: dictionary.language.default.name,
       isExported: true,
@@ -284,6 +284,7 @@ function generateChoices(model: CodeModel, file: SourceFile) {
 
 function isPrimitiveSchema(schema: Schema): boolean {
   return [
+    SchemaType.Binary,
     SchemaType.String,
     SchemaType.Number,
     SchemaType.Integer,
@@ -398,7 +399,37 @@ function generateObjectInterfaces(model: CodeModel, file: SourceFile) {
   });
 }
 
-function primitiveSchemaToType(schema: PrimitiveSchema) {
+interface TypeInfo {
+  typeName: string;
+  modelName?: string;
+}
+
+function getTypeForSchema(schema: Schema): TypeInfo {
+  let modelName: string | undefined = schema.language.default.name;
+  let typeName = schema.language.default.name;
+  if (isPrimitiveSchema(schema)) {
+    typeName = primitiveSchemaToType(schema);
+    modelName = undefined;
+  }
+
+  if (isArraySchema(schema)) {
+    const elementType = getTypeForSchema(schema.elementType);
+    typeName = `${elementType.typeName}[]`;
+    modelName = elementType.modelName;
+  }
+
+  return { typeName, modelName };
+}
+
+function isArraySchema(schema: Schema): schema is ArraySchema {
+  return schema.type === SchemaType.Array;
+}
+
+// function isDictionarySchema(schema: Schema): schema is DictionarySchema {
+//   return schema.type === SchemaType.Dictionary;
+// }
+
+function primitiveSchemaToType(schema: PrimitiveSchema): string {
   switch (schema.type) {
     case SchemaType.Any:
       return "any";
@@ -411,6 +442,7 @@ function primitiveSchemaToType(schema: PrimitiveSchema) {
       return "Date";
     case SchemaType.Char:
       return "string";
+    case SchemaType.Binary:
     case SchemaType.Duration:
     case SchemaType.Credential:
     case SchemaType.UnixTime:
@@ -626,9 +658,7 @@ function getClientFactoryBody(
   const baseUrlStatement: VariableStatementStructure = {
     kind: StructureKind.VariableStatement,
     declarationKind: VariableDeclarationKind.Const,
-    declarations: [
-      { name: "baseUrl", initializer: baseUrl } // TODO: Parametrized host
-    ]
+    declarations: [{ name: "baseUrl", initializer: baseUrl }]
   };
 
   const { credentialScopes, credentialKeyHeaderName } = getAutorestOptions();
@@ -744,14 +774,23 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
         !r.protocol.http?.headers || !r.protocol.http?.headers.length;
 
       if (isSchemaResponse(r)) {
-        if (isPrimitiveSchema(r.schema)) {
-          const schemaType = primitiveSchemaToType(r.schema);
-          bodyType = r.nullable ? `${schemaType} | null` : schemaType;
-        } else {
-          // TOOD: Handle Array Schemas
-          bodyType = r.schema.language.default.name;
-          importedModels.add(bodyType);
+        const typeInfo = getTypeForSchema(r.schema);
+        bodyType = typeInfo.typeName;
+
+        if (typeInfo.modelName) {
+          importedModels.add(typeInfo.modelName);
         }
+
+        // if (isPrimitiveSchema(r.schema)) {
+        //   const schemaType = primitiveSchemaToType(r.schema);
+        //   bodyType = r.nullable ? `${schemaType} | null` : schemaType;
+        // } else if(isArraySchema(r.schema)) {
+        //   getTypeForSchema(r.schema);
+        // } else {
+        //   // TOOD: Handle Array Schemas
+        //   bodyType = r.schema.language.default.name;
+        //   importedModels.add(bodyType);
+        // }
       }
 
       if (!isHeadersOptional) {
