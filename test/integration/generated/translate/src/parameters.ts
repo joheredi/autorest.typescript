@@ -1,4 +1,4 @@
-import { RequestParameters } from "@azure-rest/llc-shared";
+import { RequestParameters } from "@azure-rest/core-client";
 import { BatchSubmissionRequest } from "./models";
 
 interface SubmitBatchRequestBodyParam {

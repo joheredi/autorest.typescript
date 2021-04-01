@@ -3,17 +3,20 @@ import { TracingInfo } from "../../src/models/clientDetails";
 
 interface SwaggerConfig {
   swaggerOrConfig: string;
-  clientName: string;
-  packageName: string;
+  clientName?: string;
+  packageName?: string;
+  packageVersion?: string;
   addCredentials?: boolean;
   licenseHeader?: boolean;
   credentialScopes?: string;
   tracing?: TracingInfo;
   disableAsyncIterators?: boolean;
   hideClients?: boolean;
+  lowLevelClient?: boolean;
+  m4deduplication?: boolean;
 }
 
-const package_version = "1.0.0-preview1";
+const DEFAULT_PACKAGE_VERSION = "1.0.0-beta.1";
 let whiteList: string[] = [];
 
 const testSwaggers: { [name: string]: SwaggerConfig } = {
@@ -142,6 +145,13 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
     swaggerOrConfig: "body-string.json",
     clientName: "BodyStringClient",
     packageName: "body-string",
+    licenseHeader: true
+  },
+  bodyStringLlc: {
+    swaggerOrConfig: "body-string.json",
+    clientName: "BodyStringLowLevelClient",
+    packageName: "body-string-llc",
+    lowLevelClient: true,
     licenseHeader: true
   },
   bodyTime: {
@@ -404,13 +414,26 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
   translate: {
     swaggerOrConfig: "test/integration/swaggers/translate.md",
     clientName: "DocumentTranslation",
-    packageName: "@azure/ai-document-translation"
+    packageName: "@azure/ai-document-translation",
+    addCredentials: true
+  },
+  purviewScanning: {
+    swaggerOrConfig: "test/integration/swaggers/purview-scanning.md",
+    clientName: "MicrosoftScanning",
+    packageName: "@azure-rest/purview-scanning",
+    addCredentials: true,
+    m4deduplication: true
+  },
+  purviewCatalog: {
+    swaggerOrConfig: "test/integration/swaggers/purview-catalog.md",
+    m4deduplication: true
   },
   pubsub: {
     swaggerOrConfig:
       "https://raw.githubusercontent.com/Azure/azure-rest-api-specs-pr/1ed645c7d01684c0e75a4b1a9f025b00a15114a5/specification/webpubsub/data-plane/WebPubSub/preview/2020-10-01/webpubsub.json?token=AFBBZGIZVDP2NYVX7LPNZMTALPF2K",
     clientName: "PubSub",
-    packageName: "@azure/web-pubsub"
+    packageName: "@azure/web-pubsub",
+    lowLevelClient: true
   }
 };
 
@@ -435,10 +458,17 @@ const generateSwaggers = async (
       tracing,
       disableAsyncIterators,
       credentialScopes,
-      hideClients
+      hideClients,
+      lowLevelClient,
+      m4deduplication,
+      packageVersion
     } = testSwaggers[name];
 
     let swaggerPath = swaggerOrConfig;
+
+    const m4dedup = m4deduplication
+      ? `--modelerfour.lenient-model-deduplication=true`
+      : "";
 
     const tracingInfo = tracing
       ? `--tracing-info.namespace=${tracing.namespace} --tracing-info.packagePrefix=${tracing.packagePrefix}`
@@ -452,6 +482,15 @@ const generateSwaggers = async (
       ? "--disable-async-iterators=true"
       : "";
 
+    const isLlcClient = lowLevelClient ? "--low-level-client=true" : "";
+
+    const addCredentialsFlag =
+      addCredentials === false ? `--add-credentials=false` : "";
+
+    const title = clientName ? `--title=${clientName}` : "";
+    const packageNameFlag = packageName ? `--package-name=${packageName}` : "";
+    const packageVersionFlag = `--package-version=${packageVersion || DEFAULT_PACKAGE_VERSION}`
+
     if (swaggerOrConfig.split("/").length === 1) {
       // When given a filename look for it in test server, otherwise use the path
       swaggerPath = `node_modules/@microsoft.azure/autorest.testserver/swagger/${swaggerOrConfig}`;
@@ -462,7 +501,7 @@ const generateSwaggers = async (
       inputFileCommand = `--input-file=${inputFileCommand}`;
     }
 
-    let autorestCommand: string = `autorest --clear-output-folder=true ${tracingInfo} ${disableIterators} ${credentialScopesInfo} --license-header=${!!licenseHeader} --add-credentials=${!!addCredentials} --typescript --output-folder=./test/integration/generated/${name} --use=. --title=${clientName} --package-name=${packageName} --package-version=${package_version} --hide-clients=${!!hideClients} ${inputFileCommand}`;
+    let autorestCommand: string = `autorest --clear-output-folder=true  ${m4dedup} ${tracingInfo} ${disableIterators} ${credentialScopesInfo} --license-header=${!!licenseHeader} ${addCredentialsFlag} --typescript --output-folder=./test/integration/generated/${name} --use=. ${title} ${packageNameFlag} ${packageVersionFlag} --hide-clients=${!!hideClients} ${inputFileCommand} ${isLlcClient}`;
 
     if (isDebugging) {
       autorestCommand = `${autorestCommand} --typescript.debugger`;

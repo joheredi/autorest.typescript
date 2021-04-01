@@ -1,7 +1,6 @@
 import {
   CodeModel,
   Response,
-  codeModelSchema,
   Schema,
   SchemaType,
   PrimitiveSchema,
@@ -11,9 +10,9 @@ import {
   Parameter,
   ParameterLocation,
   ChoiceSchema,
-  HttpHeader
+  HttpHeader,
+  ConstantSchema
 } from "@azure-tools/codemodel";
-import { Host, startSession } from "@autorest/extension-base";
 
 import {
   CallSignatureDeclarationStructure,
@@ -32,6 +31,9 @@ import {
 
 import * as prettier from "prettier";
 import { isSchemaResponse } from "../utils/schemaHelpers";
+import { getAutorestOptions, getHost, getSession } from "../autorestSession";
+import { transformBaseUrl } from "../transforms/urlTransforms";
+import { NameType, normalizeName } from "../utils/nameUtils";
 
 const prettierTypeScriptOptions: prettier.Options = {
   parser: "typescript",
@@ -51,13 +53,17 @@ const prettierJSONOptions: prettier.Options = {
   singleQuote: false
 };
 
-export async function generateLowlevelClient(host: Host) {
-  const session = await startSession<CodeModel>(
-    host,
-    undefined,
-    codeModelSchema
+function setOperationName(model: CodeModel) {
+  model.operationGroups.forEach(og =>
+    og.operations.forEach(o => {
+      o.language.default.name = `${og.language.default.name}${o.language.default.name}`;
+    })
   );
+}
 
+export async function generateLowlevelClient() {
+  const host = getHost();
+  const session = getSession();
   const { model } = session;
 
   const project = new Project({
@@ -67,6 +73,7 @@ export async function generateLowlevelClient(host: Host) {
     }
   });
 
+  setOperationName(model);
   await generateTypes(model, project);
 
   // Save the source files to the virtual filesystem
@@ -143,13 +150,18 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
           });
 
           clientFile.addInterface({
+            isExported: true,
             name: name,
             properties: propDef
           });
 
-          const queryParamName = `${o.language.default.name}QueryParam`;
+          const queryParamName = normalizeName(
+            `${o.language.default.name}QueryParam`,
+            NameType.Interface
+          );
 
           clientFile.addInterface({
+            isExported: true,
             name: queryParamName,
             properties: [
               {
@@ -168,6 +180,7 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
           const body = getPropertySignature(bodyParameter[0], referencedModels);
 
           clientFile.addInterface({
+            isExported: true,
             name: name,
             properties: [
               {
@@ -201,7 +214,7 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
   clientFile.addImportDeclarations([
     {
       namedImports: ["RequestParameters"],
-      moduleSpecifier: "@azure-rest/llc-shared"
+      moduleSpecifier: "@azure-rest/core-client"
     }
   ]);
 
@@ -247,7 +260,9 @@ function generateSealedChoices(model: CodeModel, file: SourceFile) {
 
 function generateDictionaries(model: CodeModel, file: SourceFile) {
   (model.schemas.dictionaries || []).forEach(dictionary => {
-    const elementType = dictionary.elementType.type;
+    const elementType = isPrimitiveSchema(dictionary.elementType)
+      ? primitiveSchemaToType(dictionary.elementType)
+      : dictionary.elementType.type;
     const type = `{[key: string]: ${elementType}}`;
     file.addTypeAlias({
       name: dictionary.language.default.name,
@@ -284,7 +299,8 @@ function isPrimitiveSchema(schema: Schema): boolean {
     SchemaType.UnixTime,
     SchemaType.Uri,
     SchemaType.Uuid,
-    SchemaType.Unknown
+    SchemaType.Unknown,
+    SchemaType.Constant
   ].includes(schema.type);
 }
 
@@ -296,11 +312,13 @@ function getPropertySignature(
   const propertyName = `"${p.language.default.serializedName ||
     p.language.default.name}"`;
   if (isPrimitiveSchema(p.schema)) {
+    const schemaType = primitiveSchemaToType(p.schema);
+    const propertyType = p.nullable ? `${schemaType} | null` : schemaType;
     property = {
       name: propertyName,
       docs: [{ description: p.language.default.description }],
       hasQuestionToken: !p.required,
-      type: primitiveSchemaToType(p.schema),
+      type: propertyType,
       kind: StructureKind.PropertySignature
     };
   } else if (p.schema.type === SchemaType.Array) {
@@ -308,7 +326,10 @@ function getPropertySignature(
     let elementType = "";
 
     if (arraySchema.elementType.type === SchemaType.Object) {
-      elementType = arraySchema.elementType.language.default.name;
+      elementType = normalizeName(
+        arraySchema.elementType.language.default.name,
+        NameType.Interface
+      );
       importedModels.add(elementType);
     } else {
       elementType = primitiveSchemaToType(arraySchema.elementType);
@@ -322,19 +343,24 @@ function getPropertySignature(
       kind: StructureKind.PropertySignature
     };
   } else {
+    const type = normalizeName(
+      p.schema.language.default.name,
+      NameType.Interface
+    );
     importedModels.add(p.schema.language.default.name);
 
     property = {
       name: p.language.default.name,
       docs: [{ description: p.language.default.description }],
       hasQuestionToken: !p.required,
-      type: p.schema.language.default.name,
+      type,
       kind: StructureKind.PropertySignature
     };
   }
   return property;
 }
 
+// Need to fix this logic
 function generateObjectInterfaces(model: CodeModel, file: SourceFile) {
   (model.schemas.objects || []).forEach(o => {
     const properties: PropertySignatureStructure[] = (o.properties || []).map(
@@ -343,17 +369,22 @@ function generateObjectInterfaces(model: CodeModel, file: SourceFile) {
       }
     );
 
-    let isBaseExported = true;
-    let baseName = o.language.default.name;
+    let baseName = normalizeName(o.language.default.name, NameType.Interface);
 
     if (o.parents?.immediate && o.parents.immediate.length) {
-      isBaseExported = false;
+      if (
+        o.parents.immediate.length === 1 &&
+        o.parents.immediate[0].language.default.name === baseName &&
+        !properties.length
+      ) {
+        return;
+      }
       const exportedName = baseName;
       baseName = `${baseName}Base`;
       const parentNames = o.parents.immediate.map(p => p.language.default.name);
 
       file.addTypeAlias({
-        name: exportedName,
+        name: `${exportedName}`,
         isExported: true,
         type: [baseName, ...parentNames].join(" & ")
       });
@@ -361,7 +392,7 @@ function generateObjectInterfaces(model: CodeModel, file: SourceFile) {
 
     file.addInterface({
       name: baseName,
-      isExported: isBaseExported,
+      isExported: true,
       properties
     });
   });
@@ -369,6 +400,8 @@ function generateObjectInterfaces(model: CodeModel, file: SourceFile) {
 
 function primitiveSchemaToType(schema: PrimitiveSchema) {
   switch (schema.type) {
+    case SchemaType.Any:
+      return "any";
     case SchemaType.Integer:
     case SchemaType.Number:
       return "number";
@@ -387,11 +420,16 @@ function primitiveSchemaToType(schema: PrimitiveSchema) {
       return "string";
     case SchemaType.Boolean:
       return "boolean";
+    case SchemaType.ByteArray:
+      return "Uint8Array";
     case SchemaType.Choice:
     case SchemaType.SealedChoice:
       return (schema as ChoiceSchema).choices
         .map(choice => `"${choice.value}"`)
         .join(" | ");
+    case SchemaType.Constant:
+      const value = (schema as ConstantSchema).value.value;
+      return typeof value === "string" ? `"${value}"` : value;
   }
 
   throw new Error(`Unknown primitive schema ${schema.type}`);
@@ -416,8 +454,9 @@ type Paths = {
 };
 
 function generatePathFirstClient(model: CodeModel, project: Project) {
+  const name = normalizeName(model.language.default.name, NameType.File);
   const clientFile = project.createSourceFile(
-    `src/pathFirstclient.ts`,
+    `src/${name}Client.ts`,
     undefined,
     {
       overwrite: true
@@ -490,10 +529,15 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
       clientFile
     )
   });
+
   const clientName = model.language.default.name;
+  const uriParameter = getClientUriParameter();
+  const { addCredentials } = getAutorestOptions();
   const commonClientParams = [
-    { name: "endpoint", type: "string" },
-    { name: "credentials", type: "TokenCredential | KeyCredential" }
+    ...(uriParameter ? [{ name: uriParameter, type: "string" }] : []),
+    ...(addCredentials === false
+      ? []
+      : [{ name: "credentials", type: "TokenCredential | KeyCredential" }])
   ];
   const clientIterfaceName = `${clientName}Client`;
   const factoryTypeName = `${clientName}Factory`;
@@ -553,7 +597,7 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
   clientFile.addImportDeclarations([
     {
       namedImports: ["getClient", "ClientOptions", "PathUncheckedClient"],
-      moduleSpecifier: "@azure-rest/llc-shared"
+      moduleSpecifier: "@azure-rest/core-client"
     }
   ]);
 
@@ -565,28 +609,54 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
   ]);
 }
 
+function getClientUriParameter() {
+  const { model } = getSession();
+  const { parameterName } = transformBaseUrl(model);
+  return parameterName;
+}
+
 function getClientFactoryBody(
   clientTypeName: string
 ): string | WriterFunction | (string | WriterFunction | StatementStructures)[] {
+  const { model } = getSession();
+  const { endpoint, parameterName } = transformBaseUrl(model);
+  const baseUrl = parameterName
+    ? `options.baseUrl || "${endpoint}".replace(/{${parameterName}}/g, ${parameterName})`
+    : `options.baseUrl || "${endpoint}"`;
   const baseUrlStatement: VariableStatementStructure = {
     kind: StructureKind.VariableStatement,
     declarationKind: VariableDeclarationKind.Const,
     declarations: [
-      { name: "baseUrl", initializer: "options.baseUrl || endpoint" } // TODO: Parametrized host
+      { name: "baseUrl", initializer: baseUrl } // TODO: Parametrized host
     ]
   };
 
-  const credentials = `options = {
+  const { credentialScopes, credentialKeyHeaderName } = getAutorestOptions();
+
+  const scopesString =
+    credentialScopes && credentialScopes.length
+      ? credentialScopes.map(cs => `"${cs}"`).join(", ")
+      : "";
+  const scopes = scopesString ? `scopes: [${scopesString}],` : "";
+
+  const apiKeyHeaderName = credentialKeyHeaderName
+    ? `apiKeyHeaderName: "${credentialKeyHeaderName}",`
+    : "";
+
+  const credentials =
+    scopes || apiKeyHeaderName
+      ? `options = {
     ...options,
     credentials: {
-      scopes: ["https://cognitiveservices.azure.com/.default"], //TODO: Read these values from autorest options or SWAGGER Security
-      apiKeyHeaderName: "Ocp-Apim-Subscription-Key"
+      ${scopes}
+      ${apiKeyHeaderName}
     }
-  }`;
+  }`
+      : "";
 
   const getClient = `return (getClient(
-    credentials,
     baseUrl,
+    ${credentials ? "credentials," : ""}
     options
   ) as unknown) as ${clientTypeName};`;
 
@@ -674,13 +744,20 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
         !r.protocol.http?.headers || !r.protocol.http?.headers.length;
 
       if (isSchemaResponse(r)) {
-        bodyType = r.schema.language.default.name;
-        importedModels.add(bodyType);
+        if (isPrimitiveSchema(r.schema)) {
+          const schemaType = primitiveSchemaToType(r.schema);
+          bodyType = r.nullable ? `${schemaType} | null` : schemaType;
+        } else {
+          // TOOD: Handle Array Schemas
+          bodyType = r.schema.language.default.name;
+          importedModels.add(bodyType);
+        }
       }
 
       if (!isHeadersOptional) {
         const headersInterfaceName = `${baseResponseName}Headers`;
         clientFile.addInterface({
+          isExported: true,
           name: headersInterfaceName,
           properties: headersType = r.protocol.http?.headers.map(
             (h: HttpHeader) => ({
@@ -697,7 +774,10 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
 
       const responseInterfaceName = `${baseResponseName}Properties`;
       const responseTypeName = getResponseInterfaceName(o, r);
-      const statusCode = r.protocol.http?.statusCodes[0];
+      const statusCode =
+        r.protocol.http?.statusCodes[0] === "default"
+          ? "number"
+          : r.protocol.http?.statusCodes[0];
 
       clientFile.addTypeAlias({
         name: responseTypeName,
@@ -722,6 +802,7 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
       }
 
       clientFile.addInterface({
+        isExported: true,
         name: responseInterfaceName,
         properties: responseProperties
       });
@@ -738,13 +819,13 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
   clientFile.addImportDeclarations([
     {
       namedImports: ["HttpResponse"],
-      moduleSpecifier: "@azure-rest/llc-shared"
+      moduleSpecifier: "@azure-rest/core-client"
     }
   ]);
 
   clientFile.addImportDeclaration({
     namedImports: ["RawHttpHeaders"],
-    moduleSpecifier: "@azure/core-https"
+    moduleSpecifier: "@azure/core-rest-pipeline"
   });
 }
 

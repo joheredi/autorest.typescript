@@ -7,7 +7,7 @@ import {
   FileFormatListResult,
   StorageSourceListResult
 } from "./models";
-import { HttpResponse } from "@azure-rest/llc-shared";
+import { HttpResponse } from "@azure-rest/core-client";
 import { RawHttpHeaders } from "@azure/core-https";
 
 interface SubmitBatchRequest202Headers {

@@ -64,7 +64,7 @@ import {
   getClient,
   ClientOptions,
   PathUncheckedClient
-} from "@azure-rest/llc-shared";
+} from "@azure-rest/core-client";
 import { KeyCredential, TokenCredential } from "@azure/core-auth";
 
 export interface GetOperations {
@@ -284,18 +284,23 @@ export default function DocumentTranslation(
   credentials: TokenCredential | KeyCredential,
   options: ClientOptions = {}
 ): DocumentTranslationClient {
-  const baseUrl = options.baseUrl || endpoint;
+  const baseUrl =
+    options.baseUrl ||
+    "{endpoint}/translator/text/batch/v1.0-preview.1".replace(
+      /{endpoint}/g,
+      endpoint
+    );
   options = {
     ...options,
     credentials: {
-      scopes: ["https://cognitiveservices.azure.com/.default"], //TODO: Read these values from autorest options or SWAGGER Security
+      scopes: ["https://cognitiveservices.azure.com/.default"],
       apiKeyHeaderName: "Ocp-Apim-Subscription-Key"
     }
   };
 
   return (getClient(
-    credentials,
     baseUrl,
+    credentials,
     options
   ) as unknown) as DocumentTranslationClient;
 }

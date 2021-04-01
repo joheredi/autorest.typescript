@@ -1,33 +1,29 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
-  AutoRestExtension,
-  Host
-  // startSession
-} from "@autorest/extension-base";
-// import { generateTypeScriptLibrary } from "./typescriptGenerator";
+import { AutoRestExtension, Host } from "@autorest/extension-base";
+import { generateTypeScriptLibrary } from "./typescriptGenerator";
 import { generateLowlevelClient } from "./lowlevel/lowLevelGenerator";
-// import { CodeModel, codeModelSchema } from "@azure-tools/codemodel";
+import {
+  getAutorestOptions,
+  getSession,
+  initializeSession
+} from "./autorestSession";
 
 export async function processRequest(host: Host) {
+  await initializeSession(host);
+  const session = getSession();
+  const autorestOptions = await getAutorestOptions();
   try {
-    // const session = await startSession<CodeModel>(
-    //   host,
-    //   undefined,
-    //   codeModelSchema
-    // );
-    // const start = Date.now();
-    // await generateTypeScriptLibrary(session.model, host);
-    try {
-      await generateLowlevelClient(host);
-    } catch (e) {
-      throw e;
+    const start = Date.now();
+    if (autorestOptions.lowLevelClient) {
+      await generateLowlevelClient();
+    } else {
+      await generateTypeScriptLibrary(session.model, host);
     }
-
-    //session.log(`Autorest.Typescript took ${Date.now() - start}ms`, "");
+    session.log(`Autorest.Typescript took ${Date.now() - start}ms`, "");
   } catch (err) {
-    console.error("An error was encountered while handling a request:", err);
+    session.error("An error was encountered while handling a request:", err);
     throw err;
   }
 }

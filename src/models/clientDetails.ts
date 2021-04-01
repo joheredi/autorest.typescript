@@ -16,6 +16,7 @@ export interface ClientOptions {
   mediaTypes?: Set<KnownMediaType>;
   hasPaging?: boolean;
   credentialScopes?: string[];
+  credentialKeyHeaderName?: string;
 }
 
 export interface TracingInfo {
