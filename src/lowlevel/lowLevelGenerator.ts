@@ -27,7 +27,8 @@ import {
   StructureKind,
   VariableDeclarationKind,
   VariableStatementStructure,
-  WriterFunction
+  WriterFunction,
+  Writers
 } from "ts-morph";
 
 import * as prettier from "prettier";
@@ -55,11 +56,14 @@ const prettierJSONOptions: prettier.Options = {
 };
 
 function setOperationName(model: CodeModel) {
-  model.operationGroups.forEach(og =>
-    og.operations.forEach(o => {
-      o.language.default.name = `${og.language.default.name}${o.language.default.name}`;
-    })
-  );
+  // No need to append operation group name if there is only a single OperationGroup
+  if (model.operationGroups.length > 1) {
+    model.operationGroups.forEach(og =>
+      og.operations.forEach(o => {
+        o.language.default.name = `${og.language.default.name}${o.language.default.name}`;
+      })
+    );
+  }
 }
 
 export async function generateLowlevelClient() {
@@ -487,13 +491,9 @@ type Paths = {
 
 function generatePathFirstClient(model: CodeModel, project: Project) {
   const name = normalizeName(model.language.default.name, NameType.File);
-  const clientFile = project.createSourceFile(
-    `src/${name}Client.ts`,
-    undefined,
-    {
-      overwrite: true
-    }
-  );
+  const clientFile = project.createSourceFile(`src/${name}.ts`, undefined, {
+    overwrite: true
+  });
 
   // Get all paths
   const importedParameters = new Set<string>();
@@ -571,34 +571,33 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
       ? []
       : [{ name: "credentials", type: "TokenCredential | KeyCredential" }])
   ];
-  const clientIterfaceName = `${clientName}Client`;
+  const clientIterfaceName = clientName;
   const factoryTypeName = `${clientName}Factory`;
-  clientFile.addInterfaces([
-    {
-      isExported: true,
-      name: clientIterfaceName,
-      properties: [
-        { name: "path", type: "Routes" },
-        { name: "pathUnchecked", type: "PathUncheckedClient" }
-      ]
-    },
-    {
-      isExported: true,
-      name: factoryTypeName,
-      callSignatures: [
-        {
-          parameters: [
-            ...commonClientParams,
-            {
-              name: "options",
-              type: "ClientOptions",
-              hasQuestionToken: true /** TODO: Check if there are any required client params */
-            }
-          ]
-        }
-      ]
-    }
-  ]);
+  clientFile.addTypeAlias({
+    isExported: true,
+    name: clientIterfaceName,
+    type: Writers.intersectionType(
+      "Client",
+      Writers.objectType({ properties: [{ name: "path", type: "Routes" }] })
+    )
+  });
+
+  clientFile.addInterface({
+    isExported: true,
+    name: factoryTypeName,
+    callSignatures: [
+      {
+        parameters: [
+          ...commonClientParams,
+          {
+            name: "options",
+            type: "ClientOptions",
+            hasQuestionToken: true /** TODO: Check if there are any required client params */
+          }
+        ]
+      }
+    ]
+  });
 
   clientFile.addFunction({
     isExported: true,
@@ -628,7 +627,7 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
 
   clientFile.addImportDeclarations([
     {
-      namedImports: ["getClient", "ClientOptions", "PathUncheckedClient"],
+      namedImports: ["getClient", "ClientOptions", "Client"],
       moduleSpecifier: "@azure-rest/core-client"
     }
   ]);
@@ -684,11 +683,11 @@ function getClientFactoryBody(
   }`
       : "";
 
-  const getClient = `return (getClient(
+  const getClient = `return getClient(
     baseUrl,
     ${credentials ? "credentials," : ""}
     options
-  ) as unknown) as ${clientTypeName};`;
+  ) as ${clientTypeName};`;
 
   return [baseUrlStatement, credentials, getClient];
 }
@@ -735,6 +734,11 @@ function getPathFirstRoutesInterfaceDefinition(
     );
     const pathParams = paths[key].pathParameters;
     signatures.push({
+      docs: [
+        `Resource for '${key}' has methods for the following verbs: ${Object.keys(
+          paths[key].methods
+        ).join(", ")}`
+      ],
       parameters: [
         { name: "path", type: `"${key}"` },
         ...pathParams.map(p => {
@@ -780,17 +784,6 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
         if (typeInfo.modelName) {
           importedModels.add(typeInfo.modelName);
         }
-
-        // if (isPrimitiveSchema(r.schema)) {
-        //   const schemaType = primitiveSchemaToType(r.schema);
-        //   bodyType = r.nullable ? `${schemaType} | null` : schemaType;
-        // } else if(isArraySchema(r.schema)) {
-        //   getTypeForSchema(r.schema);
-        // } else {
-        //   // TOOD: Handle Array Schemas
-        //   bodyType = r.schema.language.default.name;
-        //   importedModels.add(bodyType);
-        // }
       }
 
       if (!isHeadersOptional) {
@@ -808,7 +801,7 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
           )
         });
 
-        headersType = `${headersInterfaceName} & RawHttpHeaders`;
+        headersType = `RawHttpHeaders & ${headersInterfaceName}`;
       }
 
       const responseInterfaceName = `${baseResponseName}Properties`;
@@ -819,8 +812,9 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
           : r.protocol.http?.statusCodes[0];
 
       clientFile.addTypeAlias({
+        docs: [o.language.default.description],
         name: responseTypeName,
-        type: `${responseInterfaceName} & HttpResponse`,
+        type: `HttpResponse & ${responseInterfaceName}`,
         isExported: true
       });
 
@@ -828,7 +822,7 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
 
       if (bodyType) {
         responseProperties.push({
-          name: "parsedBody",
+          name: "body",
           type: bodyType ?? "any"
         });
       }
