@@ -11,8 +11,7 @@ import {
   ParameterLocation,
   ChoiceSchema,
   HttpHeader,
-  ConstantSchema,
-  DictionarySchema
+  ConstantSchema
 } from "@azure-tools/codemodel";
 
 import {
@@ -55,6 +54,35 @@ const prettierJSONOptions: prettier.Options = {
   singleQuote: false
 };
 
+function escapeDecriptions(model: CodeModel) {
+  model.schemas.objects?.forEach(escapeDescription);
+  model.schemas.choices?.forEach(escapeDescription);
+  model.schemas.sealedChoices?.forEach(escapeDescription);
+  model.schemas.dictionaries?.forEach(escapeDescription);
+
+  model.operationGroups.forEach(og => {
+    og.operations.forEach(o => {
+      escapeDescription(o);
+      o.signatureParameters?.forEach(escapeDescription);
+    });
+  });
+}
+
+function escapeDescription(schema: Schema | Operation | Parameter) {
+  schema.language.default.description = schema.language.default.description.replace(
+    /@/g,
+    "\\@"
+  );
+  schema.language.default.description = schema.language.default.description.replace(
+    /{/g,
+    "\\{"
+  );
+  schema.language.default.description = schema.language.default.description.replace(
+    /}/g,
+    "\\}"
+  );
+}
+
 function setOperationName(model: CodeModel) {
   // No need to append operation group name if there is only a single OperationGroup
   if (model.operationGroups.length > 1) {
@@ -78,6 +106,7 @@ export async function generateLowlevelClient() {
     }
   });
 
+  escapeDecriptions(model);
   setOperationName(model);
   await generateTypes(model, project);
 
@@ -91,6 +120,8 @@ export async function generateLowlevelClient() {
     const isJson = /\.json$/gi.test(filePath);
     const isSourceCode = /\.(ts|js)$/gi.test(filePath);
     let fileContents = fs.readFileSync(filePath);
+    const licenseHeader = `// Copyright (c) Microsoft Corporation.\n// Licensed under the MIT license.\n`;
+    fileContents = `${licenseHeader.trimLeft()}\n${fileContents}`;
 
     // Format the contents if necessary
     if (isJson || isSourceCode) {
@@ -119,6 +150,7 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
   const clientFile = project.createSourceFile(`src/parameters.ts`, undefined, {
     overwrite: true
   });
+
   let importedModels = new Set<string>();
 
   model.operationGroups.forEach(og =>
@@ -264,15 +296,21 @@ function generateSealedChoices(model: CodeModel, file: SourceFile) {
 }
 
 function generateDictionaries(model: CodeModel, file: SourceFile) {
+  const existingDictionaries = new Set<string>();
   (model.schemas.dictionaries || []).forEach(dictionary => {
     let elementType = getTypeForSchema(dictionary.elementType);
 
-    const type = `{[key: string]: ${elementType.typeName}}`;
-    file.addTypeAlias({
+    const type = `Record<string, ${elementType.typeName}>`;
+    const typeAlias = {
       name: dictionary.language.default.name,
       isExported: true,
       type
-    });
+    };
+
+    if (!existingDictionaries.has(JSON.stringify(typeAlias))) {
+      file.addTypeAlias(typeAlias);
+      existingDictionaries.add(JSON.stringify(typeAlias));
+    }
   });
 }
 
@@ -571,7 +609,7 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
       ? []
       : [{ name: "credentials", type: "TokenCredential | KeyCredential" }])
   ];
-  const clientIterfaceName = clientName;
+  const clientIterfaceName = `${clientName}Client`;
   const factoryTypeName = `${clientName}Factory`;
   clientFile.addTypeAlias({
     isExported: true,
@@ -651,9 +689,17 @@ function getClientFactoryBody(
 ): string | WriterFunction | (string | WriterFunction | StatementStructures)[] {
   const { model } = getSession();
   const { endpoint, parameterName } = transformBaseUrl(model);
-  const baseUrl = parameterName
-    ? `options.baseUrl || "${endpoint}".replace(/{${parameterName}}/g, ${parameterName})`
-    : `options.baseUrl || "${endpoint}"`;
+  let baseUrl: string;
+  if (parameterName) {
+    const parsedEndpoint = endpoint?.replace(
+      `{${parameterName}}`,
+      `\${${parameterName}}`
+    );
+    baseUrl = `options.baseUrl ?? \`${parsedEndpoint}\``;
+  } else {
+    baseUrl = `options.baseUrl ?? "${endpoint}"`;
+  }
+
   const baseUrlStatement: VariableStatementStructure = {
     kind: StructureKind.VariableStatement,
     declarationKind: VariableDeclarationKind.Const,
@@ -735,7 +781,12 @@ function getPathFirstRoutesInterfaceDefinition(
     const pathParams = paths[key].pathParameters;
     signatures.push({
       docs: [
-        `Resource for '${key}' has methods for the following verbs: ${Object.keys(
+        `Resource for '${key
+          .replace(/}/g, "\\}")
+          .replace(
+            /{/g,
+            "\\{"
+          )}' has methods for the following verbs: ${Object.keys(
           paths[key].methods
         ).join(", ")}`
       ],
@@ -762,6 +813,7 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
   });
 
   let importedModels = new Set<string>();
+  let hasHeaders = false;
 
   const operations = getAllOperations(model);
 
@@ -787,6 +839,7 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
       }
 
       if (!isHeadersOptional) {
+        hasHeaders = true;
         const headersInterfaceName = `${baseResponseName}Headers`;
         clientFile.addInterface({
           isExported: true,
@@ -804,19 +857,11 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
         headersType = `RawHttpHeaders & ${headersInterfaceName}`;
       }
 
-      const responseInterfaceName = `${baseResponseName}Properties`;
       const responseTypeName = getResponseInterfaceName(o, r);
       const statusCode =
         r.protocol.http?.statusCodes[0] === "default"
-          ? "number"
-          : r.protocol.http?.statusCodes[0];
-
-      clientFile.addTypeAlias({
-        docs: [o.language.default.description],
-        name: responseTypeName,
-        type: `HttpResponse & ${responseInterfaceName}`,
-        isExported: true
-      });
+          ? `"500"`
+          : `"${r.protocol.http?.statusCodes[0]}"`;
 
       const responseProperties = [{ name: "status", type: statusCode }];
 
@@ -835,9 +880,11 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
       }
 
       clientFile.addInterface({
+        docs: [o.language.default.description],
+        name: responseTypeName,
+        properties: responseProperties,
         isExported: true,
-        name: responseInterfaceName,
-        properties: responseProperties
+        extends: ["HttpResponse"]
       });
     });
   });
@@ -856,10 +903,12 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
     }
   ]);
 
-  clientFile.addImportDeclaration({
-    namedImports: ["RawHttpHeaders"],
-    moduleSpecifier: "@azure/core-rest-pipeline"
-  });
+  if (hasHeaders) {
+    clientFile.addImportDeclaration({
+      namedImports: ["RawHttpHeaders"],
+      moduleSpecifier: "@azure/core-rest-pipeline"
+    });
+  }
 }
 
 function getAllOperations(model: CodeModel) {
