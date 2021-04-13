@@ -8,7 +8,7 @@ import {
   SchemaType,
   Property,
   GroupProperty
-} from "@azure-tools/codemodel";
+} from "@autorest/codemodel";
 import {
   ObjectDetails,
   ObjectKind,

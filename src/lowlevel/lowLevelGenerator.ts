@@ -12,7 +12,7 @@ import {
   ChoiceSchema,
   HttpHeader,
   ConstantSchema
-} from "@azure-tools/codemodel";
+} from "@autorest/codemodel";
 
 import {
   CallSignatureDeclarationStructure,

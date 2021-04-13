@@ -2,7 +2,7 @@ import {
   CodeModel,
   ImplementationLocation,
   ParameterLocation
-} from "@azure-tools/codemodel";
+} from "@autorest/codemodel";
 import { getLanguageMetadata } from "../utils/languageHelpers";
 
 export interface EndpointDetails {

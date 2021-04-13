@@ -1,5 +1,5 @@
 import { Host, Session, startSession } from "@autorest/extension-base";
-import { CodeModel, codeModelSchema } from "@azure-tools/codemodel";
+import { CodeModel, codeModelSchema } from "@autorest/codemodel";
 import { extractAutorestOptions } from "./utils/autorestOptions";
 
 interface AutorestOptions {
