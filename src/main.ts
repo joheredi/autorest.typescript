@@ -16,7 +16,7 @@ export async function processRequest(host: Host) {
   const autorestOptions = await getAutorestOptions();
   try {
     const start = Date.now();
-    if (autorestOptions.lowLevelClient) {
+    if (autorestOptions.restLevelClient) {
       await generateLowlevelClient();
     } else {
       await generateTypeScriptLibrary(session.model, host);

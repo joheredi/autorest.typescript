@@ -36,6 +36,5 @@ export interface ClientDetails {
   parameters: ParameterDetails[];
   options: ClientOptions;
   endpoint: EndpointDetails;
-  srcPath?: string;
   tracing?: TracingInfo;
 }

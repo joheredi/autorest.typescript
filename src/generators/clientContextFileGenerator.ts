@@ -16,6 +16,7 @@ import { ParameterDetails } from "../models/parameterDetails";
 import { ImplementationLocation, SchemaType } from "@autorest/codemodel";
 import { EndpointDetails } from "../transforms/urlTransforms";
 import { formatJsDocParam } from "./utils/parameterUtils";
+import { getAutorestOptions } from "../autorestSession";
 
 export function generateClientContext(
   clientDetails: ClientDetails,
@@ -23,6 +24,7 @@ export function generateClientContext(
   project: Project,
   hideClients: boolean
 ) {
+  const { srcPath } = getAutorestOptions();
   const importedModels = new Set<string>();
   const clientParams = clientDetails.parameters.filter(
     param => param.implementationLocation === ImplementationLocation.Client
@@ -39,7 +41,7 @@ export function generateClientContext(
   );
 
   const sourceFile = project.createSourceFile(
-    `${clientDetails.srcPath}/${clientContextFileName}.ts`,
+    `${srcPath}/${clientContextFileName}.ts`,
     undefined,
     {
       overwrite: true

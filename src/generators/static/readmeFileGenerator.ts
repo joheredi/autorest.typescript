@@ -4,12 +4,19 @@
 import { Project } from "ts-morph";
 import { PackageDetails } from "../../models/packageDetails";
 import { ClientDetails } from "../../models/clientDetails";
+import { getAutorestOptions } from "../../autorestSession";
 
 export function generateReadmeFile(
   clientDetails: ClientDetails,
   packageDetails: PackageDetails,
   project: Project
 ) {
+  const { restLevelClient, generateMetadata } = getAutorestOptions();
+
+  if (restLevelClient || !generateMetadata) {
+    return;
+  }
+
   const readmeFileContents = `
 ## Azure ${clientDetails.name} SDK for JavaScript
 

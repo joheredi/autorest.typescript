@@ -15,7 +15,7 @@ source-code-folder-path: ./src/generated
 input-file: https://raw.githubusercontent.com/Azure/azure-rest-api-specs-pr/d8575c841ac1a60da23a0a01ab6d28872ed6b009/specification/purview/data-plane/Azure.Purview.Catalog/preview/2020-12-01-preview/purviewcatalog.json?token=AFBBZGJNZKBTRADK4BU3NVTAN5AAM
 package-version: 1.0.0-beta.1
 hide-clients: true
-low-level-client: true
+rest-level-client: true
 add-credentials: true
 credential-scopes: "user_impersonation"
 flatten-models: false

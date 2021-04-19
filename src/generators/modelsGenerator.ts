@@ -42,10 +42,12 @@ import {
 } from "./utils/responseTypeUtils";
 import { getParameterDescription } from "../utils/getParameterDescription";
 import { UnionDetails } from "../models/unionDetails";
+import { getAutorestOptions } from "../autorestSession";
 
 export function generateModels(clientDetails: ClientDetails, project: Project) {
+  const { srcPath } = getAutorestOptions();
   const modelsIndexFile = project.createSourceFile(
-    `${clientDetails.srcPath}/models/index.ts`,
+    `${srcPath}/models/index.ts`,
     undefined,
     { overwrite: true }
   );

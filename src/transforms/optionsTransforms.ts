@@ -1,4 +1,4 @@
-import { Channel, Host } from "@autorest/extension-base";
+import { Host } from "@autorest/extension-base";
 import { ClientOptions } from "../models/clientDetails";
 import { OperationGroupDetails } from "../models/operationDetails";
 import { KnownMediaType } from "@azure-tools/codegen";

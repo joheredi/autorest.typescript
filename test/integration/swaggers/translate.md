@@ -15,7 +15,7 @@ source-code-folder-path: ./src/generated
 input-file: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/specification/cognitiveservices/data-plane/TranslatorText/preview/v1.0-preview.1/TranslatorBatch.json
 package-version: 1.0.0-beta.1
 hide-clients: true
-low-level-client: true
+rest-level-client: true
 add-credentials: true
 credential-scopes: "https://cognitiveservices.azure.com/.default"
 credential-key-header-name: "Ocp-Apim-Subscription-Key"

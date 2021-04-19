@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { Project, SourceFile, VariableDeclarationKind } from "ts-morph";
+import { getAutorestOptions } from "../autorestSession";
 import { ClientDetails } from "../models/clientDetails";
 import { PackageDetails } from "../models/packageDetails";
 import { NameType, normalizeName } from "../utils/nameUtils";
@@ -14,13 +15,11 @@ export function generateTracingFile(
     return;
   }
 
-  const file = project.createSourceFile(
-    `${clientDetails.srcPath}/tracing.ts`,
-    undefined,
-    {
-      overwrite: true
-    }
-  );
+  const { srcPath } = getAutorestOptions();
+
+  const file = project.createSourceFile(`${srcPath}/tracing.ts`, undefined, {
+    overwrite: true
+  });
 
   file.addImportDeclarations([
     {

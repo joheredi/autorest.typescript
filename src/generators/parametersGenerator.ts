@@ -15,6 +15,7 @@ import { isString } from "util";
 import { writeMapper } from "./mappersGenerator";
 import { shouldImportParameters } from "./utils/importUtils";
 import { logger } from "../utils/logger";
+import { getAutorestOptions } from "../autorestSession";
 
 export function generateParameters(
   clientDetails: ClientDetails,
@@ -27,8 +28,10 @@ export function generateParameters(
     return;
   }
 
+  const { srcPath } = getAutorestOptions();
+
   const parametersFile = project.createSourceFile(
-    `${clientDetails.srcPath}/models/parameters.ts`,
+    `${srcPath}/models/parameters.ts`,
     undefined,
     { overwrite: true }
   );

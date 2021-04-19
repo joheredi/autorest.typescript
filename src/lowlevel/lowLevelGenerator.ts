@@ -11,7 +11,8 @@ import {
   ParameterLocation,
   ChoiceSchema,
   HttpHeader,
-  ConstantSchema
+  ConstantSchema,
+  ImplementationLocation
 } from "@autorest/codemodel";
 
 import {
@@ -35,6 +36,11 @@ import { isSchemaResponse } from "../utils/schemaHelpers";
 import { getAutorestOptions, getHost, getSession } from "../autorestSession";
 import { transformBaseUrl } from "../transforms/urlTransforms";
 import { NameType, normalizeName } from "../utils/nameUtils";
+import { generateIndexFile } from "../generators/indexGenerator";
+import { generatePackageJson } from "../generators/static/packageFileGenerator";
+import { generateLicenseFile } from "../generators/static/licenseFileGenerator";
+import { generateTsConfig } from "../generators/static/tsConfigFileGenerator";
+import { generateApiExtractorConfig } from "../generators/static/apiExtractorConfig";
 
 const prettierTypeScriptOptions: prettier.Options = {
   parser: "typescript",
@@ -54,11 +60,14 @@ const prettierJSONOptions: prettier.Options = {
   singleQuote: false
 };
 
-function escapeDecriptions(model: CodeModel) {
+function escapeDescriptions(model: CodeModel) {
   model.schemas.objects?.forEach(escapeDescription);
   model.schemas.choices?.forEach(escapeDescription);
   model.schemas.sealedChoices?.forEach(escapeDescription);
-  model.schemas.dictionaries?.forEach(escapeDescription);
+  model.schemas.dictionaries?.forEach(d => {
+    d.language.default.name = `${d.language.default.name}Dictionary`;
+    escapeDescription(d);
+  });
 
   model.operationGroups.forEach(og => {
     og.operations.forEach(o => {
@@ -106,8 +115,17 @@ export async function generateLowlevelClient() {
     }
   });
 
-  escapeDecriptions(model);
+  // Language patching
+  escapeDescriptions(model);
   setOperationName(model);
+
+  // Metadata Files
+  generateIndexFile(project);
+  generatePackageJson(project);
+  generateLicenseFile(project);
+  generateTsConfig(project);
+  generateApiExtractorConfig(project);
+
   await generateTypes(model, project);
 
   // Save the source files to the virtual filesystem
@@ -121,7 +139,10 @@ export async function generateLowlevelClient() {
     const isSourceCode = /\.(ts|js)$/gi.test(filePath);
     let fileContents = fs.readFileSync(filePath);
     const licenseHeader = `// Copyright (c) Microsoft Corporation.\n// Licensed under the MIT license.\n`;
-    fileContents = `${licenseHeader.trimLeft()}\n${fileContents}`;
+
+    if (!isJson) {
+      fileContents = `${licenseHeader.trimLeft()}\n${fileContents}`;
+    }
 
     // Format the contents if necessary
     if (isJson || isSourceCode) {
@@ -357,9 +378,10 @@ function getPropertySignature(
   if (isPrimitiveSchema(p.schema)) {
     const schemaType = primitiveSchemaToType(p.schema);
     const propertyType = p.nullable ? `${schemaType} | null` : schemaType;
+    const description = p.language.default.description;
     property = {
       name: propertyName,
-      docs: [{ description: p.language.default.description }],
+      ...(description && { docs: [{ description }] }),
       hasQuestionToken: !p.required,
       type: propertyType,
       kind: StructureKind.PropertySignature
@@ -378,9 +400,10 @@ function getPropertySignature(
       elementType = primitiveSchemaToType(arraySchema.elementType);
     }
 
+    const description = p.language.default.description;
     property = {
       name: propertyName,
-      docs: [{ description: p.language.default.description }],
+      ...(description && { docs: [{ description }] }),
       hasQuestionToken: !p.required,
       type: `${elementType}[]`,
       kind: StructureKind.PropertySignature
@@ -392,9 +415,10 @@ function getPropertySignature(
     );
     importedModels.add(p.schema.language.default.name);
 
+    const description = p.language.default.description;
     property = {
       name: p.language.default.name,
-      docs: [{ description: p.language.default.description }],
+      ...(description && { docs: [{ description }] }),
       hasQuestionToken: !p.required,
       type,
       kind: StructureKind.PropertySignature
@@ -602,6 +626,7 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
 
   const clientName = model.language.default.name;
   const uriParameter = getClientUriParameter();
+
   const { addCredentials } = getAutorestOptions();
   const commonClientParams = [
     ...(uriParameter ? [{ name: uriParameter, type: "string" }] : []),
@@ -678,6 +703,31 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
   ]);
 }
 
+function getApiVersion(): string | undefined {
+  const { model } = getSession();
+  if (!model.globalParameters || !model.globalParameters.length) {
+    return undefined;
+  }
+
+  const apiVersionParam = model.globalParameters
+    .filter(
+      gp =>
+        gp.implementation === ImplementationLocation.Client &&
+        gp.protocol.http?.in === ParameterLocation.Query
+    )
+    .find(param => param.language.default.serializedName === "api-version");
+
+  if (apiVersionParam && isConstantSchema(apiVersionParam.schema)) {
+    return apiVersionParam.schema.value.value.toString();
+  }
+
+  return undefined;
+}
+
+function isConstantSchema(schema: Schema): schema is ConstantSchema {
+  return schema.type === SchemaType.Constant;
+}
+
 function getClientUriParameter() {
   const { model } = getSession();
   const { parameterName } = transformBaseUrl(model);
@@ -698,6 +748,12 @@ function getClientFactoryBody(
     baseUrl = `options.baseUrl ?? \`${parsedEndpoint}\``;
   } else {
     baseUrl = `options.baseUrl ?? "${endpoint}"`;
+  }
+
+  const apiVersion = getApiVersion();
+  let apiVersionStatement: string = "";
+  if (apiVersion) {
+    apiVersionStatement = `options.apiVersion = options.apiVersion ?? "${apiVersion}"`;
   }
 
   const baseUrlStatement: VariableStatementStructure = {
@@ -735,7 +791,7 @@ function getClientFactoryBody(
     options
   ) as ${clientTypeName};`;
 
-  return [baseUrlStatement, credentials, getClient];
+  return [baseUrlStatement, apiVersionStatement, credentials, getClient];
 }
 
 function generatePathFirstRouteMethodsDefinition(
@@ -746,9 +802,10 @@ function generatePathFirstRouteMethodsDefinition(
   const methodDefinitions: OptionalKind<MethodSignatureStructure>[] = [];
   for (const key of Object.keys(methods)) {
     const method = methods[key];
+    const description = methods[key].description;
     methodDefinitions.push({
       name: key,
-      docs: [{ description: methods[key].description }],
+      ...(description && { docs: [{ description }] }),
       parameters: [
         {
           name: "options",
@@ -845,12 +902,15 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
           isExported: true,
           name: headersInterfaceName,
           properties: headersType = r.protocol.http?.headers.map(
-            (h: HttpHeader) => ({
-              name: `"${h.header.toLowerCase()}"`,
-              docs: [h.language.default.description],
-              type: "string",
-              hasQuestionToken: true
-            })
+            (h: HttpHeader) => {
+              const description = h.language.default.description;
+              return {
+                name: `"${h.header.toLowerCase()}"`,
+                ...(description && { docs: [{ description }] }),
+                type: "string",
+                hasQuestionToken: true
+              };
+            }
           )
         });
 
@@ -879,8 +939,9 @@ function generateResponsesInterface(model: CodeModel, project: Project) {
         });
       }
 
+      const description = o.language.default.description;
       clientFile.addInterface({
-        docs: [o.language.default.description],
+        ...(description && { docs: [{ description }] }),
         name: responseTypeName,
         properties: responseProperties,
         isExported: true,

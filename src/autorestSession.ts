@@ -1,13 +1,20 @@
 import { Host, Session, startSession } from "@autorest/extension-base";
 import { CodeModel, codeModelSchema } from "@autorest/codemodel";
 import { extractAutorestOptions } from "./utils/autorestOptions";
+import { PackageDetails } from "./models/packageDetails";
+import { TracingInfo } from "./models/clientDetails";
 
-interface AutorestOptions {
-  lowLevelClient?: boolean;
+export interface AutorestOptions {
+  restLevelClient?: boolean;
   azureArm?: boolean;
   addCredentials?: boolean;
   credentialKeyHeaderName?: string;
   credentialScopes?: string[];
+  srcPath: string;
+  packageDetails: PackageDetails;
+  licenseHeader: boolean;
+  tracingInfo?: TracingInfo;
+  generateMetadata?: boolean;
 }
 
 let host: Host;

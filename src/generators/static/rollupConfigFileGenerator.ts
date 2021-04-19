@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { Project, VariableDeclarationKind } from "ts-morph";
+import { getAutorestOptions } from "../../autorestSession";
 import { ClientDetails } from "../../models/clientDetails";
 import { PackageDetails } from "../../models/packageDetails";
 import { normalizeName, NameType } from "../../utils/nameUtils";
@@ -11,6 +12,12 @@ export function generateRollupConfig(
   packageDetails: PackageDetails,
   project: Project
 ) {
+  const { restLevelClient, generateMetadata } = getAutorestOptions();
+
+  if (restLevelClient || !generateMetadata) {
+    return;
+  }
+
   const rollupFile = project.createSourceFile("rollup.config.js", undefined, {
     overwrite: true
   });

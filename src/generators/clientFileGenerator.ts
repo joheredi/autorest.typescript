@@ -24,6 +24,7 @@ import { shouldImportParameters } from "./utils/importUtils";
 import { getAllModelsNames } from "./utils/responseTypeUtils";
 import { addTracingOperationImports } from "./utils/tracingUtils";
 import { addPagingImports } from "./utils/pagingOperations";
+import { getAutorestOptions } from "../autorestSession";
 
 type OperationDeclarationDetails = { name: string; typeName: string };
 
@@ -32,6 +33,7 @@ export function generateClient(
   project: Project,
   hideClients: boolean
 ) {
+  const { srcPath } = getAutorestOptions();
   const clientContextClassName = `${clientDetails.className}Context`;
   const hasMappers = !!clientDetails.mappers.length;
 
@@ -62,7 +64,7 @@ export function generateClient(
   );
 
   const clientFile = project.createSourceFile(
-    `${clientDetails.srcPath}/${clientDetails.sourceFileName}.ts`,
+    `${srcPath}/${clientDetails.sourceFileName}.ts`,
     undefined,
     {
       overwrite: true

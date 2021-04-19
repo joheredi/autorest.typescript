@@ -23,7 +23,7 @@ import { generateOperations } from "./generators/operationGenerator";
 import { generateParameters } from "./generators/parametersGenerator";
 import { generateLROFiles } from "./generators/LROGenerator";
 import { generateTracingFile } from "./generators/tracingFileGenerator";
-import { TracingInfo } from "./models/clientDetails";
+import { getAutorestOptions } from "./autorestSession";
 
 const prettierTypeScriptOptions: prettier.Options = {
   parser: "typescript",
@@ -54,39 +54,24 @@ export async function generateTypeScriptLibrary(
     }
   });
 
-  const srcPath =
-    ((await host.GetValue("source-code-folder-path")) as string) || "src";
-
   const clientDetails = await transformCodeModel(codeModel, host);
-  clientDetails.srcPath = srcPath;
 
-  clientDetails.tracing = await getTracingInfo(host);
+  const {
+    tracingInfo,
+    packageDetails,
+    licenseHeader: shouldGenerateLicense
+  } = getAutorestOptions();
 
-  const packageName =
-    (await host.GetValue("package-name")) || clientDetails.name;
-  const packageNameParts = packageName.match(/(^@(.*)\/)?(.*)/);
-  const packageDetails: PackageDetails = {
-    name: packageName,
-    scopeName: packageNameParts[2],
-    nameWithoutScope: packageNameParts[3],
-    description: clientDetails.description,
-    version: (await host.GetValue("package-version")) || "1.0.0"
-  };
-
-  const shouldGenerateLicense: boolean =
-    (await host.GetValue("license-header")) || false;
+  clientDetails.tracing = tracingInfo;
 
   const hideClients: boolean = (await host.GetValue("hide-clients")) || false;
 
-  // Skip metadata generation if `generate-metadata` is explicitly false
-  if ((await host.GetValue("generate-metadata")) !== false) {
-    generatePackageJson(clientDetails, packageDetails, project);
-    generateLicenseFile(project, shouldGenerateLicense);
-    generateReadmeFile(clientDetails, packageDetails, project);
-    generateTsConfig(project);
-    generateRollupConfig(clientDetails, packageDetails, project);
-    generateApiExtractorConfig(clientDetails, project);
-  }
+  generatePackageJson(project, clientDetails);
+  generateLicenseFile(project);
+  generateReadmeFile(clientDetails, packageDetails, project);
+  generateTsConfig(project);
+  generateRollupConfig(clientDetails, packageDetails, project);
+  generateApiExtractorConfig(project);
 
   generateClient(clientDetails, project, hideClients);
   generateClientContext(clientDetails, packageDetails, project, hideClients);
@@ -95,7 +80,7 @@ export async function generateTypeScriptLibrary(
   generateMappers(clientDetails, project);
   generateOperations(clientDetails, project);
   generateParameters(clientDetails, project);
-  generateIndexFile(clientDetails, project);
+  generateIndexFile(project, clientDetails);
   await generateLROFiles(clientDetails, project);
   generateTracingFile(clientDetails, project);
 
@@ -139,33 +124,4 @@ export async function generateTypeScriptLibrary(
       fileContents
     );
   }
-}
-
-async function getTracingInfo(host: Host): Promise<TracingInfo | undefined> {
-  const tracing: TracingInfo | undefined =
-    (await host.GetValue("tracing-info")) || undefined;
-
-  if (tracing && tracing.namespace && tracing.packagePrefix) {
-    return tracing;
-  }
-
-  const namespace =
-    (await host.GetValue("tracing-info.namespace")) || undefined;
-  const packagePrefix =
-    (await host.GetValue("tracing-info.packagePrefix")) || undefined;
-
-  if (packagePrefix && namespace) {
-    return {
-      namespace,
-      packagePrefix
-    };
-  }
-
-  if (!tracing && !packagePrefix && !namespace) {
-    return undefined;
-  }
-
-  throw new Error(
-    "Invalid tracing-info. Make sure that namespace and packagePrefix are defined"
-  );
 }

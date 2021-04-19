@@ -428,12 +428,14 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
     swaggerOrConfig: "test/integration/swaggers/purview-catalog.md",
     m4deduplication: true
   },
-  pubsub: {
+  iothub: {
     swaggerOrConfig:
-      "https://raw.githubusercontent.com/Azure/azure-rest-api-specs-pr/1ed645c7d01684c0e75a4b1a9f025b00a15114a5/specification/webpubsub/data-plane/WebPubSub/preview/2020-10-01/webpubsub.json?token=AFBBZGIZVDP2NYVX7LPNZMTALPF2K",
-    clientName: "PubSub",
-    packageName: "@azure/web-pubsub",
-    lowLevelClient: true
+      "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/specification/iothub/resource-manager/Microsoft.Devices/preview/2021-03-03-preview/iothub.json",
+    clientName: "IoTHub",
+    packageName: "@azure/iothub",
+    lowLevelClient: true,
+    credentialScopes: "https://management.azure.com/.default",
+    addCredentials: true
   }
 };
 
@@ -482,14 +484,17 @@ const generateSwaggers = async (
       ? "--disable-async-iterators=true"
       : "";
 
-    const isLlcClient = lowLevelClient ? "--low-level-client=true" : "";
+    const isLlcClient = lowLevelClient ? "--rest-level-client=true" : "";
 
     const addCredentialsFlag =
-      addCredentials === false ? `--add-credentials=false` : "";
+      addCredentials === false
+        ? `--add-credentials=false`
+        : "--add-credentials=true";
 
     const title = clientName ? `--title=${clientName}` : "";
     const packageNameFlag = packageName ? `--package-name=${packageName}` : "";
-    const packageVersionFlag = `--package-version=${packageVersion || DEFAULT_PACKAGE_VERSION}`
+    const packageVersionFlag = `--package-version=${packageVersion ||
+      DEFAULT_PACKAGE_VERSION}`;
 
     if (swaggerOrConfig.split("/").length === 1) {
       // When given a filename look for it in test server, otherwise use the path

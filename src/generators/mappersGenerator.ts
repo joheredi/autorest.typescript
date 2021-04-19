@@ -23,6 +23,7 @@ import { keys, isEmpty, isString, isNil, isEqual } from "lodash";
 import { getStringForValue, MapperTypes } from "../utils/valueHelpers";
 import { PolymorphicObjectDetails, ObjectKind } from "../models/modelDetails";
 import { logger } from "../utils/logger";
+import { getAutorestOptions } from "../autorestSession";
 
 export function generateMappers(
   clientDetails: ClientDetails,
@@ -32,8 +33,9 @@ export function generateMappers(
     logger.info("No mappers in code model, skipping mapper file generation");
     return;
   }
+  const { srcPath } = getAutorestOptions();
   const mappersFile = project.createSourceFile(
-    `${clientDetails.srcPath}/models/mappers.ts`,
+    `${srcPath}/models/mappers.ts`,
     undefined,
     { overwrite: true }
   );

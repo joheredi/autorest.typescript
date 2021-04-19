@@ -2,12 +2,15 @@
 // Licensed under the MIT License.
 
 import { Project } from "ts-morph";
-import { ClientDetails } from "../../models/clientDetails";
+import { getAutorestOptions } from "../../autorestSession";
 
-export function generateApiExtractorConfig(
-  clientDetails: ClientDetails,
-  project: Project
-) {
+export function generateApiExtractorConfig(project: Project) {
+  const { generateMetadata } = getAutorestOptions();
+
+  if (!generateMetadata) {
+    return;
+  }
+
   const config = {
     $schema:
       "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",

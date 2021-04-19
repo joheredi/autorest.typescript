@@ -47,6 +47,7 @@ import {
   preparePageableOperations,
   writeAsyncIterators
 } from "./utils/pagingOperations";
+import { getAutorestOptions } from "../autorestSession";
 
 /**
  * Function that writes the code for all the operations.
@@ -74,8 +75,9 @@ export function generateOperations(
   });
 
   if (operationGroups.length) {
+    const { srcPath } = getAutorestOptions();
     const operationIndexFile = project.createSourceFile(
-      `${clientDetails.srcPath}/operations/index.ts`,
+      `${srcPath}/operations/index.ts`,
       undefined,
       { overwrite: true }
     );
@@ -98,10 +100,11 @@ function generateOperation(
   clientDetails: ClientDetails,
   project: Project
 ): void {
+  const { srcPath } = getAutorestOptions();
   const name = normalizeName(operationGroupDetails.name, NameType.File);
   const hasMappers = !!clientDetails.mappers.length;
   const operationGroupFile = project.createSourceFile(
-    `${clientDetails.srcPath}/operations/${name}.ts`,
+    `${srcPath}/operations/${name}.ts`,
     undefined,
     { overwrite: true }
   );
