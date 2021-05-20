@@ -436,6 +436,11 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
     lowLevelClient: true,
     credentialScopes: "https://management.azure.com/.default",
     addCredentials: true
+  },
+  monitor: {
+    swaggerOrConfig: "test/integration/swaggers/mr.MD",
+    clientName: "Monitor",
+    packageName: "@azure-rest/monitor"
   }
 };
 

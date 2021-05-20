@@ -387,8 +387,15 @@ function getPropertySignature(
       kind: StructureKind.PropertySignature
     };
   } else if (p.schema.type === SchemaType.Array) {
-    const arraySchema = p.schema as ArraySchema;
+    let arraySchema = p.schema as ArraySchema;
     let elementType = "";
+
+    let arrayDimensions = "[]";
+
+    while (arraySchema.elementType.type === SchemaType.Array) {
+      arraySchema = arraySchema.elementType as ArraySchema;
+      arrayDimensions = `${arrayDimensions}[]`;
+    }
 
     if (arraySchema.elementType.type === SchemaType.Object) {
       elementType = normalizeName(
@@ -405,7 +412,7 @@ function getPropertySignature(
       name: propertyName,
       ...(description && { docs: [{ description }] }),
       hasQuestionToken: !p.required,
-      type: `${elementType}[]`,
+      type: `${elementType}${arrayDimensions}`,
       kind: StructureKind.PropertySignature
     };
   } else {
@@ -627,15 +634,21 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
   const clientName = model.language.default.name;
   const uriParameter = getClientUriParameter();
 
-  const { addCredentials } = getAutorestOptions();
+  const { addCredentials, credentialKeyHeaderName } = getAutorestOptions();
+  const credentialTypes = ["TokenCredential"];
+
+  if (credentialKeyHeaderName) {
+    credentialTypes.push("KeyCredential");
+  }
+
   const commonClientParams = [
     ...(uriParameter ? [{ name: uriParameter, type: "string" }] : []),
     ...(addCredentials === false
       ? []
-      : [{ name: "credentials", type: "TokenCredential | KeyCredential" }])
+      : [{ name: "credentials", type: credentialTypes.join(" | ") }])
   ];
-  const clientIterfaceName = `${clientName}Client`;
-  const factoryTypeName = `${clientName}Factory`;
+  const clientIterfaceName = `${clientName}RestClient`;
+  // const factoryTypeName = `${clientName}Factory`;
   clientFile.addTypeAlias({
     isExported: true,
     name: clientIterfaceName,
@@ -643,23 +656,6 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
       "Client",
       Writers.objectType({ properties: [{ name: "path", type: "Routes" }] })
     )
-  });
-
-  clientFile.addInterface({
-    isExported: true,
-    name: factoryTypeName,
-    callSignatures: [
-      {
-        parameters: [
-          ...commonClientParams,
-          {
-            name: "options",
-            type: "ClientOptions",
-            hasQuestionToken: true /** TODO: Check if there are any required client params */
-          }
-        ]
-      }
-    ]
   });
 
   clientFile.addFunction({
@@ -697,7 +693,7 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
 
   clientFile.addImportDeclarations([
     {
-      namedImports: ["KeyCredential", "TokenCredential"],
+      namedImports: credentialTypes,
       moduleSpecifier: "@azure/core-auth"
     }
   ]);
