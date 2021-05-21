@@ -9,10 +9,11 @@ interface SwaggerConfig {
   addCredentials?: boolean;
   licenseHeader?: boolean;
   credentialScopes?: string;
+  credentialKeyHeaderName?: string,
   tracing?: TracingInfo;
   disableAsyncIterators?: boolean;
   hideClients?: boolean;
-  lowLevelClient?: boolean;
+  restLevelClient?: boolean;
   m4deduplication?: boolean;
 }
 
@@ -147,11 +148,12 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
     packageName: "body-string",
     licenseHeader: true
   },
-  bodyStringLlc: {
+  bodyStringREST: {
     swaggerOrConfig: "body-string.json",
-    clientName: "BodyStringLowLevelClient",
-    packageName: "body-string-llc",
-    lowLevelClient: true,
+    clientName: "BodyStringREST",
+    packageName: "body-string-rlc",
+    addCredentials: false,
+    restLevelClient: true,
     licenseHeader: true
   },
   bodyTime: {
@@ -411,6 +413,14 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
     clientName: "TextAnalytics",
     packageName: "@azure/ai-text-analytics"
   },
+  textAnalyticsRest: {
+    swaggerOrConfig: "https://github.com/Azure/azure-rest-api-specs/blob/master/specification/cognitiveservices/data-plane/TextAnalytics/preview/v3.1-preview.5/TextAnalytics.json",
+    clientName: "TextAnalytics",
+    packageName: "@azure-rest/ai-text-analytics",
+    restLevelClient: true,
+    addCredentials: true,
+    credentialKeyHeaderName: "Ocp-Apim-Subscription-Key"
+  },
   translate: {
     swaggerOrConfig: "test/integration/swaggers/translate.md",
     clientName: "DocumentTranslation",
@@ -433,7 +443,7 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
       "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/specification/iothub/resource-manager/Microsoft.Devices/preview/2021-03-03-preview/iothub.json",
     clientName: "IoTHub",
     packageName: "@azure/iothub",
-    lowLevelClient: true,
+    restLevelClient: true,
     credentialScopes: "https://management.azure.com/.default",
     addCredentials: true
   },
@@ -466,9 +476,10 @@ const generateSwaggers = async (
       disableAsyncIterators,
       credentialScopes,
       hideClients,
-      lowLevelClient,
+      restLevelClient: lowLevelClient,
       m4deduplication,
-      packageVersion
+      packageVersion,
+      credentialKeyHeaderName
     } = testSwaggers[name];
 
     let swaggerPath = swaggerOrConfig;
@@ -484,6 +495,8 @@ const generateSwaggers = async (
     const credentialScopesInfo = credentialScopes
       ? `--credential-scopes=${credentialScopes}`
       : "";
+
+    const credentialKeyNameInfo = credentialKeyHeaderName ? `--credential-key-header-name=${credentialKeyHeaderName}` : "";
 
     const disableIterators = disableAsyncIterators
       ? "--disable-async-iterators=true"
@@ -511,7 +524,7 @@ const generateSwaggers = async (
       inputFileCommand = `--input-file=${inputFileCommand}`;
     }
 
-    let autorestCommand: string = `autorest --clear-output-folder=true  ${m4dedup} ${tracingInfo} ${disableIterators} ${credentialScopesInfo} --license-header=${!!licenseHeader} ${addCredentialsFlag} --typescript --output-folder=./test/integration/generated/${name} --use=. ${title} ${packageNameFlag} ${packageVersionFlag} --hide-clients=${!!hideClients} ${inputFileCommand} ${isLlcClient}`;
+    let autorestCommand: string = `autorest --clear-output-folder=true  ${m4dedup} ${tracingInfo} ${disableIterators} ${credentialScopesInfo} ${credentialKeyNameInfo} --license-header=${!!licenseHeader} ${addCredentialsFlag} --typescript --output-folder=./test/integration/generated/${name} --use=. ${title} ${packageNameFlag} ${packageVersionFlag} --hide-clients=${!!hideClients} ${inputFileCommand} ${isLlcClient}`;
 
     if (isDebugging) {
       autorestCommand = `${autorestCommand} --typescript.debugger`;

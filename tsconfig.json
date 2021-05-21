@@ -15,13 +15,26 @@
     "stripInternal": true,
     "noEmitHelpers": false,
     "target": "es2018",
-    "types": ["node", "mocha"],
-    "lib": ["es2018"],
+    "types": [
+      "node",
+      "mocha"
+    ],
+    "lib": [
+      "es2018"
+    ],
     "experimentalDecorators": true,
     "newLine": "LF",
     "outDir": "dist",
     "rootDir": "."
   },
-  "include": ["src"],
-  "exclude": ["dist", "resources", "node_modules", "**/*.d.ts", "generated"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "dist",
+    "resources",
+    "node_modules",
+    "**/*.d.ts",
+    "generated"
+  ]
 }

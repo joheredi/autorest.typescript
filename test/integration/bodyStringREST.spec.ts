@@ -1,16 +1,16 @@
 import { assert } from "chai";
 import BodyString, {
-  BodyStringLowLevelClientClient
-} from "./generated/bodyStringLlc/src/bodyStringLowLevelClientClient";
+  BodyStringRestRestClient
+} from "./generated/bodyStringREST/src/bodyStringRest";
 
 describe.only("BodyString LLC", () => {
-  let client: BodyStringLowLevelClientClient;
+  let client: BodyStringRestRestClient;
 
   beforeEach(() => {
     client = BodyString();
   });
 
-  it("should support valid null value", async function() {
+  it("should support valid null value", async function () {
     const result = await client
       .path("/string/null")
       .get({ allowInsecureConnection: true });
@@ -19,22 +19,22 @@ describe.only("BodyString LLC", () => {
     const putResult = await client
       .path("/string/null")
       .put({ body: undefined, allowInsecureConnection: true });
-    assert.deepStrictEqual(putResult.status, 200);
+    assert.deepStrictEqual(putResult.status, "200");
   });
 
-  it("should support valid empty string value", async function() {
+  it("should support valid empty string value", async function () {
     const putResult = await client.path("/string/empty").put({
       allowInsecureConnection: true,
       body: ""
     });
-    assert.equal(putResult.status, 200);
+    assert.equal(putResult.status, "200");
     const getResult = await client
       .path("/string/empty")
       .get({ allowInsecureConnection: true });
     assert.equal(getResult.body, "");
   });
 
-  it("should support whitespace string value", async function() {
+  it("should support whitespace string value", async function () {
     const whiteSpace = client.path("/string/whitespace");
     const expected =
       "    Now is the time for all good men to come to the aid of their country    ";
@@ -49,11 +49,11 @@ describe.only("BodyString LLC", () => {
           body: expected
         })
       ).status,
-      200
+      "200"
     );
   });
 
-  it("should support not provided value", async function() {
+  it("should support not provided value", async function () {
     const notProvided = client.path("/string/notProvided");
     assert.equal(
       (await notProvided.get({ allowInsecureConnection: true })).body,
@@ -61,7 +61,7 @@ describe.only("BodyString LLC", () => {
     );
   });
 
-  it("should support valid enum valid value", async function() {
+  it("should support valid enum valid value", async function () {
     const expected = "red color";
     const notExpandable = client.path("/string/enum/notExpandable");
     assert.equal(
@@ -75,24 +75,30 @@ describe.only("BodyString LLC", () => {
           body: expected
         })
       ).status,
-      200
+      "200"
     );
   });
 
-  it("should correctly handle invalid values for enum", async function() {
+  it("should correctly handle invalid values for enum", async function () {
     const invalidEnum = await client
       .path("/string/enum/notExpandable")
       .put({ allowInsecureConnection: true, body: "red_color" as any });
-    assert.equal(invalidEnum.status, 400);
+    assert.equal(invalidEnum.status, "400");
   });
 
-  it("should correctly deserialize base64 encoded string", async function() {
+  it("should correctly deserialize base64 encoded string", async function () {
     const expected = "YSBzdHJpbmcgdGhhdCBnZXRzIGVuY29kZWQgd2l0aCBiYXNlNjQ=";
     const result = await client
       .path("/string/base64Encoding")
       .get({ allowInsecureConnection: true });
 
-    assert.equal(result.body, expected);
+    if (result.status !== "200") {
+      assert.fail("Expected 200 status code")
+    } else {
+      assert.equal(result.body.toString(), expected);
+    }
+
+
   });
 
   it("should correctly handle null base64url encoded string", async () => {
@@ -107,7 +113,7 @@ describe.only("BodyString LLC", () => {
     const expected = `YSBzdHJpbmcgdGhhdCBnZXRzIGVuY29kZWQgd2l0aCBiYXNlNjR1cmw`;
     const base64UrlEncoded = client.path("/string/base64UrlEncoding");
     assert.equal(
-      (await base64UrlEncoded.get({ allowInsecureConnection: true })).body,
+      (await base64UrlEncoded.get({ allowInsecureConnection: true })).body.toString(),
       expected
     );
 
@@ -115,27 +121,32 @@ describe.only("BodyString LLC", () => {
       allowInsecureConnection: true,
       body: expected as any
     });
-    assert.equal(result.status, 200);
+    assert.equal(result.status, "200");
   });
 
-  //   it("should getEnumReferenced", async function() {
-  //     const { body } = await client.enum.getReferenced();
-  //     equal(body, "red color");
-  //   });
+  it("should getEnumReferenced", async function () {
+    const { body } = await client.path("/string/enum/Referenced").get({ allowInsecureConnection: true })
+    assert.equal(body, "red color");
+  });
 
-  //   it("should putEnumReferenced", async function() {
-  //     await client.enum.putReferenced("red color");
-  //   });
+  it("should putEnumReferenced", async function () {
+    await client.path("/string/enum/Referenced").put({ body: "red color", allowInsecureConnection: true });
+  });
 
-  //   it("should getEnumReferencedConstant", async function() {
-  //     const { field1 } = await client.enum.getReferencedConstant();
-  //     equal(field1, "Sample String");
-  //   });
+  it("should getEnumReferencedConstant", async function () {
+    const result = await client.path("/string/enum/ReferencedConstant").get({ allowInsecureConnection: true });
 
-  //   it("should putEnumReferencedConstant", async function() {
-  //     await client.enum.putReferencedConstant({
-  //       field1: "",
-  //       colorConstant: "green-color"
-  //     });
-  //   });
+    if (result.status !== "200") {
+      assert.fail("Expected success status");
+    } else {
+
+      assert.equal(result.body.field1, "Sample String");
+    }
+
+  });
+
+  it("should putEnumReferencedConstant", async function () {
+    const result = await client.path("/string/enum/ReferencedConstant").put({ body: { colorConstant: "green-color" }, allowInsecureConnection: true })
+    assert.equal(result.status, "200");
+  });
 });

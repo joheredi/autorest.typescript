@@ -88,7 +88,7 @@ async function getPackageDetails(host: Host): Promise<PackageDetails> {
   };
 }
 
-async function getCredentialScopes(host: Host): Promise<string[] | undefined> {
+export async function getCredentialScopes(host: Host): Promise<string[] | undefined> {
   const addCredentials = await host.GetValue("add-credentials");
   const credentialScopes = await host.GetValue("credential-scopes");
   const azureArm = await host.GetValue("azure-arm");

@@ -1,6 +1,6 @@
 import { Channel, Host, Message } from "@autorest/extension-base";
 import { assert } from "chai";
-import { getCredentialScopes } from "../../../src/transforms/optionsTransforms";
+import { getCredentialScopes } from "../../../src/utils/autorestOptions";
 
 describe("transformOptions", () => {
   describe("getCredentialScopes", () => {
@@ -18,7 +18,7 @@ describe("transformOptions", () => {
               return undefined;
           }
         },
-        Message: (message: Message) => {}
+        Message: (message: Message) => { }
       } as Host;
       try {
         await getCredentialScopes(mockHost);
@@ -45,7 +45,7 @@ describe("transformOptions", () => {
               return undefined;
           }
         },
-        Message: (message: Message) => {}
+        Message: (message: Message) => { }
       } as Host;
       const scopes = await getCredentialScopes(mockHost);
       assert.deepEqual(scopes, ["https://management.azure.com/.default"]);
@@ -91,7 +91,7 @@ describe("transformOptions", () => {
               return undefined;
           }
         },
-        Message: (message: Message) => {}
+        Message: (message: Message) => { }
       } as Host;
       const scopes = await getCredentialScopes(mockHost);
       assert.deepEqual(scopes, ["https://microsoft.com/.defaults"]);
@@ -111,7 +111,7 @@ describe("transformOptions", () => {
               return undefined;
           }
         },
-        Message: (message: Message) => {}
+        Message: (message: Message) => { }
       } as Host;
       const scopes = await getCredentialScopes(mockHost);
       assert.deepEqual(scopes, [
