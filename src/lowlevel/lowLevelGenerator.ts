@@ -415,6 +415,15 @@ function getPropertySignature(
       type: `${elementType}${arrayDimensions}`,
       kind: StructureKind.PropertySignature
     };
+  } else if (p.schema.type === SchemaType.AnyObject) {
+    const description = p.language.default.description;
+    property = {
+      name: p.language.default.name,
+      ...(description && { docs: [{ description }] }),
+      hasQuestionToken: !p.required,
+      type: "Record<string, unknown>",
+      kind: StructureKind.PropertySignature
+    };
   } else {
     const type = normalizeName(
       p.schema.language.default.name,

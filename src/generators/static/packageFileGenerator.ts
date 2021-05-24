@@ -59,7 +59,7 @@ function restLevelPackage(packageDetails: PackageDetails) {
     author: "",
     license: "ISC",
     dependencies: {
-      "@azure-rest/core-client": "^1.0.3",
+      "@azure-rest/core-client": "1.0.0-beta.2",
       "@azure/ai-text-analytics": "^5.0.1",
       "@azure/core-auth": "^1.1.4",
       "@azure/core-rest-pipeline": "^1.0.3",

@@ -765,6 +765,7 @@ export function getMapperTypeFromSchema(type: SchemaType, format?: string) {
     case SchemaType.Time:
       return MapperType.String;
     case SchemaType.Dictionary:
+    case SchemaType.AnyObject:
       return MapperType.Dictionary;
     case SchemaType.Integer:
     case SchemaType.Number:

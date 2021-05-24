@@ -130,6 +130,9 @@ export function getTypeForSchema(
     case SchemaType.Duration:
       typeName = "string";
       break;
+    case SchemaType.AnyObject:
+      typeName = `{[propertyName: string]: unknown}`;
+      break;
     case SchemaType.Dictionary:
       const dictionarySchema = schema as DictionarySchema;
       const elementType = getTypeForSchema(
