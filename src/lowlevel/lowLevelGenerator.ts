@@ -397,7 +397,9 @@ function getPropertySignature(
       arrayDimensions = `${arrayDimensions}[]`;
     }
 
-    if (arraySchema.elementType.type === SchemaType.Object) {
+    if (arraySchema.elementType.type === SchemaType.AnyObject) {
+      elementType = "Record<string, unknown>";
+    } else if (arraySchema.elementType.type === SchemaType.Object) {
       elementType = normalizeName(
         arraySchema.elementType.language.default.name,
         NameType.Interface
@@ -500,6 +502,11 @@ function getTypeForSchema(schema: Schema): TypeInfo {
     modelName = elementType.modelName;
   }
 
+  if (isAnyObjectSchema(schema)) {
+    typeName = "unknown";
+    modelName = undefined;
+  }
+
   return { typeName, modelName };
 }
 
@@ -507,6 +514,9 @@ function isArraySchema(schema: Schema): schema is ArraySchema {
   return schema.type === SchemaType.Array;
 }
 
+function isAnyObjectSchema(schema: Schema): schema is ArraySchema {
+  return schema.type === SchemaType.AnyObject;
+}
 // function isDictionarySchema(schema: Schema): schema is DictionarySchema {
 //   return schema.type === SchemaType.Dictionary;
 // }

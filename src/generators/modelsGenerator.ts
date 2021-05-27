@@ -530,7 +530,10 @@ const writeObjectSignature = (modelsIndexFile: SourceFile) => (
 /**
  * This function writes all UnionTypes, these types represent the options a request can use for a Polymorphic parameter
  */
-function writeUniontypes({ objects }: ClientDetails, modelsFile: SourceFile) {
+export function writeUniontypes(
+  { objects }: ClientDetails,
+  modelsFile: SourceFile
+) {
   objects
     .filter(
       obj => obj.kind === ObjectKind.Polymorphic && obj.children.length > 0
