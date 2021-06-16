@@ -12,7 +12,10 @@ import {
   ChoiceSchema,
   HttpHeader,
   ConstantSchema,
-  ImplementationLocation
+  ImplementationLocation,
+  DictionarySchema,
+  isObjectSchema,
+  ObjectSchema
 } from "@autorest/codemodel";
 
 import {
@@ -203,7 +206,9 @@ function generateParameterInterfaces(model: CodeModel, project: Project) {
         const referencedModels = new Set<string>();
         if (queryParameters.length) {
           const name = `${o.language.default.name}QueryParamProperties`;
-          const propDef = queryParameters.map(p => {
+          const propDef: OptionalKind<
+            PropertySignatureStructure
+          >[] = queryParameters.map(p => {
             return getPropertySignature(p, referencedModels);
           });
 
@@ -364,95 +369,148 @@ function isPrimitiveSchema(schema: Schema): boolean {
     SchemaType.Uri,
     SchemaType.Uuid,
     SchemaType.Unknown,
-    SchemaType.Constant
+    SchemaType.Constant,
+    SchemaType.Choice,
+    SchemaType.SealedChoice
   ].includes(schema.type);
 }
 
 function getPropertySignature(
   p: Property | Parameter,
   importedModels = new Set<string>()
-) {
-  let property: PropertySignatureStructure;
+): OptionalKind<PropertySignatureStructure> {
   const propertyName = `"${p.language.default.serializedName ||
     p.language.default.name}"`;
-  if (isPrimitiveSchema(p.schema)) {
-    const schemaType = primitiveSchemaToType(p.schema);
-    const propertyType = p.nullable ? `${schemaType} | null` : schemaType;
-    const description = p.language.default.description;
-    property = {
-      name: propertyName,
-      ...(description && { docs: [{ description }] }),
-      hasQuestionToken: !p.required,
-      type: propertyType,
-      kind: StructureKind.PropertySignature
-    };
-  } else if (p.schema.type === SchemaType.Array) {
-    let arraySchema = p.schema as ArraySchema;
-    let elementType = "";
+  const description = p.language.default.description;
+  const type = getElementType(p.schema, importedModels);
+  return {
+    name: propertyName,
+    ...(description && { docs: [{ description }] }),
+    hasQuestionToken: !p.required,
+    type,
+    kind: StructureKind.PropertySignature
+  };
 
-    let arrayDimensions = "[]";
+  // if (isPrimitiveSchema(p.schema)) {
+  //   const schemaType = primitiveSchemaToType(p.schema);
+  //   const propertyType = p.nullable ? `${schemaType} | null` : schemaType;
+  //   const description = p.language.default.description;
+  //   property = {
+  //     name: propertyName,
+  //     ...(description && { docs: [{ description }] }),
+  //     hasQuestionToken: !p.required,
+  //     type: propertyType,
+  //     kind: StructureKind.PropertySignature
+  //   };
+  // } else if (p.schema.type === SchemaType.Array) {
+  //   let arraySchema = p.schema as ArraySchema;
+  //   let elementType = "";
 
-    while (arraySchema.elementType.type === SchemaType.Array) {
-      arraySchema = arraySchema.elementType as ArraySchema;
-      arrayDimensions = `${arrayDimensions}[]`;
-    }
+  //   let arrayDimensions = "[]";
 
-    if (arraySchema.elementType.type === SchemaType.AnyObject) {
-      elementType = "Record<string, unknown>";
-    } else if (arraySchema.elementType.type === SchemaType.Object) {
-      elementType = normalizeName(
-        arraySchema.elementType.language.default.name,
-        NameType.Interface
-      );
-      importedModels.add(elementType);
-    } else {
-      elementType = primitiveSchemaToType(arraySchema.elementType);
-    }
+  //   while (arraySchema.elementType.type === SchemaType.Array) {
+  //     arraySchema = arraySchema.elementType as ArraySchema;
+  //     arrayDimensions = `${arrayDimensions}[]`;
+  //   }
 
-    const description = p.language.default.description;
-    property = {
-      name: propertyName,
-      ...(description && { docs: [{ description }] }),
-      hasQuestionToken: !p.required,
-      type: `${elementType}${arrayDimensions}`,
-      kind: StructureKind.PropertySignature
-    };
-  } else if (p.schema.type === SchemaType.AnyObject) {
-    const description = p.language.default.description;
-    property = {
-      name: p.language.default.name,
-      ...(description && { docs: [{ description }] }),
-      hasQuestionToken: !p.required,
-      type: "Record<string, unknown>",
-      kind: StructureKind.PropertySignature
-    };
-  } else {
-    const type = normalizeName(
-      p.schema.language.default.name,
-      NameType.Interface
-    );
-    importedModels.add(p.schema.language.default.name);
+  //   if (arraySchema.elementType.type === SchemaType.AnyObject) {
+  //     elementType = "Record<string, unknown>";
+  //   } else if (arraySchema.elementType.type === SchemaType.Object) {
+  //     elementType = normalizeName(
+  //       arraySchema.elementType.language.default.name,
+  //       NameType.Interface
+  //     );
+  //     importedModels.add(elementType);
+  //   } else {
+  //     elementType = primitiveSchemaToType(arraySchema.elementType);
+  //   }
 
-    const description = p.language.default.description;
-    property = {
-      name: p.language.default.name,
-      ...(description && { docs: [{ description }] }),
-      hasQuestionToken: !p.required,
-      type,
-      kind: StructureKind.PropertySignature
-    };
+  //   const description = p.language.default.description;
+  //   property = {
+  //     name: propertyName,
+  //     ...(description && { docs: [{ description }] }),
+  //     hasQuestionToken: !p.required,
+  //     type: `${elementType}${arrayDimensions}`,
+  //     kind: StructureKind.PropertySignature
+  //   };
+  // } else if (p.schema.type === SchemaType.AnyObject) {
+  //   const description = p.language.default.description;
+  //   property = {
+  //     name: p.language.default.name,
+  //     ...(description && { docs: [{ description }] }),
+  //     hasQuestionToken: !p.required,
+  //     type: "Record<string, unknown>",
+  //     kind: StructureKind.PropertySignature
+  //   };
+  // } else if (isDictionarySchema(p.schema)) {
+  //   const type = p.schema.elementType;
+  // } else {
+  //   const type = normalizeName(
+  //     p.schema.language.default.name,
+  //     NameType.Interface
+  //   );
+  //   importedModels.add(p.schema.language.default.name);
+
+  //   const description = p.language.default.description;
+  //   property = {
+  //     name: p.language.default.name,
+  //     ...(description && { docs: [{ description }] }),
+  //     hasQuestionToken: !p.required,
+  //     type,
+  //     kind: StructureKind.PropertySignature
+  //   };
+  // }
+}
+
+function getElementType(
+  schema: Schema,
+  importedModels = new Set<string>()
+): string {
+  if (isArraySchema(schema)) {
+    return `Array<${getElementType(schema.elementType)}>`;
   }
-  return property;
+
+  if (isPrimitiveSchema(schema)) {
+    return `${primitiveSchemaToType(schema)}`;
+  }
+
+  if (isAnyObjectSchema(schema)) {
+    return `Record<string, unknown>`;
+  }
+
+  if (isObjectSchema(schema)) {
+    const { name } = getObjectInfo(schema);
+    importedModels.add(name);
+    return `${name}`;
+  }
+
+  if (isDictionarySchema(schema)) {
+    return `Record<string, ${getElementType(schema.elementType)}>`;
+  }
+
+  throw new Error(`Don't know how to get type for schema ${schema.type}`);
+}
+
+function getObjectInfo(schema: ObjectSchema) {
+  const name = normalizeName(
+    schema.language.default.name,
+    NameType.Interface,
+    true
+  );
+
+  return {
+    name
+  };
 }
 
 // Need to fix this logic
 function generateObjectInterfaces(model: CodeModel, file: SourceFile) {
   (model.schemas.objects || []).forEach(o => {
-    const properties: PropertySignatureStructure[] = (o.properties || []).map(
-      p => {
-        return getPropertySignature(p);
-      }
-    );
+    const properties: OptionalKind<PropertySignatureStructure>[] = (
+      o.properties || []
+    ).map(p => {
+      return getPropertySignature(p);
+    });
 
     let baseName = normalizeName(o.language.default.name, NameType.Interface);
 
@@ -517,9 +575,9 @@ function isArraySchema(schema: Schema): schema is ArraySchema {
 function isAnyObjectSchema(schema: Schema): schema is ArraySchema {
   return schema.type === SchemaType.AnyObject;
 }
-// function isDictionarySchema(schema: Schema): schema is DictionarySchema {
-//   return schema.type === SchemaType.Dictionary;
-// }
+function isDictionarySchema(schema: Schema): schema is DictionarySchema {
+  return schema.type === SchemaType.Dictionary;
+}
 
 function primitiveSchemaToType(schema: PrimitiveSchema): string {
   switch (schema.type) {
@@ -562,12 +620,14 @@ function primitiveSchemaToType(schema: PrimitiveSchema): string {
 type PathParameter = { name: string; description?: string };
 
 type Methods = {
-  [key: string]: {
-    optionsName: string;
-    description: string;
-    hasOptionalOptions: boolean;
-    returnType: string;
-  };
+  [key: string]: [
+    {
+      optionsName: string;
+      description: string;
+      hasOptionalOptions: boolean;
+      returnType: string;
+    }
+  ];
 };
 type Paths = {
   [key: string]: {
@@ -617,25 +677,22 @@ function generatePathFirstClient(model: CodeModel, project: Project) {
           const hasOptionalOptions = !request.signatureParameters?.some(
             p => p.required
           );
-          pathDictionary[path] = {
-            name: operationName,
-            pathParameters,
-            methods: {
-              ...pathDictionary[path].methods,
-              [`${method}`]: {
-                description: operationDescription,
-                optionsName: getOperationOptionsType(
-                  operation,
-                  importedParameters
-                ),
-                hasOptionalOptions,
-                returnType: `Promise<${getOperationReturnType(
-                  operation,
-                  importedResponses
-                )}>`
-              }
-            }
+
+          const newMethod = {
+            description: operationDescription,
+            optionsName: getOperationOptionsType(operation, importedParameters),
+            hasOptionalOptions,
+            returnType: `Promise<${getOperationReturnType(
+              operation,
+              importedResponses
+            )}>`
           };
+
+          if (pathDictionary[path].methods[`${method}`]) {
+            pathDictionary[path].methods[`${method}`].push(newMethod);
+          } else {
+            pathDictionary[path].methods[`${method}`] = [newMethod];
+          }
         }
       }
     }
@@ -817,18 +874,21 @@ function generatePathFirstRouteMethodsDefinition(
   const methodDefinitions: OptionalKind<MethodSignatureStructure>[] = [];
   for (const key of Object.keys(methods)) {
     const method = methods[key];
-    const description = methods[key].description;
+    const description = methods[key][0].description;
+
+    let areAllOptional = !method.some(m => !m.hasOptionalOptions);
+
     methodDefinitions.push({
       name: key,
       ...(description && { docs: [{ description }] }),
       parameters: [
         {
           name: "options",
-          hasQuestionToken: method.hasOptionalOptions,
-          type: method.optionsName
+          hasQuestionToken: areAllOptional,
+          type: method.map(m => m.optionsName).join(" | ")
         }
       ],
-      returnType: method.returnType
+      returnType: method.map(m => m.returnType).join(" | ")
     });
   }
 

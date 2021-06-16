@@ -30,10 +30,10 @@
         "LICENSE"
     ],
     "dependencies": {
-        "@autorest/codemodel": "^4.14.8",
-        "@autorest/extension-base": "^3.2.0",
+        "@autorest/codemodel": "^4.15.0",
+        "@autorest/extension-base": "^3.2.1",
         "@azure-rest/core-client": "1.0.0-beta.2",
-        "@azure-tools/codegen": "^2.5.249",
+        "@azure-tools/codegen": "^2.5.294",
         "@azure/core-auth": "^1.1.4",
         "@azure/core-http": "^1.2.1-alpha.20201203.2",
         "@azure/core-https": "^1.0.0-alpha.20200925.1",
