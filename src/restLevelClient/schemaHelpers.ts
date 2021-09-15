@@ -21,7 +21,8 @@ import { NameType, normalizeName } from "../utils/nameUtils";
  */
 export function getElementType(
   schema: Schema,
-  importedModels = new Set<string>()
+  importedModels = new Set<string>(),
+  usage: "Input" | "Output" = "Input"
 ): string {
   if (isArraySchema(schema)) {
     // Recursively find out the type for the elements in the array.
@@ -38,8 +39,11 @@ export function getElementType(
 
   if (isObjectSchema(schema)) {
     const { name } = getObjectInfo(schema);
-    importedModels.add(name);
-    return `${name}`;
+
+    const suffix = usage === "Output" ? usage : "";
+    const modelName = `${name}${suffix}`;
+    importedModels.add(modelName);
+    return modelName;
   }
 
   if (isDictionarySchema(schema)) {
@@ -138,7 +142,7 @@ function getObjectInfo(schema: ObjectSchema) {
   };
 }
 
-function isArraySchema(schema: Schema): schema is ArraySchema {
+export function isArraySchema(schema: Schema): schema is ArraySchema {
   return schema.type === SchemaType.Array;
 }
 
@@ -151,6 +155,12 @@ export function isDictionarySchema(schema: Schema): schema is DictionarySchema {
 
 export function isConstantSchema(schema: Schema): schema is ConstantSchema {
   return schema.type === SchemaType.Constant;
+}
+
+export function isEnumSchema(schema: Schema): schema is ChoiceSchema {
+  return (
+    schema.type === SchemaType.Choice || schema.type === SchemaType.SealedChoice
+  );
 }
 
 /**

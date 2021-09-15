@@ -1,8 +1,11 @@
 import {
   CodeModel,
   HttpHeader,
+  ObjectSchema,
   Operation,
   Response,
+  Schema,
+  SchemaContext,
   SchemaResponse
 } from "@autorest/codemodel";
 import {
@@ -171,7 +174,8 @@ function getBodyTypeName(
   response: SchemaResponse,
   importedModels: Set<string>
 ): string | undefined {
-  return getElementType(response.schema, importedModels);
+  const usage = isAlsoOutput(response.schema) ? "Output" : "Input";
+  return getElementType(response.schema, importedModels, usage);
 }
 
 function getResponseHeaderInterfaceDefinition(
@@ -202,6 +206,16 @@ function getResponseHeaderInterfaceDefinition(
   }
 
   return undefined;
+}
+
+function isAlsoOutput(schema: Schema) {
+  const objectSchema = schema as ObjectSchema;
+
+  return (
+    objectSchema.usage &&
+    objectSchema.usage.length > 1 &&
+    objectSchema.usage.some(u => u === SchemaContext.Output)
+  );
 }
 
 // Gets a list of all the available operations requests in the specification

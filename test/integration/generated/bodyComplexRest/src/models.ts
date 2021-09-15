@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-export interface BasicDef {
+export interface BasicOutput {
   /** Basic Id */
   id?: number;
   /** Name property with a very long description that does not fit on a single line and a line break. */
@@ -14,89 +14,89 @@ export interface ErrorModel {
   message?: string;
 }
 
-export interface IntWrapper {
+export interface IntWrapperOutput {
   field1?: number;
   field2?: number;
 }
 
-export interface LongWrapper {
+export interface LongWrapperOutput {
   field1?: number;
   field2?: number;
 }
 
-export interface FloatWrapper {
+export interface FloatWrapperOutput {
   field1?: number;
   field2?: number;
 }
 
-export interface DoubleWrapper {
+export interface DoubleWrapperOutput {
   field1?: number;
   field_56_zeros_after_the_dot_and_negative_zero_before_dot_and_this_is_a_long_field_name_on_purpose?: number;
 }
 
-export interface BooleanWrapper {
+export interface BooleanWrapperOutput {
   field_true?: boolean;
   field_false?: boolean;
 }
 
-export interface StringWrapper {
+export interface StringWrapperOutput {
   field?: string;
   empty?: string;
   null?: string;
 }
 
-export interface DateWrapper {
+export interface DateWrapperOutput {
   field?: Date;
   leap?: Date;
 }
 
-export interface DatetimeWrapper {
+export interface DatetimeWrapperOutput {
   field?: Date;
   now?: Date;
 }
 
-export interface Datetimerfc1123Wrapper {
+export interface Datetimerfc1123WrapperOutput {
   field?: Date;
   now?: Date;
 }
 
-export interface DurationWrapper {
+export interface DurationWrapperOutput {
   field?: string;
 }
 
-export interface ByteWrapper {
+export interface ByteWrapperOutput {
   /** Value may contain base64 encoded characters */
   field?: string;
 }
 
-export interface ArrayWrapper {
+export interface ArrayWrapperOutput {
   array?: Array<string>;
 }
 
-export interface DictionaryWrapper {
+export interface DictionaryWrapperOutput {
   /** Dictionary of <string> */
   defaultProgram?: Record<string, string>;
 }
 
-export interface Pet {
+export interface PetOutput {
   id?: number;
   name?: string;
 }
 
-export interface Cat extends Pet {
+export interface CatOutput extends PetOutput {
   color?: string;
   hates?: Array<Dog>;
 }
 
-export interface Dog extends Pet {
+export interface DogOutput extends PetOutput {
   food?: string;
 }
 
-export interface Siamese extends Cat {
+export interface SiameseOutput extends CatOutput {
   breed?: string;
 }
 
-export interface FishBase {
+export interface FishOutputBase {
   species?: string;
   length: number;
   siblings?: Array<Fish>;
@@ -109,86 +109,92 @@ export interface FishBase {
     | "cookiecuttershark";
 }
 
-export interface DotFishBase {
+export interface DotFishOutputBase {
   species?: string;
   "fish.type": "DotSalmon";
 }
 
-export interface DotFishMarket {
+export interface DotFishMarketOutput {
   sampleSalmon?: DotSalmon;
   salmons?: Array<DotSalmon>;
   sampleFish?: DotFish;
   fishes?: Array<DotFish>;
 }
 
-export interface DotSalmon extends DotFishBase {
+export interface DotSalmonOutput extends DotFishOutputBase {
   location?: string;
   iswild?: boolean;
   "fish.type": "DotSalmon";
 }
 
-export interface SalmonBase extends FishBase {
+export interface SalmonOutputBase extends FishOutputBase {
   location?: string;
   iswild?: boolean;
   fishtype: "salmon" | "smart_salmon";
 }
 
-export interface ReadonlyObj {
+export interface ReadonlyObjOutput {
   id?: string;
   size?: number;
 }
 
-export interface MyBaseTypeBase {
+export interface MyBaseTypeOutputBase {
   propB1?: string;
   helper?: MyBaseHelperType;
   kind: "Kind1";
 }
 
-export interface MyBaseHelperType {
+export interface MyBaseHelperTypeOutput {
   propBH1?: string;
 }
 
-export interface SmartSalmon extends SalmonBase, Record<string, unknown> {
+export interface SmartSalmonOutput
+  extends SalmonOutputBase,
+    Record<string, unknown> {
   college_degree?: string;
   fishtype: "smart_salmon";
 }
 
-export interface SharkBase extends FishBase {
+export interface SharkOutputBase extends FishOutputBase {
   age?: number;
   birthday: Date;
   fishtype: "shark" | "sawshark" | "goblin" | "cookiecuttershark";
 }
 
-export interface Sawshark extends SharkBase {
+export interface SawsharkOutput extends SharkOutputBase {
   /** Value may contain base64 encoded characters */
   picture?: string;
   fishtype: "sawshark";
 }
 
-export interface Goblinshark extends SharkBase {
+export interface GoblinsharkOutput extends SharkOutputBase {
   jawsize?: number;
   /** Colors possible */
   color?: "pink" | "gray" | "brown" | "RED" | "red";
   fishtype: "goblin";
 }
 
-export interface Cookiecuttershark extends SharkBase {
+export interface CookiecuttersharkOutput extends SharkOutputBase {
   fishtype: "cookiecuttershark";
 }
 
-export interface MyDerivedType extends MyBaseTypeBase {
+export interface MyDerivedTypeOutput extends MyBaseTypeOutputBase {
   propD1?: string;
   kind: "Kind1";
 }
 
-export type Fish =
-  | Salmon
-  | SmartSalmon
-  | Shark
-  | Sawshark
-  | Goblinshark
-  | Cookiecuttershark;
-export type DotFish = DotSalmon;
-export type Salmon = SalmonBase | SmartSalmon;
-export type MyBaseType = MyDerivedType;
-export type Shark = SharkBase | Sawshark | Goblinshark | Cookiecuttershark;
+export type FishOutput =
+  | SalmonOutput
+  | SmartSalmonOutput
+  | SharkOutput
+  | SawsharkOutput
+  | GoblinsharkOutput
+  | CookiecuttersharkOutput;
+export type DotFishOutput = DotSalmonOutput;
+export type SalmonOutput = SalmonOutputBase | SmartSalmonOutput;
+export type MyBaseTypeOutput = MyDerivedTypeOutput;
+export type SharkOutput =
+  | SharkOutputBase
+  | SawsharkOutput
+  | GoblinsharkOutput
+  | CookiecuttersharkOutput;

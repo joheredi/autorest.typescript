@@ -3,12 +3,13 @@ import {
   ComplexSchema,
   isObjectSchema,
   ObjectSchema,
-  Property
+  Property,
+  Schema,
+  SchemaContext
 } from "@autorest/codemodel";
 import { Channel } from "@autorest/extension-base";
 import {
   InterfaceDeclarationStructure,
-  Program,
   PropertySignatureStructure,
   StructureKind,
   TypeAliasDeclarationStructure
@@ -31,13 +32,24 @@ export function buildObjectInterfaces(
 
   for (const objectSchema of objectSchemas) {
     const baseName = getObjectBaseName(objectSchema);
-    const interfaceDeclaration = getObjectInterfaceDeclaration(
-      baseName,
-      objectSchema,
-      importedModels
-    );
 
-    objectInterfaces.push(interfaceDeclaration);
+    if (!isOutput(objectSchema)) {
+      const interfaceDeclaration = getObjectInterfaceDeclaration(
+        baseName,
+        objectSchema,
+        importedModels
+      );
+      objectInterfaces.push(interfaceDeclaration);
+    } else {
+      const outputInterfaceDeclaration = getObjectInterfaceDeclaration(
+        `${baseName}Output`,
+        objectSchema,
+        importedModels,
+        "Output"
+      );
+
+      objectInterfaces.push(outputInterfaceDeclaration);
+    }
   }
   return objectInterfaces;
 }
@@ -50,7 +62,17 @@ export function buildPolymorphicAliases(model: CodeModel) {
     const baseName = getObjectBaseName(objectSchema);
     const typeAlias = getPolymorphicTypeAlias(baseName, objectSchema);
     if (typeAlias) {
-      objectAliases.push(typeAlias);
+      if (!isOutput(objectSchema)) {
+        typeAlias.isExported;
+        objectAliases.push(typeAlias);
+      } else {
+        const outputAlias = getPolymorphicTypeAlias(
+          baseName,
+          objectSchema,
+          "Output"
+        );
+        outputAlias && objectAliases.push(outputAlias);
+      }
     }
   }
 
@@ -74,17 +96,20 @@ function getObjectBaseName(objectSchema: ObjectSchema) {
  */
 function getPolymorphicTypeAlias(
   baseName: string,
-  objectSchema: ObjectSchema
+  objectSchema: ObjectSchema,
+  usage: "Input" | "Output" = "Input"
 ): TypeAliasDeclarationStructure | undefined {
   if (!isPolymorphicParent(objectSchema)) {
     return undefined;
   }
 
   const unionTypes: string[] = [];
+  const nameSuffix = usage === "Output" ? usage : "";
+  const base = `${baseName}${nameSuffix}`;
 
   // If the object itself has a discriminatorValue add its base to the union
   if (objectSchema.discriminatorValue) {
-    unionTypes.push(`${baseName}Base`);
+    unionTypes.push(`${base}Base`);
   }
 
   for (const child of objectSchema.children?.all ?? []) {
@@ -94,12 +119,12 @@ function getPolymorphicTypeAlias(
       true /** shouldGuard */
     );
 
-    unionTypes.push(name);
+    unionTypes.push(`${name}${nameSuffix}`);
   }
 
   return {
     kind: StructureKind.TypeAlias,
-    name: baseName,
+    name: base,
     type: unionTypes.join(" | "),
     isExported: true
   };
@@ -112,7 +137,8 @@ function getPolymorphicTypeAlias(
 function getObjectInterfaceDeclaration(
   baseName: string,
   objectSchema: ObjectSchema,
-  importedModels: Set<string>
+  importedModels: Set<string>,
+  usage: "Input" | "Output" = "Input"
 ): InterfaceDeclarationStructure {
   let interfaceName = baseName;
   if (isPolymorphicParent(objectSchema)) {
@@ -130,7 +156,7 @@ function getObjectInterfaceDeclaration(
   );
 
   // Calculate the parents of the current object
-  const extendFrom = getImmediateParentsNames(objectSchema);
+  const extendFrom = getImmediateParentsNames(objectSchema, usage);
 
   return {
     kind: StructureKind.Interface,
@@ -274,7 +300,10 @@ function getChildDiscriminatorValues(children: ComplexSchema[]): string[] {
 /**
  * Gets a list of types a given object may extend from
  */
-function getImmediateParentsNames(objectSchema: ObjectSchema): string[] {
+function getImmediateParentsNames(
+  objectSchema: ObjectSchema,
+  usage: "Input" | "Output" = "Input"
+): string[] {
   if (!objectSchema.parents?.immediate) {
     return [];
   }
@@ -291,18 +320,29 @@ function getImmediateParentsNames(objectSchema: ObjectSchema): string[] {
   const parents = objectSchema.parents.immediate
     .filter(p => !isDictionarySchema(p))
     .map(parent => {
+      const nameSuffix = isOutput(parent) ? "Output" : "";
       const name = normalizeName(
         getLanguageMetadata(parent.language).name,
         NameType.Interface,
         true /** shouldGuard */
       );
-
-      return isObjectSchema(parent) && isPolymorphicParent(parent)
-        ? `${name}Base`
-        : name;
+      if (isObjectSchema(parent) && isPolymorphicParent(parent)) {
+        return `${name}${nameSuffix}Base`;
+      } else {
+        return `${name}${nameSuffix}`;
+      }
     });
 
   return [...parents, ...extendFrom];
+}
+
+function isOutput(schema: Schema) {
+  const objectSchema = schema as ObjectSchema;
+
+  return (
+    objectSchema.usage &&
+    objectSchema.usage.some(u => u === SchemaContext.Output)
+  );
 }
 
 function getPropertySignatures(

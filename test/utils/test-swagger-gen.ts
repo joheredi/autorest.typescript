@@ -823,7 +823,7 @@ const testSwaggers: { [name: string]: SwaggerConfig } = {
     isTestPackage: true
   },
   bodyComplexRest: {
-    swaggerOrConfig: "test/integration/swaggers/bodyComplex.md",
+    swaggerOrConfig: "body-complex.json",
     clientName: "BodyComplexRestClient",
     packageName: "body-complex-rest",
     licenseHeader: true,

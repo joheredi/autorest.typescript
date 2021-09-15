@@ -3,7 +3,7 @@
 
 import { RequestParameters } from "@azure-rest/core-client";
 import {
-  BasicDef,
+  Basic,
   IntWrapper,
   LongWrapper,
   FloatWrapper,
@@ -27,7 +27,7 @@ export type BasicGetValidParameters = RequestParameters;
 
 export interface BasicPutValidBodyParam {
   /** Please put {id: 2, name: 'abc', color: 'Magenta'} */
-  body: BasicDef;
+  body: Basic;
 }
 
 export type BasicPutValidParameters = BasicPutValidBodyParam &
