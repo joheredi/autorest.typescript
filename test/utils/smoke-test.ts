@@ -31,7 +31,10 @@ const generateFromReadme = async ({
   params,
   outputFolderName
 }: SpecDefinition) => {
-  const matches = path.match(/^[^#].*?specification[\/\\]([\w-]+[\/\\][\w-]+)[\/\\]readme.md/);
+  const matches =
+    path.match(
+      /^[^#].*?specification[\/\\]([\w-]+[\/\\][\w-]+)[\/\\]readme.md/
+    ) || path.match(/^[^#].*?smoke[\/\\]([\w-]+[\/\\][\w-]+)[\/\\]*.md/);
   if (!matches?.length) {
     return;
   }

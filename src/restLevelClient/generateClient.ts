@@ -21,7 +21,7 @@ import {
 
 import { getAutorestOptions, getSession } from "../autorestSession";
 import { transformBaseUrl } from "../transforms/urlTransforms";
-import { NameType, normalizeName } from "../utils/nameUtils";
+import { CasingConvention, NameType, normalizeName } from "../utils/nameUtils";
 import { isConstantSchema, getElementType } from "./schemaHelpers";
 import { getLanguageMetadata } from "../utils/languageHelpers";
 import {
@@ -31,7 +31,8 @@ import {
 } from "./helpers/operationHelpers";
 import {
   generateMethodShortcutImplementation,
-  generateMethodShortcuts
+  generateMethodShortcuts,
+  REST_CLIENT_RESERVED
 } from "./generateMethodShortcuts";
 import { Methods, PathParameter, Paths } from "./interfaces";
 
@@ -137,10 +138,18 @@ export function generatePathFirstClient(model: CodeModel, project: Project) {
     ? []
     : model.operationGroups.map(og => {
         const groupName = og.language.default.name;
-        const name = normalizeName(groupName, NameType.Property);
+        const name = normalizeName(
+          groupName,
+          NameType.OperationGroup,
+          true,
+          REST_CLIENT_RESERVED,
+          CasingConvention.Camel
+        );
         const interfaceName = normalizeName(
           `${name}Operations`,
-          NameType.Interface
+          NameType.Interface,
+          true,
+          REST_CLIENT_RESERVED
         );
         return { name, type: interfaceName };
       });
@@ -232,7 +241,9 @@ function writeShortcutInterface(
   const shortcuts = generateMethodShortcuts(model, pathDictionary);
 
   for (const group of Object.keys(shortcuts)) {
-    const groupName = normalizeName(group, NameType.Interface) || "Client";
+    const groupName =
+      normalizeName(group, NameType.Interface, true, REST_CLIENT_RESERVED) ||
+      "Client";
     const groupOperations = shortcuts[group];
 
     clientFile.addInterface({
