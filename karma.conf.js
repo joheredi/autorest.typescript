@@ -32,7 +32,7 @@ module.exports = function(config) {
     autoWatch: false,
 
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true, // Set to false when you need to debug.
+    singleRun: false, // Set to false when you need to debug.
 
     // Concurrency level
     // how many browser should be started simultaneous

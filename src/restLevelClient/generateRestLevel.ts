@@ -29,6 +29,7 @@ import { generateReadmeFile } from "../generators/static/readmeFileGenerator";
 import * as path from "path";
 import * as fsextra from "fs-extra";
 import { generateSampleEnv } from "../generators/samples/sampleEnvGenerator";
+import { generateIsErrorHelper } from "./generateIsErrorHelper";
 
 /**
  * Generates a Rest Level Client library
@@ -74,6 +75,7 @@ export async function generateRestLevelClient() {
   generatePathFirstClient(model, project);
   generateClient(model, project);
   generateIndexFile(project);
+  generateIsErrorHelper(project);
 
   generateTopLevelIndexFile(model, project);
   if (generateTest) {

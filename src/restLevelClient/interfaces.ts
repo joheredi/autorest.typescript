@@ -13,6 +13,8 @@ export type Methods = {
       description: string;
       hasOptionalOptions: boolean;
       returnType: string;
+      successStatus: string[];
+      responseTypes: { error: string[]; success: string[] };
     }
   ];
 };

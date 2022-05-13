@@ -2,11 +2,16 @@ import {
   CodeModel,
   Operation,
   ParameterLocation,
-  ImplementationLocation
+  ImplementationLocation,
+  Response
 } from "@autorest/codemodel";
 import { isEqual } from "lodash";
 
-import { getResponseTypeName } from "./operationHelpers";
+import {
+  getResponseTypeName,
+  getOperationDescription,
+  gerOperationSuccessStatus
+} from "./operationHelpers";
 
 import {
   CallSignatureDeclarationStructure,
@@ -55,8 +60,7 @@ export function generatePathFirstClient(model: CodeModel, project: Project) {
   for (const operationGroup of model.operationGroups) {
     for (const operation of operationGroup.operations) {
       const operationName = getLanguageMetadata(operation.language).name;
-      const operationDescription = getLanguageMetadata(operation.language)
-        .description;
+      const operationDescription = getOperationDescription(operation);
       const pathParameters: PathParameter[] =
         operation.parameters
           ?.filter(p => p.protocol.http?.in === ParameterLocation.Path)
@@ -95,7 +99,9 @@ export function generatePathFirstClient(model: CodeModel, project: Project) {
               operation,
               importedResponses,
               clientImports
-            )}>`
+            )}>`,
+            responseTypes: getResponseTypes(operation),
+            successStatus: gerOperationSuccessStatus(operation)
           };
 
           if (
@@ -254,6 +260,33 @@ function getOperationOptionsType(
   importedParameters.add(paramsName);
 
   return paramsName;
+}
+
+function getResponseTypes(operation: Operation) {
+  let returnTypes: { success: string[]; error: string[] } = {
+    error: [],
+    success: []
+  };
+  if (
+    (operation.responses && operation.responses.length) ||
+    (operation.exceptions && operation.exceptions.length)
+  ) {
+    function getResponseType(responses: Response[]) {
+      return responses
+        .filter(
+          r =>
+            r.protocol.http?.statusCodes && r.protocol.http?.statusCodes.length
+        )
+        .map(r => {
+          const responseName = getResponseTypeName(operation, r);
+          return responseName;
+        });
+    }
+
+    returnTypes.error = getResponseType(operation.exceptions ?? []);
+    returnTypes.success = getResponseType(operation.responses ?? []);
+  }
+  return returnTypes;
 }
 
 function getOperationReturnType(

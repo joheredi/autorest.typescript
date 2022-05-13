@@ -8,7 +8,7 @@
 package-name: "@msinternal/synapse-artifacts"
 title: SynapseArtifacts
 product-doc-link: https://azure.microsoft.com/en-us/services/synapse-analytics/
-generate-metadata: false
+generate-metadata: true
 license-header: MICROSOFT_MIT_NO_VERSION
 output-folder: ../
 source-code-folder-path: ./src

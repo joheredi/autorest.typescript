@@ -60,3 +60,25 @@ export function getStatusCode(response: Response): string {
 
   return `"${statusCode}"`;
 }
+
+export function getOperationDescription(operation: Operation) {
+  let description = getLanguageMetadata(operation.language).description;
+
+  if (operation.extensions && operation.extensions["x-ms-pageable"]) {
+    description = `${description}\nThis operation returns paginated results. You can use the \`paginate\` helper in this package to iterate the results`;
+  }
+
+  return description;
+}
+
+export function gerOperationSuccessStatus(operation: Operation): string[] {
+  const responses = operation.responses ?? [];
+  const status: string[] = [];
+
+  for (const response of responses) {
+    let statusCode = response.protocol.http?.statusCodes[0];
+    status.push(statusCode);
+  }
+
+  return status;
+}

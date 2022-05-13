@@ -68,7 +68,11 @@ export const readmes: SpecDefinition[] = [
       "..",
       "./.tmp/specs/specification/web/resource-manager/readme.md"
     ),
-    params: [AutorestParams.GenerateTest, AutorestParams.GenerateSamples, AutorestParams.AzureSdkForJs],
+    params: [
+      AutorestParams.GenerateTest,
+      AutorestParams.GenerateSamples,
+      AutorestParams.AzureSdkForJs
+    ],
     branch: "925e8285703ddd461588d8f5fbf14bd97c286fab",
     buildTag: "ci_2"
   },
@@ -186,7 +190,11 @@ export const readmes: SpecDefinition[] = [
       "./.tmp/specs/specification/agrifood/data-plane/readme.md"
     ),
     branch: "3ac6ce225efe665e6c74abe48016dcb2a236d609",
-    params: [AutorestParams.RestClient, AutorestParams.GenerateTest, AutorestParams.AzureSdkForJs],
+    params: [
+      AutorestParams.RestClient,
+      AutorestParams.GenerateTest,
+      AutorestParams.AzureSdkForJs
+    ],
     buildTag: "ci_rlc"
   },
   {
@@ -195,8 +203,12 @@ export const readmes: SpecDefinition[] = [
       "..",
       "./smoke/swagger/purview-administration-rest.md"
     ),
-    params: [AutorestParams.RestClient, AutorestParams.MultiClient, AutorestParams.AzureSdkForJs],
-    buildTag: "ci_rlc"
+    params: [
+      AutorestParams.RestClient,
+      AutorestParams.MultiClient,
+      AutorestParams.AzureSdkForJs
+    ],
+    buildTag: "debug"
   },
   {
     path: joinPath(
