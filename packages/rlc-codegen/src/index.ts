@@ -1,2 +1,2 @@
 export * from "./interfaces.js";
-export * from "./generateClientDefinitions.js";
+export { buildClientDefinitions } from "./generateClientDefinitions.js";

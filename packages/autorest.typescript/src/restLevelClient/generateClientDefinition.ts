@@ -1,9 +1,16 @@
 import {
   CodeModel,
-  Operation,
-  ParameterLocation,
+  Operation as M4Operation,
+  ParameterLocation as M4ParameterLocation,
   ImplementationLocation,
-  Response
+  Response,
+  SchemaContext,
+  OperationGroup as M4OperationGroup,
+  Parameter as M4Parameter,
+  Schema,
+  SchemaType,
+  ObjectSchema,
+  ArraySchema
 } from "@autorest/codemodel";
 import { isEqual } from "lodash";
 
@@ -12,50 +19,41 @@ import {
   getResponseTypeName
 } from "./operationHelpers";
 
-import {
-  CallSignatureDeclarationStructure,
-  Project,
-  SourceFile,
-  StructureKind,
-  Writers
-} from "ts-morph";
-import * as path from "path";
+import { Project } from "ts-morph";
 
 import { getAutorestOptions } from "../autorestSession";
 import { CasingConvention, NameType, normalizeName } from "../utils/nameUtils";
 import { getLanguageMetadata } from "../utils/languageHelpers";
-import {
-  buildMethodDefinitions,
-  getOperationParameters,
-  getPathParamDefinitions
-} from "./helpers/operationHelpers";
-import {
-  generateMethodShortcuts,
-  REST_CLIENT_RESERVED
-} from "./generateMethodShortcuts";
-import { Methods, PathParameter, Paths, ResponseTypes } from "./interfaces";
+import { getOperationParameters } from "./helpers/operationHelpers";
+import { ResponseTypes } from "./interfaces";
 import { isLongRunningOperation } from "./helpers/hasPollingOperations";
+import { getElementType } from "./schemaHelpers";
+import {
+  buildClientDefinitions,
+  Paths,
+  PathParameter,
+  OperationShortcuts,
+  OperationShortcutGroup,
+  OperationGroup,
+  Operation,
+  Parameter,
+  ParameterLocation,
+  TsType
+} from "@azure-tools/rlc-codegen";
+import { REST_CLIENT_RESERVED } from "./generateMethodShortcuts";
+import { getParameterLocation } from "../utils/parameterHelpers";
 export let pathDictionary: Paths = {};
 
 export function generatePathFirstClient(model: CodeModel, project: Project) {
   const name = normalizeName(
     getLanguageMetadata(model.language).name,
-    NameType.File
+    NameType.Interface
   );
   const { srcPath } = getAutorestOptions();
-  const clientFile = project.createSourceFile(
-    path.join(srcPath, `clientDefinitions.ts`),
-    undefined,
-    {
-      overwrite: true
-    }
-  );
-
-  // Get all paths
+  pathDictionary = {};
   const importedParameters = new Set<string>();
   const importedResponses = new Set<string>();
   const clientImports = new Set<string>();
-  pathDictionary = {};
   for (const operationGroup of model.operationGroups) {
     for (const operation of operationGroup.operations) {
       const operationName = getLanguageMetadata(operation.language).name;
@@ -63,13 +61,17 @@ export function generatePathFirstClient(model: CodeModel, project: Project) {
         .description;
       const pathParameters: PathParameter[] =
         operation.parameters
-          ?.filter(p => p.protocol.http?.in === ParameterLocation.Path)
+          ?.filter(p => p.protocol.http?.in === M4ParameterLocation.Path)
           .map(p => {
             const languageMetadata = getLanguageMetadata(p.language);
             return {
               name: languageMetadata.serializedName || languageMetadata.name,
               schema: p.schema,
-              description: languageMetadata.description
+              description: languageMetadata.description,
+              type: getElementType(p.schema, [
+                SchemaContext.Input,
+                SchemaContext.Exception
+              ])
             };
           }) || [];
       const path: string = operation.requests?.[0].protocol.http?.path;
@@ -122,132 +124,177 @@ export function generatePathFirstClient(model: CodeModel, project: Project) {
     }
   }
 
-  writeShortcutInterface(model, pathDictionary, clientFile);
-  clientFile.addInterface({
-    name: "Routes",
-    isExported: true,
-    callSignatures: getPathFirstRoutesInterfaceDefinition(
-      pathDictionary,
-      clientFile
-    )
-  });
-
-  const clientName = getLanguageMetadata(model.language).name;
-
-  const clientInterfaceName = clientName.endsWith("Client")
-    ? `${clientName}`
-    : `${clientName}Client`;
-
   const { rlcShortcut } = getAutorestOptions();
+  const shortcutGroups = rlcShortcut ? getShortcuts(model.operationGroups) : [];
+  const shortcuts: OperationShortcuts = { groups: shortcutGroups };
 
-  let shortcutElements = !rlcShortcut
-    ? []
-    : model.operationGroups.map(og => {
-        const groupName = og.language.default.name;
-        const name = normalizeName(
-          groupName,
-          NameType.OperationGroup,
-          true,
-          REST_CLIENT_RESERVED,
-          CasingConvention.Camel
-        );
-        const interfaceName = normalizeName(
-          `${name}Operations`,
-          NameType.Interface,
-          true,
-          REST_CLIENT_RESERVED
-        );
-        return { name, type: interfaceName };
-      });
-
-  // There may be operations without an operation group, those shortcut
-  // methods need to be handled differently.
-  const shortcutsInOperationGroup = shortcutElements.filter(s => s.name);
-
-  clientFile.addTypeAlias({
-    isExported: true,
-    name: clientInterfaceName,
-    type: Writers.intersectionType(
-      "Client",
-      Writers.objectType({
-        properties: [
-          { name: "path", type: "Routes" },
-          ...shortcutsInOperationGroup
-        ]
-      }),
-      // If the length of shortcutMethods in operation group and all shortcutMethods
-      // is the same, then we don't have any operations at the client level
-      // Otherwise we need to make the client interface name an union with the
-      // definition of all client level shortcut methods
-      ...(shortcutsInOperationGroup.length !== shortcutElements.length
-        ? [`ClientOperations`]
-        : [])
-    )
+  const operationGroups: OperationGroup[] = model.operationGroups.map(g => {
+    const name = normalizeName(
+      g.language.default.name,
+      NameType.OperationGroup,
+      true,
+      REST_CLIENT_RESERVED,
+      CasingConvention.Camel
+    );
+    return {
+      name,
+      description: g.language.default?.description,
+      operations: g.operations.map(transformOperation)
+    };
   });
 
-  if (importedParameters.size) {
-    clientFile.addImportDeclaration({
-      namedImports: [...importedParameters],
-      moduleSpecifier: "./parameters"
-    });
-  }
-
-  if (importedResponses.size) {
-    clientFile.addImportDeclaration({
-      namedImports: [...importedResponses],
-      moduleSpecifier: "./responses"
-    });
-  }
-
-  clientImports.add("Client");
-  clientImports.add("StreamableMethod");
-  clientFile.addImportDeclarations([
+  const clientDefinitionsFile = buildClientDefinitions(
     {
-      namedImports: [...clientImports],
-      moduleSpecifier: "@azure-rest/core-client"
-    }
-  ]);
+      libraryName: name,
+      paths: pathDictionary,
+      srcPath,
+      shortcuts,
+      operationGroups
+    },
+    { clientImports, importedParameters, importedResponses }
+  );
+
+  project.createSourceFile(
+    clientDefinitionsFile.path,
+    clientDefinitionsFile.content
+  );
 }
 
-function writeShortcutInterface(
-  model: CodeModel,
-  pathDictionary: Paths,
-  clientFile: SourceFile
-) {
-  const { rlcShortcut } = getAutorestOptions();
-  if (!rlcShortcut) {
-    return;
-  }
+function transformOperation(m4Operation: M4Operation): Operation {
+  const name = normalizeName(
+    m4Operation.language.default.name,
+    NameType.Property,
+    true
+  );
 
-  // Create a map of Operation group descriptions
-  const descriptions = model.operationGroups.reduce((map, current) => {
-    const { name, description } = current.language.default;
-    map.set(name, description);
+  const description = m4Operation.language.default.description;
 
-    return map;
-  }, new Map<string, string>());
+  return {
+    name,
+    ...(description && { docs: description }),
+    parameters: m4Operation.parameters?.map(transformParameters) ?? [],
+    path: m4Operation.requests?.[0].protocol.http?.path,
+    returnType: "any",
+    verb: m4Operation.requests?.[0].protocol.http?.method
+  };
+}
 
-  const shortcuts = generateMethodShortcuts(model, pathDictionary);
-
-  for (const group of Object.keys(shortcuts)) {
-    const groupName =
-      normalizeName(group, NameType.Interface, true, REST_CLIENT_RESERVED) ||
-      "Client";
-    const groupOperations = shortcuts[group];
-
-    clientFile.addInterface({
-      docs: [
-        descriptions.get(group) ||
-          `Contains operations for ${groupName} operations`
-      ],
-      name: `${groupName}Operations`,
-      isExported: true,
-      methods: groupOperations
-    });
+function transformType(schema: Schema): TsType {
+  switch (schema.type) {
+    case SchemaType.Object:
+      return {
+        kind: "record",
+        valueType: { kind: "primitive", name: "unknown" }
+      };
+    case SchemaType.Array:
+      return {
+        kind: "array",
+        elementType: transformType((schema as ArraySchema).elementType)
+      };
+    case SchemaType.Any:
+      return {
+        kind: "primitive",
+        name: "any"
+      };
+    case SchemaType.Binary:
+      return {
+        kind: "primitive",
+        name: "Uint8Array"
+      };
+    case SchemaType.Boolean:
+      return {
+        kind: "primitive",
+        name: "boolean"
+      };
+    case SchemaType.Date:
+    case SchemaType.DateTime:
+      return {
+        kind: "primitive",
+        name: "Date"
+      };
+    case SchemaType.Char:
+    case SchemaType.String:
+    case SchemaType.Uri:
+    case SchemaType.Uuid:
+      return {
+        kind: "primitive",
+        name: "string"
+      };
+    case SchemaType.Integer:
+    case SchemaType.Number:
+      return {
+        kind: "primitive",
+        name: "string"
+      };
+    default:
+      return {
+        kind: "primitive",
+        name: "any"
+      };
   }
 }
 
-function hasRequiredOptions(operation: Operation) {
+function transformParameters(m4Parameter: M4Parameter): Parameter {
+  const name = normalizeName(
+    m4Parameter.language.default.name,
+    NameType.Parameter,
+    true
+  );
+  const location = getParameterLocation(m4Parameter);
+  return {
+    name,
+    location: transformParameterLocation(location),
+    type: transformType(m4Parameter.schema),
+    docs: m4Parameter.language.default.description
+  };
+}
+
+function transformParameterLocation(
+  m4Location: M4ParameterLocation
+): ParameterLocation {
+  switch (m4Location) {
+    case M4ParameterLocation.Body:
+      return "body";
+    case M4ParameterLocation.Header:
+      return "header";
+    case M4ParameterLocation.Path:
+      return "path";
+    case M4ParameterLocation.Query:
+      return "query";
+    case M4ParameterLocation.Uri:
+      return "url";
+    case M4ParameterLocation.Cookie:
+      return "cookie";
+    case M4ParameterLocation.None:
+      return "none";
+    case M4ParameterLocation.Virtual:
+      return "virtual";
+  }
+}
+
+function getShortcuts(
+  operationGroups: M4OperationGroup[]
+): OperationShortcutGroup[] {
+  return operationGroups.map(og => {
+    const groupName = og.language.default.name;
+    const name = normalizeName(
+      groupName,
+      NameType.OperationGroup,
+      true,
+      REST_CLIENT_RESERVED,
+      CasingConvention.Camel
+    );
+    const interfaceName = normalizeName(
+      `${name}Operations`,
+      NameType.Interface,
+      true,
+      REST_CLIENT_RESERVED
+    );
+    return { name, type: interfaceName };
+  });
+}
+
+function hasRequiredOptions(operation: M4Operation) {
   return getOperationParameters(operation)
     .filter(p => p.implementation === ImplementationLocation.Method)
     .filter(p => ["query", "body", "headers"].includes(p.protocol.http?.in))
@@ -255,7 +302,7 @@ function hasRequiredOptions(operation: Operation) {
 }
 
 function getOperationOptionsType(
-  operation: Operation,
+  operation: M4Operation,
   importedParameters = new Set<string>()
 ) {
   const paramsName = `${
@@ -267,7 +314,7 @@ function getOperationOptionsType(
 }
 
 function getOperationReturnType(
-  operation: Operation,
+  operation: M4Operation,
   importedResponses = new Set<string>(),
   coreClientImports = new Set<string>()
 ) {
@@ -306,59 +353,11 @@ function getOperationReturnType(
   return returnType;
 }
 
-function getPathFirstRoutesInterfaceDefinition(
-  paths: Paths,
-  sourcefile: SourceFile
-): CallSignatureDeclarationStructure[] {
-  const signatures: CallSignatureDeclarationStructure[] = [];
-  for (const key of Object.keys(paths)) {
-    generatePathFirstRouteMethodsDefinition(
-      paths[key].name,
-      paths[key].methods,
-      sourcefile
-    );
-    const pathParams = paths[key].pathParameters;
-    signatures.push({
-      docs: [
-        `Resource for '${key
-          .replace(/}/g, "\\}")
-          .replace(
-            /{/g,
-            "\\{"
-          )}' has methods for the following verbs: ${Object.keys(
-          paths[key].methods
-        ).join(", ")}`
-      ],
-      parameters: [
-        { name: "path", type: `"${key}"` },
-        ...getPathParamDefinitions(pathParams)
-      ],
-      returnType: paths[key].name,
-      kind: StructureKind.CallSignature
-    });
-  }
-  return signatures;
-}
-
-function generatePathFirstRouteMethodsDefinition(
-  operationName: string,
-  methods: Methods,
-  file: SourceFile
-): void {
-  const methodDefinitions = buildMethodDefinitions(methods);
-
-  file.addInterface({
-    methods: methodDefinitions,
-    name: operationName,
-    isExported: true
-  });
-}
-
 /**
  * This function computes all the response types error and success
  * an operation can end up returning.
  */
-function getResponseTypes(operation: Operation): ResponseTypes {
+function getResponseTypes(operation: M4Operation): ResponseTypes {
   let returnTypes: ResponseTypes = {
     error: [],
     success: []

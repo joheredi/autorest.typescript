@@ -1,5 +1,8 @@
 import {
   CallSignatureDeclarationStructure,
+  MethodSignatureStructure,
+  OptionalKind,
+  ParameterDeclarationStructure,
   Project,
   SourceFile,
   StructureKind,
@@ -11,13 +14,18 @@ import {
   buildMethodDefinitions,
   getPathParamDefinitions
 } from "./helpers/operationHelpers.js";
-import { Methods, Paths } from "./interfaces.js";
-
-export interface RLCModel {
-  libraryName: string;
-  srcPath: string;
-  paths: Paths;
-}
+import {
+  Methods,
+  Operation,
+  Parameter,
+  Paths,
+  RLCModel,
+  TsType
+} from "./interfaces.js";
+import {
+  addShortcuts,
+  getShortcutInterfaces
+} from "./helpers/operationShortcuts.js";
 
 export function buildClientDefinitions(
   model: RLCModel,
@@ -37,8 +45,13 @@ export function buildClientDefinitions(
   // Get all paths
   const pathDictionary = model.paths;
 
-  // TODO ENABLE SHORTCUT
-  // writeShortcutInterface(model, pathDictionary, clientFile);
+  const shortcutInterfaces = getShortcutInterfaces(
+    model.operationGroups,
+    pathDictionary
+  );
+
+  addShortcuts(shortcutInterfaces, clientDefinitionsFile);
+
   clientDefinitionsFile.addInterface({
     name: "Routes",
     isExported: true,
@@ -54,14 +67,30 @@ export function buildClientDefinitions(
     ? `${clientName}`
     : `${clientName}Client`;
 
+  // There may be operations without an operation group, those shortcut
+  // methods need to be handled differently.
+  const shortcutsInOperationGroup = model.shortcuts.groups.filter(
+    (s) => s.name
+  );
+
   clientDefinitionsFile.addTypeAlias({
     isExported: true,
     name: clientInterfaceName,
     type: Writers.intersectionType(
       "Client",
       Writers.objectType({
-        properties: [{ name: "path", type: "Routes" }]
-      })
+        properties: [
+          { name: "path", type: "Routes" },
+          ...shortcutsInOperationGroup
+        ]
+      }),
+      // If the length of shortcutMethods in operation group and all shortcutMethods
+      // is the same, then we don't have any operations at the client level
+      // Otherwise we need to make the client interface name an union with the
+      // definition of all client level shortcut methods
+      ...(shortcutsInOperationGroup.length !== model.shortcuts.groups.length
+        ? [`ClientOperations`]
+        : [])
     )
   });
 

@@ -37,6 +37,7 @@ import { PropertyKind } from "../models/modelDetails";
 import { KnownMediaType } from "@azure-tools/codegen";
 import { getAutorestOptions } from "../autorestSession";
 import { DictionaryMapper } from "@azure/core-client";
+import { getParameterLocation } from "../utils/parameterHelpers";
 
 interface OperationParameterDetails {
   parameter: Parameter;
@@ -148,14 +149,14 @@ const extractOperationParameters = (codeModel: CodeModel) =>
           }
           const operationParams: OperationParameterDetails[] = (
             operation.parameters || []
-          ).map(p => { 
+          ).map(p => {
             if (p.required) {
               p.language.default.isTopLevelParameter = true;
             }
             return {
-              parameter: p, 
-              operationName 
-            }  
+              parameter: p,
+              operationName
+            };
           });
 
           // Operations may have multiple requests, each with their own set of parameters.
@@ -170,8 +171,10 @@ const extractOperationParameters = (codeModel: CodeModel) =>
                 targetMediaType: request.protocol.http?.knownMediaType
               });
               if (parameter.required) {
-                if ((parameter as any)['targetProperty'] !== undefined) {
-                  (parameter as any)['targetProperty'].language.default.isTopLevelParameter = true;
+                if ((parameter as any)["targetProperty"] !== undefined) {
+                  (parameter as any)[
+                    "targetProperty"
+                  ].language.default.isTopLevelParameter = true;
                 }
                 parameter.language.default.isTopLevelParameter = true;
               }
@@ -348,7 +351,9 @@ function getParameterPath(parameter: Parameter) {
   const name = normalizeName(
     metadata.name,
     NameType.Parameter,
-    parameter.language.default.isTopLevelParameter ? true: false /** shouldGuard */
+    parameter.language.default.isTopLevelParameter
+      ? true
+      : false /** shouldGuard */
   );
 
   if (parameter.groupedBy) {
@@ -370,19 +375,6 @@ function getParameterPath(parameter: Parameter) {
 
 const isClientImplementation = (parameter: Parameter) =>
   parameter.implementation === ImplementationLocation.Client;
-
-function getParameterLocation(parameter: Parameter): ParameterLocation {
-  const originalLocaltion =
-    parameter.protocol.http?.in ||
-    (parameter as VirtualParameter).originalParameter.protocol.http?.in;
-  const locationExtension =
-    parameter.extensions && parameter.extensions["x-in"];
-  if (!originalLocaltion && !locationExtension) {
-    throw new Error("Expected parameter to contain HTTP Protocol information");
-  }
-
-  return locationExtension || originalLocaltion;
-}
 
 /**
  * Serialization styles used by ModelerFour but not present in SerializationStyle

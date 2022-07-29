@@ -5,8 +5,8 @@ import { HeadParameters } from "./parameters";
 import { Head200Response } from "./responses";
 import { Client, StreamableMethod } from "@azure-rest/core-client";
 
-/** Contains operations for Client operations */
-export interface ClientOperations {
+/** Contains operations for  operations */
+export interface Operations {
   /** Operation */
   head(options?: HeadParameters): StreamableMethod<Head200Response>;
 }
