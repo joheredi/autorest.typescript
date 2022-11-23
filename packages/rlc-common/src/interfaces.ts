@@ -1,4 +1,7 @@
 // Copyright (c) Microsoft Corporation.
+
+import { StatementStructures, WriterFunction } from "ts-morph";
+
 // Licensed under the MIT License.
 export interface RLCModel {
   libraryName: string;
@@ -66,7 +69,14 @@ export interface PathMetadata {
 export type Paths = Record<string, PathMetadata>;
 
 export type PathParameter = {
+  /**
+   * This is the serialized name of the parameter.
+   */
   name: string;
+  /**
+   * This is the client name of the parameter.
+   */
+  clientName: string;
   type: string;
   description?: string;
   value?: string | number | boolean;
@@ -214,7 +224,20 @@ export interface ResponseMetadata {
 export type ResponseHeaderSchema = Schema;
 export type ResponseBodySchema = Schema;
 
+export type FactoryBodyBuilder = (
+  model: RLCModel,
+  clientTypeName: string
+) =>
+  | string
+  | WriterFunction
+  | (string | WriterFunction | StatementStructures)[];
+
+export interface BuildClientOptions {
+  bodyBuilder?: FactoryBodyBuilder;
+  hasSampleGenerated?: boolean;
+}
+
 export type ContentBuilder = {
   (model: RLCModel): File | undefined;
-  (model: RLCModel, hasSampleGenerated?: boolean): File | undefined;
+  (model: RLCModel, options?: BuildClientOptions): File | undefined;
 };

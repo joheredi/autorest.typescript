@@ -1,4 +1,4 @@
-import { ContentBuilder } from "@azure-tools/rlc-common";
+import { BuildClientOptions, ContentBuilder } from "@azure-tools/rlc-common";
 import { buildSchemaTypes } from "@azure-tools/rlc-common";
 import { File, RLCModel } from "@azure-tools/rlc-common";
 import { CompilerHost, Program } from "@cadl-lang/compiler";
@@ -22,7 +22,8 @@ export async function emitModels(rlcModels: RLCModel, program: Program) {
 export async function emitContentByBuilder(
   program: Program,
   builderFnOrList: ContentBuilder | ContentBuilder[],
-  rlcModels: RLCModel
+  rlcModels: RLCModel,
+  options?: BuildClientOptions
 ) {
   if (!Array.isArray(builderFnOrList)) {
     builderFnOrList = [builderFnOrList];
@@ -35,7 +36,7 @@ export async function emitContentByBuilder(
   }
 }
 
-async function emitFile(file: File, program: Program) {
+export async function emitFile(file: File, program: Program) {
   const host: CompilerHost = program.host;
   const filePath =
     isAbsolute(file.path) || !program.compilerOptions.outputDir
