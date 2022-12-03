@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Program } from "@cadl-lang/compiler";
+import { emitFile, Program } from "@cadl-lang/compiler";
 import {
   buildClientDefinitions,
   buildResponseTypes,
@@ -23,14 +23,21 @@ import {
   buildRecordedClientFile,
   buildSampleTest,
   buildReadmeFile,
-  RLCOptions
+  RLCOptions,
+  buildOperations
 } from "@azure-tools/rlc-common";
 import { transformRLCModel } from "./transform/transform.js";
 import { emitContentByBuilder, emitModels } from "./emitUtil.js";
 
 export async function $onEmit(program: Program, options: RLCOptions) {
   const rlcModels = await transformRLCModel(program, options);
+  const hrlcFiles = buildOperations(rlcModels);
+  // hrlcFiles.some((f) => f);
   await emitModels(rlcModels, program);
+  for (const file of hrlcFiles) {
+    emitFile(program, file);
+  }
+
   await emitContentByBuilder(program, buildClientDefinitions, rlcModels);
   await emitContentByBuilder(program, buildResponseTypes, rlcModels);
   await emitContentByBuilder(program, buildClient, rlcModels);

@@ -167,7 +167,7 @@ function buildQueryParameterDefinition(
   requestIndex: number
 ): InterfaceDeclarationStructure[] | undefined {
   const queryParameters = (parameters?.parameters || []).filter(
-    (p) => p.type === "query"
+    (p) => p.kind === "query"
   );
 
   if (!queryParameters.length) {
@@ -233,7 +233,7 @@ function buildPathParameterDefinitions(
   requestIndex: number
 ): InterfaceDeclarationStructure | undefined {
   const pathParameters = (parameters.parameters || []).filter(
-    (p) => p.type === "path"
+    (p) => p.kind === "path"
   );
   if (!pathParameters.length) {
     return undefined;
@@ -287,7 +287,7 @@ function buildHeaderParameterDefinitions(
   requestIndex: number
 ): InterfaceDeclarationStructure | undefined {
   const headerParameters = (parameters.parameters || []).filter(
-    (p) => p.type === "header" && p.name !== "contentType"
+    (p) => p.kind === "header" && p.name !== "contentType"
   );
   if (!headerParameters.length) {
     return undefined;
@@ -348,7 +348,7 @@ function buildContentTypeParametersDefinition(
   requestIndex: number
 ): InterfaceDeclarationStructure | undefined {
   const mediaTypeParameters = (parameters.parameters || []).filter(
-    (p) => p.type === "header" && p.name === "contentType"
+    (p) => p.kind === "header" && p.name === "contentType"
   );
   if (!mediaTypeParameters.length) {
     return undefined;
@@ -455,7 +455,7 @@ export function buildBodyTypeAlias(parameters: ParameterMetadatas) {
   }
   const schema = bodyParameters.body[0] as ObjectSchema;
   const headerParameters = (parameters.parameters || []).filter(
-    (p) => p.type === "header" && p.name === "contentType"
+    (p) => p.kind === "header" && p.name === "contentType"
   );
   if (!headerParameters.length || headerParameters.length > 1) {
     return undefined;

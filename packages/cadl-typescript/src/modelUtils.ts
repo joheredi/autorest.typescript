@@ -10,6 +10,7 @@ import {
   getEffectiveModelType,
   getFormat,
   getFriendlyName,
+  getProjectedName,
   getIntrinsicModelName,
   getKnownValues,
   getMaxLength,
@@ -356,29 +357,31 @@ function getSchemaForModel(
   needRef?: boolean
 ) {
   const friendlyName = getFriendlyName(program, model);
-  let name = model.name;
   if (
     !friendlyName &&
     model.templateArguments &&
     model.templateArguments.length > 0 &&
     getPagedResult(program, model)
   ) {
-    name =
-      model.templateArguments
-        .map((it) => {
-          switch (it.kind) {
-            case "Model":
-              return it.name;
-            case "String":
-              return it.value;
-            default:
-              return "";
-          }
-        })
-        .join("") + "List";
+    model.templateArguments
+      .map((it) => {
+        switch (it.kind) {
+          case "Model":
+            return it.name;
+          case "String":
+            return it.value;
+          default:
+            return "";
+        }
+      })
+      .join("") + "List";
+
+    //TODO: Name is not used!
   }
+  const serializedName = getProjectedName(program, model, "json");
   let modelSchema: ObjectSchema = {
-    name: friendlyName ?? name,
+    name: serializedName ?? model.name,
+    clientName: model.name,
     type: "object",
     description: getDoc(program, model) ?? ""
   };
@@ -427,6 +430,8 @@ function getSchemaForModel(
     const { propertyName } = discriminator;
 
     modelSchema.discriminator = {
+      // TODO: make sure projectedName is handled correctly here
+      clientName: propertyName,
       name: propertyName,
       type: "string",
       required: true,

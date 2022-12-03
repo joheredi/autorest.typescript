@@ -11,7 +11,7 @@ import {
   Schema,
   SchemaContext
 } from "@azure-tools/rlc-common";
-import { Model, Program, Type } from "@cadl-lang/compiler";
+import { getProjectedName, Model, Program, Type } from "@cadl-lang/compiler";
 import {
   getAllHttpServices,
   HttpOperationParameter,
@@ -77,7 +77,7 @@ export function transformToParameterTypes(
 
 function getParameterMetadata(
   program: Program,
-  paramType: "query" | "path" | "header",
+  paramType: "query" | "path" | "header" | "body",
   parameter: HttpOperationParameter
 ): ParameterMetadata {
   const schema = getSchemaForType(program, parameter.param.type, [
@@ -87,10 +87,12 @@ function getParameterMetadata(
   const type = getTypeName(schema);
   const name = getParameterName(parameter.name);
   return {
-    type: paramType,
+    kind: paramType,
     name,
+    clientName: parameter.clientName,
     param: {
       name,
+      clientName: parameter.clientName,
       type,
       required: !parameter.param.optional,
       description:
@@ -208,6 +210,7 @@ function transformNormalBody(
     isPartialBody: false,
     body: [
       {
+        clientName: schema.clientName,
         properties: schema.properties,
         typeName: schema.name,
         name: "body",
@@ -222,7 +225,7 @@ function transformNormalBody(
 function transformBinaryBody(
   program: Program,
   parameters: HttpOperationParameters
-) {
+): ParameterBodyMetadata {
   const descriptions: string[] = [];
   const description =
     parameters.bodyParameter &&
@@ -231,11 +234,15 @@ function transformBinaryBody(
     descriptions.push(description!);
   }
   descriptions.push("Value may contain any sequence of octets");
+  const name = parameters.bodyParameter
+    ? getProjectedName(program, parameters.bodyParameter, "json") ?? "body"
+    : "body";
   return {
     isPartialBody: false,
     body: [
       {
-        name: "body",
+        clientName: "body",
+        name: name,
         type: getBinaryType([SchemaContext.Input, SchemaContext.Exception]),
         required: parameters?.bodyParameter?.optional === false,
         description: descriptions.join("\n\n")
@@ -259,11 +266,15 @@ function transformMultiFormBody(
       bodyType,
       parameters
     ).join("\n\n");
+    const name = parameters.bodyParameter
+      ? getProjectedName(program, parameters.bodyParameter, "json") ?? "body"
+      : "body";
     return {
       isPartialBody: true,
       body: [
         {
-          name: "body",
+          name,
+          clientName: "body",
           type,
           required: parameters?.bodyParameter?.optional === false,
           description
@@ -294,8 +305,11 @@ function transformMultiFormBody(
     } else {
       type = extractNameFromCadlType(program, paramType.type, importedModels);
     }
+    const name = getProjectedName(program, paramType, "json") ?? paramType.name;
+
     bodyParameters.body!.push({
-      name: paramName,
+      name,
+      clientName: paramName,
       type,
       required: paramType.optional === false
     });

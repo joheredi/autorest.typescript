@@ -10,7 +10,7 @@ import {
   SchemaContext,
   RLCOptions
 } from "@azure-tools/rlc-common";
-import { Program, getDoc } from "@cadl-lang/compiler";
+import { Program, getDoc, getProjectedName } from "@cadl-lang/compiler";
 import {
   getAllHttpServices,
   HttpOperationResponse
@@ -98,9 +98,11 @@ function transformHeaders(
       const typeSchema = getSchemaForType(program, value!.type, [
         SchemaContext.Output
       ]) as Schema;
+      const name = getProjectedName(program, value, "json") ?? key;
       const type = getTypeName(typeSchema);
       const header: ResponseHeaderSchema = {
-        name: `"${key.toLowerCase()}"`,
+        clientName: `"${key.toLowerCase()}"`,
+        name,
         type,
         required: !value?.optional,
         description: getDoc(program, value!)
@@ -154,6 +156,7 @@ function transformBody(
 
   return {
     name: "body",
+    clientName: "body",
     type: [...typeSet].join("|"),
     description: [...descriptions].join("\n\n")
   };

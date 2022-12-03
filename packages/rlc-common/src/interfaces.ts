@@ -57,6 +57,7 @@ export interface OperationMethod {
 }
 export interface PathMetadata {
   name: string;
+  clientName?: string;
   pathParameters: PathParameter[];
   methods: Methods;
   operationGroupName: string;
@@ -67,6 +68,7 @@ export type Paths = Record<string, PathMetadata>;
 
 export type PathParameter = {
   name: string;
+  clientName?: string;
   type: string;
   description?: string;
   value?: string | number | boolean;
@@ -130,6 +132,7 @@ export enum SchemaContext {
 
 export interface Schema {
   name: string;
+  clientName: string;
   type: string;
   typeName?: string;
   outputTypeName?: string;
@@ -195,7 +198,8 @@ export interface ParameterBodyMetadata {
 
 export type ParameterBodySchema = Schema;
 export interface ParameterMetadata {
-  type: "query" | "path" | "header";
+  kind: "query" | "path" | "header" | "body";
+  clientName: string;
   name: string;
   param: Schema;
 }

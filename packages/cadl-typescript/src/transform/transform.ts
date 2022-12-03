@@ -81,6 +81,7 @@ function transformApiVersionParam(program: Program): Parameter | undefined {
   const apiVersion = getServiceVersion(program);
   if (apiVersion && apiVersion !== "0000-00-00") {
     return {
+      clientName: "apiVersion",
       name: "api-version",
       type: "constant",
       default: apiVersion
