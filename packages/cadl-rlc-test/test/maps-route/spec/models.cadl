@@ -1,0 +1,1296 @@
+import "@cadl-lang/rest";
+
+using Cadl.Rest;
+
+namespace Azure.Maps.Route;
+
+enum JsonFormatKnownValues {
+  Json: "json",
+}
+
+@knownValues(JsonFormatKnownValues)
+model JsonFormat is string;
+
+enum ComputeTravelTimeKnownValues {
+  None: "none",
+  All: "all",
+}
+
+@knownValues(ComputeTravelTimeKnownValues)
+model ComputeTravelTime is string;
+
+enum SectionTypeKnownValues {
+  CarOrTrain: "carTrain",
+  Country: "country",
+  Ferry: "ferry",
+  Motorway: "motorway",
+  Pedestrian: "pedestrian",
+  TollRoad: "tollRoad",
+  TollVignette: "tollVignette",
+  Traffic: "traffic",
+  TravelMode: "travelMode",
+  Tunnel: "tunnel",
+  Carpool: "carpool",
+  Urban: "urban",
+}
+
+@knownValues(SectionTypeKnownValues)
+model SectionType is string;
+
+enum WindingnessLevelKnownValues {
+  Low: "low",
+  Normal: "normal",
+  High: "high",
+}
+
+@knownValues(WindingnessLevelKnownValues)
+model WindingnessLevel is string;
+
+enum InclineLevelKnownValues {
+  Low: "low",
+  Normal: "normal",
+  High: "high",
+}
+
+@knownValues(InclineLevelKnownValues)
+model InclineLevel is string;
+
+enum TravelModeKnownValues {
+  Car: "car",
+  Truck: "truck",
+  Taxi: "taxi",
+  Bus: "bus",
+  Van: "van",
+  Motorcycle: "motorcycle",
+  Bicycle: "bicycle",
+  Pedestrian: "pedestrian",
+}
+
+@knownValues(TravelModeKnownValues)
+model TravelMode is string;
+
+enum RouteAvoidTypeKnownValues {
+  TollRoads: "tollRoads",
+  Motorways: "motorways",
+  Ferries: "ferries",
+  UnpavedRoads: "unpavedRoads",
+  Carpools: "carpools",
+  AlreadyUsedRoads: "alreadyUsedRoads",
+  BorderCrossings: "borderCrossings",
+}
+
+@knownValues(RouteAvoidTypeKnownValues)
+model RouteAvoidType is string;
+
+enum RouteTypeKnownValues {
+  Fastest: "fastest",
+  Shortest: "shortest",
+  Economy: "eco",
+  Thrilling: "thrilling",
+}
+
+@knownValues(RouteTypeKnownValues)
+model RouteType is string;
+
+enum VehicleLoadTypeKnownValues {
+  "USHazmatClass1",
+  "USHazmatClass2",
+  "USHazmatClass3",
+  "USHazmatClass4",
+  "USHazmatClass5",
+  "USHazmatClass6",
+  "USHazmatClass7",
+  "USHazmatClass8",
+  "USHazmatClass9",
+  OtherHazmatExplosive: "otherHazmatExplosive",
+  OtherHazmatGeneral: "otherHazmatGeneral",
+  OtherHazmatHarmfulToWater: "otherHazmatHarmfulToWater",
+}
+
+@knownValues(VehicleLoadTypeKnownValues)
+model VehicleLoadType is string;
+
+enum ResponseFormatKnownValues {
+  Json: "json",
+  Xml: "xml",
+}
+
+@knownValues(ResponseFormatKnownValues)
+model ResponseFormat is string;
+
+enum AlternativeRouteTypeKnownValues {
+  AnyRoute: "anyRoute",
+  BetterRoute: "betterRoute",
+}
+
+@knownValues(AlternativeRouteTypeKnownValues)
+model AlternativeRouteType is string;
+
+enum RouteInstructionsTypeKnownValues {
+  Coded: "coded",
+  Text: "text",
+  Tagged: "tagged",
+}
+
+@knownValues(RouteInstructionsTypeKnownValues)
+model RouteInstructionsType is string;
+
+enum RouteRepresentationForBestOrderKnownValues {
+  Polyline: "polyline",
+  SummaryOnly: "summaryOnly",
+  None: "none",
+}
+
+@knownValues(RouteRepresentationForBestOrderKnownValues)
+model RouteRepresentationForBestOrder is string;
+
+enum ReportKnownValues {
+  EffectiveSettings: "effectiveSettings",
+}
+
+@knownValues(ReportKnownValues)
+model Report is string;
+
+enum VehicleEngineTypeKnownValues {
+  Combustion: "combustion",
+  Electric: "electric",
+}
+
+@knownValues(VehicleEngineTypeKnownValues)
+model VehicleEngineType is string;
+
+enum ResponseSectionTypeKnownValues {
+  CarOrTrain: "CAR_TRAIN",
+  Country: "COUNTRY",
+  Ferry: "FERRY",
+  Motorway: "MOTORWAY",
+  Pedestrian: "PEDESTRIAN",
+  TollRoad: "TOLL_ROAD",
+  TollVignette: "TOLL_VIGNETTE",
+  Traffic: "TRAFFIC",
+  TravelMode: "TRAVEL_MODE",
+  Tunnel: "TUNNEL",
+  Carpool: "CARPOOL",
+  Urban: "URBAN",
+}
+
+@knownValues(ResponseSectionTypeKnownValues)
+model ResponseSectionType is string;
+
+enum ResponseTravelModeKnownValues {
+  Car: "car",
+  Truck: "truck",
+  Taxi: "taxi",
+  Bus: "bus",
+  Van: "van",
+  Motorcycle: "motorcycle",
+  Bicycle: "bicycle",
+  Pedestrian: "pedestrian",
+  Other: "other",
+}
+
+@knownValues(ResponseTravelModeKnownValues)
+model ResponseTravelMode is string;
+
+enum SimpleCategoryKnownValues {
+  Jam: "JAM",
+  RoadWork: "ROAD_WORK",
+  RoadClosure: "ROAD_CLOSURE",
+  Other: "OTHER",
+}
+
+@knownValues(SimpleCategoryKnownValues)
+model SimpleCategory is string;
+
+enum DelayMagnitudeKnownValues {
+  Unknown: "0",
+  Minor: "1",
+  Moderate: "2",
+  Major: "3",
+  Undefined: "4",
+}
+
+@knownValues(DelayMagnitudeKnownValues)
+model DelayMagnitude is string;
+
+enum GuidanceInstructionTypeKnownValues {
+  Turn: "TURN",
+  RoadChange: "ROAD_CHANGE",
+  LocationDeparture: "LOCATION_DEPARTURE",
+  LocationArrival: "LOCATION_ARRIVAL",
+  DirectionInfo: "DIRECTION_INFO",
+  LocationWaypoint: "LOCATION_WAYPOINT",
+}
+
+@knownValues(GuidanceInstructionTypeKnownValues)
+model GuidanceInstructionType is string;
+
+enum JunctionTypeKnownValues {
+  Regular: "REGULAR",
+  Roundabout: "ROUNDABOUT",
+  Bifurcation: "BIFURCATION",
+}
+
+@knownValues(JunctionTypeKnownValues)
+model JunctionType is string;
+
+enum DrivingSideKnownValues {
+  Left: "LEFT",
+  Right: "RIGHT",
+}
+
+@knownValues(DrivingSideKnownValues)
+model DrivingSide is string;
+
+enum GuidanceManeuverKnownValues {
+  Arrive: "ARRIVE",
+  ArriveLeft: "ARRIVE_LEFT",
+  ArriveRight: "ARRIVE_RIGHT",
+  Depart: "DEPART",
+  Straight: "STRAIGHT",
+  KeepRight: "KEEP_RIGHT",
+  BearRight: "BEAR_RIGHT",
+  TurnRight: "TURN_RIGHT",
+  SharpRight: "SHARP_RIGHT",
+  KeepLeft: "KEEP_LEFT",
+  BearLeft: "BEAR_LEFT",
+  TurnLeft: "TURN_LEFT",
+  SharpLeft: "SHARP_LEFT",
+  MakeUTurn: "MAKE_UTURN",
+  EnterMotorway: "ENTER_MOTORWAY",
+  EnterFreeway: "ENTER_FREEWAY",
+  EnterHighway: "ENTER_HIGHWAY",
+  TakeExit: "TAKE_EXIT",
+  MotorwayExitLeft: "MOTORWAY_EXIT_LEFT",
+  MotorwayExitRight: "MOTORWAY_EXIT_RIGHT",
+  TakeFerry: "TAKE_FERRY",
+  RoundaboutCross: "ROUNDABOUT_CROSS",
+  RoundaboutRight: "ROUNDABOUT_RIGHT",
+  RoundaboutLeft: "ROUNDABOUT_LEFT",
+  RoundaboutBack: "ROUNDABOUT_BACK",
+  TryMakeUTurn: "TRY_MAKE_UTURN",
+  Follow: "FOLLOW",
+  SwitchParallelRoad: "SWITCH_PARALLEL_ROAD",
+  SwitchMainRoad: "SWITCH_MAIN_ROAD",
+  EntranceRamp: "ENTRANCE_RAMP",
+  WaypointLeft: "WAYPOINT_LEFT",
+  WaypointRight: "WAYPOINT_RIGHT",
+  WaypointReached: "WAYPOINT_REACHED",
+}
+
+@knownValues(GuidanceManeuverKnownValues)
+model GuidanceManeuver is string;
+
+enum GeoJsonObjectType {
+  GeoJsonPoint: "Point",
+  GeoJsonMultiPoint: "MultiPoint",
+  GeoJsonLineString: "LineString",
+  GeoJsonMultiLineString: "MultiLineString",
+  GeoJsonPolygon: "Polygon",
+  GeoJsonMultiPolygon: "MultiPolygon",
+  GeoJsonGeometryCollection: "GeometryCollection",
+  GeoJsonFeature: "Feature",
+  GeoJsonFeatureCollection: "FeatureCollection",
+}
+
+@doc("An object with a matrix of coordinates.")
+model RouteMatrixQuery {
+  @doc("""
+A valid `GeoJSON MultiPoint` geometry type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.3) for details.
+""")
+  origins?: GeoJsonMultiPoint;
+
+  @doc("""
+A valid `GeoJSON MultiPoint` geometry type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.3) for details.
+""")
+  destinations?: GeoJsonMultiPoint;
+}
+
+@doc("""
+A valid `GeoJSON MultiPoint` geometry type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.3) for details.
+""")
+model GeoJsonMultiPoint extends GeoJsonGeometry {
+  ...GeoJsonMultiPointData;
+
+  @doc("""
+Specifies the `GeoJSON` type. Must be one of the nine valid GeoJSON object
+types - Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon,
+GeometryCollection, Feature and FeatureCollection.
+""")
+  type: "MultiPoint";
+}
+
+@doc("""
+A valid `GeoJSON` geometry object. The type must be one of the seven valid
+GeoJSON geometry types - Point, MultiPoint, LineString, MultiLineString,
+Polygon, MultiPolygon and GeometryCollection. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1) for details.
+""")
+@discriminator("type")
+model GeoJsonGeometry extends GeoJsonObject {}
+
+@doc("""
+A valid `GeoJSON` object. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3) for details.
+""")
+@discriminator("type")
+model GeoJsonObject {}
+
+@doc("Data contained by a `GeoJson MultiPoint`.")
+model GeoJsonMultiPointData {
+  @doc("Coordinates for the `GeoJson MultiPoint` geometry.")
+  coordinates: float32[][];
+}
+
+@doc("""
+This object is returned from a successful Route Matrix call. For ex, if 2
+origins and 3 destinations are provided, there are going to 2 arrays with 3
+elements in each. Each element's content depends on the options provided in the
+query.
+""")
+model RouteMatrixResult {
+  @doc("Format Version property")
+  @visibility("read")
+  formatVersion?: string;
+
+  @doc("Results as a 2 dimensional array of route summaries.")
+  @visibility("read")
+  matrix?: RouteMatrix[][];
+
+  @doc("Summary object")
+  @visibility("read")
+  summary?: RouteMatrixSummary;
+}
+
+@doc("Matrix result object")
+model RouteMatrix {
+  @doc("StatusCode property for the current cell in the input matrix.")
+  @visibility("read")
+  statusCode?: int32;
+
+  @doc("Response object of the current cell in the input matrix.")
+  @visibility("read")
+  response?: RouteMatrixResultResponse;
+}
+
+@doc("Response object of the current cell in the input matrix.")
+model RouteMatrixResultResponse {
+  @doc("Summary object for route section.")
+  @visibility("read")
+  routeSummary?: RouteLegSummary;
+}
+
+@doc("Summary object for route section.")
+model RouteLegSummary {
+  @doc("Length In Meters property")
+  @visibility("read")
+  lengthInMeters?: int32;
+
+  @doc("""
+Estimated travel time in seconds property that includes the delay due to
+real-time traffic. Note that even when traffic=false travelTimeInSeconds still
+includes the delay due to traffic. If DepartAt is in the future, travel time is
+calculated using time-dependent historic traffic data.
+""")
+  @visibility("read")
+  travelTimeInSeconds?: int32;
+
+  @doc("""
+Estimated delay in seconds caused by the real-time incident(s) according to
+traffic information. For routes planned with departure time in the future,
+delays is always 0. To return additional travel times using different types of
+traffic information, parameter computeTravelTimeFor=all needs to be added.
+""")
+  @visibility("read")
+  trafficDelayInSeconds?: int32;
+
+  @doc("The estimated departure time for the route or leg.")
+  @visibility("read")
+  departureTime?: zonedDateTime;
+
+  @doc("The estimated arrival time for the route or leg.")
+  @visibility("read")
+  arrivalTime?: zonedDateTime;
+
+  @doc("""
+Estimated travel time calculated as if there are no delays on the route due to
+traffic conditions (e.g. congestion). Included only if computeTravelTimeFor =
+all is used in the query.
+""")
+  @visibility("read")
+  noTrafficTravelTimeInSeconds?: int32;
+
+  @doc("""
+Estimated travel time calculated using time-dependent historic traffic data.
+Included only if computeTravelTimeFor = all is used in the query.
+""")
+  @visibility("read")
+  historicTrafficTravelTimeInSeconds?: int32;
+
+  @doc("""
+Estimated travel time calculated using real-time speed data. Included only if
+computeTravelTimeFor = all is used in the query.
+""")
+  @visibility("read")
+  liveTrafficIncidentsTravelTimeInSeconds?: int32;
+
+  @doc("""
+Estimated fuel consumption in liters using the Combustion Consumption Model.
+Included if vehicleEngineType is set to _combustion_ and
+constantSpeedConsumptionInLitersPerHundredkm is specified. The value will be
+non-negative.
+""")
+  @visibility("read")
+  fuelConsumptionInLiters?: float32;
+
+  @doc("""
+Estimated electric energy consumption in kilowatt hours (kWh) using the
+Electric Consumption Model. Included if vehicleEngineType is set to electric
+and constantSpeedConsumptionInkWhPerHundredkm is specified. The value of
+batteryConsumptionInkWh includes the recuperated electric energy and can
+therefore be negative (which indicates gaining energy). If both maxChargeInkWh
+and currentChargeInkWh are specified, recuperation will be capped to ensure
+that the battery charge level never exceeds maxChargeInkWh. If neither
+maxChargeInkWh nor currentChargeInkWh are specified, unconstrained recuperation
+is assumed in the consumption calculation.
+""")
+  @visibility("read")
+  batteryConsumptionInkWh?: float32;
+}
+
+@doc("Summary object")
+model RouteMatrixSummary {
+  @doc("Number of successful routes in the response.")
+  @visibility("read")
+  successfulRoutes?: int32;
+
+  @doc("Total number of routes requested. Number of cells in the input matrix.")
+  @visibility("read")
+  totalRoutes?: int32;
+}
+
+@doc("""
+Common error response for all Azure Resource Manager APIs to return error
+details for failed operations. (This also follows the OData error response
+format.).
+""")
+@error
+model ErrorResponse {
+  @doc("The error object.")
+  error?: ErrorDetail;
+}
+
+@doc("The error detail.")
+model ErrorDetail {
+  @doc("The error code.")
+  @visibility("read")
+  code?: string;
+
+  @doc("The error message.")
+  @visibility("read")
+  message?: string;
+
+  @doc("The error target.")
+  @visibility("read")
+  target?: string;
+
+  @doc("The error details.")
+  @visibility("read")
+  details?: ErrorDetail[];
+
+  @doc("The error additional info.")
+  @visibility("read")
+  additionalInfo?: ErrorAdditionalInfo[];
+}
+
+@doc("The resource management error additional info.")
+model ErrorAdditionalInfo {
+  @doc("The additional info type.")
+  @visibility("read")
+  type?: string;
+
+  @doc("The additional info.")
+  @visibility("read")
+  info?: object;
+}
+
+@doc("This object is returned from a successful Route Directions call")
+model RouteDirections {
+  @doc("Format Version property")
+  @visibility("read")
+  formatVersion?: string;
+
+  @doc("Routes array")
+  @visibility("read")
+  routes?: Route[];
+
+  @doc("""
+Optimized sequence of waypoints. It shows the index from the user provided
+waypoint sequence for the original and optimized list. For instance, a
+response: 
+
+```
+<optimizedWaypoints>
+<waypoint providedIndex=\"0\"
+optimizedIndex=\"1\"/>
+<waypoint providedIndex=\"1\"
+optimizedIndex=\"2\"/>
+<waypoint providedIndex=\"2\"
+optimizedIndex=\"0\"/>
+</optimizedWaypoints>
+```
+
+means that the original
+sequence is [0, 1, 2] and optimized sequence is [1, 2, 0]. Since the index
+starts by 0 the original is \"first, second, third\" while the optimized is
+\"second, third, first\".
+""")
+  @visibility("read")
+  optimizedWaypoints?: RouteOptimizedWaypoint[];
+
+  @doc("Reports the effective settings used in the current call.")
+  report?: RouteReport;
+}
+
+model Route {
+  @doc("Summary object")
+  @visibility("read")
+  summary?: RouteSummary;
+
+  @doc("Legs array")
+  @visibility("read")
+  legs?: RouteLeg[];
+
+  @doc("Sections array")
+  @visibility("read")
+  sections?: RouteSection[];
+
+  @doc("""
+Contains guidance related elements. This field is present only when guidance
+was requested and is available.
+""")
+  @visibility("read")
+  guidance?: RouteGuidance;
+}
+
+@doc("Summary object")
+model RouteSummary {
+  @doc("Length In Meters property")
+  @visibility("read")
+  lengthInMeters?: int32;
+
+  @doc("""
+Estimated travel time in seconds property that includes the delay due to
+real-time traffic. Note that even when traffic=false travelTimeInSeconds still
+includes the delay due to traffic. If DepartAt is in the future, travel time is
+calculated using time-dependent historic traffic data.
+""")
+  @visibility("read")
+  travelTimeInSeconds?: int32;
+
+  @doc("""
+Estimated delay in seconds caused by the real-time incident(s) according to
+traffic information. For routes planned with departure time in the future,
+delays is always 0. To return additional travel times using different types of
+traffic information, parameter computeTravelTimeFor=all needs to be added.
+""")
+  @visibility("read")
+  trafficDelayInSeconds?: int32;
+
+  @doc("The estimated departure time for the route or leg.")
+  @visibility("read")
+  departureTime?: zonedDateTime;
+
+  @doc("The estimated arrival time for the route or leg.")
+  @visibility("read")
+  arrivalTime?: zonedDateTime;
+}
+
+@doc("""
+A description of a part of a route, comprised of a list of points. Each
+additional waypoint provided in the request will result in an additional leg in
+the returned route.
+""")
+model RouteLeg {
+  @doc("Summary object for route section.")
+  @visibility("read")
+  summary?: RouteLegSummary;
+
+  @doc("Points array")
+  @visibility("read")
+  points?: LatLongPair[];
+}
+
+@doc("A location represented as a latitude and longitude.")
+model LatLongPair {
+  @doc("Latitude property")
+  latitude?: float32;
+
+  @doc("Longitude property")
+  longitude?: float32;
+}
+
+@doc("""
+Route sections contain additional information about parts of a route. Each
+section contains at least the elements `startPointIndex`, `endPointIndex`, and
+`sectionType`.
+""")
+model RouteSection {
+  @doc("Index of the first point (offset 0) in the route this section applies to.")
+  @visibility("read")
+  startPointIndex?: int32;
+
+  @doc("Index of the last point (offset 0) in the route this section applies to.")
+  @visibility("read")
+  endPointIndex?: int32;
+
+  @doc("Section types of the reported route response")
+  @visibility("read")
+  sectionType?: ResponseSectionType;
+
+  @doc("""
+Travel mode for the calculated route. The value will be set to `other` if the
+requested mode of transport is not possible in this section
+""")
+  @visibility("read")
+  travelMode?: ResponseTravelMode;
+
+  @doc("""
+Type of the incident. Can currently be JAM, ROAD_WORK, ROAD_CLOSURE, or OTHER.
+See \"tec\" for detailed information.
+""")
+  @visibility("read")
+  simpleCategory?: SimpleCategory;
+
+  @doc("Effective speed of the incident in km/h, averaged over its entire length.")
+  @visibility("read")
+  effectiveSpeedInKmh?: int32;
+
+  @doc("Delay in seconds caused by the incident.")
+  @visibility("read")
+  delayInSeconds?: int32;
+
+  @doc("""
+The magnitude of delay caused by the incident. These values correspond to the
+values of the response field ty of the [Get Traffic Incident Detail
+API](https://docs.microsoft.com/rest/api/maps/traffic/gettrafficincidentdetail).
+
+""")
+  @visibility("read")
+  magnitudeOfDelay?: DelayMagnitude;
+
+  @doc("""
+Details of the traffic event, using definitions in the
+[TPEG2-TEC](https://www.iso.org/standard/63116.html) standard. Can contain
+effectCode and causes elements.
+""")
+  tec?: RouteSectionTec;
+}
+
+@doc("""
+Details of the traffic event, using definitions in the
+[TPEG2-TEC](https://www.iso.org/standard/63116.html) standard. Can contain
+effectCode and causes elements.
+""")
+model RouteSectionTec {
+  @doc("""
+The effect on the traffic flow. Contains a value in the tec001:EffectCode
+table, as defined in the [TPEG2-TEC](https://www.iso.org/standard/63116.html)
+standard. Can be used to color-code traffic events according to severity.
+""")
+  @visibility("read")
+  effectCode?: int32;
+
+  @doc("Causes array")
+  causes?: RouteSectionTecCause[];
+}
+
+@doc("""
+The cause of the traffic event. Can contain mainCauseCode and subCauseCode
+elements. Can be used to define iconography and descriptions.
+""")
+model RouteSectionTecCause {
+  @doc("""
+The main cause of the traffic event. Contains a value in the tec002:CauseCode
+table, as defined in the [TPEG2-TEC](https://www.iso.org/standard/63116.html)
+standard.
+""")
+  @visibility("read")
+  mainCauseCode?: int32;
+
+  @doc("""
+The subcause of the traffic event. Contains a value in the sub cause table
+defined by the mainCauseCode, as defined in the
+[TPEG2-TEC](https://www.iso.org/standard/63116.html) standard.
+""")
+  @visibility("read")
+  subCauseCode?: int32;
+}
+
+@doc("""
+Contains guidance related elements. This field is present only when guidance
+was requested and is available.
+""")
+model RouteGuidance {
+  @doc("A list of instructions describing maneuvers.")
+  @visibility("read")
+  instructions?: RouteInstruction[];
+
+  @doc("Groups a sequence of instruction elements which are related to each other.")
+  @visibility("read")
+  instructionGroups?: RouteInstructionGroup[];
+}
+
+@doc("""
+A set of attributes describing a maneuver, e.g. 'Turn right', 'Keep left',
+'Take the ferry', 'Take the motorway', 'Arrive'.
+""")
+model RouteInstruction {
+  @doc("Distance from the start of the route to the point of the instruction.")
+  @visibility("read")
+  routeOffsetInMeters?: int32;
+
+  @doc("Estimated travel time up to the point corresponding to routeOffsetInMeters.")
+  @visibility("read")
+  travelTimeInSeconds?: int32;
+
+  @doc("A location represented as a latitude and longitude.")
+  point?: LatLongPair;
+
+  @doc("""
+The index of the point in the list of polyline \"points\" corresponding to the
+point of the instruction.
+""")
+  @visibility("read")
+  pointIndex?: int32;
+
+  @doc("Type of the instruction, e.g., turn or change of road form.")
+  instructionType?: GuidanceInstructionType;
+
+  @doc("""
+The road number(s) of the next significant road segment(s) after the maneuver,
+or of the road(s) to be followed. Example: [\"E34\", \"N205\"]
+""")
+  @visibility("read")
+  roadNumbers?: string[];
+
+  @doc("""
+The number(s) of a highway exit taken by the current maneuver. If an exit has
+multiple exit numbers, they will be separated by \",\" and possibly aggregated
+by \"-\", e.g., \"10, 13-15\".
+""")
+  @visibility("read")
+  exitNumber?: string;
+
+  @doc("""
+Street name of the next significant road segment after the maneuver, or of the
+street that should be followed.
+""")
+  @visibility("read")
+  street?: string;
+
+  @doc("""
+The text on a signpost which is most relevant to the maneuver, or to the
+direction that should be followed.
+""")
+  @visibility("read")
+  signpostText?: string;
+
+  @doc("""
+3-character [ISO 3166-1](https://www.iso.org/iso-3166-country-codes.html)
+alpha-3 country code. E.g. USA.
+""")
+  @visibility("read")
+  countryCode?: string;
+
+  @doc("""
+A subdivision (e.g., state) of the country, represented by the second part of
+an [ISO 3166-2](https://www.iso.org/standard/63546.html) code. This is only
+available for some countries like the US, Canada, and Mexico.
+""")
+  @visibility("read")
+  stateCode?: string;
+
+  @doc("""
+The type of the junction where the maneuver takes place. For larger
+roundabouts, two separate instructions are generated for entering and leaving
+the roundabout.
+""")
+  @visibility("read")
+  junctionType?: JunctionType;
+
+  @doc("""
+Indicates the direction of an instruction. If junctionType indicates a turn
+instruction:
+
+  * 180 = U-turn
+  * [-179, -1] = Left turn
+  * 0 = Straight on
+(a '0 degree' turn)
+  * [1, 179] = Right turn
+
+If junctionType indicates a
+bifurcation instruction:
+
+  * <0 - keep left
+  * \\>0 - keep right
+""")
+  @visibility("read")
+  turnAngleInDecimalDegrees?: int32;
+
+  @doc("This indicates which exit to take at a roundabout.")
+  @visibility("read")
+  roundaboutExitNumber?: string;
+
+  @doc("""
+It is possible to optionally combine the instruction with the next one. This
+can be used to build messages like \"Turn left and then turn right\".
+""")
+  @visibility("read")
+  possibleCombineWithNext?: boolean;
+
+  @doc("Indicates left-hand vs. right-hand side driving at the point of the maneuver.")
+  @visibility("read")
+  drivingSide?: DrivingSide;
+
+  @doc("A code identifying the maneuver.")
+  @visibility("read")
+  maneuver?: GuidanceManeuver;
+
+  @doc("A human-readable message for the maneuver.")
+  @visibility("read")
+  message?: string;
+
+  @doc("""
+A human-readable message for the maneuver combined with the message from the
+next instruction. Sometimes it is possible to combine two successive
+instructions into a single instruction making it easier to follow. When this is
+the case the possibleCombineWithNext flag will be true. For example:
+
+```
+10.
+Turn left onto Einsteinweg/A10/E22 towards Ring Amsterdam
+11. Follow
+Einsteinweg/A10/E22 towards Ring Amsterdam
+```
+
+The possibleCombineWithNext
+flag on instruction 10 is true. This indicates to the clients of coded guidance
+that it can be combined with instruction 11. The instructions will be combined
+automatically for clients requesting human-readable guidance. The
+combinedMessage field contains the combined message:
+
+```
+Turn left onto
+Einsteinweg/A10/E22 towards Ring Amsterdam
+then follow Einsteinweg/A10/E22
+towards Ring Amsterdam.
+```
+""")
+  @visibility("read")
+  combinedMessage?: string;
+}
+
+@doc("""
+Groups a sequence of instruction elements which are related to each other. The
+sequence range is constrained with firstInstructionIndex and
+lastInstructionIndex. When human-readable text messages are requested for
+guidance (instructionType=text or tagged), then the instructionGroup has a
+summary message returned when available.
+""")
+model RouteInstructionGroup {
+  @doc("Index of the first instruction in the instructions and belonging to this group.")
+  @visibility("read")
+  firstInstructionIndex?: int32;
+
+  @doc("Index of the last instruction in the instructions and belonging to this group.")
+  @visibility("read")
+  lastInstructionIndex?: int32;
+
+  @doc("Length of the group.")
+  @visibility("read")
+  groupLengthInMeters?: int32;
+
+  @doc("""
+Summary message when human-readable text messages are requested for guidance
+(instructionType=text or tagged).
+""")
+  @visibility("read")
+  groupMessage?: string;
+}
+
+@doc("Optimized way point object.")
+model RouteOptimizedWaypoint {
+  @doc("Way point index provided by the user.")
+  @visibility("read")
+  providedIndex?: int32;
+
+  @doc("Optimized way point index from the system.")
+  @visibility("read")
+  optimizedIndex?: int32;
+}
+
+@doc("Reports the effective settings used in the current call.")
+model RouteReport {
+  @doc("Effective parameters or data used when calling this Route API.")
+  @visibility("read")
+  effectiveSettings?: EffectiveSetting[];
+}
+
+@doc("Effective parameter or data used when calling this Route API.")
+model EffectiveSetting {
+  @doc("Name of the parameter used.")
+  @visibility("read")
+  key?: string;
+
+  @doc("Value of the parameter used.")
+  @visibility("read")
+  value?: string;
+}
+
+@doc("Post body parameters for Route directions.")
+model RouteDirectionParameters {
+  @doc("""
+A GeoJSON Geometry collection representing sequence of coordinates used as
+input for route reconstruction and for calculating zero or more alternative
+routes to this reference route.
+  - The provided sequence of supporting points
+is used as input for route reconstruction.
+  - The alternative routes are
+calculated between the origin and destination points specified in the base path
+parameter locations.
+  - If both _minDeviationDistance_ and _minDeviationTime_
+are set to zero, then these origin and destination points are
+  expected to be
+at (or very near) the beginning and end of the reference route, respectively.
+ 
+- Intermediate locations (_waypoints_) are not supported when using
+<_supportingPoints_>.
+  - The reference route may contain traffic incidents of
+type _ROAD_CLOSURE_, which are
+  ignored for the calculation of the reference
+route's travel time and traffic delay.
+ Please refer to [Supporting
+Points](https://docs.microsoft.com/azure/azure-maps/how-to-use-best-practices-for-routing#calculate-and-bias-alternative-routes-using-supporting-points)
+for details.
+""")
+  supportingPoints?: GeoJsonGeometryCollection;
+
+  @doc("""
+This is a list of 3-character, ISO 3166-1, alpha-3 country codes of countries
+in which all toll roads with vignettes are to be avoided, e.g. \"AUS,CHE\".
+Toll roads with vignettes in countries not in the list are unaffected. Note: It
+is an error to specify both **avoidVignette** and **allowVignette**.
+""")
+  avoidVignette?: string[];
+
+  @doc("""
+This is a list of 3-character, ISO 3166-1, alpha-3 country codes of countries
+in which toll roads with vignettes are allowed, e.g. \"AUS,CHE\". Specifying
+**allowVignette** with some countries X is equivalent to specifying
+**avoidVignette** with all countries but X. Specifying **allowVignette** with
+an empty list is the same as avoiding all toll roads with vignettes. Note: It
+is an error to specify both **avoidVignette** and **allowVignette**.
+""")
+  allowVignette?: string[];
+
+  @doc("""
+A GeoJSON MultiPolygon representing list of areas to avoid. Only rectangle
+polygons are supported. The maximum size of a rectangle is about 160x160 km.
+Maximum number of avoided areas is **10**. It cannot cross the 180th meridian.
+It must be between -80 and +80 degrees of latitude.
+""")
+  avoidAreas?: GeoJsonMultiPolygon;
+}
+
+@doc("""
+A valid `GeoJSON GeometryCollection` object type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.8) for details.
+""")
+model GeoJsonGeometryCollection extends GeoJsonGeometry {
+  ...GeoJsonGeometryCollectionData;
+
+  @doc("""
+Specifies the `GeoJSON` type. Must be one of the nine valid GeoJSON object
+types - Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon,
+GeometryCollection, Feature and FeatureCollection.
+""")
+  type: "GeometryCollection";
+}
+
+model GeoJsonGeometryCollectionData {
+  @doc("""
+Contains a list of valid `GeoJSON` geometry objects. **Note** that coordinates
+in GeoJSON are in x, y order (longitude, latitude).
+""")
+  geometries: GeoJsonGeometry[];
+}
+
+@doc("""
+A valid `GeoJSON MultiPolygon` object type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.7) for details.
+""")
+model GeoJsonMultiPolygon extends GeoJsonGeometry {
+  ...GeoJsonMultiPolygonData;
+
+  @doc("""
+Specifies the `GeoJSON` type. Must be one of the nine valid GeoJSON object
+types - Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon,
+GeometryCollection, Feature and FeatureCollection.
+""")
+  type: "MultiPolygon";
+}
+
+model GeoJsonMultiPolygonData {
+  @doc("""
+Contains a list of valid `GeoJSON Polygon` objects. **Note** that coordinates
+in GeoJSON are in x, y order (longitude, latitude).
+""")
+  coordinates: float32[][][][];
+}
+
+@doc("This object is returned from a successful Route Reachable Range call")
+model RouteRangeResult {
+  @doc("Format Version property")
+  @visibility("read")
+  formatVersion?: string;
+
+  @doc("Reachable Range")
+  reachableRange?: RouteRange;
+
+  @doc("Reports the effective settings used in the current call.")
+  report?: RouteReport;
+}
+
+@doc("Reachable Range")
+model RouteRange {
+  @doc("Center point of the reachable range")
+  center?: LatLongPair;
+
+  @doc("Polygon boundary of the reachable range represented as a list of points.")
+  @visibility("read")
+  boundary?: LatLongPair[];
+}
+
+@doc("This type represents the request body for the Batch service.")
+model BatchRequest {
+  @doc("The list of queries to process.")
+  batchItems?: BatchRequestItem[];
+}
+
+@doc("Batch request object")
+model BatchRequestItem {
+  @doc("""
+This parameter contains a query string used to perform an unstructured
+geocoding operation. The query string will be passed verbatim to the search API
+for processing.
+""")
+  query?: string;
+}
+
+@doc("This object is returned from a successful Route Directions Batch service call.")
+model RouteDirectionsBatchResult {
+  ...BatchResult;
+
+  @doc("Array containing the batch results.")
+  @visibility("read")
+  batchItems?: RouteDirectionsBatchItem[];
+}
+
+@doc("An item returned from Route Directions Batch service call.")
+model RouteDirectionsBatchItem {
+  ...BatchResultItem;
+
+  @doc("""
+The result of the query. RouteDirections if the query completed successfully,
+ErrorResponse otherwise.
+""")
+  @visibility("read")
+  response?: RouteDirectionsBatchItemResponse;
+}
+
+@doc("""
+The result of the query. RouteDirections if the query completed successfully,
+ErrorResponse otherwise.
+""")
+model RouteDirectionsBatchItemResponse {
+  ...RouteDirections;
+  ...ErrorResponse;
+}
+
+@doc("An item returned from Batch API. Extend with 'response' property.")
+model BatchResultItem {
+  @doc("HTTP request status code.")
+  @visibility("read")
+  statusCode?: int32;
+}
+
+@doc("""
+This object is returned from a successful Batch service call. Extend with
+'batchItems' property.
+""")
+model BatchResult {
+  @doc("Summary of the results for the batch request")
+  @visibility("read")
+  summary?: BatchResultSummary;
+}
+
+@doc("Summary of the results for the batch request")
+model BatchResultSummary {
+  @doc("Number of successful requests in the batch")
+  @visibility("read")
+  successfulRequests?: int32;
+
+  @doc("Total number of requests in the batch")
+  @visibility("read")
+  totalRequests?: int32;
+}
+
+@doc("""
+A valid `GeoJSON Point` geometry type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.2) for details.
+""")
+model GeoJsonPoint extends GeoJsonGeometry {
+  ...GeoJsonPointData;
+
+  @doc("""
+Specifies the `GeoJSON` type. Must be one of the nine valid GeoJSON object
+types - Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon,
+GeometryCollection, Feature and FeatureCollection.
+""")
+  type: "Point";
+}
+
+@doc("Data contained by a `GeoJson Point`.")
+model GeoJsonPointData {
+  @doc("""
+A `Position` is an array of numbers with two or more elements. The first two
+elements are _longitude_ and _latitude_, precisely in that order.
+_Altitude/Elevation_ is an optional third element. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.1) for details.
+""")
+  coordinates: float32[];
+}
+
+@doc("""
+A valid `GeoJSON LineString` geometry type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.4) for details.
+""")
+model GeoJsonLineString extends GeoJsonGeometry {
+  ...GeoJsonLineStringData;
+
+  @doc("""
+Specifies the `GeoJSON` type. Must be one of the nine valid GeoJSON object
+types - Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon,
+GeometryCollection, Feature and FeatureCollection.
+""")
+  type: "LineString";
+}
+
+model GeoJsonLineStringData {
+  @doc("Coordinates for the `GeoJson LineString` geometry.")
+  coordinates: float32[][];
+}
+
+@doc("""
+A valid `GeoJSON MultiLineString` geometry type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.5) for details.
+""")
+model GeoJsonMultiLineString extends GeoJsonGeometry {
+  ...GeoJsonMultiLineStringData;
+
+  @doc("""
+Specifies the `GeoJSON` type. Must be one of the nine valid GeoJSON object
+types - Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon,
+GeometryCollection, Feature and FeatureCollection.
+""")
+  type: "MultiLineString";
+}
+
+model GeoJsonMultiLineStringData {
+  @doc("Coordinates for the `GeoJson MultiLineString` geometry.")
+  coordinates: float32[][][];
+}
+
+@doc("""
+A valid `GeoJSON Polygon` geometry type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1.6) for details.
+""")
+model GeoJsonPolygon extends GeoJsonGeometry {
+  ...GeoJsonPolygonData;
+
+  @doc("""
+Specifies the `GeoJSON` type. Must be one of the nine valid GeoJSON object
+types - Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon,
+GeometryCollection, Feature and FeatureCollection.
+""")
+  type: "Polygon";
+}
+
+model GeoJsonPolygonData {
+  @doc("Coordinates for the `GeoJson Polygon` geometry type.")
+  coordinates: float32[][][];
+}
+
+@doc("""
+A valid `GeoJSON Feature` object type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.2) for details.
+""")
+model GeoJsonFeature extends GeoJsonObject {
+  ...GeoJsonFeatureData;
+
+  @doc("""
+Specifies the `GeoJSON` type. Must be one of the nine valid GeoJSON object
+types - Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon,
+GeometryCollection, Feature and FeatureCollection.
+""")
+  type: "Feature";
+}
+
+model GeoJsonFeatureData {
+  @doc("""
+A valid `GeoJSON` geometry object. The type must be one of the seven valid
+GeoJSON geometry types - Point, MultiPoint, LineString, MultiLineString,
+Polygon, MultiPolygon and GeometryCollection. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.1) for details.
+""")
+  geometry: GeoJsonGeometry;
+
+  @doc("""
+Properties can contain any additional metadata about the `Feature`. Value can
+be any JSON object or a JSON null value
+""")
+  properties?: object;
+
+  @doc("Identifier for the feature.")
+  id?: string;
+
+  @doc("""
+The type of the feature. The value depends on the data model the current
+feature is part of. Some data models may have an empty value.
+""")
+  featureType?: string;
+}
+
+@doc("""
+A valid `GeoJSON FeatureCollection` object type. Please refer to [RFC
+7946](https://tools.ietf.org/html/rfc7946#section-3.3) for details.
+""")
+model GeoJsonFeatureCollection extends GeoJsonObject {
+  ...GeoJsonFeatureCollectionData;
+
+  @doc("""
+Specifies the `GeoJSON` type. Must be one of the nine valid GeoJSON object
+types - Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon,
+GeometryCollection, Feature and FeatureCollection.
+""")
+  type: "FeatureCollection";
+}
+
+model GeoJsonFeatureCollectionData {
+  @doc("Contains a list of valid `GeoJSON Feature` objects.")
+  features: GeoJsonFeature[];
+}

@@ -10,7 +10,7 @@ import {
   OperationMethod,
   RLCOptions
 } from "@azure-tools/rlc-common";
-import { getDoc, Program } from "@cadl-lang/compiler";
+import { getDoc, getProjectedName, Program } from "@cadl-lang/compiler";
 import {
   getAllHttpServices,
   HttpOperation,
@@ -72,8 +72,10 @@ export function transformPaths(program: Program, options?: RLCOptions): Paths {
         pathParameters: route.parameters.parameters
           .filter((p) => p.type === "path")
           .map((p) => {
+            const name = getProjectedName(program, p.param, "json") ?? p.name;
             return {
-              name: p.name,
+              name,
+              clientName: p.name,
               type: p.param.sourceProperty
                 ? getSchemaForType(program, p.param.sourceProperty?.type).type
                 : getSchemaForType(program, p.param.type).type,

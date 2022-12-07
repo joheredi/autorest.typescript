@@ -178,6 +178,7 @@ This score shows the percentage contributing to the anomalous timestamp. A
 number between 0 and 1.
 """)
   contributionScore?: float32;
+
   correlationChanges?: CorrelationChanges;
 }
 

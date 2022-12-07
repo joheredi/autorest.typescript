@@ -14,6 +14,7 @@ import {
 } from "../interfaces.js";
 import * as path from "path";
 import { getName } from "../helpers/hrlcNames.js";
+import { inRange } from "lodash";
 
 export function buildOperations(model: RLCModel): File[] {
   const pathsByOperationGroup = getPathsByOperationGroup(model);
@@ -50,21 +51,21 @@ export function buildOperations(model: RLCModel): File[] {
             ...pathParameters,
             ...otherParameters
           ]);
+          const implementation =
+            getHttpMethodParams(otherParameters)?.join("\n");
+          const statements = `const result = await context.path("${path.path}"${
+            pathParameters.length > 0
+              ? ", " + pathParameters.map((p) => p.clientName).join(", ")
+              : ""
+          }).${verb}(${implementation ?? ""});`;
           addContextParameter(parameters);
+          addOptionsParameter(parameters);
           operationsFile.addFunction({
             name: operationFunctionName,
+            isAsync: true,
             isExported: true,
             parameters,
-            statements: [
-              `/** \n`,
-              otherParameters
-                .map((p) => {
-                  return ` * ${p.kind} ${p.clientName ?? p.name}\n`;
-                })
-
-                .join("\n"),
-              `*/`
-            ]
+            statements
           });
         }
       }
@@ -84,6 +85,16 @@ function addContextParameter(
   parameters.unshift({
     name: "context",
     type: "Client"
+  });
+}
+
+function addOptionsParameter(
+  parameters: OptionalKind<ParameterDeclarationStructure>[]
+) {
+  parameters.push({
+    name: "options",
+    type: "any",
+    hasQuestionToken: true
   });
 }
 
@@ -147,6 +158,77 @@ function getOperationMethodParameters(
   return [];
 }
 
-function getParametersForSignature(parameters: (ParameterMetadata | PathParameter)[]) {
-  parameters[0].
+function getHttpMethodParams(parameters: ParameterMetadata[]) {
+  const queryParameters = parameters.filter((p) => p.kind === "query");
+  const bodyParameter = parameters.find((p) => p.kind === "body");
+  const headerParameters = parameters.filter((p) => p.kind === "header");
+
+  if (!queryParameters.length && !bodyParameter && !headerParameters.length) {
+    return undefined;
+  }
+
+  const statements: string[] = ["{"];
+
+  if (queryParameters.length > 0) {
+    statements.push("queryParameters: {");
+    for (const p of queryParameters) {
+      if (p.param.required) {
+        statements.push(`${p.name}: ${p.clientName},`);
+      } else {
+        statements.push(
+          `${p.name}: options?.[${p.clientName}] ${
+            p.param.default ? `?? ${p.param.default},` : ","
+          }`
+        );
+      }
+    }
+    statements.push("},");
+  }
+
+  if (headerParameters.length > 0) {
+    statements.push("headerParameters: {");
+    for (const p of headerParameters) {
+      if (p.param.required) {
+        statements.push(`${p.name}: ${p.clientName},`);
+      } else {
+        statements.push(
+          `${p.name}: options?.[${p.clientName}] ${
+            p.param.default ? `?? ${p.param.default},` : ""
+          }`
+        );
+      }
+    }
+    statements.push("},");
+  }
+
+  if (bodyParameter) {
+    statements.push(`body: ${bodyParameter.clientName}`);
+  }
+
+  statements.push("}");
+  return statements;
+}
+
+function getParametersForSignature(
+  parameters: (ParameterMetadata | PathParameter)[]
+): OptionalKind<ParameterDeclarationStructure>[] {
+  return parameters
+    .filter((p) => !(isParameterMetadata(p) && !p.param.required))
+    .map((p) => {
+      if (isParameterMetadata(p)) {
+        return {
+          name: p.clientName ?? p.name,
+          type: p.param.type
+        };
+      } else {
+        return {
+          name: p.name,
+          type: p.type
+        };
+      }
+    });
+}
+
+function isParameterMetadata(parameter: any): parameter is ParameterMetadata {
+  return parameter.param !== undefined;
 }

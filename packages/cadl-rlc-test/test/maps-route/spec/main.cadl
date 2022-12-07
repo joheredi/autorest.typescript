@@ -1,0 +1,19 @@
+import "@cadl-lang/rest";
+import "./routes.cadl";
+
+using Cadl.Rest;
+using Cadl.Http;
+@service({
+  title: "MapsRoute",
+  version: "v1.0"
+})
+@server(
+  "{$host}",
+  "Azure Maps Route REST APIs",
+  {
+    @doc("server parameter")
+    $host: string,
+  }
+)
+@doc("Azure Maps Route REST APIs")
+namespace Azure.Maps.Route;

@@ -11,6 +11,7 @@ import {
   Schema,
   SchemaContext
 } from "@azure-tools/rlc-common";
+import { getCollectionFormat } from "@azure-tools/cadl-autorest";
 import { getProjectedName, Model, Program, Type } from "@cadl-lang/compiler";
 import {
   getAllHttpServices,
@@ -84,15 +85,19 @@ function getParameterMetadata(
     SchemaContext.Input,
     SchemaContext.Exception
   ]) as Schema;
+
   const type = getTypeName(schema);
-  const name = getParameterName(parameter.name);
+  const clientName = getParameterName(parameter.name);
+  const name = getProjectedName(program, parameter.param, "json") ?? clientName;
+  const collectionFormat = getCollectionFormat(program, parameter.param);
+  collectionFormat;
   return {
     kind: paramType,
     name,
-    clientName: parameter.clientName,
+    clientName,
     param: {
       name,
-      clientName: parameter.clientName,
+      clientName,
       type,
       required: !parameter.param.optional,
       description:

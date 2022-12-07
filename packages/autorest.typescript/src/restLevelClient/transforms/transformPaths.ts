@@ -49,7 +49,8 @@ export function transformPaths(model: CodeModel): Paths {
           .map(p => {
             const languageMetadata = getLanguageMetadata(p.language);
             return {
-              name: languageMetadata.serializedName || languageMetadata.name,
+              name: languageMetadata.serializedName,
+              clientName: languageMetadata.name,
               type: getElementType(p.schema, [
                 SchemaContext.Input,
                 SchemaContext.Exception

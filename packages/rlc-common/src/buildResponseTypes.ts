@@ -122,7 +122,7 @@ function getResponseHeaderInterfaceDefinition(
     properties: response?.headers.map((h: ResponseHeaderSchema) => {
       const description = h.description;
       return {
-        name: h.name,
+        name: `"${h.name}"`,
         ...(description && { docs: [{ description }] }),
         type: h.type,
         hasQuestionToken: !h.required
