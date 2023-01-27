@@ -4,6 +4,7 @@ import { File, RLCModel } from "@azure-tools/rlc-common";
 import { CompilerHost, Program } from "@cadl-lang/compiler";
 import { dirname, join } from "path";
 import { format } from "prettier";
+// import { HrlcCodeModel } from "./hrlc/hrlcCodeModel.js";
 import { prettierJSONOptions, prettierTypeScriptOptions } from "./lib.js";
 
 export async function emitModels(rlcModels: RLCModel, program: Program) {

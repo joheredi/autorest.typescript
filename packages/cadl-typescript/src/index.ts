@@ -31,11 +31,21 @@ import {
 import { transformRLCModel } from "./transform/transform.js";
 import { emitContentByBuilder, emitModels } from "./emitUtil.js";
 import { listClients } from "@azure-tools/cadl-dpg";
+import { emitCodeModel } from "./hrlc/sharedEmitter.js";
+import { emitClients } from "./hrlc/emitClients.js";
 
 export async function $onEmit(context: EmitContext) {
   const program: Program = context.program;
   const options: RLCOptions = context.options;
   const clients = listClients(program);
+  const hrlc = emitCodeModel(context, { casing: "camel" });
+  const hrlcClients = emitClients(hrlc);
+
+  for (const hrlcClient of hrlcClients) {
+    emitContentByBuilder(program, () => hrlcClient, hrlc as any);
+    // emitFile(program, { content: hrlcClient.content, path: hrlcClient.path });
+  }
+
   for (const client of clients) {
     const rlcModels = await transformRLCModel(
       program,
