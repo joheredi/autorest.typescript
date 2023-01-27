@@ -93,7 +93,7 @@ function emitOptionsInterface(
     operation.bodyParameter?.type.properties ?? []
   ).filter((p) => p.optional);
   const options = [...optionalBodyParams, ...optionalParameters];
-  const name = `${operation.name}Options`;
+  const name = toPascalCase(`${operation.name}Options`);
   sourceFile.addInterface({
     name,
     properties: options.map((p) => {
@@ -106,6 +106,10 @@ function emitOptionsInterface(
   });
 
   return name;
+}
+
+function toPascalCase(name: string): string {
+  return name[0]?.toUpperCase() + name.substring(1);
 }
 
 function buildParameterType(
