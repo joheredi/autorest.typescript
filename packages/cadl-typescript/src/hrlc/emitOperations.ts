@@ -37,7 +37,7 @@ export function emitOperationGroups(
     }
     operationGroupFile.addImportDeclaration({
       moduleSpecifier: "@azure-rest/core-client",
-      namedImports: ["Client"]
+      namedImports: ["Client", "RequestParameters"]
     });
     files.push({
       content: operationGroupFile.getFullText(),
@@ -53,13 +53,13 @@ function emitOperation(
   sourceFile: SourceFile,
   imports: Record<string, Set<string>>
 ) {
-  const parameters: OptionalKind<ParameterDeclarationStructure>[] = (
+  let parameters: OptionalKind<ParameterDeclarationStructure>[] = (
     operation.bodyParameter?.type.properties ?? []
   )
     .filter((p) => !p.optional)
     .map((p) => buildParameterType(p, imports));
 
-  parameters.concat(
+  parameters = parameters.concat(
     operation.parameters
       .filter(
         (p) =>
@@ -74,14 +74,131 @@ function emitOperation(
   const optionsType = emitOptionsInterface(operation, sourceFile, imports);
   parameters.push({ name: "options", type: optionsType, initializer: "{}" });
 
-  sourceFile.addFunction({
+  const operationDeclaration = sourceFile.addFunction({
     docs: [operation.description],
     isAsync: true,
     isExported: true,
     name: operation.name,
     parameters
   });
+
+  const operationPath = operation.url;
+  const operationMethod = operation.method.toLowerCase();
+  operationDeclaration.addStatements([
+    `const result = await context.pathUnchecked("${operationPath}", ${getPathParameters(
+      operation
+    )}).${operationMethod}({${getRequestParameters(operation)}});`
+  ]);
 }
+
+function getPathParameters(operation: Operation) {
+  if (!operation.parameters) {
+    return "";
+  }
+
+  let pathParams = "";
+  for (const param of operation.parameters) {
+    if (param.location === "path") {
+      if (!param.optional) {
+        pathParams = `${pathParams} ${param.clientName},`;
+        continue;
+      }
+
+      const defaultValue = getDefaultValue(param);
+
+      pathParams = `${pathParams}, options.${param.clientName}`;
+
+      if (defaultValue) {
+        pathParams = ` ?? "${defaultValue}"`;
+      }
+      pathParams = `${pathParams},`;
+    }
+  }
+
+  return pathParams;
+}
+
+function getRequestParameters(operation: Operation): string {
+  if (!operation.parameters) {
+    return "";
+  }
+
+  const parametersImplementation: Record<
+    "header" | "query" | "body",
+    string[]
+  > = {
+    header: [],
+    query: [],
+    body: []
+  };
+
+  for (const param of operation.parameters) {
+    if (param.location === "header" || param.location === "query") {
+      parametersImplementation[param.location].push(getParameterMap(param));
+    }
+  }
+
+  for (const param of operation.bodyParameter?.type.properties ?? []) {
+    parametersImplementation.body.push(getParameterMap(param));
+  }
+
+  let paramStr = "";
+
+  if (parametersImplementation.header.length) {
+    paramStr = `${paramStr}\nheaders: {${parametersImplementation.header.join(
+      "\n"
+    )}},`;
+  }
+
+  if (parametersImplementation.query.length) {
+    paramStr = `${paramStr}\nqueryParameters: {${parametersImplementation.query.join(
+      "\n"
+    )}},`;
+  }
+
+  if (operation.bodyParameter && operation.bodyParameter.type.properties) {
+    paramStr = `${paramStr}\nbody: {${parametersImplementation.body.join(
+      "\n"
+    )}},`;
+  }
+
+  return paramStr;
+}
+
+function getDefaultValue(param: Parameter | Property) {
+  return (param.clientDefaultValue ?? param.type.clientDefaultValue) !==
+    undefined
+    ? `?? "${param.clientDefaultValue ?? param.type.clientDefaultValue}"`
+    : "";
+}
+
+function getParameterMap(param: Parameter | Property) {
+  const defaultValue = getDefaultValue(param);
+  return `"${param.restApiName}": ${
+    param.optional || param.type.type === "constant"
+      ? `options.${param.clientName} ${defaultValue}`
+      : param.clientName
+  },`;
+}
+
+// function getBodyParameters(operation: Operation): string {
+//   if (!operation.bodyParameter) {
+//     return "undefined";
+//   }
+
+//   const bodyParams = operation.bodyParameter;
+
+//   let paramStr = "";
+//   for (const param of bodyParams.type.properties ?? []) {
+//     paramStr = `${paramStr}\n"${param.restApiName}": ${
+//       param.optional || param.type.type === "constant"
+//         ? `options.${param.clientName}`
+//         : param.clientName
+//     },`;
+//   }
+
+//   return paramStr;
+// }
 
 function emitOptionsInterface(
   operation: Operation,
@@ -96,6 +213,7 @@ function emitOptionsInterface(
   const name = toPascalCase(`${operation.name}Options`);
   sourceFile.addInterface({
     name,
+    extends: ["RequestParameters"],
     properties: options.map((p) => {
       return {
         docs: [p.description],

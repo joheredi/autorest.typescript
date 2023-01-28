@@ -11,6 +11,7 @@ export interface Header {
 }
 
 export interface Property {
+  clientDefaultValue?: any;
   clientName: string;
   restApiName: string;
   type: Type;
@@ -23,7 +24,7 @@ export interface BodyParameter {
   contentTypes: string[];
   type: Type;
   restApiName: string;
-  location: string;
+  location: "body";
   optional: boolean;
   description: string;
   clientName: string;
@@ -83,13 +84,20 @@ export interface Client {
   apiVersions: any[];
 }
 
+export type ParameterLocation =
+  | "endpointPath"
+  | "header"
+  | "query"
+  | "path"
+  | "other";
+
 export interface Parameter {
   optional: boolean;
   description: string;
   clientName: string;
   inOverload: boolean;
   restApiName: string;
-  location: string;
+  location: ParameterLocation;
   type: Type;
   implementation: string;
   skipUrlEncoding?: boolean;
