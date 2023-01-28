@@ -3,9 +3,13 @@ import { Project } from "ts-morph";
 import { getType } from "./getType.js";
 import { HrlcCodeModel } from "./hrlcCodeModel.js";
 
-export function emitModels(codeModel: HrlcCodeModel, project: Project): File[] {
+export function emitModels(
+  codeModel: HrlcCodeModel,
+  project: Project,
+  srcPath: string = "src"
+): File[] {
   const files: File[] = [];
-  const modelsFile = project.createSourceFile("models.ts");
+  const modelsFile = project.createSourceFile(`models.ts`);
   const models = codeModel.types.filter(
     (t) => t.type === "model" || t.type === "enum"
   );
@@ -35,13 +39,16 @@ export function emitModels(codeModel: HrlcCodeModel, project: Project): File[] {
             docs: [p.description],
             hasQuestionToken: p.optional,
             isReadonly: p.readonly,
-            type: typeName
+            type: getType(p.type).name
           };
         })
       });
     }
   }
 
-  files.push({ content: modelsFile.getFullText(), path: "models.ts" });
+  files.push({
+    content: modelsFile.getFullText(),
+    path: `${srcPath}/src/api/models.ts`
+  });
   return files;
 }

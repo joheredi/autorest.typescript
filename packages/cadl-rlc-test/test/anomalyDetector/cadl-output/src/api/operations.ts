@@ -5,12 +5,19 @@ import {
   TimeSeriesPoint,
   TimeGranularity,
   ImputeMode,
+  UnivariateEntireDetectionResult,
+  UnivariateLastDetectionResult,
+  UnivariateChangePointDetectionResult,
+  MultivariateDetectionResult,
   DataSchema,
   AlignPolicy,
   ModelStatus,
   ErrorResponse,
   DiagnosticsInfo,
+  AnomalyDetectionModel,
+  ModelList,
   VariableValues,
+  MultivariateLastDetectionResult,
 } from "./models.js";
 import { Client, RequestParameters } from "@azure-rest/core-client";
 
@@ -65,7 +72,7 @@ export async function detectUnivariateEntireSeries(
   context: Client,
   series: TimeSeriesPoint[],
   options: DetectUnivariateEntireSeriesOptions = {}
-) {
+): Promise<UnivariateEntireDetectionResult> {
   const result = await context.pathUnchecked("/timeseries/entire/detect").post({
     headers: {
       Accept: options.accept ?? "application/json",
@@ -82,6 +89,19 @@ export async function detectUnivariateEntireSeries(
       imputeFixedValue: options.imputeFixedValue,
     },
   });
+  if (!["200"].includes(result.status)) {
+    throw result.body;
+  }
+  return {
+    period: result.body.period,
+    expectedValues: result.body.expectedValues,
+    upperMargins: result.body.upperMargins,
+    lowerMargins: result.body.lowerMargins,
+    isAnomaly: result.body.isAnomaly,
+    isNegativeAnomaly: result.body.isNegativeAnomaly,
+    isPositiveAnomaly: result.body.isPositiveAnomaly,
+    severity: result.body.severity,
+  };
 }
 
 interface DetectUnivariateLastPointOptions extends RequestParameters {
@@ -133,7 +153,7 @@ export async function detectUnivariateLastPoint(
   context: Client,
   series: TimeSeriesPoint[],
   options: DetectUnivariateLastPointOptions = {}
-) {
+): Promise<UnivariateLastDetectionResult> {
   const result = await context.pathUnchecked("/timeseries/last/detect").post({
     headers: {
       Accept: options.accept ?? "application/json",
@@ -150,6 +170,20 @@ export async function detectUnivariateLastPoint(
       imputeFixedValue: options.imputeFixedValue,
     },
   });
+  if (!["200"].includes(result.status)) {
+    throw result.body;
+  }
+  return {
+    period: result.body.period,
+    suggestedWindow: result.body.suggestedWindow,
+    expectedValue: result.body.expectedValue,
+    upperMargin: result.body.upperMargin,
+    lowerMargin: result.body.lowerMargin,
+    isAnomaly: result.body.isAnomaly,
+    isNegativeAnomaly: result.body.isNegativeAnomaly,
+    isPositiveAnomaly: result.body.isPositiveAnomaly,
+    severity: result.body.severity,
+  };
 }
 
 interface DetectUnivariateChangePointOptions extends RequestParameters {
@@ -185,7 +219,7 @@ export async function detectUnivariateChangePoint(
   series: TimeSeriesPoint[],
   granularity: TimeGranularity,
   options: DetectUnivariateChangePointOptions = {}
-) {
+): Promise<UnivariateChangePointDetectionResult> {
   const result = await context
     .pathUnchecked("/timeseries/changepoint/detect")
     .post({
@@ -202,6 +236,14 @@ export async function detectUnivariateChangePoint(
         threshold: options.threshold,
       },
     });
+  if (!["200"].includes(result.status)) {
+    throw result.body;
+  }
+  return {
+    period: result.body.period,
+    isChangePoint: result.body.isChangePoint,
+    confidenceScores: result.body.confidenceScores,
+  };
 }
 
 interface GetMultivariateBatchDetectionResultOptions
@@ -215,12 +257,20 @@ export async function getMultivariateBatchDetectionResult(
   context: Client,
   result_id: string,
   options: GetMultivariateBatchDetectionResultOptions = {}
-) {
+): Promise<MultivariateDetectionResult> {
   const result = await context
     .pathUnchecked("/multivariate/detect-batch/{resultId}", result_id)
     .get({
       headers: { Accept: options.accept ?? "application/json" },
     });
+  if (!["200"].includes(result.status)) {
+    throw result.body;
+  }
+  return {
+    resultId: result.body.resultId,
+    summary: result.body.summary,
+    results: result.body.results,
+  };
 }
 
 interface TrainMultivariateModelOptions extends RequestParameters {
@@ -266,7 +316,7 @@ export async function trainMultivariateModel(
   startTime: Date,
   endTime: Date,
   options: TrainMultivariateModelOptions = {}
-) {
+): Promise<AnomalyDetectionModel> {
   const result = await context.pathUnchecked("/multivariate/models").post({
     headers: {
       Accept: options.accept ?? "application/json",
@@ -285,6 +335,15 @@ export async function trainMultivariateModel(
       diagnosticsInfo: options.diagnosticsInfo,
     },
   });
+  if (!["201"].includes(result.status)) {
+    throw result.body;
+  }
+  return {
+    modelId: result.body.modelId,
+    createdTime: result.body.createdTime,
+    lastUpdatedTime: result.body.lastUpdatedTime,
+    modelInfo: result.body.modelInfo,
+  };
 }
 
 interface ListMultivariateModelsOptions extends RequestParameters {
@@ -298,11 +357,20 @@ interface ListMultivariateModelsOptions extends RequestParameters {
 export async function listMultivariateModels(
   context: Client,
   options: ListMultivariateModelsOptions = {}
-) {
+): Promise<ModelList> {
   const result = await context.pathUnchecked("/multivariate/models").get({
     headers: { Accept: options.accept ?? "application/json" },
     queryParameters: { skip: options.skip, top: options.top },
   });
+  if (!["200"].includes(result.status)) {
+    throw result.body;
+  }
+  return {
+    models: result.body.models,
+    currentCount: result.body.currentCount,
+    maxCount: result.body.maxCount,
+    nextLink: result.body.nextLink,
+  };
 }
 
 interface DeleteMultivariateModelOptions extends RequestParameters {}
@@ -312,12 +380,16 @@ export async function deleteMultivariateModel(
   context: Client,
   model_id: string,
   options: DeleteMultivariateModelOptions = {}
-) {
+): Promise<void> {
   const result = await context
     .pathUnchecked("/multivariate/models/{modelId}", model_id)
     .delete({
       headers: { Accept: options.accept ?? "application/json" },
     });
+  if (!["204"].includes(result.status)) {
+    throw result.body;
+  }
+  return;
 }
 
 interface GetMultivariateModelOptions extends RequestParameters {}
@@ -330,12 +402,21 @@ export async function getMultivariateModel(
   context: Client,
   model_id: string,
   options: GetMultivariateModelOptions = {}
-) {
+): Promise<AnomalyDetectionModel> {
   const result = await context
     .pathUnchecked("/multivariate/models/{modelId}", model_id)
     .get({
       headers: { Accept: options.accept ?? "application/json" },
     });
+  if (!["200"].includes(result.status)) {
+    throw result.body;
+  }
+  return {
+    modelId: result.body.modelId,
+    createdTime: result.body.createdTime,
+    lastUpdatedTime: result.body.lastUpdatedTime,
+    modelInfo: result.body.modelInfo,
+  };
 }
 
 interface DetectMultivariateBatchAnomalyOptions extends RequestParameters {
@@ -359,7 +440,7 @@ export async function detectMultivariateBatchAnomaly(
   endTime: Date,
   model_id: string,
   options: DetectMultivariateBatchAnomalyOptions = {}
-) {
+): Promise<MultivariateDetectionResult> {
   const result = await context
     .pathUnchecked("/multivariate/models/{modelId}:detect-batch", model_id)
     .post({
@@ -374,6 +455,14 @@ export async function detectMultivariateBatchAnomaly(
         endTime: endTime,
       },
     });
+  if (!["202"].includes(result.status)) {
+    throw result.body;
+  }
+  return {
+    resultId: result.body.resultId,
+    summary: result.body.summary,
+    results: result.body.results,
+  };
 }
 
 interface DetectMultivariateLastAnomalyOptions extends RequestParameters {
@@ -393,7 +482,7 @@ export async function detectMultivariateLastAnomaly(
   topContributorCount: number,
   model_id: string,
   options: DetectMultivariateLastAnomalyOptions = {}
-) {
+): Promise<MultivariateLastDetectionResult> {
   const result = await context
     .pathUnchecked("/multivariate/models/{modelId}:detect-last", model_id)
     .post({
@@ -403,4 +492,11 @@ export async function detectMultivariateLastAnomaly(
       },
       body: { variables: variables, topContributorCount: topContributorCount },
     });
+  if (!["200"].includes(result.status)) {
+    throw result.body;
+  }
+  return {
+    variableStates: result.body.variableStates,
+    results: result.body.results,
+  };
 }

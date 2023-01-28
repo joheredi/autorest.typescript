@@ -39,7 +39,8 @@ export async function $onEmit(context: EmitContext) {
   const options: RLCOptions = context.options;
   const clients = listClients(program);
   const hrlc = emitCodeModel(context, { casing: "camel" });
-  const hrlcClients = emitClients(hrlc);
+  const hrlcClients = emitClients(hrlc, context.emitterOutputDir);
+  clearSrcFolder(context.emitterOutputDir);
 
   for (const hrlcClient of hrlcClients) {
     emitContentByBuilder(program, () => hrlcClient, hrlc as any);
@@ -53,7 +54,6 @@ export async function $onEmit(context: EmitContext) {
       client,
       context.emitterOutputDir
     );
-    clearSrcFolder(rlcModels);
     await emitModels(rlcModels, program);
     await emitContentByBuilder(program, buildClientDefinitions, rlcModels);
     await emitContentByBuilder(program, buildResponseTypes, rlcModels);
@@ -96,7 +96,6 @@ export async function $onEmit(context: EmitContext) {
   }
 }
 
-function clearSrcFolder(model: RLCModel) {
-  const srcPath = model.srcPath;
+function clearSrcFolder(srcPath: string) {
   fsextra.emptyDirSync(srcPath);
 }

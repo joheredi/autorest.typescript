@@ -1,84 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-/** The response of entire anomaly detection. */
-export interface UnivariateEntireDetectionResult {
-  /**
-   * Frequency extracted from the series, zero means no recurrent pattern has been
-   * found.
-   */
-  period: UnivariateEntireDetectionResult;
-  /**
-   * ExpectedValues contain expected value for each input point. The index of the
-   * array is consistent with the input series.
-   */
-  expectedValues: UnivariateEntireDetectionResult;
-  /**
-   * UpperMargins contain upper margin of each input point. UpperMargin is used to
-   * calculate upperBoundary, which equals to expectedValue + (100 -
-   * marginScale)*upperMargin. Anomalies in response can be filtered by
-   * upperBoundary and lowerBoundary. By adjusting marginScale value, less
-   * significant anomalies can be filtered in client side. The index of the array is
-   * consistent with the input series.
-   */
-  upperMargins: UnivariateEntireDetectionResult;
-  /**
-   * LowerMargins contain lower margin of each input point. LowerMargin is used to
-   * calculate lowerBoundary, which equals to expectedValue - (100 -
-   * marginScale)*lowerMargin. Points between the boundary can be marked as normal
-   * ones in client side. The index of the array is consistent with the input
-   * series.
-   */
-  lowerMargins: UnivariateEntireDetectionResult;
-  /**
-   * IsAnomaly contains anomaly properties for each input point. True means an
-   * anomaly either negative or positive has been detected. The index of the array
-   * is consistent with the input series.
-   */
-  isAnomaly: UnivariateEntireDetectionResult;
-  /**
-   * IsNegativeAnomaly contains anomaly status in negative direction for each input
-   * point. True means a negative anomaly has been detected. A negative anomaly
-   * means the point is detected as an anomaly and its real value is smaller than
-   * the expected one. The index of the array is consistent with the input series.
-   */
-  isNegativeAnomaly: UnivariateEntireDetectionResult;
-  /**
-   * IsPositiveAnomaly contain anomaly status in positive direction for each input
-   * point. True means a positive anomaly has been detected. A positive anomaly
-   * means the point is detected as an anomaly and its real value is larger than the
-   * expected one. The index of the array is consistent with the input series.
-   */
-  isPositiveAnomaly: UnivariateEntireDetectionResult;
-  /**
-   * The severity score for each input point. The larger the value is, the more
-   * sever the anomaly is. For normal points, the "severity" is always 0.
-   */
-  severity?: UnivariateEntireDetectionResult;
-}
-
-/** Error information returned by the API. */
-export interface AnomalyDetectorError {
-  /** The error code. */
-  code?: AnomalyDetectorError;
-  /** A message explaining the error reported by the service. */
-  message?: AnomalyDetectorError;
-}
-
-/** */
-export type AnomalyDetectorErrorCodes =
-  | "InvalidCustomInterval"
-  | "BadArgument"
-  | "InvalidGranularity"
-  | "InvalidPeriod"
-  | "InvalidModelArgument"
-  | "InvalidSeries"
-  | "InvalidJsonFormat"
-  | "RequiredGranularity"
-  | "RequiredSeries"
-  | "InvalidImputeMode"
-  | "InvalidImputeFixedValue";
-
 /** The request of entire or last anomaly detection. */
 export interface UnivariateDetectionOptions {
   /**
@@ -87,135 +9,62 @@ export interface UnivariateDetectionOptions {
    * correctly or there is duplicated timestamp, the API will not work. In such
    * case, an error message will be returned.
    */
-  series: UnivariateDetectionOptions;
+  series: Array<TimeSeriesPoint>;
   /**
    * Optional argument, can be one of yearly, monthly, weekly, daily, hourly,
    * minutely, secondly, microsecond or none. If granularity is not present, it will
    * be none by default. If granularity is none, the timestamp property in time
    * series point can be absent.
    */
-  granularity?: UnivariateDetectionOptions;
+  granularity?:
+    | "yearly"
+    | "monthly"
+    | "weekly"
+    | "daily"
+    | "hourly"
+    | "minutely"
+    | "secondly"
+    | "microsecond"
+    | "none";
   /**
    * Custom Interval is used to set non-standard time interval, for example, if the
    * series is 5 minutes, request can be set as {"granularity":"minutely",
    * "customInterval":5}.
    */
-  customInterval?: UnivariateDetectionOptions;
+  customInterval?: number;
   /**
    * Optional argument, periodic value of a time series. If the value is null or
    * does not present, the API will determine the period automatically.
    */
-  period?: UnivariateDetectionOptions;
+  period?: number;
   /** Optional argument, advanced model parameter, max anomaly ratio in a time series. */
-  maxAnomalyRatio?: UnivariateDetectionOptions;
+  maxAnomalyRatio?: number;
   /**
    * Optional argument, advanced model parameter, between 0-99, the lower the value
    * is, the larger the margin value will be which means less anomalies will be
    * accepted.
    */
-  sensitivity?: UnivariateDetectionOptions;
+  sensitivity?: number;
   /**
    * Used to specify how to deal with missing values in the input series, it's used
    * when granularity is not "none".
+   *
+   * Possible values: auto, previous, linear, fixed, zero, notFill
    */
-  imputeMode?: UnivariateDetectionOptions;
+  imputeMode?: string;
   /**
    * Used to specify the value to fill, it's used when granularity is not "none"
    * and imputeMode is "fixed".
    */
-  imputeFixedValue?: UnivariateDetectionOptions;
+  imputeFixedValue?: number;
 }
 
 /** The definition of input timeseries points. */
 export interface TimeSeriesPoint {
   /** Optional argument, timestamp of a data point (ISO8601 format). */
-  timestamp?: TimeSeriesPoint;
+  timestamp?: Date | string;
   /** The measurement of that point, should be float. */
-  value: TimeSeriesPoint;
-}
-
-/** */
-export type TimeGranularity =
-  | "yearly"
-  | "monthly"
-  | "weekly"
-  | "daily"
-  | "hourly"
-  | "minutely"
-  | "secondly"
-  | "microsecond"
-  | "none";
-/** */
-export type ImputeMode =
-  | "auto"
-  | "previous"
-  | "linear"
-  | "fixed"
-  | "zero"
-  | "notFill";
-
-/** The response of last anomaly detection. */
-export interface UnivariateLastDetectionResult {
-  /**
-   * Frequency extracted from the series, zero means no recurrent pattern has been
-   * found.
-   */
-  period: UnivariateLastDetectionResult;
-  /** Suggested input series points needed for detecting the latest point. */
-  suggestedWindow: UnivariateLastDetectionResult;
-  /** Expected value of the latest point. */
-  expectedValue: UnivariateLastDetectionResult;
-  /**
-   * Upper margin of the latest point. UpperMargin is used to calculate
-   * upperBoundary, which equals to expectedValue + (100 - marginScale)*upperMargin.
-   * If the value of latest point is between upperBoundary and lowerBoundary, it
-   * should be treated as normal value. By adjusting marginScale value, anomaly
-   * status of latest point can be changed.
-   */
-  upperMargin: UnivariateLastDetectionResult;
-  /**
-   * Lower margin of the latest point. LowerMargin is used to calculate
-   * lowerBoundary, which equals to expectedValue - (100 - marginScale)*lowerMargin.
-   *
-   */
-  lowerMargin: UnivariateLastDetectionResult;
-  /**
-   * Anomaly status of the latest point, true means the latest point is an anomaly
-   * either in negative direction or positive direction.
-   */
-  isAnomaly: UnivariateLastDetectionResult;
-  /**
-   * Anomaly status in negative direction of the latest point. True means the latest
-   * point is an anomaly and its real value is smaller than the expected one.
-   */
-  isNegativeAnomaly: UnivariateLastDetectionResult;
-  /**
-   * Anomaly status in positive direction of the latest point. True means the latest
-   * point is an anomaly and its real value is larger than the expected one.
-   */
-  isPositiveAnomaly: UnivariateLastDetectionResult;
-  /**
-   * The severity score for the last input point. The larger the value is, the more
-   * sever the anomaly is. For normal points, the "severity" is always 0.
-   */
-  severity?: UnivariateLastDetectionResult;
-}
-
-/** The response of change point detection. */
-export interface UnivariateChangePointDetectionResult {
-  /**
-   * Frequency extracted from the series, zero means no recurrent pattern has been
-   * found.
-   */
-  readonly period?: UnivariateChangePointDetectionResult;
-  /**
-   * isChangePoint contains change point properties for each input point. True means
-   * an anomaly either negative or positive has been detected. The index of the
-   * array is consistent with the input series.
-   */
-  isChangePoint?: UnivariateChangePointDetectionResult;
-  /** the change point confidence of each point */
-  confidenceScores?: UnivariateChangePointDetectionResult;
+  value: number;
 }
 
 /** The request of change point detection. */
@@ -224,88 +73,65 @@ export interface UnivariateChangePointDetectionOptions {
    * Time series data points. Points should be sorted by timestamp in ascending
    * order to match the change point detection result.
    */
-  series: UnivariateChangePointDetectionOptions;
+  series: Array<TimeSeriesPoint>;
   /**
    * Can only be one of yearly, monthly, weekly, daily, hourly, minutely or
    * secondly. Granularity is used for verify whether input series is valid.
    */
-  granularity: UnivariateChangePointDetectionOptions;
+  granularity:
+    | "yearly"
+    | "monthly"
+    | "weekly"
+    | "daily"
+    | "hourly"
+    | "minutely"
+    | "secondly"
+    | "microsecond"
+    | "none";
   /**
    * Custom Interval is used to set non-standard time interval, for example, if the
    * series is 5 minutes, request can be set as {"granularity":"minutely",
    * "customInterval":5}.
    */
-  customInterval?: UnivariateChangePointDetectionOptions;
+  customInterval?: number;
   /**
    * Optional argument, periodic value of a time series. If the value is null or
    * does not present, the API will determine the period automatically.
    */
-  period?: UnivariateChangePointDetectionOptions;
+  period?: number;
   /**
    * Optional argument, advanced model parameter, a default stableTrendWindow will
    * be used in detection.
    */
-  stableTrendWindow?: UnivariateChangePointDetectionOptions;
+  stableTrendWindow?: number;
   /**
    * Optional argument, advanced model parameter, between 0.0-1.0, the lower the
    * value is, the larger the trend error will be which means less change point will
    * be accepted.
    */
-  threshold?: UnivariateChangePointDetectionOptions;
+  threshold?: number;
 }
-
-/** Detection results for the given resultId. */
-export interface MultivariateDetectionResult {
-  /** Result identifier, which is used to fetch the results of an inference call. */
-  readonly resultId: MultivariateDetectionResult;
-  /** Multivariate anomaly detection status. */
-  summary: MultivariateDetectionResult;
-  /** Detection result for each timestamp. */
-  results: MultivariateDetectionResult;
-}
-
-/** Multivariate anomaly detection status. */
-export interface MultivariateBatchDetectionResultSummary {
-  /** Status of detection results. One of CREATED, RUNNING, READY, and FAILED. */
-  status: MultivariateBatchDetectionResultSummary;
-  /** Error message when detection is failed. */
-  errors?: MultivariateBatchDetectionResultSummary;
-  /** Variable Status. */
-  variableStates?: MultivariateBatchDetectionResultSummary;
-  /**
-   * Detection request for batch inference. This is an asynchronous inference which
-   * will need another API to get detection results.
-   */
-  setupInfo: MultivariateBatchDetectionResultSummary;
-}
-
-/** */
-export type MultivariateBatchDetectionStatus =
-  | "CREATED"
-  | "RUNNING"
-  | "READY"
-  | "FAILED";
 
 /** ErrorResponse contains code and message that shows the error information. */
 export interface ErrorResponse {
   /** The error code. */
-  code: ErrorResponse;
+  code: string;
   /** The message explaining the error reported by the service. */
-  message: ErrorResponse;
+  message: string;
 }
 
 /** Variable Status. */
 export interface VariableState {
   /** Variable name in variable states. */
-  variable?: VariableState;
+  variable?: string;
   /** Proportion of missing values that need to be filled by fillNAMethod. */
-  filledNARatio?: VariableState;
+  filledNARatio?: number;
   /** Number of effective data points before applying fillNAMethod. */
-  effectiveCount?: VariableState;
+  effectiveCount?: number;
   /** First valid timestamp with value of input data. */
-  firstTimestamp?: VariableState;
+  firstTimestamp?: Date | string;
   /** Last valid timestamp with value of input data. */
-  lastTimestamp?: VariableState;
+  lastTimestamp?: Date | string;
 }
 
 /**
@@ -319,85 +145,23 @@ export interface MultivariateBatchDetectionOptions {
    * Azure blob storage based on you data schema selection. The data schema should
    * be exactly the same with those used in the training phase.
    */
-  dataSource: MultivariateBatchDetectionOptions;
+  dataSource: string;
   /**
    * An optional field, which is used to specify the number of top contributed
    * variables for one anomalous timestamp in the response. The default number is
    * 10.
    */
-  topContributorCount: MultivariateBatchDetectionOptions;
+  topContributorCount: number;
   /**
    * A required field, indicating the start time of data for detection, which should
    * be date-time of ISO 8601 format.
    */
-  startTime: MultivariateBatchDetectionOptions;
+  startTime: Date | string;
   /**
    * A required field, indicating the end time of data for detection, which should
    * be date-time of ISO 8601 format.
    */
-  endTime: MultivariateBatchDetectionOptions;
-}
-
-/** Anomaly status and information. */
-export interface AnomalyState {
-  /** The timestamp for this anomaly. */
-  timestamp: AnomalyState;
-  /** The detailed value of this anomalous timestamp. */
-  value?: AnomalyState;
-  /** Error message for the current timestamp. */
-  errors?: AnomalyState;
-}
-
-/** Detailed information of the anomalous timestamp. */
-export interface AnomalyValue {
-  /** True if an anomaly is detected at the current timestamp. */
-  isAnomaly: AnomalyValue;
-  /**
-   * Indicates the significance of the anomaly. The higher the severity, the more
-   * significant the anomaly is.
-   */
-  severity: AnomalyValue;
-  /**
-   * Raw anomaly score of severity, will help indicate the degree of abnormality as
-   * well.
-   */
-  score: AnomalyValue;
-  /** Interpretation of this anomalous timestamp. */
-  interpretation?: AnomalyValue;
-}
-
-/** Interpretation of the anomalous timestamp. */
-export interface AnomalyInterpretation {
-  /** Variable. */
-  variable?: AnomalyInterpretation;
-  /**
-   * This score shows the percentage contributing to the anomalous timestamp. A
-   * number between 0 and 1.
-   */
-  contributionScore?: AnomalyInterpretation;
-  /** Correlation changes among the anomalous variables */
-  correlationChanges?: AnomalyInterpretation;
-}
-
-/** Correlation changes among the anomalous variables */
-export interface CorrelationChanges {
-  /** The correlated variables that have correlation changes under an anomaly. */
-  changedVariables?: CorrelationChanges;
-}
-
-/** Response of getting a model. */
-export interface AnomalyDetectionModel {
-  /** Model identifier. */
-  readonly modelId: AnomalyDetectionModel;
-  /** Date and time (UTC) when the model was created. */
-  createdTime: AnomalyDetectionModel;
-  /** Date and time (UTC) when the model was last updated. */
-  lastUpdatedTime: AnomalyDetectionModel;
-  /**
-   * Training result of a model including its status, errors and diagnostics
-   * information.
-   */
-  modelInfo?: AnomalyDetectionModel;
+  endTime: Date | string;
 }
 
 /**
@@ -410,44 +174,41 @@ export interface ModelInfo {
    * either pointed to an Azure blob storage folder, or pointed to a CSV file in
    * Azure blob storage based on you data schema selection.
    */
-  dataSource: ModelInfo;
+  dataSource: string;
   /**
    * Data schema of input data source: OneTable or MultiTable. The default
    * DataSchema is OneTable.
+   *
+   * Possible values: OneTable, MultiTable
    */
-  dataSchema?: ModelInfo;
+  dataSchema?: string;
   /**
    * A required field, indicating the start time of training data, which should be
    * date-time of ISO 8601 format.
    */
-  startTime: ModelInfo;
+  startTime: Date | string;
   /**
    * A required field, indicating the end time of training data, which should be
    * date-time of ISO 8601 format.
    */
-  endTime: ModelInfo;
+  endTime: Date | string;
   /**
    * An optional field. The display name of the model whose maximum length is 24
    * characters.
    */
-  displayName?: ModelInfo;
+  displayName?: string;
   /**
    * An optional field, indicating how many previous timestamps will be used to
    * detect whether the timestamp is anomaly or not.
    */
-  slidingWindow?: ModelInfo;
+  slidingWindow?: number;
   /** An optional field, indicating the manner to align multiple variables. */
-  alignPolicy?: ModelInfo;
+  alignPolicy?: AlignPolicy;
   /** Model status. One of CREATED, RUNNING, READY, and FAILED. */
-  status?: ModelInfo;
-  /** Error messages when failed to create a model. */
-  readonly errors?: ModelInfo;
+  status?: "CREATED" | "RUNNING" | "READY" | "FAILED";
   /** Diagnostics information to help inspect the states of model or variable. */
-  diagnosticsInfo?: ModelInfo;
+  diagnosticsInfo?: DiagnosticsInfo;
 }
-
-/** Data schema of input data source: OneTable or MultiTable. The default DataSchema is OneTable. */
-export type DataSchema = "OneTable" | "MultiTable";
 
 /** An optional field, indicating the manner to align multiple variables. */
 export interface AlignPolicy {
@@ -455,34 +216,24 @@ export interface AlignPolicy {
    * An optional field, indicating how to align different variables to the same
    * time-range. Either Inner or Outer.
    */
-  alignMode?: AlignPolicy;
+  alignMode?: "Inner" | "Outer";
   /**
    * An optional field, indicating how missing values will be filled. One of
    * Previous, Subsequent, Linear, Zero, Fixed.
+   *
+   * Possible values: Previous, Subsequent, Linear, Zero, Fixed
    */
-  fillNAMethod?: AlignPolicy;
+  fillNAMethod?: string;
   /** An optional field. Required when fillNAMethod is Fixed. */
-  paddingValue?: AlignPolicy;
+  paddingValue?: number;
 }
-
-/** */
-export type AlignMode = "Inner" | "Outer";
-/** An optional field, indicating how missing values will be filled. One of Previous, Subsequent, Linear, Zero, Fixed. */
-export type FillNAMethod =
-  | "Previous"
-  | "Subsequent"
-  | "Linear"
-  | "Zero"
-  | "Fixed";
-/** */
-export type ModelStatus = "CREATED" | "RUNNING" | "READY" | "FAILED";
 
 /** Diagnostics information to help inspect the states of model or variable. */
 export interface DiagnosticsInfo {
   /** Model status. */
-  modelState?: DiagnosticsInfo;
+  modelState?: ModelState;
   /** Variable Status. */
-  variableStates?: DiagnosticsInfo;
+  variableStates?: Array<VariableState>;
 }
 
 /** Model status. */
@@ -491,39 +242,19 @@ export interface ModelState {
    * This indicates the number of passes of the entire training dataset the
    * algorithm has completed.
    */
-  epochIds?: ModelState;
+  epochIds?: number[];
   /**
    * List of metrics used to assess how the model fits the training data for each
    * epoch.
    */
-  trainLosses?: ModelState;
+  trainLosses?: number[];
   /**
    * List of metrics used to assess how the model fits the validation set for each
    * epoch.
    */
-  validationLosses?: ModelState;
+  validationLosses?: number[];
   /** Latency for each epoch. */
-  latenciesInSeconds?: ModelState;
-}
-
-/** Response of listing models. */
-export interface ModelList {
-  /** List of models. */
-  models: ModelList;
-  /** Number of trained multivariate models. */
-  currentCount: ModelList;
-  /** Maximum number of models that can be trained for this Anomaly Detector resource. */
-  maxCount: ModelList;
-  /** The link to fetch more models. */
-  nextLink?: ModelList;
-}
-
-/** Results of last detection. */
-export interface MultivariateLastDetectionResult {
-  /** Variable Status. */
-  variableStates?: MultivariateLastDetectionResult;
-  /** Anomaly status and information. */
-  results?: MultivariateLastDetectionResult;
+  latenciesInSeconds?: number[];
 }
 
 /** Request of last detection. */
@@ -532,21 +263,21 @@ export interface MultivariateLastDetectionOptions {
    * This contains the inference data, including the name, timestamps(ISO 8601) and
    * values of variables.
    */
-  variables: MultivariateLastDetectionOptions;
+  variables: Array<VariableValues>;
   /**
    * An optional field, which is used to specify the number of top contributed
    * variables for one anomalous timestamp in the response. The default number is
    * 10.
    */
-  topContributorCount: MultivariateLastDetectionOptions;
+  topContributorCount: number;
 }
 
 /** Variable values. */
 export interface VariableValues {
   /** Variable name of last detection request. */
-  variable: VariableValues;
+  variable: string;
   /** Timestamps of last detection request */
-  timestamps: VariableValues;
+  timestamps: string[];
   /** Values of variables. */
-  values: VariableValues;
+  values: number[];
 }

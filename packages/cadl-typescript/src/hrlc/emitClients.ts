@@ -13,7 +13,7 @@ export interface ClientSourceFile {
   path: string;
   content: string;
 }
-export function emitClients(codeModel: HrlcCodeModel) {
+export function emitClients(codeModel: HrlcCodeModel, srcPath: string = "src") {
   const project: Project = new Project();
   let files: ClientSourceFile[] = [];
   for (const client of codeModel.clients) {
@@ -75,9 +75,16 @@ export function emitClients(codeModel: HrlcCodeModel) {
         namedImports: ["getClient", "ClientOptions"]
       }
     ]);
-    const operationFiles = emitOperationGroups(client.operationGroups, project);
-    const modelFiles = emitModels(codeModel, project);
-    files.push({ path: `src/${name}.ts`, content: clientFile.getFullText() });
+    const operationFiles = emitOperationGroups(
+      client.operationGroups,
+      project,
+      srcPath
+    );
+    const modelFiles = emitModels(codeModel, project, srcPath);
+    files.push({
+      path: `${srcPath}/src/api/${name}.ts`,
+      content: clientFile.getFullText()
+    });
     files = [...files, ...operationFiles, ...modelFiles];
   }
   return files;

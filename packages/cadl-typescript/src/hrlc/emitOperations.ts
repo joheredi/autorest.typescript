@@ -10,12 +10,14 @@ import {
   OperationGroup,
   Operation,
   Parameter,
-  Property
+  Property,
+  Type
 } from "./hrlcCodeModel.js";
 
 export function emitOperationGroups(
   operationGroups: OperationGroup[],
-  project: Project
+  project: Project,
+  srcPath: string = "src"
 ): File[] {
   const files: File[] = [];
   for (const operationGroup of operationGroups) {
@@ -41,7 +43,7 @@ export function emitOperationGroups(
     });
     files.push({
       content: operationGroupFile.getFullText(),
-      path: `src/${fileName}`
+      path: `${srcPath}/src/api/${fileName}`
     });
   }
 
@@ -57,7 +59,7 @@ function emitOperation(
     operation.bodyParameter?.type.properties ?? []
   )
     .filter((p) => !p.optional)
-    .map((p) => buildParameterType(p, imports));
+    .map((p) => buildParameterType(p.clientName, p.type, imports));
 
   parameters = parameters.concat(
     operation.parameters
@@ -67,19 +69,27 @@ function emitOperation(
           p.type.type !== "constant" &&
           !p.optional
       )
-      .map((p) => buildParameterType(p, imports))
+      .map((p) => buildParameterType(p.clientName, p.type, imports))
   );
 
   parameters.unshift({ name: "context", type: "Client" });
   const optionsType = emitOptionsInterface(operation, sourceFile, imports);
   parameters.push({ name: "options", type: optionsType, initializer: "{}" });
 
+  // TODO: Support operation overloads
+  const response = operation.responses[0]!;
+  const returnType =
+    response?.type?.type === "model"
+      ? buildParameterType(response.type.name!, response.type!, imports)
+      : { name: "", type: "void" };
+
   const operationDeclaration = sourceFile.addFunction({
     docs: [operation.description],
     isAsync: true,
     isExported: true,
     name: operation.name,
-    parameters
+    parameters,
+    returnType: `Promise<${returnType.type}>`
   });
 
   const operationPath = operation.url;
@@ -89,6 +99,48 @@ function emitOperation(
       operation
     )}).${operationMethod}({${getRequestParameters(operation)}});`
   ]);
+
+  const successCodes = getSuccessStatuses(operation);
+
+  operationDeclaration.addStatements([
+    `if(![${successCodes
+      .map((s) => `"${s}"`)
+      .join(",")}].includes(result.status)){`,
+    "throw result.body",
+    "}"
+  ]);
+
+  if (!response?.type?.properties) {
+    operationDeclaration.addStatements([`return;`]);
+  } else {
+    operationDeclaration.addStatements([
+      `return {`,
+      getResponseMapping(response.type.properties ?? []).join(","),
+      `}`
+    ]);
+  }
+}
+
+function getResponseMapping(properties: Property[]) {
+  const props: string[] = [];
+  for (const property of properties) {
+    // TODO: Do we need to also add headers in the result type?
+    props.push(`"${property.restApiName}": result.body.${property.clientName}`);
+  }
+
+  return props;
+}
+function getSuccessStatuses(operation: Operation): number[] {
+  const success: Set<number> = new Set();
+  for (const response of operation.responses) {
+    for (const status of response.statusCodes) {
+      if (status !== "default") {
+        success.add(status);
+      }
+    }
+  }
+
+  return [...success];
 }
 
 function getPathParameters(operation: Operation) {
@@ -218,7 +270,7 @@ function emitOptionsInterface(
       return {
         docs: [p.description],
         hasQuestionToken: true,
-        ...buildParameterType(p, imports)
+        ...buildParameterType(p.clientName, p.type, imports)
       };
     })
   });
@@ -231,10 +283,11 @@ function toPascalCase(name: string): string {
 }
 
 function buildParameterType(
-  p: Parameter | Property,
+  clientName: string,
+  type: Type,
   imports: Record<string, Set<string>>
 ) {
-  let typeMetadata = getType(p.type);
+  let typeMetadata = getType(type);
   let typeName = typeMetadata.name;
   if (typeMetadata.modifier === "Array") {
     typeName = `${typeName}[]`;
@@ -246,5 +299,5 @@ function buildParameterType(
 
     imports[typeMetadata.originModule]!.add(typeMetadata.name);
   }
-  return { name: p.clientName, type: typeName };
+  return { name: clientName, type: typeName };
 }
