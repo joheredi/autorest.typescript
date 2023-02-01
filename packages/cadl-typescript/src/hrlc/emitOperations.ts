@@ -7,20 +7,20 @@ import {
 } from "ts-morph";
 import { getType } from "./getType.js";
 import {
-  OperationGroup,
   Operation,
   Parameter,
   Property,
-  Type
+  Type,
+  Client
 } from "./hrlcCodeModel.js";
 
 export function emitOperationGroups(
-  operationGroups: OperationGroup[],
+  client: Client,
   project: Project,
   srcPath: string = "src"
 ): File[] {
   const files: File[] = [];
-  for (const operationGroup of operationGroups) {
+  for (const operationGroup of client.operationGroups) {
     const imports: Record<string, Set<string>> = {};
     const fileName = operationGroup.className
       ? `${operationGroup.className}.ts`
@@ -37,10 +37,16 @@ export function emitOperationGroups(
         namedImports: [...imports[module]!]
       });
     }
-    operationGroupFile.addImportDeclaration({
-      moduleSpecifier: "@azure-rest/core-client",
-      namedImports: ["Client", "RequestParameters"]
-    });
+    operationGroupFile.addImportDeclarations([
+      {
+        moduleSpecifier: "../index.js",
+        namedImports: [`${client.name} as Client`, "isUnexpected"]
+      },
+      {
+        moduleSpecifier: "@azure-rest/core-client",
+        namedImports: [`RequestParameters`]
+      }
+    ]);
     files.push({
       content: operationGroupFile.getFullText(),
       path: `${srcPath}/src/api/${fileName}`
@@ -95,17 +101,13 @@ function emitOperation(
   const operationPath = operation.url;
   const operationMethod = operation.method.toLowerCase();
   operationDeclaration.addStatements([
-    `const result = await context.pathUnchecked("${operationPath}", ${getPathParameters(
+    `const result = await context.path("${operationPath}", ${getPathParameters(
       operation
     )}).${operationMethod}({${getRequestParameters(operation)}});`
   ]);
 
-  const successCodes = getSuccessStatuses(operation);
-
   operationDeclaration.addStatements([
-    `if(![${successCodes
-      .map((s) => `"${s}"`)
-      .join(",")}].includes(result.status)){`,
+    `if(isUnexpected(result)){`,
     "throw result.body",
     "}"
   ]);
@@ -121,27 +123,80 @@ function emitOperation(
   }
 }
 
-function getResponseMapping(properties: Property[]) {
+function getResponseMapping(
+  properties: Property[],
+  propertyPath: string = "result.body"
+) {
   const props: string[] = [];
   for (const property of properties) {
     // TODO: Do we need to also add headers in the result type?
-    props.push(`"${property.restApiName}": result.body.${property.clientName}`);
+    if (property.type.type === "model") {
+      props.push(
+        `"${property.restApiName}": {${getResponseMapping(
+          property.type.properties ?? [],
+          `${propertyPath}.${property.restApiName}${
+            property.optional ? "?" : ""
+          }`
+        )}}`
+      );
+    } else {
+      const restValue = `${propertyPath ? `${propertyPath}.` : "."}${
+        property.clientName
+      }`;
+      props.push(
+        `"${property.restApiName}": ${deserializeResponseValue(
+          property.type,
+          restValue
+        )}`
+      );
+    }
   }
 
   return props;
 }
-function getSuccessStatuses(operation: Operation): number[] {
-  const success: Set<number> = new Set();
-  for (const response of operation.responses) {
-    for (const status of response.statusCodes) {
-      if (status !== "default") {
-        success.add(status);
-      }
-    }
-  }
 
-  return [...success];
+function deserializeResponseValue(type: Type, restValue: string): string {
+  switch (type.type) {
+    case "datetime":
+      return `new Date(${restValue} ?? "")`;
+    case "list":
+      if (type.elementType?.type === "model") {
+        return `(${restValue} ?? []).map(p => ({${getResponseMapping(
+          type.elementType?.properties ?? [],
+          "p"
+        )}}))`;
+      } else if (
+        type.elementType?.properties?.some((p) => needsDeserialize(p.type))
+      ) {
+        return `(${restValue} ?? []).map(p => ${deserializeResponseValue(
+          type.elementType!,
+          "p"
+        )})`;
+      } else {
+        return restValue;
+      }
+
+    default:
+      return restValue;
+  }
 }
+
+function needsDeserialize(type?: Type) {
+  return type?.type === "datetime" || type?.type === "model";
+}
+
+// function getSuccessStatuses(operation: Operation): number[] {
+//   const success: Set<number> = new Set();
+//   for (const response of operation.responses) {
+//     for (const status of response.statusCodes) {
+//       if (status !== "default") {
+//         success.add(status);
+//       }
+//     }
+//   }
+
+//   return [...success];
+// }
 
 function getPathParameters(operation: Operation) {
   if (!operation.parameters) {

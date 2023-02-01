@@ -19,7 +19,8 @@ import {
   VariableValues,
   MultivariateLastDetectionResult,
 } from "./models.js";
-import { Client, RequestParameters } from "@azure-rest/core-client";
+import { AnomalyDetectorClient as Client, isUnexpected } from "../index.js";
+import { RequestParameters } from "@azure-rest/core-client";
 
 interface DetectUnivariateEntireSeriesOptions extends RequestParameters {
   /**
@@ -73,7 +74,7 @@ export async function detectUnivariateEntireSeries(
   series: TimeSeriesPoint[],
   options: DetectUnivariateEntireSeriesOptions = {}
 ): Promise<UnivariateEntireDetectionResult> {
-  const result = await context.pathUnchecked("/timeseries/entire/detect").post({
+  const result = await context.path("/timeseries/entire/detect").post({
     headers: {
       Accept: options.accept ?? "application/json",
       "Content-Type": options.content_type ?? "application/json",
@@ -89,7 +90,7 @@ export async function detectUnivariateEntireSeries(
       imputeFixedValue: options.imputeFixedValue,
     },
   });
-  if (!["200"].includes(result.status)) {
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return {
@@ -154,7 +155,7 @@ export async function detectUnivariateLastPoint(
   series: TimeSeriesPoint[],
   options: DetectUnivariateLastPointOptions = {}
 ): Promise<UnivariateLastDetectionResult> {
-  const result = await context.pathUnchecked("/timeseries/last/detect").post({
+  const result = await context.path("/timeseries/last/detect").post({
     headers: {
       Accept: options.accept ?? "application/json",
       "Content-Type": options.content_type ?? "application/json",
@@ -170,7 +171,7 @@ export async function detectUnivariateLastPoint(
       imputeFixedValue: options.imputeFixedValue,
     },
   });
-  if (!["200"].includes(result.status)) {
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return {
@@ -220,23 +221,21 @@ export async function detectUnivariateChangePoint(
   granularity: TimeGranularity,
   options: DetectUnivariateChangePointOptions = {}
 ): Promise<UnivariateChangePointDetectionResult> {
-  const result = await context
-    .pathUnchecked("/timeseries/changepoint/detect")
-    .post({
-      headers: {
-        Accept: options.accept ?? "application/json",
-        "Content-Type": options.content_type ?? "application/json",
-      },
-      body: {
-        series: series,
-        granularity: granularity,
-        customInterval: options.customInterval,
-        period: options.period,
-        stableTrendWindow: options.stableTrendWindow,
-        threshold: options.threshold,
-      },
-    });
-  if (!["200"].includes(result.status)) {
+  const result = await context.path("/timeseries/changepoint/detect").post({
+    headers: {
+      Accept: options.accept ?? "application/json",
+      "Content-Type": options.content_type ?? "application/json",
+    },
+    body: {
+      series: series,
+      granularity: granularity,
+      customInterval: options.customInterval,
+      period: options.period,
+      stableTrendWindow: options.stableTrendWindow,
+      threshold: options.threshold,
+    },
+  });
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return {
@@ -259,17 +258,54 @@ export async function getMultivariateBatchDetectionResult(
   options: GetMultivariateBatchDetectionResultOptions = {}
 ): Promise<MultivariateDetectionResult> {
   const result = await context
-    .pathUnchecked("/multivariate/detect-batch/{resultId}", result_id)
+    .path("/multivariate/detect-batch/{resultId}", result_id)
     .get({
       headers: { Accept: options.accept ?? "application/json" },
     });
-  if (!["200"].includes(result.status)) {
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return {
     resultId: result.body.resultId,
-    summary: result.body.summary,
-    results: result.body.results,
+    summary: {
+      status: result.body.summary.status,
+      errors: (result.body.summary.errors ?? []).map((p) => ({
+        code: p.code,
+        message: p.message,
+      })),
+      variableStates: (result.body.summary.variableStates ?? []).map((p) => ({
+        variable: p.variable,
+        filledNARatio: p.filledNARatio,
+        effectiveCount: p.effectiveCount,
+        firstTimestamp: new Date(p.firstTimestamp ?? ""),
+        lastTimestamp: new Date(p.lastTimestamp ?? ""),
+      })),
+      setupInfo: {
+        dataSource: result.body.summary.setupInfo.dataSource,
+        topContributorCount: result.body.summary.setupInfo.topContributorCount,
+        startTime: new Date(result.body.summary.setupInfo.startTime ?? ""),
+        endTime: new Date(result.body.summary.setupInfo.endTime ?? ""),
+      },
+    },
+    results: (result.body.results ?? []).map((p) => ({
+      timestamp: new Date(p.timestamp ?? ""),
+      value: {
+        isAnomaly: p.value?.isAnomaly,
+        severity: p.value?.severity,
+        score: p.value?.score,
+        interpretation: (p.value?.interpretation ?? []).map((p) => ({
+          variable: p.variable,
+          contributionScore: p.contributionScore,
+          correlationChanges: {
+            changedVariables: p.correlationChanges?.changedVariables,
+          },
+        })),
+      },
+      errors: (p.errors ?? []).map((p) => ({
+        code: p.code,
+        message: p.message,
+      })),
+    })),
   };
 }
 
@@ -317,7 +353,7 @@ export async function trainMultivariateModel(
   endTime: Date,
   options: TrainMultivariateModelOptions = {}
 ): Promise<AnomalyDetectionModel> {
-  const result = await context.pathUnchecked("/multivariate/models").post({
+  const result = await context.path("/multivariate/models").post({
     headers: {
       Accept: options.accept ?? "application/json",
       "Content-Type": options.content_type ?? "application/json",
@@ -335,14 +371,54 @@ export async function trainMultivariateModel(
       diagnosticsInfo: options.diagnosticsInfo,
     },
   });
-  if (!["201"].includes(result.status)) {
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return {
     modelId: result.body.modelId,
-    createdTime: result.body.createdTime,
-    lastUpdatedTime: result.body.lastUpdatedTime,
-    modelInfo: result.body.modelInfo,
+    createdTime: new Date(result.body.createdTime ?? ""),
+    lastUpdatedTime: new Date(result.body.lastUpdatedTime ?? ""),
+    modelInfo: {
+      dataSource: result.body.modelInfo?.dataSource,
+      dataSchema: result.body.modelInfo?.dataSchema,
+      startTime: new Date(result.body.modelInfo?.startTime ?? ""),
+      endTime: new Date(result.body.modelInfo?.endTime ?? ""),
+      displayName: result.body.modelInfo?.displayName,
+      slidingWindow: result.body.modelInfo?.slidingWindow,
+      alignPolicy: {
+        alignMode: result.body.modelInfo?.alignPolicy?.alignMode,
+        fillNAMethod: result.body.modelInfo?.alignPolicy?.fillNAMethod,
+        paddingValue: result.body.modelInfo?.alignPolicy?.paddingValue,
+      },
+      status: result.body.modelInfo?.status,
+      errors: (result.body.modelInfo?.errors ?? []).map((p) => ({
+        code: p.code,
+        message: p.message,
+      })),
+      diagnosticsInfo: {
+        modelState: {
+          epochIds:
+            result.body.modelInfo?.diagnosticsInfo?.modelState?.epochIds,
+          trainLosses:
+            result.body.modelInfo?.diagnosticsInfo?.modelState?.trainLosses,
+          validationLosses:
+            result.body.modelInfo?.diagnosticsInfo?.modelState
+              ?.validationLosses,
+          latenciesInSeconds:
+            result.body.modelInfo?.diagnosticsInfo?.modelState
+              ?.latenciesInSeconds,
+        },
+        variableStates: (
+          result.body.modelInfo?.diagnosticsInfo?.variableStates ?? []
+        ).map((p) => ({
+          variable: p.variable,
+          filledNARatio: p.filledNARatio,
+          effectiveCount: p.effectiveCount,
+          firstTimestamp: new Date(p.firstTimestamp ?? ""),
+          lastTimestamp: new Date(p.lastTimestamp ?? ""),
+        })),
+      },
+    },
   };
 }
 
@@ -358,15 +434,56 @@ export async function listMultivariateModels(
   context: Client,
   options: ListMultivariateModelsOptions = {}
 ): Promise<ModelList> {
-  const result = await context.pathUnchecked("/multivariate/models").get({
+  const result = await context.path("/multivariate/models").get({
     headers: { Accept: options.accept ?? "application/json" },
     queryParameters: { skip: options.skip, top: options.top },
   });
-  if (!["200"].includes(result.status)) {
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return {
-    models: result.body.models,
+    models: (result.body.models ?? []).map((p) => ({
+      modelId: p.modelId,
+      createdTime: new Date(p.createdTime ?? ""),
+      lastUpdatedTime: new Date(p.lastUpdatedTime ?? ""),
+      modelInfo: {
+        dataSource: p.modelInfo?.dataSource,
+        dataSchema: p.modelInfo?.dataSchema,
+        startTime: new Date(p.modelInfo?.startTime ?? ""),
+        endTime: new Date(p.modelInfo?.endTime ?? ""),
+        displayName: p.modelInfo?.displayName,
+        slidingWindow: p.modelInfo?.slidingWindow,
+        alignPolicy: {
+          alignMode: p.modelInfo?.alignPolicy?.alignMode,
+          fillNAMethod: p.modelInfo?.alignPolicy?.fillNAMethod,
+          paddingValue: p.modelInfo?.alignPolicy?.paddingValue,
+        },
+        status: p.modelInfo?.status,
+        errors: (p.modelInfo?.errors ?? []).map((p) => ({
+          code: p.code,
+          message: p.message,
+        })),
+        diagnosticsInfo: {
+          modelState: {
+            epochIds: p.modelInfo?.diagnosticsInfo?.modelState?.epochIds,
+            trainLosses: p.modelInfo?.diagnosticsInfo?.modelState?.trainLosses,
+            validationLosses:
+              p.modelInfo?.diagnosticsInfo?.modelState?.validationLosses,
+            latenciesInSeconds:
+              p.modelInfo?.diagnosticsInfo?.modelState?.latenciesInSeconds,
+          },
+          variableStates: (
+            p.modelInfo?.diagnosticsInfo?.variableStates ?? []
+          ).map((p) => ({
+            variable: p.variable,
+            filledNARatio: p.filledNARatio,
+            effectiveCount: p.effectiveCount,
+            firstTimestamp: new Date(p.firstTimestamp ?? ""),
+            lastTimestamp: new Date(p.lastTimestamp ?? ""),
+          })),
+        },
+      },
+    })),
     currentCount: result.body.currentCount,
     maxCount: result.body.maxCount,
     nextLink: result.body.nextLink,
@@ -382,11 +499,11 @@ export async function deleteMultivariateModel(
   options: DeleteMultivariateModelOptions = {}
 ): Promise<void> {
   const result = await context
-    .pathUnchecked("/multivariate/models/{modelId}", model_id)
+    .path("/multivariate/models/{modelId}", model_id)
     .delete({
       headers: { Accept: options.accept ?? "application/json" },
     });
-  if (!["204"].includes(result.status)) {
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return;
@@ -404,18 +521,58 @@ export async function getMultivariateModel(
   options: GetMultivariateModelOptions = {}
 ): Promise<AnomalyDetectionModel> {
   const result = await context
-    .pathUnchecked("/multivariate/models/{modelId}", model_id)
+    .path("/multivariate/models/{modelId}", model_id)
     .get({
       headers: { Accept: options.accept ?? "application/json" },
     });
-  if (!["200"].includes(result.status)) {
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return {
     modelId: result.body.modelId,
-    createdTime: result.body.createdTime,
-    lastUpdatedTime: result.body.lastUpdatedTime,
-    modelInfo: result.body.modelInfo,
+    createdTime: new Date(result.body.createdTime ?? ""),
+    lastUpdatedTime: new Date(result.body.lastUpdatedTime ?? ""),
+    modelInfo: {
+      dataSource: result.body.modelInfo?.dataSource,
+      dataSchema: result.body.modelInfo?.dataSchema,
+      startTime: new Date(result.body.modelInfo?.startTime ?? ""),
+      endTime: new Date(result.body.modelInfo?.endTime ?? ""),
+      displayName: result.body.modelInfo?.displayName,
+      slidingWindow: result.body.modelInfo?.slidingWindow,
+      alignPolicy: {
+        alignMode: result.body.modelInfo?.alignPolicy?.alignMode,
+        fillNAMethod: result.body.modelInfo?.alignPolicy?.fillNAMethod,
+        paddingValue: result.body.modelInfo?.alignPolicy?.paddingValue,
+      },
+      status: result.body.modelInfo?.status,
+      errors: (result.body.modelInfo?.errors ?? []).map((p) => ({
+        code: p.code,
+        message: p.message,
+      })),
+      diagnosticsInfo: {
+        modelState: {
+          epochIds:
+            result.body.modelInfo?.diagnosticsInfo?.modelState?.epochIds,
+          trainLosses:
+            result.body.modelInfo?.diagnosticsInfo?.modelState?.trainLosses,
+          validationLosses:
+            result.body.modelInfo?.diagnosticsInfo?.modelState
+              ?.validationLosses,
+          latenciesInSeconds:
+            result.body.modelInfo?.diagnosticsInfo?.modelState
+              ?.latenciesInSeconds,
+        },
+        variableStates: (
+          result.body.modelInfo?.diagnosticsInfo?.variableStates ?? []
+        ).map((p) => ({
+          variable: p.variable,
+          filledNARatio: p.filledNARatio,
+          effectiveCount: p.effectiveCount,
+          firstTimestamp: new Date(p.firstTimestamp ?? ""),
+          lastTimestamp: new Date(p.lastTimestamp ?? ""),
+        })),
+      },
+    },
   };
 }
 
@@ -442,7 +599,7 @@ export async function detectMultivariateBatchAnomaly(
   options: DetectMultivariateBatchAnomalyOptions = {}
 ): Promise<MultivariateDetectionResult> {
   const result = await context
-    .pathUnchecked("/multivariate/models/{modelId}:detect-batch", model_id)
+    .path("/multivariate/models/{modelId}:detect-batch", model_id)
     .post({
       headers: {
         Accept: options.accept ?? "application/json",
@@ -455,13 +612,50 @@ export async function detectMultivariateBatchAnomaly(
         endTime: endTime,
       },
     });
-  if (!["202"].includes(result.status)) {
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return {
     resultId: result.body.resultId,
-    summary: result.body.summary,
-    results: result.body.results,
+    summary: {
+      status: result.body.summary.status,
+      errors: (result.body.summary.errors ?? []).map((p) => ({
+        code: p.code,
+        message: p.message,
+      })),
+      variableStates: (result.body.summary.variableStates ?? []).map((p) => ({
+        variable: p.variable,
+        filledNARatio: p.filledNARatio,
+        effectiveCount: p.effectiveCount,
+        firstTimestamp: new Date(p.firstTimestamp ?? ""),
+        lastTimestamp: new Date(p.lastTimestamp ?? ""),
+      })),
+      setupInfo: {
+        dataSource: result.body.summary.setupInfo.dataSource,
+        topContributorCount: result.body.summary.setupInfo.topContributorCount,
+        startTime: new Date(result.body.summary.setupInfo.startTime ?? ""),
+        endTime: new Date(result.body.summary.setupInfo.endTime ?? ""),
+      },
+    },
+    results: (result.body.results ?? []).map((p) => ({
+      timestamp: new Date(p.timestamp ?? ""),
+      value: {
+        isAnomaly: p.value?.isAnomaly,
+        severity: p.value?.severity,
+        score: p.value?.score,
+        interpretation: (p.value?.interpretation ?? []).map((p) => ({
+          variable: p.variable,
+          contributionScore: p.contributionScore,
+          correlationChanges: {
+            changedVariables: p.correlationChanges?.changedVariables,
+          },
+        })),
+      },
+      errors: (p.errors ?? []).map((p) => ({
+        code: p.code,
+        message: p.message,
+      })),
+    })),
   };
 }
 
@@ -484,7 +678,7 @@ export async function detectMultivariateLastAnomaly(
   options: DetectMultivariateLastAnomalyOptions = {}
 ): Promise<MultivariateLastDetectionResult> {
   const result = await context
-    .pathUnchecked("/multivariate/models/{modelId}:detect-last", model_id)
+    .path("/multivariate/models/{modelId}:detect-last", model_id)
     .post({
       headers: {
         Accept: options.accept ?? "application/json",
@@ -492,11 +686,35 @@ export async function detectMultivariateLastAnomaly(
       },
       body: { variables: variables, topContributorCount: topContributorCount },
     });
-  if (!["200"].includes(result.status)) {
+  if (isUnexpected(result)) {
     throw result.body;
   }
   return {
-    variableStates: result.body.variableStates,
-    results: result.body.results,
+    variableStates: (result.body.variableStates ?? []).map((p) => ({
+      variable: p.variable,
+      filledNARatio: p.filledNARatio,
+      effectiveCount: p.effectiveCount,
+      firstTimestamp: new Date(p.firstTimestamp ?? ""),
+      lastTimestamp: new Date(p.lastTimestamp ?? ""),
+    })),
+    results: (result.body.results ?? []).map((p) => ({
+      timestamp: new Date(p.timestamp ?? ""),
+      value: {
+        isAnomaly: p.value?.isAnomaly,
+        severity: p.value?.severity,
+        score: p.value?.score,
+        interpretation: (p.value?.interpretation ?? []).map((p) => ({
+          variable: p.variable,
+          contributionScore: p.contributionScore,
+          correlationChanges: {
+            changedVariables: p.correlationChanges?.changedVariables,
+          },
+        })),
+      },
+      errors: (p.errors ?? []).map((p) => ({
+        code: p.code,
+        message: p.message,
+      })),
+    })),
   };
 }

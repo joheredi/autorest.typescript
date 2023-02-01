@@ -28,11 +28,12 @@ export function emitClients(codeModel: HrlcCodeModel, srcPath: string = "src") {
             type: getParameterType(p)
           };
         }),
-      { name: "options", type: "ClientOptions", initializer: "{}" }
+      { name: "options", type: `${name}Options`, initializer: "{}" }
     ];
     const factoryFunction = clientFile.addFunction({
       docs: [description],
       name: `create${name}`,
+      returnType: `${name}`,
       parameters: params,
       isExported: true
     });
@@ -71,15 +72,12 @@ export function emitClients(codeModel: HrlcCodeModel, srcPath: string = "src") {
 
     clientFile.addImportDeclarations([
       {
-        moduleSpecifier: "@azure-rest/core-client",
-        namedImports: ["getClient", "ClientOptions"]
+        moduleSpecifier: "../index.js",
+        defaultImport: "getClient",
+        namedImports: [name, `${name}Options`]
       }
     ]);
-    const operationFiles = emitOperationGroups(
-      client.operationGroups,
-      project,
-      srcPath
-    );
+    const operationFiles = emitOperationGroups(client, project, srcPath);
     const modelFiles = emitModels(codeModel, project, srcPath);
     files.push({
       path: `${srcPath}/src/api/${name}.ts`,

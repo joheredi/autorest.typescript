@@ -34,12 +34,17 @@ export function emitModels(
         isExported: true,
         docs: [model.description ?? ""],
         properties: properties.map((p) => {
+          const propertyMetadata = getType(p.type);
+          let propertyTypeName = propertyMetadata.name;
+          if (propertyMetadata.modifier === "Array") {
+            propertyTypeName = `${propertyTypeName}[]`;
+          }
           return {
             name: p.clientName,
             docs: [p.description],
             hasQuestionToken: p.optional,
             isReadonly: p.readonly,
-            type: getType(p.type).name
+            type: propertyTypeName
           };
         })
       });

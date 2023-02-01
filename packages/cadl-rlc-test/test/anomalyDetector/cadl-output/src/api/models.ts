@@ -12,7 +12,7 @@ export interface UnivariateEntireDetectionResult {
    * ExpectedValues contain expected value for each input point. The index of the
    * array is consistent with the input series.
    */
-  expectedValues: number;
+  expectedValues: number[];
   /**
    * UpperMargins contain upper margin of each input point. UpperMargin is used to
    * calculate upperBoundary, which equals to expectedValue + (100 -
@@ -21,7 +21,7 @@ export interface UnivariateEntireDetectionResult {
    * significant anomalies can be filtered in client side. The index of the array is
    * consistent with the input series.
    */
-  upperMargins: number;
+  upperMargins: number[];
   /**
    * LowerMargins contain lower margin of each input point. LowerMargin is used to
    * calculate lowerBoundary, which equals to expectedValue - (100 -
@@ -29,32 +29,32 @@ export interface UnivariateEntireDetectionResult {
    * ones in client side. The index of the array is consistent with the input
    * series.
    */
-  lowerMargins: number;
+  lowerMargins: number[];
   /**
    * IsAnomaly contains anomaly properties for each input point. True means an
    * anomaly either negative or positive has been detected. The index of the array
    * is consistent with the input series.
    */
-  isAnomaly: boolean;
+  isAnomaly: boolean[];
   /**
    * IsNegativeAnomaly contains anomaly status in negative direction for each input
    * point. True means a negative anomaly has been detected. A negative anomaly
    * means the point is detected as an anomaly and its real value is smaller than
    * the expected one. The index of the array is consistent with the input series.
    */
-  isNegativeAnomaly: boolean;
+  isNegativeAnomaly: boolean[];
   /**
    * IsPositiveAnomaly contain anomaly status in positive direction for each input
    * point. True means a positive anomaly has been detected. A positive anomaly
    * means the point is detected as an anomaly and its real value is larger than the
    * expected one. The index of the array is consistent with the input series.
    */
-  isPositiveAnomaly: boolean;
+  isPositiveAnomaly: boolean[];
   /**
    * The severity score for each input point. The larger the value is, the more
    * sever the anomaly is. For normal points, the "severity" is always 0.
    */
-  severity?: number;
+  severity?: number[];
 }
 
 /** Error information returned by the API. */
@@ -87,7 +87,7 @@ export interface UnivariateDetectionOptions {
    * correctly or there is duplicated timestamp, the API will not work. In such
    * case, an error message will be returned.
    */
-  series: TimeSeriesPoint;
+  series: TimeSeriesPoint[];
   /**
    * Optional argument, can be one of yearly, monthly, weekly, daily, hourly,
    * minutely, secondly, microsecond or none. If granularity is not present, it will
@@ -213,9 +213,9 @@ export interface UnivariateChangePointDetectionResult {
    * an anomaly either negative or positive has been detected. The index of the
    * array is consistent with the input series.
    */
-  isChangePoint?: boolean;
+  isChangePoint?: boolean[];
   /** the change point confidence of each point */
-  confidenceScores?: number;
+  confidenceScores?: number[];
 }
 
 /** The request of change point detection. */
@@ -224,7 +224,7 @@ export interface UnivariateChangePointDetectionOptions {
    * Time series data points. Points should be sorted by timestamp in ascending
    * order to match the change point detection result.
    */
-  series: TimeSeriesPoint;
+  series: TimeSeriesPoint[];
   /**
    * Can only be one of yearly, monthly, weekly, daily, hourly, minutely or
    * secondly. Granularity is used for verify whether input series is valid.
@@ -261,7 +261,7 @@ export interface MultivariateDetectionResult {
   /** Multivariate anomaly detection status. */
   summary: MultivariateBatchDetectionResultSummary;
   /** Detection result for each timestamp. */
-  results: AnomalyState;
+  results: AnomalyState[];
 }
 
 /** Multivariate anomaly detection status. */
@@ -269,9 +269,9 @@ export interface MultivariateBatchDetectionResultSummary {
   /** Status of detection results. One of CREATED, RUNNING, READY, and FAILED. */
   status: MultivariateBatchDetectionStatus;
   /** Error message when detection is failed. */
-  errors?: ErrorResponse;
+  errors?: ErrorResponse[];
   /** Variable Status. */
-  variableStates?: VariableState;
+  variableStates?: VariableState[];
   /**
    * Detection request for batch inference. This is an asynchronous inference which
    * will need another API to get detection results.
@@ -345,7 +345,7 @@ export interface AnomalyState {
   /** The detailed value of this anomalous timestamp. */
   value?: AnomalyValue;
   /** Error message for the current timestamp. */
-  errors?: ErrorResponse;
+  errors?: ErrorResponse[];
 }
 
 /** Detailed information of the anomalous timestamp. */
@@ -363,7 +363,7 @@ export interface AnomalyValue {
    */
   score: number;
   /** Interpretation of this anomalous timestamp. */
-  interpretation?: AnomalyInterpretation;
+  interpretation?: AnomalyInterpretation[];
 }
 
 /** Interpretation of the anomalous timestamp. */
@@ -382,7 +382,7 @@ export interface AnomalyInterpretation {
 /** Correlation changes among the anomalous variables */
 export interface CorrelationChanges {
   /** The correlated variables that have correlation changes under an anomaly. */
-  changedVariables?: string;
+  changedVariables?: string[];
 }
 
 /** Response of getting a model. */
@@ -441,7 +441,7 @@ export interface ModelInfo {
   /** Model status. One of CREATED, RUNNING, READY, and FAILED. */
   status?: ModelStatus;
   /** Error messages when failed to create a model. */
-  readonly errors?: ErrorResponse;
+  readonly errors?: ErrorResponse[];
   /** Diagnostics information to help inspect the states of model or variable. */
   diagnosticsInfo?: DiagnosticsInfo;
 }
@@ -482,7 +482,7 @@ export interface DiagnosticsInfo {
   /** Model status. */
   modelState?: ModelState;
   /** Variable Status. */
-  variableStates?: VariableState;
+  variableStates?: VariableState[];
 }
 
 /** Model status. */
@@ -491,25 +491,25 @@ export interface ModelState {
    * This indicates the number of passes of the entire training dataset the
    * algorithm has completed.
    */
-  epochIds?: number;
+  epochIds?: number[];
   /**
    * List of metrics used to assess how the model fits the training data for each
    * epoch.
    */
-  trainLosses?: number;
+  trainLosses?: number[];
   /**
    * List of metrics used to assess how the model fits the validation set for each
    * epoch.
    */
-  validationLosses?: number;
+  validationLosses?: number[];
   /** Latency for each epoch. */
-  latenciesInSeconds?: number;
+  latenciesInSeconds?: number[];
 }
 
 /** Response of listing models. */
 export interface ModelList {
   /** List of models. */
-  models: AnomalyDetectionModel;
+  models: AnomalyDetectionModel[];
   /** Number of trained multivariate models. */
   currentCount: number;
   /** Maximum number of models that can be trained for this Anomaly Detector resource. */
@@ -521,9 +521,9 @@ export interface ModelList {
 /** Results of last detection. */
 export interface MultivariateLastDetectionResult {
   /** Variable Status. */
-  variableStates?: VariableState;
+  variableStates?: VariableState[];
   /** Anomaly status and information. */
-  results?: AnomalyState;
+  results?: AnomalyState[];
 }
 
 /** Request of last detection. */
@@ -532,7 +532,7 @@ export interface MultivariateLastDetectionOptions {
    * This contains the inference data, including the name, timestamps(ISO 8601) and
    * values of variables.
    */
-  variables: VariableValues;
+  variables: VariableValues[];
   /**
    * An optional field, which is used to specify the number of top contributed
    * variables for one anomalous timestamp in the response. The default number is
@@ -546,7 +546,7 @@ export interface VariableValues {
   /** Variable name of last detection request. */
   variable: string;
   /** Timestamps of last detection request */
-  timestamps: string;
+  timestamps: string[];
   /** Values of variables. */
-  values: number;
+  values: number[];
 }

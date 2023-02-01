@@ -2,7 +2,10 @@
 // Licensed under the MIT license.
 
 import { AzureKeyCredential } from "@azure/core-auth";
-import { getClient, ClientOptions } from "@azure-rest/core-client";
+import getClient, {
+  AnomalyDetectorClient,
+  AnomalyDetectorClientOptions,
+} from "../index.js";
 
 /**
  * The Anomaly Detector API detects anomalies automatically in time series data.
@@ -25,8 +28,8 @@ import { getClient, ClientOptions } from "@azure-rest/core-client";
 export function createAnomalyDetectorClient(
   endpoint: string,
   credential: AzureKeyCredential,
-  options: ClientOptions = {}
-) {
+  options: AnomalyDetectorClientOptions = {}
+): AnomalyDetectorClient {
   const baseUrl = endpoint;
   options.credentials = {
     ...options.credentials,
