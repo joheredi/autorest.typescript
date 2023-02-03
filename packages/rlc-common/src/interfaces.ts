@@ -101,6 +101,7 @@ export interface RLCOptions {
   serviceInfo?: ServiceInfo;
   azureArm?: boolean;
   sourceFrom?: "Cadl" | "Swagger";
+  isHrlc?: boolean;
 }
 
 export interface ServiceInfo {

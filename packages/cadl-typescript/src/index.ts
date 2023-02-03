@@ -37,14 +37,16 @@ import { emitClients } from "./hrlc/emitClients.js";
 export async function $onEmit(context: EmitContext) {
   const program: Program = context.program;
   const options: RLCOptions = context.options;
-  const clients = listClients(program);
-  const hrlc = emitCodeModel(context, { casing: "camel" });
-  const hrlcClients = emitClients(hrlc, context.emitterOutputDir);
   clearSrcFolder(context.emitterOutputDir);
+  const clients = listClients(program);
 
-  for (const hrlcClient of hrlcClients) {
-    emitContentByBuilder(program, () => hrlcClient, hrlc as any);
-    // emitFile(program, { content: hrlcClient.content, path: hrlcClient.path });
+  if (options.isHrlc) {
+    const hrlc = emitCodeModel(context, { casing: "camel" });
+    const hrlcClients = emitClients(hrlc, context.emitterOutputDir);
+    for (const hrlcClient of hrlcClients) {
+      emitContentByBuilder(program, () => hrlcClient, hrlc as any);
+      // emitFile(program, { content: hrlcClient.content, path: hrlcClient.path });
+    }
   }
 
   for (const client of clients) {

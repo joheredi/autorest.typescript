@@ -39,7 +39,7 @@ export function emitOperationGroups(
     }
     operationGroupFile.addImportDeclarations([
       {
-        moduleSpecifier: "../index.js",
+        moduleSpecifier: "../rest/index.js",
         namedImports: [`${client.name} as Client`, "isUnexpected"]
       },
       {

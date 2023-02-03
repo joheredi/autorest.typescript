@@ -13,6 +13,7 @@ export const RLCOptionsSchema: JSONSchemaType<RLCOptions> = {
   type: "object",
   additionalProperties: true,
   properties: {
+    isHrlc: { type: "boolean", nullable: true },
     includeShortcuts: { type: "boolean", nullable: true },
     multiClient: { type: "boolean", nullable: true },
     batch: {

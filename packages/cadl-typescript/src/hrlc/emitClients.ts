@@ -72,7 +72,7 @@ export function emitClients(codeModel: HrlcCodeModel, srcPath: string = "src") {
 
     clientFile.addImportDeclarations([
       {
-        moduleSpecifier: "../index.js",
+        moduleSpecifier: "../rest/index.js",
         defaultImport: "getClient",
         namedImports: [name, `${name}Options`]
       }

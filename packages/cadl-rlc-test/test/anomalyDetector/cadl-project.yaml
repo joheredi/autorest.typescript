@@ -5,6 +5,7 @@ options:
   "@azure-tools/cadl-typescript":
     generateMetadata: true
     generateTest: true
+    isHrlc: true
     azureSdkForJs: false
     "emitter-output-dir": "{output-dir}"
     packageDetails:

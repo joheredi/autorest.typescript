@@ -58,6 +58,7 @@ export async function transformRLCModel(
   const srcPath = join(
     emitterOutputDir ?? "",
     "src",
+    options.isHrlc ? "rest" : "",
     options.batch && options.batch.length > 1
       ? normalizeName(client.name.replace("Client", ""), NameType.File)
       : ""

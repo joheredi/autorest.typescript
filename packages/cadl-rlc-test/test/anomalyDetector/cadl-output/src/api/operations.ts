@@ -19,10 +19,13 @@ import {
   VariableValues,
   MultivariateLastDetectionResult,
 } from "./models.js";
-import { AnomalyDetectorClient as Client, isUnexpected } from "../index.js";
+import {
+  AnomalyDetectorClient as Client,
+  isUnexpected,
+} from "../rest/index.js";
 import { RequestParameters } from "@azure-rest/core-client";
 
-interface DetectUnivariateEntireSeriesOptions extends RequestParameters {
+export interface DetectUnivariateEntireSeriesOptions extends RequestParameters {
   /**
    * Optional argument, can be one of yearly, monthly, weekly, daily, hourly,
    * minutely, secondly, microsecond or none. If granularity is not present, it will
@@ -105,7 +108,7 @@ export async function detectUnivariateEntireSeries(
   };
 }
 
-interface DetectUnivariateLastPointOptions extends RequestParameters {
+export interface DetectUnivariateLastPointOptions extends RequestParameters {
   /**
    * Optional argument, can be one of yearly, monthly, weekly, daily, hourly,
    * minutely, secondly, microsecond or none. If granularity is not present, it will
@@ -187,7 +190,7 @@ export async function detectUnivariateLastPoint(
   };
 }
 
-interface DetectUnivariateChangePointOptions extends RequestParameters {
+export interface DetectUnivariateChangePointOptions extends RequestParameters {
   /**
    * Custom Interval is used to set non-standard time interval, for example, if the
    * series is 5 minutes, request can be set as {"granularity":"minutely",
@@ -245,7 +248,7 @@ export async function detectUnivariateChangePoint(
   };
 }
 
-interface GetMultivariateBatchDetectionResultOptions
+export interface GetMultivariateBatchDetectionResultOptions
   extends RequestParameters {}
 
 /**
@@ -311,7 +314,7 @@ export async function getMultivariateBatchDetectionResult(
   };
 }
 
-interface TrainMultivariateModelOptions extends RequestParameters {
+export interface TrainMultivariateModelOptions extends RequestParameters {
   /**
    * Data schema of input data source: OneTable or MultiTable. The default
    * DataSchema is OneTable.
@@ -433,7 +436,7 @@ export async function trainMultivariateModel(
   };
 }
 
-interface ListMultivariateModelsOptions extends RequestParameters {
+export interface ListMultivariateModelsOptions extends RequestParameters {
   /** Skip indicates how many models will be skipped. */
   skip?: number;
   /** Top indicates how many models will be fetched. */
@@ -513,7 +516,7 @@ export async function listMultivariateModels(
   };
 }
 
-interface DeleteMultivariateModelOptions extends RequestParameters {}
+export interface DeleteMultivariateModelOptions extends RequestParameters {}
 
 /** Delete an existing multivariate model according to the modelId */
 export async function deleteMultivariateModel(
@@ -532,7 +535,7 @@ export async function deleteMultivariateModel(
   return;
 }
 
-interface GetMultivariateModelOptions extends RequestParameters {}
+export interface GetMultivariateModelOptions extends RequestParameters {}
 
 /**
  * Get detailed information of multivariate model, including the training status
@@ -609,7 +612,8 @@ export async function getMultivariateModel(
   };
 }
 
-interface DetectMultivariateBatchAnomalyOptions extends RequestParameters {
+export interface DetectMultivariateBatchAnomalyOptions
+  extends RequestParameters {
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -694,7 +698,8 @@ export async function detectMultivariateBatchAnomaly(
   };
 }
 
-interface DetectMultivariateLastAnomalyOptions extends RequestParameters {
+export interface DetectMultivariateLastAnomalyOptions
+  extends RequestParameters {
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }

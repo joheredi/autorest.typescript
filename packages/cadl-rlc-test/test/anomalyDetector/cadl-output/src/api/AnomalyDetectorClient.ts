@@ -5,7 +5,7 @@ import { AzureKeyCredential } from "@azure/core-auth";
 import getClient, {
   AnomalyDetectorClient,
   AnomalyDetectorClientOptions,
-} from "../index.js";
+} from "../rest/index.js";
 
 /**
  * The Anomaly Detector API detects anomalies automatically in time series data.
