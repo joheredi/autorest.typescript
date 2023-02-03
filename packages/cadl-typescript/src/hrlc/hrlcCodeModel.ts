@@ -62,12 +62,14 @@ export interface Type {
     | "enum"
     | "integer"
     | "float"
-    | "boolean";
+    | "boolean"
+    | "dict";
   policy?: Policy;
   apiVersions?: any[];
   clientDefaultValue?: any;
   value?: string;
   values?: EnumValue[];
+  isFixed?: boolean;
   valueType?: Type;
   elementType?: Type;
   xmlMetadata?: XmlMetadata;

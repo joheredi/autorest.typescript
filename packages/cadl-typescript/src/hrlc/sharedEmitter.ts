@@ -1,4 +1,4 @@
-import { getPagedResult } from "@azure-tools/cadl-azure-core";
+import { getPagedResult, isFixed } from "@azure-tools/cadl-azure-core";
 import {
   EnumMember,
   Enum,
@@ -875,7 +875,8 @@ function emitEnum(program: Program, type: Enum): Record<string, any> {
     name: type.name,
     description: getDocStr(program, type),
     valueType: { type: enumMemberType(type.members.values().next().value) },
-    values: enumValues
+    values: enumValues,
+    isFixed: isFixed(program, type)
   };
   function enumMemberType(member: EnumMember) {
     if (typeof member.value === "number") {

@@ -132,7 +132,11 @@ function getResponseMapping(
     // TODO: Do we need to also add headers in the result type?
     if (property.type.type === "model") {
       props.push(
-        `"${property.restApiName}": {${getResponseMapping(
+        `"${property.restApiName}": ${
+          !property.optional
+            ? ""
+            : `!${propertyPath}.${property.clientName} ? undefined :`
+        } {${getResponseMapping(
           property.type.properties ?? [],
           `${propertyPath}.${property.restApiName}${
             property.optional ? "?" : ""
@@ -245,7 +249,9 @@ function getRequestParameters(operation: Operation): string {
     }
   }
 
-  for (const param of operation.bodyParameter?.type.properties ?? []) {
+  for (const param of operation.bodyParameter?.type.properties?.filter(
+    (p) => !p.readonly
+  ) ?? []) {
     parametersImplementation.body.push(getParameterMap(param));
   }
 

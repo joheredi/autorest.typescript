@@ -45,6 +45,13 @@ export function getType(type: Type): TypeMetadata {
       return { name: type.name, originModule: "./models.js" };
     case "string":
       return { name: "string" };
+    case "dict":
+      if (!type.elementType) {
+        throw new Error("Unable to process dict without elemetType info");
+      }
+      return {
+        name: `Record<string, ${type.elementType.type}>`
+      };
     default:
       throw new Error(`Unsupported type ${type.type}`);
   }

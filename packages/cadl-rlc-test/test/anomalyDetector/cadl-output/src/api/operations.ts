@@ -289,18 +289,20 @@ export async function getMultivariateBatchDetectionResult(
     },
     results: (result.body.results ?? []).map((p) => ({
       timestamp: new Date(p.timestamp ?? ""),
-      value: {
-        isAnomaly: p.value?.isAnomaly,
-        severity: p.value?.severity,
-        score: p.value?.score,
-        interpretation: (p.value?.interpretation ?? []).map((p) => ({
-          variable: p.variable,
-          contributionScore: p.contributionScore,
-          correlationChanges: {
-            changedVariables: p.correlationChanges?.changedVariables,
+      value: !p.value
+        ? undefined
+        : {
+            isAnomaly: p.value?.isAnomaly,
+            severity: p.value?.severity,
+            score: p.value?.score,
+            interpretation: (p.value?.interpretation ?? []).map((p) => ({
+              variable: p.variable,
+              contributionScore: p.contributionScore,
+              correlationChanges: !p.correlationChanges
+                ? undefined
+                : { changedVariables: p.correlationChanges?.changedVariables },
+            })),
           },
-        })),
-      },
       errors: (p.errors ?? []).map((p) => ({
         code: p.code,
         message: p.message,
@@ -367,7 +369,6 @@ export async function trainMultivariateModel(
       slidingWindow: options.slidingWindow,
       alignPolicy: options.alignPolicy,
       status: options.status,
-      errors: options.errors,
       diagnosticsInfo: options.diagnosticsInfo,
     },
   });
@@ -378,47 +379,57 @@ export async function trainMultivariateModel(
     modelId: result.body.modelId,
     createdTime: new Date(result.body.createdTime ?? ""),
     lastUpdatedTime: new Date(result.body.lastUpdatedTime ?? ""),
-    modelInfo: {
-      dataSource: result.body.modelInfo?.dataSource,
-      dataSchema: result.body.modelInfo?.dataSchema,
-      startTime: new Date(result.body.modelInfo?.startTime ?? ""),
-      endTime: new Date(result.body.modelInfo?.endTime ?? ""),
-      displayName: result.body.modelInfo?.displayName,
-      slidingWindow: result.body.modelInfo?.slidingWindow,
-      alignPolicy: {
-        alignMode: result.body.modelInfo?.alignPolicy?.alignMode,
-        fillNAMethod: result.body.modelInfo?.alignPolicy?.fillNAMethod,
-        paddingValue: result.body.modelInfo?.alignPolicy?.paddingValue,
-      },
-      status: result.body.modelInfo?.status,
-      errors: (result.body.modelInfo?.errors ?? []).map((p) => ({
-        code: p.code,
-        message: p.message,
-      })),
-      diagnosticsInfo: {
-        modelState: {
-          epochIds:
-            result.body.modelInfo?.diagnosticsInfo?.modelState?.epochIds,
-          trainLosses:
-            result.body.modelInfo?.diagnosticsInfo?.modelState?.trainLosses,
-          validationLosses:
-            result.body.modelInfo?.diagnosticsInfo?.modelState
-              ?.validationLosses,
-          latenciesInSeconds:
-            result.body.modelInfo?.diagnosticsInfo?.modelState
-              ?.latenciesInSeconds,
+    modelInfo: !result.body.modelInfo
+      ? undefined
+      : {
+          dataSource: result.body.modelInfo?.dataSource,
+          dataSchema: result.body.modelInfo?.dataSchema,
+          startTime: new Date(result.body.modelInfo?.startTime ?? ""),
+          endTime: new Date(result.body.modelInfo?.endTime ?? ""),
+          displayName: result.body.modelInfo?.displayName,
+          slidingWindow: result.body.modelInfo?.slidingWindow,
+          alignPolicy: !result.body.modelInfo?.alignPolicy
+            ? undefined
+            : {
+                alignMode: result.body.modelInfo?.alignPolicy?.alignMode,
+                fillNAMethod: result.body.modelInfo?.alignPolicy?.fillNAMethod,
+                paddingValue: result.body.modelInfo?.alignPolicy?.paddingValue,
+              },
+          status: result.body.modelInfo?.status,
+          errors: (result.body.modelInfo?.errors ?? []).map((p) => ({
+            code: p.code,
+            message: p.message,
+          })),
+          diagnosticsInfo: !result.body.modelInfo?.diagnosticsInfo
+            ? undefined
+            : {
+                modelState: !result.body.modelInfo?.diagnosticsInfo?.modelState
+                  ? undefined
+                  : {
+                      epochIds:
+                        result.body.modelInfo?.diagnosticsInfo?.modelState
+                          ?.epochIds,
+                      trainLosses:
+                        result.body.modelInfo?.diagnosticsInfo?.modelState
+                          ?.trainLosses,
+                      validationLosses:
+                        result.body.modelInfo?.diagnosticsInfo?.modelState
+                          ?.validationLosses,
+                      latenciesInSeconds:
+                        result.body.modelInfo?.diagnosticsInfo?.modelState
+                          ?.latenciesInSeconds,
+                    },
+                variableStates: (
+                  result.body.modelInfo?.diagnosticsInfo?.variableStates ?? []
+                ).map((p) => ({
+                  variable: p.variable,
+                  filledNARatio: p.filledNARatio,
+                  effectiveCount: p.effectiveCount,
+                  firstTimestamp: new Date(p.firstTimestamp ?? ""),
+                  lastTimestamp: new Date(p.lastTimestamp ?? ""),
+                })),
+              },
         },
-        variableStates: (
-          result.body.modelInfo?.diagnosticsInfo?.variableStates ?? []
-        ).map((p) => ({
-          variable: p.variable,
-          filledNARatio: p.filledNARatio,
-          effectiveCount: p.effectiveCount,
-          firstTimestamp: new Date(p.firstTimestamp ?? ""),
-          lastTimestamp: new Date(p.lastTimestamp ?? ""),
-        })),
-      },
-    },
   };
 }
 
@@ -446,43 +457,55 @@ export async function listMultivariateModels(
       modelId: p.modelId,
       createdTime: new Date(p.createdTime ?? ""),
       lastUpdatedTime: new Date(p.lastUpdatedTime ?? ""),
-      modelInfo: {
-        dataSource: p.modelInfo?.dataSource,
-        dataSchema: p.modelInfo?.dataSchema,
-        startTime: new Date(p.modelInfo?.startTime ?? ""),
-        endTime: new Date(p.modelInfo?.endTime ?? ""),
-        displayName: p.modelInfo?.displayName,
-        slidingWindow: p.modelInfo?.slidingWindow,
-        alignPolicy: {
-          alignMode: p.modelInfo?.alignPolicy?.alignMode,
-          fillNAMethod: p.modelInfo?.alignPolicy?.fillNAMethod,
-          paddingValue: p.modelInfo?.alignPolicy?.paddingValue,
-        },
-        status: p.modelInfo?.status,
-        errors: (p.modelInfo?.errors ?? []).map((p) => ({
-          code: p.code,
-          message: p.message,
-        })),
-        diagnosticsInfo: {
-          modelState: {
-            epochIds: p.modelInfo?.diagnosticsInfo?.modelState?.epochIds,
-            trainLosses: p.modelInfo?.diagnosticsInfo?.modelState?.trainLosses,
-            validationLosses:
-              p.modelInfo?.diagnosticsInfo?.modelState?.validationLosses,
-            latenciesInSeconds:
-              p.modelInfo?.diagnosticsInfo?.modelState?.latenciesInSeconds,
+      modelInfo: !p.modelInfo
+        ? undefined
+        : {
+            dataSource: p.modelInfo?.dataSource,
+            dataSchema: p.modelInfo?.dataSchema,
+            startTime: new Date(p.modelInfo?.startTime ?? ""),
+            endTime: new Date(p.modelInfo?.endTime ?? ""),
+            displayName: p.modelInfo?.displayName,
+            slidingWindow: p.modelInfo?.slidingWindow,
+            alignPolicy: !p.modelInfo?.alignPolicy
+              ? undefined
+              : {
+                  alignMode: p.modelInfo?.alignPolicy?.alignMode,
+                  fillNAMethod: p.modelInfo?.alignPolicy?.fillNAMethod,
+                  paddingValue: p.modelInfo?.alignPolicy?.paddingValue,
+                },
+            status: p.modelInfo?.status,
+            errors: (p.modelInfo?.errors ?? []).map((p) => ({
+              code: p.code,
+              message: p.message,
+            })),
+            diagnosticsInfo: !p.modelInfo?.diagnosticsInfo
+              ? undefined
+              : {
+                  modelState: !p.modelInfo?.diagnosticsInfo?.modelState
+                    ? undefined
+                    : {
+                        epochIds:
+                          p.modelInfo?.diagnosticsInfo?.modelState?.epochIds,
+                        trainLosses:
+                          p.modelInfo?.diagnosticsInfo?.modelState?.trainLosses,
+                        validationLosses:
+                          p.modelInfo?.diagnosticsInfo?.modelState
+                            ?.validationLosses,
+                        latenciesInSeconds:
+                          p.modelInfo?.diagnosticsInfo?.modelState
+                            ?.latenciesInSeconds,
+                      },
+                  variableStates: (
+                    p.modelInfo?.diagnosticsInfo?.variableStates ?? []
+                  ).map((p) => ({
+                    variable: p.variable,
+                    filledNARatio: p.filledNARatio,
+                    effectiveCount: p.effectiveCount,
+                    firstTimestamp: new Date(p.firstTimestamp ?? ""),
+                    lastTimestamp: new Date(p.lastTimestamp ?? ""),
+                  })),
+                },
           },
-          variableStates: (
-            p.modelInfo?.diagnosticsInfo?.variableStates ?? []
-          ).map((p) => ({
-            variable: p.variable,
-            filledNARatio: p.filledNARatio,
-            effectiveCount: p.effectiveCount,
-            firstTimestamp: new Date(p.firstTimestamp ?? ""),
-            lastTimestamp: new Date(p.lastTimestamp ?? ""),
-          })),
-        },
-      },
     })),
     currentCount: result.body.currentCount,
     maxCount: result.body.maxCount,
@@ -532,47 +555,57 @@ export async function getMultivariateModel(
     modelId: result.body.modelId,
     createdTime: new Date(result.body.createdTime ?? ""),
     lastUpdatedTime: new Date(result.body.lastUpdatedTime ?? ""),
-    modelInfo: {
-      dataSource: result.body.modelInfo?.dataSource,
-      dataSchema: result.body.modelInfo?.dataSchema,
-      startTime: new Date(result.body.modelInfo?.startTime ?? ""),
-      endTime: new Date(result.body.modelInfo?.endTime ?? ""),
-      displayName: result.body.modelInfo?.displayName,
-      slidingWindow: result.body.modelInfo?.slidingWindow,
-      alignPolicy: {
-        alignMode: result.body.modelInfo?.alignPolicy?.alignMode,
-        fillNAMethod: result.body.modelInfo?.alignPolicy?.fillNAMethod,
-        paddingValue: result.body.modelInfo?.alignPolicy?.paddingValue,
-      },
-      status: result.body.modelInfo?.status,
-      errors: (result.body.modelInfo?.errors ?? []).map((p) => ({
-        code: p.code,
-        message: p.message,
-      })),
-      diagnosticsInfo: {
-        modelState: {
-          epochIds:
-            result.body.modelInfo?.diagnosticsInfo?.modelState?.epochIds,
-          trainLosses:
-            result.body.modelInfo?.diagnosticsInfo?.modelState?.trainLosses,
-          validationLosses:
-            result.body.modelInfo?.diagnosticsInfo?.modelState
-              ?.validationLosses,
-          latenciesInSeconds:
-            result.body.modelInfo?.diagnosticsInfo?.modelState
-              ?.latenciesInSeconds,
+    modelInfo: !result.body.modelInfo
+      ? undefined
+      : {
+          dataSource: result.body.modelInfo?.dataSource,
+          dataSchema: result.body.modelInfo?.dataSchema,
+          startTime: new Date(result.body.modelInfo?.startTime ?? ""),
+          endTime: new Date(result.body.modelInfo?.endTime ?? ""),
+          displayName: result.body.modelInfo?.displayName,
+          slidingWindow: result.body.modelInfo?.slidingWindow,
+          alignPolicy: !result.body.modelInfo?.alignPolicy
+            ? undefined
+            : {
+                alignMode: result.body.modelInfo?.alignPolicy?.alignMode,
+                fillNAMethod: result.body.modelInfo?.alignPolicy?.fillNAMethod,
+                paddingValue: result.body.modelInfo?.alignPolicy?.paddingValue,
+              },
+          status: result.body.modelInfo?.status,
+          errors: (result.body.modelInfo?.errors ?? []).map((p) => ({
+            code: p.code,
+            message: p.message,
+          })),
+          diagnosticsInfo: !result.body.modelInfo?.diagnosticsInfo
+            ? undefined
+            : {
+                modelState: !result.body.modelInfo?.diagnosticsInfo?.modelState
+                  ? undefined
+                  : {
+                      epochIds:
+                        result.body.modelInfo?.diagnosticsInfo?.modelState
+                          ?.epochIds,
+                      trainLosses:
+                        result.body.modelInfo?.diagnosticsInfo?.modelState
+                          ?.trainLosses,
+                      validationLosses:
+                        result.body.modelInfo?.diagnosticsInfo?.modelState
+                          ?.validationLosses,
+                      latenciesInSeconds:
+                        result.body.modelInfo?.diagnosticsInfo?.modelState
+                          ?.latenciesInSeconds,
+                    },
+                variableStates: (
+                  result.body.modelInfo?.diagnosticsInfo?.variableStates ?? []
+                ).map((p) => ({
+                  variable: p.variable,
+                  filledNARatio: p.filledNARatio,
+                  effectiveCount: p.effectiveCount,
+                  firstTimestamp: new Date(p.firstTimestamp ?? ""),
+                  lastTimestamp: new Date(p.lastTimestamp ?? ""),
+                })),
+              },
         },
-        variableStates: (
-          result.body.modelInfo?.diagnosticsInfo?.variableStates ?? []
-        ).map((p) => ({
-          variable: p.variable,
-          filledNARatio: p.filledNARatio,
-          effectiveCount: p.effectiveCount,
-          firstTimestamp: new Date(p.firstTimestamp ?? ""),
-          lastTimestamp: new Date(p.lastTimestamp ?? ""),
-        })),
-      },
-    },
   };
 }
 
@@ -639,18 +672,20 @@ export async function detectMultivariateBatchAnomaly(
     },
     results: (result.body.results ?? []).map((p) => ({
       timestamp: new Date(p.timestamp ?? ""),
-      value: {
-        isAnomaly: p.value?.isAnomaly,
-        severity: p.value?.severity,
-        score: p.value?.score,
-        interpretation: (p.value?.interpretation ?? []).map((p) => ({
-          variable: p.variable,
-          contributionScore: p.contributionScore,
-          correlationChanges: {
-            changedVariables: p.correlationChanges?.changedVariables,
+      value: !p.value
+        ? undefined
+        : {
+            isAnomaly: p.value?.isAnomaly,
+            severity: p.value?.severity,
+            score: p.value?.score,
+            interpretation: (p.value?.interpretation ?? []).map((p) => ({
+              variable: p.variable,
+              contributionScore: p.contributionScore,
+              correlationChanges: !p.correlationChanges
+                ? undefined
+                : { changedVariables: p.correlationChanges?.changedVariables },
+            })),
           },
-        })),
-      },
       errors: (p.errors ?? []).map((p) => ({
         code: p.code,
         message: p.message,
@@ -699,18 +734,20 @@ export async function detectMultivariateLastAnomaly(
     })),
     results: (result.body.results ?? []).map((p) => ({
       timestamp: new Date(p.timestamp ?? ""),
-      value: {
-        isAnomaly: p.value?.isAnomaly,
-        severity: p.value?.severity,
-        score: p.value?.score,
-        interpretation: (p.value?.interpretation ?? []).map((p) => ({
-          variable: p.variable,
-          contributionScore: p.contributionScore,
-          correlationChanges: {
-            changedVariables: p.correlationChanges?.changedVariables,
+      value: !p.value
+        ? undefined
+        : {
+            isAnomaly: p.value?.isAnomaly,
+            severity: p.value?.severity,
+            score: p.value?.score,
+            interpretation: (p.value?.interpretation ?? []).map((p) => ({
+              variable: p.variable,
+              contributionScore: p.contributionScore,
+              correlationChanges: !p.correlationChanges
+                ? undefined
+                : { changedVariables: p.correlationChanges?.changedVariables },
+            })),
           },
-        })),
-      },
       errors: (p.errors ?? []).map((p) => ({
         code: p.code,
         message: p.message,

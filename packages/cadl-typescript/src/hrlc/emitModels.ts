@@ -25,8 +25,15 @@ export function emitModels(
       modelsFile.addTypeAlias({
         name: model.name!,
         isExported: true,
-        docs: [model.description ?? ""],
-        type: (model.values ?? []).map((v) => `"${v.value}"`).join(" | ")
+        docs: [
+          model.description ?? "",
+          model.isFixed
+            ? ""
+            : (model.values ?? []).map((v) => `"${v.value}"`).join(", ")
+        ],
+        type: model.isFixed
+          ? (model.values ?? []).map((v) => `"${v.value}"`).join(" | ")
+          : "string"
       });
     } else {
       modelsFile.addInterface({

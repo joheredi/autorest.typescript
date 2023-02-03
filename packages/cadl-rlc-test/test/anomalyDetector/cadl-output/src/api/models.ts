@@ -66,18 +66,8 @@ export interface AnomalyDetectorError {
 }
 
 /** */
-export type AnomalyDetectorErrorCodes =
-  | "InvalidCustomInterval"
-  | "BadArgument"
-  | "InvalidGranularity"
-  | "InvalidPeriod"
-  | "InvalidModelArgument"
-  | "InvalidSeries"
-  | "InvalidJsonFormat"
-  | "RequiredGranularity"
-  | "RequiredSeries"
-  | "InvalidImputeMode"
-  | "InvalidImputeFixedValue";
+/** "InvalidCustomInterval", "BadArgument", "InvalidGranularity", "InvalidPeriod", "InvalidModelArgument", "InvalidSeries", "InvalidJsonFormat", "RequiredGranularity", "RequiredSeries", "InvalidImputeMode", "InvalidImputeFixedValue" */
+export type AnomalyDetectorErrorCodes = string;
 
 /** The request of entire or last anomaly detection. */
 export interface UnivariateDetectionOptions {
@@ -135,6 +125,7 @@ export interface TimeSeriesPoint {
 }
 
 /** */
+/** */
 export type TimeGranularity =
   | "yearly"
   | "monthly"
@@ -146,13 +137,8 @@ export type TimeGranularity =
   | "microsecond"
   | "none";
 /** */
-export type ImputeMode =
-  | "auto"
-  | "previous"
-  | "linear"
-  | "fixed"
-  | "zero"
-  | "notFill";
+/** "auto", "previous", "linear", "fixed", "zero", "notFill" */
+export type ImputeMode = string;
 
 /** The response of last anomaly detection. */
 export interface UnivariateLastDetectionResult {
@@ -279,6 +265,7 @@ export interface MultivariateBatchDetectionResultSummary {
   setupInfo: MultivariateBatchDetectionOptions;
 }
 
+/** */
 /** */
 export type MultivariateBatchDetectionStatus =
   | "CREATED"
@@ -447,7 +434,8 @@ export interface ModelInfo {
 }
 
 /** Data schema of input data source: OneTable or MultiTable. The default DataSchema is OneTable. */
-export type DataSchema = "OneTable" | "MultiTable";
+/** "OneTable", "MultiTable" */
+export type DataSchema = string;
 
 /** An optional field, indicating the manner to align multiple variables. */
 export interface AlignPolicy {
@@ -466,14 +454,12 @@ export interface AlignPolicy {
 }
 
 /** */
+/** */
 export type AlignMode = "Inner" | "Outer";
 /** An optional field, indicating how missing values will be filled. One of Previous, Subsequent, Linear, Zero, Fixed. */
-export type FillNAMethod =
-  | "Previous"
-  | "Subsequent"
-  | "Linear"
-  | "Zero"
-  | "Fixed";
+/** "Previous", "Subsequent", "Linear", "Zero", "Fixed" */
+export type FillNAMethod = string;
+/** */
 /** */
 export type ModelStatus = "CREATED" | "RUNNING" | "READY" | "FAILED";
 
