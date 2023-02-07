@@ -33,6 +33,7 @@ import { emitContentByBuilder, emitModels } from "./emitUtil.js";
 import { listClients } from "@azure-tools/cadl-dpg";
 import { emitCodeModel } from "./hrlc/sharedEmitter.js";
 import { emitClients } from "./hrlc/emitClients.js";
+import { emitApiIndex } from "./hrlc/emitIndexFiles.js";
 
 export async function $onEmit(context: EmitContext) {
   const program: Program = context.program;
@@ -41,12 +42,22 @@ export async function $onEmit(context: EmitContext) {
   const clients = listClients(program);
 
   if (options.isHrlc) {
+    const hrlcExports: string[] = [];
     const hrlc = emitCodeModel(context, { casing: "camel" });
-    const hrlcClients = emitClients(hrlc, context.emitterOutputDir);
+    const hrlcClients = emitClients(
+      hrlc,
+      hrlcExports,
+      context.emitterOutputDir
+    );
     for (const hrlcClient of hrlcClients) {
       emitContentByBuilder(program, () => hrlcClient, hrlc as any);
       // emitFile(program, { content: hrlcClient.content, path: hrlcClient.path });
     }
+    emitContentByBuilder(
+      program,
+      () => emitApiIndex(hrlcExports, context.emitterOutputDir),
+      hrlc as any
+    );
   }
 
   for (const client of clients) {

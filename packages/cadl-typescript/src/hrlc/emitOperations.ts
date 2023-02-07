@@ -17,16 +17,18 @@ import {
 export function emitOperationGroups(
   client: Client,
   project: Project,
+  exports: string[],
   srcPath: string = "src"
 ): File[] {
   const files: File[] = [];
   for (const operationGroup of client.operationGroups) {
     const imports: Record<string, Set<string>> = {};
     const fileName = operationGroup.className
-      ? `${operationGroup.className}.ts`
-      : "operations.ts";
+      ? `${operationGroup.className}`
+      : "operations";
 
-    const operationGroupFile = project.createSourceFile(fileName);
+    const operationGroupFile = project.createSourceFile(`${fileName}.ts`);
+    exports.push(`${fileName}.js`);
     operationGroup.operations.forEach((o) =>
       emitOperation(o, operationGroupFile, imports)
     );
@@ -49,7 +51,7 @@ export function emitOperationGroups(
     ]);
     files.push({
       content: operationGroupFile.getFullText(),
-      path: `${srcPath}/src/api/${fileName}`
+      path: `${srcPath}/src/api/${fileName}.ts`
     });
   }
 
@@ -326,6 +328,7 @@ function emitOptionsInterface(
   const name = toPascalCase(`${operation.name}Options`);
   sourceFile.addInterface({
     name,
+    isExported: true,
     extends: ["RequestParameters"],
     properties: options.map((p) => {
       return {

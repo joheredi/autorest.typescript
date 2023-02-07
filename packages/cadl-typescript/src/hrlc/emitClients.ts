@@ -13,12 +13,17 @@ export interface ClientSourceFile {
   path: string;
   content: string;
 }
-export function emitClients(codeModel: HrlcCodeModel, srcPath: string = "src") {
+export function emitClients(
+  codeModel: HrlcCodeModel,
+  exports: string[],
+  srcPath: string = "src"
+) {
   const project: Project = new Project();
   let files: ClientSourceFile[] = [];
   for (const client of codeModel.clients) {
     const { name, description, parameters } = client;
     const clientFile = project.createSourceFile(`${name}.ts`);
+    exports.push(`${name}.js`);
     const params: OptionalKind<ParameterDeclarationStructure>[] = [
       ...parameters
         .filter((p) => p.type.type !== "constant")
@@ -77,8 +82,14 @@ export function emitClients(codeModel: HrlcCodeModel, srcPath: string = "src") {
         namedImports: [name, `${name}Options`]
       }
     ]);
-    const operationFiles = emitOperationGroups(client, project, srcPath);
-    const modelFiles = emitModels(codeModel, project, srcPath);
+    const operationFiles = emitOperationGroups(
+      client,
+      project,
+      exports,
+      srcPath
+    );
+    const modelFiles = emitModels(codeModel, project, exports, srcPath);
+    emitUberClient(factoryFunction);
     files.push({
       path: `${srcPath}/src/api/${name}.ts`,
       content: clientFile.getFullText()
@@ -105,6 +116,17 @@ function importCredential(
         `Credential of type ${credential.type.type} is not yet supported`
       );
   }
+}
+
+function emitUberClient(context: FunctionDeclaration) {
+  // const client = context.getSignature();
+  // const decl = client.getDeclaration().getText();
+  // console.log(decl);
+  const signature = context.getSignature();
+  const declaration = signature.getDeclaration();
+  const params = signature.getParameters();
+  const returnType = signature.getReturnType();
+  console.log(`${declaration} ${params} ${returnType}`);
 }
 
 function addCredentialOptionsStatement(

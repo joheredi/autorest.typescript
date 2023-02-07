@@ -6,10 +6,12 @@ import { HrlcCodeModel } from "./hrlcCodeModel.js";
 export function emitModels(
   codeModel: HrlcCodeModel,
   project: Project,
+  exports: string[],
   srcPath: string = "src"
 ): File[] {
   const files: File[] = [];
   const modelsFile = project.createSourceFile(`models.ts`);
+  exports.push("models.js");
   const models = codeModel.types.filter(
     (t) => t.type === "model" || t.type === "enum"
   );
