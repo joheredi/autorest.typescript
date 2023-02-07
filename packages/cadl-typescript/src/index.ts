@@ -25,8 +25,7 @@ import {
   buildSampleTest,
   buildReadmeFile,
   buildSerializeHelper,
-  RLCOptions,
-  RLCModel
+  RLCOptions
 } from "@azure-tools/rlc-common";
 import { transformRLCModel } from "./transform/transform.js";
 import { emitContentByBuilder, emitModels } from "./emitUtil.js";
