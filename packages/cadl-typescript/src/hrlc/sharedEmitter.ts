@@ -53,7 +53,7 @@ import {
   HttpOperation,
   isHeader
 } from "@cadl-lang/rest/http";
-import { getAddedOn } from "@cadl-lang/versioning";
+import { getAddedOnVersions } from "@cadl-lang/versioning";
 import {
   Client,
   listClients,
@@ -262,7 +262,7 @@ function getType(program: Program, type: EmitterType): any {
 
 // To pass the yaml dump
 function getAddedOnVersion(p: Program, t: Type): string | undefined {
-  return getAddedOn(p as any, t as any)?.value;
+  return getAddedOnVersions(p, t)?.[0]?.value;
 }
 
 type ParamBase = {
@@ -1435,7 +1435,7 @@ export function emitCodeModel(
     }
   }
   codeModel.types = [
-    ...typesMap.values(),
+    ...[...typesMap.values()].filter((t) => t.name !== "object"),
     { type: "string" },
     ...simpleTypesMap.values()
   ];

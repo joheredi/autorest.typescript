@@ -24,7 +24,7 @@ import {
   UploadBatchServiceLogsConfiguration,
 } from "./models";
 
-export interface ApplicationOperationsListHeaders {
+export interface ApplicationsListApplicationsHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -40,7 +40,7 @@ export interface ApplicationOperationsListHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface ApplicationOperationsListQueryParamProperties {
+export interface ApplicationsListApplicationsQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -53,22 +53,22 @@ export interface ApplicationOperationsListQueryParamProperties {
   timeOut?: number;
 }
 
-export interface ApplicationOperationsListQueryParam {
-  queryParameters?: ApplicationOperationsListQueryParamProperties;
+export interface ApplicationsListApplicationsQueryParam {
+  queryParameters?: ApplicationsListApplicationsQueryParamProperties;
 }
 
-export interface ApplicationOperationsListHeaderParam {
-  headers?: RawHttpHeadersInput & ApplicationOperationsListHeaders;
+export interface ApplicationsListApplicationsHeaderParam {
+  headers?: RawHttpHeadersInput & ApplicationsListApplicationsHeaders;
 }
 
-export type ApplicationOperationsListParameters =
-  ApplicationOperationsListQueryParam &
-    ApplicationOperationsListHeaderParam &
+export type ApplicationsListApplicationsParameters =
+  ApplicationsListApplicationsQueryParam &
+    ApplicationsListApplicationsHeaderParam &
     RequestParameters;
-export type ApplicationOperationsGetParameters = RequestParameters;
+export type ApplicationsGetApplicationParameters = RequestParameters;
 export type PoolListUsageMetricsParameters = RequestParameters;
 
-export interface PoolGetAllLifetimeStatisticsHeaders {
+export interface PoolGetAllPoolLifetimeStatisticsHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -84,7 +84,7 @@ export interface PoolGetAllLifetimeStatisticsHeaders {
   "ocp-date"?: string;
 }
 
-export interface PoolGetAllLifetimeStatisticsQueryParamProperties {
+export interface PoolGetAllPoolLifetimeStatisticsQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -92,20 +92,20 @@ export interface PoolGetAllLifetimeStatisticsQueryParamProperties {
   timeOut?: number;
 }
 
-export interface PoolGetAllLifetimeStatisticsQueryParam {
-  queryParameters?: PoolGetAllLifetimeStatisticsQueryParamProperties;
+export interface PoolGetAllPoolLifetimeStatisticsQueryParam {
+  queryParameters?: PoolGetAllPoolLifetimeStatisticsQueryParamProperties;
 }
 
-export interface PoolGetAllLifetimeStatisticsHeaderParam {
-  headers?: RawHttpHeadersInput & PoolGetAllLifetimeStatisticsHeaders;
+export interface PoolGetAllPoolLifetimeStatisticsHeaderParam {
+  headers?: RawHttpHeadersInput & PoolGetAllPoolLifetimeStatisticsHeaders;
 }
 
-export type PoolGetAllLifetimeStatisticsParameters =
-  PoolGetAllLifetimeStatisticsQueryParam &
-    PoolGetAllLifetimeStatisticsHeaderParam &
+export type PoolGetAllPoolLifetimeStatisticsParameters =
+  PoolGetAllPoolLifetimeStatisticsQueryParam &
+    PoolGetAllPoolLifetimeStatisticsHeaderParam &
     RequestParameters;
 
-export interface PoolAddHeaders {
+export interface PoolAddPoolHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -121,12 +121,12 @@ export interface PoolAddHeaders {
   "ocp-date"?: string;
 }
 
-export interface PoolAddBodyParam {
+export interface PoolAddPoolBodyParam {
   /** The Pool to be added. */
   body: BatchPool;
 }
 
-export interface PoolAddQueryParamProperties {
+export interface PoolAddPoolQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -134,20 +134,20 @@ export interface PoolAddQueryParamProperties {
   timeOut?: number;
 }
 
-export interface PoolAddQueryParam {
-  queryParameters?: PoolAddQueryParamProperties;
+export interface PoolAddPoolQueryParam {
+  queryParameters?: PoolAddPoolQueryParamProperties;
 }
 
-export interface PoolAddHeaderParam {
-  headers?: RawHttpHeadersInput & PoolAddHeaders;
+export interface PoolAddPoolHeaderParam {
+  headers?: RawHttpHeadersInput & PoolAddPoolHeaders;
 }
 
-export type PoolAddParameters = PoolAddQueryParam &
-  PoolAddHeaderParam &
-  PoolAddBodyParam &
+export type PoolAddPoolParameters = PoolAddPoolQueryParam &
+  PoolAddPoolHeaderParam &
+  PoolAddPoolBodyParam &
   RequestParameters;
 
-export interface PoolListHeaders {
+export interface PoolListPoolsHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -163,7 +163,7 @@ export interface PoolListHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface PoolListQueryParamProperties {
+export interface PoolListPoolsQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -185,19 +185,19 @@ export interface PoolListQueryParamProperties {
   $expand?: string;
 }
 
-export interface PoolListQueryParam {
-  queryParameters?: PoolListQueryParamProperties;
+export interface PoolListPoolsQueryParam {
+  queryParameters?: PoolListPoolsQueryParamProperties;
 }
 
-export interface PoolListHeaderParam {
-  headers?: RawHttpHeadersInput & PoolListHeaders;
+export interface PoolListPoolsHeaderParam {
+  headers?: RawHttpHeadersInput & PoolListPoolsHeaders;
 }
 
-export type PoolListParameters = PoolListQueryParam &
-  PoolListHeaderParam &
+export type PoolListPoolsParameters = PoolListPoolsQueryParam &
+  PoolListPoolsHeaderParam &
   RequestParameters;
 
-export interface PoolDeleteHeaders {
+export interface PoolDeletePoolHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -237,7 +237,7 @@ export interface PoolDeleteHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface PoolDeleteQueryParamProperties {
+export interface PoolDeletePoolQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -245,19 +245,19 @@ export interface PoolDeleteQueryParamProperties {
   timeOut?: number;
 }
 
-export interface PoolDeleteQueryParam {
-  queryParameters?: PoolDeleteQueryParamProperties;
+export interface PoolDeletePoolQueryParam {
+  queryParameters?: PoolDeletePoolQueryParamProperties;
 }
 
-export interface PoolDeleteHeaderParam {
-  headers?: RawHttpHeadersInput & PoolDeleteHeaders;
+export interface PoolDeletePoolHeaderParam {
+  headers?: RawHttpHeadersInput & PoolDeletePoolHeaders;
 }
 
-export type PoolDeleteParameters = PoolDeleteQueryParam &
-  PoolDeleteHeaderParam &
+export type PoolDeletePoolParameters = PoolDeletePoolQueryParam &
+  PoolDeletePoolHeaderParam &
   RequestParameters;
 
-export interface PoolExistsHeaders {
+export interface PoolPoolExistsHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -297,7 +297,7 @@ export interface PoolExistsHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface PoolExistsQueryParamProperties {
+export interface PoolPoolExistsQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -305,19 +305,19 @@ export interface PoolExistsQueryParamProperties {
   timeOut?: number;
 }
 
-export interface PoolExistsQueryParam {
-  queryParameters?: PoolExistsQueryParamProperties;
+export interface PoolPoolExistsQueryParam {
+  queryParameters?: PoolPoolExistsQueryParamProperties;
 }
 
-export interface PoolExistsHeaderParam {
-  headers?: RawHttpHeadersInput & PoolExistsHeaders;
+export interface PoolPoolExistsHeaderParam {
+  headers?: RawHttpHeadersInput & PoolPoolExistsHeaders;
 }
 
-export type PoolExistsParameters = PoolExistsQueryParam &
-  PoolExistsHeaderParam &
+export type PoolPoolExistsParameters = PoolPoolExistsQueryParam &
+  PoolPoolExistsHeaderParam &
   RequestParameters;
 
-export interface PoolGetHeaders {
+export interface PoolGetPoolHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -357,31 +357,31 @@ export interface PoolGetHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface PoolGetQueryParamProperties {
+export interface PoolGetPoolQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
   timeOut?: number;
   /** An OData $select clause. */
-  $select: string;
+  $select?: string;
   /** An OData $expand clause. */
-  $expand: string;
+  $expand?: string;
 }
 
-export interface PoolGetQueryParam {
-  queryParameters: PoolGetQueryParamProperties;
+export interface PoolGetPoolQueryParam {
+  queryParameters?: PoolGetPoolQueryParamProperties;
 }
 
-export interface PoolGetHeaderParam {
-  headers?: RawHttpHeadersInput & PoolGetHeaders;
+export interface PoolGetPoolHeaderParam {
+  headers?: RawHttpHeadersInput & PoolGetPoolHeaders;
 }
 
-export type PoolGetParameters = PoolGetQueryParam &
-  PoolGetHeaderParam &
+export type PoolGetPoolParameters = PoolGetPoolQueryParam &
+  PoolGetPoolHeaderParam &
   RequestParameters;
 
-export interface PoolPatchHeaders {
+export interface PoolUpdatePoolHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -421,12 +421,12 @@ export interface PoolPatchHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface PoolPatchBodyParam {
+export interface PoolUpdatePoolBodyParam {
   /** The parameters for the request. */
   body: BatchPool;
 }
 
-export interface PoolPatchQueryParamProperties {
+export interface PoolUpdatePoolQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -434,17 +434,17 @@ export interface PoolPatchQueryParamProperties {
   timeOut?: number;
 }
 
-export interface PoolPatchQueryParam {
-  queryParameters?: PoolPatchQueryParamProperties;
+export interface PoolUpdatePoolQueryParam {
+  queryParameters?: PoolUpdatePoolQueryParamProperties;
 }
 
-export interface PoolPatchHeaderParam {
-  headers?: RawHttpHeadersInput & PoolPatchHeaders;
+export interface PoolUpdatePoolHeaderParam {
+  headers?: RawHttpHeadersInput & PoolUpdatePoolHeaders;
 }
 
-export type PoolPatchParameters = PoolPatchQueryParam &
-  PoolPatchHeaderParam &
-  PoolPatchBodyParam &
+export type PoolUpdatePoolParameters = PoolUpdatePoolQueryParam &
+  PoolUpdatePoolHeaderParam &
+  PoolUpdatePoolBodyParam &
   RequestParameters;
 
 export interface PoolDisableAutoScaleHeaders {
@@ -591,7 +591,7 @@ export type PoolEvaluateAutoScaleParameters = PoolEvaluateAutoScaleQueryParam &
   PoolEvaluateAutoScaleBodyParam &
   RequestParameters;
 
-export interface PoolResizeHeaders {
+export interface PoolResizePoolHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -631,12 +631,12 @@ export interface PoolResizeHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface PoolResizeBodyParam {
+export interface PoolResizePoolBodyParam {
   /** The parameters for the request. */
   body: BatchPoolResizeParameters;
 }
 
-export interface PoolResizeQueryParamProperties {
+export interface PoolResizePoolQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -644,20 +644,20 @@ export interface PoolResizeQueryParamProperties {
   timeOut?: number;
 }
 
-export interface PoolResizeQueryParam {
-  queryParameters?: PoolResizeQueryParamProperties;
+export interface PoolResizePoolQueryParam {
+  queryParameters?: PoolResizePoolQueryParamProperties;
 }
 
-export interface PoolResizeHeaderParam {
-  headers?: RawHttpHeadersInput & PoolResizeHeaders;
+export interface PoolResizePoolHeaderParam {
+  headers?: RawHttpHeadersInput & PoolResizePoolHeaders;
 }
 
-export type PoolResizeParameters = PoolResizeQueryParam &
-  PoolResizeHeaderParam &
-  PoolResizeBodyParam &
+export type PoolResizePoolParameters = PoolResizePoolQueryParam &
+  PoolResizePoolHeaderParam &
+  PoolResizePoolBodyParam &
   RequestParameters;
 
-export interface PoolStopResizeHeaders {
+export interface PoolStopResizePoolHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -697,7 +697,7 @@ export interface PoolStopResizeHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface PoolStopResizeQueryParamProperties {
+export interface PoolStopResizePoolQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -705,19 +705,19 @@ export interface PoolStopResizeQueryParamProperties {
   timeOut?: number;
 }
 
-export interface PoolStopResizeQueryParam {
-  queryParameters?: PoolStopResizeQueryParamProperties;
+export interface PoolStopResizePoolQueryParam {
+  queryParameters?: PoolStopResizePoolQueryParamProperties;
 }
 
-export interface PoolStopResizeHeaderParam {
-  headers?: RawHttpHeadersInput & PoolStopResizeHeaders;
+export interface PoolStopResizePoolHeaderParam {
+  headers?: RawHttpHeadersInput & PoolStopResizePoolHeaders;
 }
 
-export type PoolStopResizeParameters = PoolStopResizeQueryParam &
-  PoolStopResizeHeaderParam &
+export type PoolStopResizePoolParameters = PoolStopResizePoolQueryParam &
+  PoolStopResizePoolHeaderParam &
   RequestParameters;
 
-export interface PoolUpdatePropertiesHeaders {
+export interface PoolUpdatePoolPropertiesHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -733,12 +733,12 @@ export interface PoolUpdatePropertiesHeaders {
   "ocp-date"?: string;
 }
 
-export interface PoolUpdatePropertiesBodyParam {
+export interface PoolUpdatePoolPropertiesBodyParam {
   /** The parameters for the request. */
   body: BatchPool;
 }
 
-export interface PoolUpdatePropertiesQueryParamProperties {
+export interface PoolUpdatePoolPropertiesQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -746,20 +746,21 @@ export interface PoolUpdatePropertiesQueryParamProperties {
   timeOut?: number;
 }
 
-export interface PoolUpdatePropertiesQueryParam {
-  queryParameters?: PoolUpdatePropertiesQueryParamProperties;
+export interface PoolUpdatePoolPropertiesQueryParam {
+  queryParameters?: PoolUpdatePoolPropertiesQueryParamProperties;
 }
 
-export interface PoolUpdatePropertiesHeaderParam {
-  headers?: RawHttpHeadersInput & PoolUpdatePropertiesHeaders;
+export interface PoolUpdatePoolPropertiesHeaderParam {
+  headers?: RawHttpHeadersInput & PoolUpdatePoolPropertiesHeaders;
 }
 
-export type PoolUpdatePropertiesParameters = PoolUpdatePropertiesQueryParam &
-  PoolUpdatePropertiesHeaderParam &
-  PoolUpdatePropertiesBodyParam &
-  RequestParameters;
+export type PoolUpdatePoolPropertiesParameters =
+  PoolUpdatePoolPropertiesQueryParam &
+    PoolUpdatePoolPropertiesHeaderParam &
+    PoolUpdatePoolPropertiesBodyParam &
+    RequestParameters;
 
-export interface PoolRemoveNodesHeaders {
+export interface PoolRemovePoolNodesHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -799,12 +800,12 @@ export interface PoolRemoveNodesHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface PoolRemoveNodesBodyParam {
+export interface PoolRemovePoolNodesBodyParam {
   /** The parameters for the request. */
   body: NodeRemoveParameters;
 }
 
-export interface PoolRemoveNodesQueryParamProperties {
+export interface PoolRemovePoolNodesQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -812,17 +813,17 @@ export interface PoolRemoveNodesQueryParamProperties {
   timeOut?: number;
 }
 
-export interface PoolRemoveNodesQueryParam {
-  queryParameters?: PoolRemoveNodesQueryParamProperties;
+export interface PoolRemovePoolNodesQueryParam {
+  queryParameters?: PoolRemovePoolNodesQueryParamProperties;
 }
 
-export interface PoolRemoveNodesHeaderParam {
-  headers?: RawHttpHeadersInput & PoolRemoveNodesHeaders;
+export interface PoolRemovePoolNodesHeaderParam {
+  headers?: RawHttpHeadersInput & PoolRemovePoolNodesHeaders;
 }
 
-export type PoolRemoveNodesParameters = PoolRemoveNodesQueryParam &
-  PoolRemoveNodesHeaderParam &
-  PoolRemoveNodesBodyParam &
+export type PoolRemovePoolNodesParameters = PoolRemovePoolNodesQueryParam &
+  PoolRemovePoolNodesHeaderParam &
+  PoolRemovePoolNodesBodyParam &
   RequestParameters;
 
 export interface AccountListSupportedImagesHeaders {
@@ -956,7 +957,7 @@ export type JobGetAllLifetimeStatisticsParameters =
     JobGetAllLifetimeStatisticsHeaderParam &
     RequestParameters;
 
-export interface JobDeleteHeaders {
+export interface JobDeleteJobHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -996,7 +997,7 @@ export interface JobDeleteHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobDeleteQueryParamProperties {
+export interface JobDeleteJobQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1004,19 +1005,19 @@ export interface JobDeleteQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobDeleteQueryParam {
-  queryParameters?: JobDeleteQueryParamProperties;
+export interface JobDeleteJobQueryParam {
+  queryParameters?: JobDeleteJobQueryParamProperties;
 }
 
-export interface JobDeleteHeaderParam {
-  headers?: RawHttpHeadersInput & JobDeleteHeaders;
+export interface JobDeleteJobHeaderParam {
+  headers?: RawHttpHeadersInput & JobDeleteJobHeaders;
 }
 
-export type JobDeleteParameters = JobDeleteQueryParam &
-  JobDeleteHeaderParam &
+export type JobDeleteJobParameters = JobDeleteJobQueryParam &
+  JobDeleteJobHeaderParam &
   RequestParameters;
 
-export interface JobGetHeaders {
+export interface JobGetJobHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1056,7 +1057,7 @@ export interface JobGetHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobGetQueryParamProperties {
+export interface JobGetJobQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1068,19 +1069,19 @@ export interface JobGetQueryParamProperties {
   $expand?: string;
 }
 
-export interface JobGetQueryParam {
-  queryParameters?: JobGetQueryParamProperties;
+export interface JobGetJobQueryParam {
+  queryParameters?: JobGetJobQueryParamProperties;
 }
 
-export interface JobGetHeaderParam {
-  headers?: RawHttpHeadersInput & JobGetHeaders;
+export interface JobGetJobHeaderParam {
+  headers?: RawHttpHeadersInput & JobGetJobHeaders;
 }
 
-export type JobGetParameters = JobGetQueryParam &
-  JobGetHeaderParam &
+export type JobGetJobParameters = JobGetJobQueryParam &
+  JobGetJobHeaderParam &
   RequestParameters;
 
-export interface JobPatchHeaders {
+export interface JobUpdateJobHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1120,12 +1121,12 @@ export interface JobPatchHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobPatchBodyParam {
+export interface JobUpdateJobBodyParam {
   /** The parameters for the request. */
   body: BatchJob;
 }
 
-export interface JobPatchQueryParamProperties {
+export interface JobUpdateJobQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1133,20 +1134,20 @@ export interface JobPatchQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobPatchQueryParam {
-  queryParameters?: JobPatchQueryParamProperties;
+export interface JobUpdateJobQueryParam {
+  queryParameters?: JobUpdateJobQueryParamProperties;
 }
 
-export interface JobPatchHeaderParam {
-  headers?: RawHttpHeadersInput & JobPatchHeaders;
+export interface JobUpdateJobHeaderParam {
+  headers?: RawHttpHeadersInput & JobUpdateJobHeaders;
 }
 
-export type JobPatchParameters = JobPatchQueryParam &
-  JobPatchHeaderParam &
-  JobPatchBodyParam &
+export type JobUpdateJobParameters = JobUpdateJobQueryParam &
+  JobUpdateJobHeaderParam &
+  JobUpdateJobBodyParam &
   RequestParameters;
 
-export interface JobUpdateHeaders {
+export interface JobReplaceJobHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1186,12 +1187,12 @@ export interface JobUpdateHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobUpdateBodyParam {
+export interface JobReplaceJobBodyParam {
   /** The parameters for the request. */
   body: BatchJob;
 }
 
-export interface JobUpdateQueryParamProperties {
+export interface JobReplaceJobQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1199,20 +1200,20 @@ export interface JobUpdateQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobUpdateQueryParam {
-  queryParameters?: JobUpdateQueryParamProperties;
+export interface JobReplaceJobQueryParam {
+  queryParameters?: JobReplaceJobQueryParamProperties;
 }
 
-export interface JobUpdateHeaderParam {
-  headers?: RawHttpHeadersInput & JobUpdateHeaders;
+export interface JobReplaceJobHeaderParam {
+  headers?: RawHttpHeadersInput & JobReplaceJobHeaders;
 }
 
-export type JobUpdateParameters = JobUpdateQueryParam &
-  JobUpdateHeaderParam &
-  JobUpdateBodyParam &
+export type JobReplaceJobParameters = JobReplaceJobQueryParam &
+  JobReplaceJobHeaderParam &
+  JobReplaceJobBodyParam &
   RequestParameters;
 
-export interface JobDisableHeaders {
+export interface JobDisableJobHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1252,12 +1253,12 @@ export interface JobDisableHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobDisableBodyParam {
+export interface JobDisableJobBodyParam {
   /** The parameters for the request. */
   body: BatchJobDisableParameters;
 }
 
-export interface JobDisableQueryParamProperties {
+export interface JobDisableJobQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1265,20 +1266,20 @@ export interface JobDisableQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobDisableQueryParam {
-  queryParameters?: JobDisableQueryParamProperties;
+export interface JobDisableJobQueryParam {
+  queryParameters?: JobDisableJobQueryParamProperties;
 }
 
-export interface JobDisableHeaderParam {
-  headers?: RawHttpHeadersInput & JobDisableHeaders;
+export interface JobDisableJobHeaderParam {
+  headers?: RawHttpHeadersInput & JobDisableJobHeaders;
 }
 
-export type JobDisableParameters = JobDisableQueryParam &
-  JobDisableHeaderParam &
-  JobDisableBodyParam &
+export type JobDisableJobParameters = JobDisableJobQueryParam &
+  JobDisableJobHeaderParam &
+  JobDisableJobBodyParam &
   RequestParameters;
 
-export interface JobEnableHeaders {
+export interface JobEnableJobHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1318,7 +1319,7 @@ export interface JobEnableHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobEnableQueryParamProperties {
+export interface JobEnableJobQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1326,19 +1327,19 @@ export interface JobEnableQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobEnableQueryParam {
-  queryParameters?: JobEnableQueryParamProperties;
+export interface JobEnableJobQueryParam {
+  queryParameters?: JobEnableJobQueryParamProperties;
 }
 
-export interface JobEnableHeaderParam {
-  headers?: RawHttpHeadersInput & JobEnableHeaders;
+export interface JobEnableJobHeaderParam {
+  headers?: RawHttpHeadersInput & JobEnableJobHeaders;
 }
 
-export type JobEnableParameters = JobEnableQueryParam &
-  JobEnableHeaderParam &
+export type JobEnableJobParameters = JobEnableJobQueryParam &
+  JobEnableJobHeaderParam &
   RequestParameters;
 
-export interface JobTerminateHeaders {
+export interface JobTerminateJobHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1378,12 +1379,12 @@ export interface JobTerminateHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobTerminateBodyParam {
+export interface JobTerminateJobBodyParam {
   /** The parameters for the request. */
-  body: BatchJobTerminateParameters;
+  body?: BatchJobTerminateParameters;
 }
 
-export interface JobTerminateQueryParamProperties {
+export interface JobTerminateJobQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1391,20 +1392,20 @@ export interface JobTerminateQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobTerminateQueryParam {
-  queryParameters?: JobTerminateQueryParamProperties;
+export interface JobTerminateJobQueryParam {
+  queryParameters?: JobTerminateJobQueryParamProperties;
 }
 
-export interface JobTerminateHeaderParam {
-  headers?: RawHttpHeadersInput & JobTerminateHeaders;
+export interface JobTerminateJobHeaderParam {
+  headers?: RawHttpHeadersInput & JobTerminateJobHeaders;
 }
 
-export type JobTerminateParameters = JobTerminateQueryParam &
-  JobTerminateHeaderParam &
-  JobTerminateBodyParam &
+export type JobTerminateJobParameters = JobTerminateJobQueryParam &
+  JobTerminateJobHeaderParam &
+  JobTerminateJobBodyParam &
   RequestParameters;
 
-export interface JobAddHeaders {
+export interface JobAddJobHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1420,12 +1421,12 @@ export interface JobAddHeaders {
   "ocp-date"?: string;
 }
 
-export interface JobAddBodyParam {
+export interface JobAddJobBodyParam {
   /** The Job to be added. */
   body: BatchJob;
 }
 
-export interface JobAddQueryParamProperties {
+export interface JobAddJobQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1433,20 +1434,20 @@ export interface JobAddQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobAddQueryParam {
-  queryParameters?: JobAddQueryParamProperties;
+export interface JobAddJobQueryParam {
+  queryParameters?: JobAddJobQueryParamProperties;
 }
 
-export interface JobAddHeaderParam {
-  headers?: RawHttpHeadersInput & JobAddHeaders;
+export interface JobAddJobHeaderParam {
+  headers?: RawHttpHeadersInput & JobAddJobHeaders;
 }
 
-export type JobAddParameters = JobAddQueryParam &
-  JobAddHeaderParam &
-  JobAddBodyParam &
+export type JobAddJobParameters = JobAddJobQueryParam &
+  JobAddJobHeaderParam &
+  JobAddJobBodyParam &
   RequestParameters;
 
-export interface JobListHeaders {
+export interface JobListJobsHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -1462,7 +1463,7 @@ export interface JobListHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface JobListQueryParamProperties {
+export interface JobListJobsQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1477,23 +1478,23 @@ export interface JobListQueryParamProperties {
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-jobs.
    */
-  $filter: string;
+  $filter?: string;
   /** An OData $select clause. */
-  $select: string;
+  $select?: string;
   /** An OData $expand clause. */
-  $expand: string;
+  $expand?: string;
 }
 
-export interface JobListQueryParam {
-  queryParameters: JobListQueryParamProperties;
+export interface JobListJobsQueryParam {
+  queryParameters?: JobListJobsQueryParamProperties;
 }
 
-export interface JobListHeaderParam {
-  headers?: RawHttpHeadersInput & JobListHeaders;
+export interface JobListJobsHeaderParam {
+  headers?: RawHttpHeadersInput & JobListJobsHeaders;
 }
 
-export type JobListParameters = JobListQueryParam &
-  JobListHeaderParam &
+export type JobListJobsParameters = JobListJobsQueryParam &
+  JobListJobsHeaderParam &
   RequestParameters;
 
 export interface JobListFromJobScheduleHeaders {
@@ -1527,15 +1528,15 @@ export interface JobListFromJobScheduleQueryParamProperties {
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-jobs-in-a-job-schedule.
    */
-  $filter: string;
+  $filter?: string;
   /** An OData $select clause. */
-  $select: string;
+  $select?: string;
   /** An OData $expand clause. */
-  $expand: string;
+  $expand?: string;
 }
 
 export interface JobListFromJobScheduleQueryParam {
-  queryParameters: JobListFromJobScheduleQueryParamProperties;
+  queryParameters?: JobListFromJobScheduleQueryParamProperties;
 }
 
 export interface JobListFromJobScheduleHeaderParam {
@@ -1578,13 +1579,13 @@ export interface JobListPreparationAndReleaseTaskStatusQueryParamProperties {
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-job-preparation-and-release-status.
    */
-  $filter: string;
+  $filter?: string;
   /** An OData $select clause. */
-  $select: string;
+  $select?: string;
 }
 
 export interface JobListPreparationAndReleaseTaskStatusQueryParam {
-  queryParameters: JobListPreparationAndReleaseTaskStatusQueryParamProperties;
+  queryParameters?: JobListPreparationAndReleaseTaskStatusQueryParamProperties;
 }
 
 export interface JobListPreparationAndReleaseTaskStatusHeaderParam {
@@ -1632,7 +1633,7 @@ export type JobGetTaskCountsParameters = JobGetTaskCountsQueryParam &
   JobGetTaskCountsHeaderParam &
   RequestParameters;
 
-export interface CertificateOperationsAddHeaders {
+export interface CertificatesAddCertificateHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1648,12 +1649,12 @@ export interface CertificateOperationsAddHeaders {
   "ocp-date"?: string;
 }
 
-export interface CertificateOperationsAddBodyParam {
+export interface CertificatesAddCertificateBodyParam {
   /** The Certificate to be added. */
   body: Certificate;
 }
 
-export interface CertificateOperationsAddQueryParamProperties {
+export interface CertificatesAddCertificateQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1661,21 +1662,21 @@ export interface CertificateOperationsAddQueryParamProperties {
   timeOut?: number;
 }
 
-export interface CertificateOperationsAddQueryParam {
-  queryParameters?: CertificateOperationsAddQueryParamProperties;
+export interface CertificatesAddCertificateQueryParam {
+  queryParameters?: CertificatesAddCertificateQueryParamProperties;
 }
 
-export interface CertificateOperationsAddHeaderParam {
-  headers?: RawHttpHeadersInput & CertificateOperationsAddHeaders;
+export interface CertificatesAddCertificateHeaderParam {
+  headers?: RawHttpHeadersInput & CertificatesAddCertificateHeaders;
 }
 
-export type CertificateOperationsAddParameters =
-  CertificateOperationsAddQueryParam &
-    CertificateOperationsAddHeaderParam &
-    CertificateOperationsAddBodyParam &
+export type CertificatesAddCertificateParameters =
+  CertificatesAddCertificateQueryParam &
+    CertificatesAddCertificateHeaderParam &
+    CertificatesAddCertificateBodyParam &
     RequestParameters;
 
-export interface CertificateOperationsListHeaders {
+export interface CertificatesListCertificatesHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -1691,7 +1692,7 @@ export interface CertificateOperationsListHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface CertificateOperationsListQueryParamProperties {
+export interface CertificatesListCertificatesQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1706,25 +1707,25 @@ export interface CertificateOperationsListQueryParamProperties {
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-certificates.
    */
-  $filter: string;
+  $filter?: string;
   /** An OData $select clause. */
-  $select: string;
+  $select?: string;
 }
 
-export interface CertificateOperationsListQueryParam {
-  queryParameters: CertificateOperationsListQueryParamProperties;
+export interface CertificatesListCertificatesQueryParam {
+  queryParameters?: CertificatesListCertificatesQueryParamProperties;
 }
 
-export interface CertificateOperationsListHeaderParam {
-  headers?: RawHttpHeadersInput & CertificateOperationsListHeaders;
+export interface CertificatesListCertificatesHeaderParam {
+  headers?: RawHttpHeadersInput & CertificatesListCertificatesHeaders;
 }
 
-export type CertificateOperationsListParameters =
-  CertificateOperationsListQueryParam &
-    CertificateOperationsListHeaderParam &
+export type CertificatesListCertificatesParameters =
+  CertificatesListCertificatesQueryParam &
+    CertificatesListCertificatesHeaderParam &
     RequestParameters;
 
-export interface CertificateOperationsCancelDeletionHeaders {
+export interface CertificatesCancelCertificateDeletionHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1740,7 +1741,7 @@ export interface CertificateOperationsCancelDeletionHeaders {
   "ocp-date"?: string;
 }
 
-export interface CertificateOperationsCancelDeletionQueryParamProperties {
+export interface CertificatesCancelCertificateDeletionQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1748,20 +1749,20 @@ export interface CertificateOperationsCancelDeletionQueryParamProperties {
   timeOut?: number;
 }
 
-export interface CertificateOperationsCancelDeletionQueryParam {
-  queryParameters?: CertificateOperationsCancelDeletionQueryParamProperties;
+export interface CertificatesCancelCertificateDeletionQueryParam {
+  queryParameters?: CertificatesCancelCertificateDeletionQueryParamProperties;
 }
 
-export interface CertificateOperationsCancelDeletionHeaderParam {
-  headers?: RawHttpHeadersInput & CertificateOperationsCancelDeletionHeaders;
+export interface CertificatesCancelCertificateDeletionHeaderParam {
+  headers?: RawHttpHeadersInput & CertificatesCancelCertificateDeletionHeaders;
 }
 
-export type CertificateOperationsCancelDeletionParameters =
-  CertificateOperationsCancelDeletionQueryParam &
-    CertificateOperationsCancelDeletionHeaderParam &
+export type CertificatesCancelCertificateDeletionParameters =
+  CertificatesCancelCertificateDeletionQueryParam &
+    CertificatesCancelCertificateDeletionHeaderParam &
     RequestParameters;
 
-export interface CertificateOperationsDeleteHeaders {
+export interface CertificatesDeleteCertificateHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1777,7 +1778,7 @@ export interface CertificateOperationsDeleteHeaders {
   "ocp-date"?: string;
 }
 
-export interface CertificateOperationsDeleteQueryParamProperties {
+export interface CertificatesDeleteCertificateQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1785,20 +1786,20 @@ export interface CertificateOperationsDeleteQueryParamProperties {
   timeOut?: number;
 }
 
-export interface CertificateOperationsDeleteQueryParam {
-  queryParameters?: CertificateOperationsDeleteQueryParamProperties;
+export interface CertificatesDeleteCertificateQueryParam {
+  queryParameters?: CertificatesDeleteCertificateQueryParamProperties;
 }
 
-export interface CertificateOperationsDeleteHeaderParam {
-  headers?: RawHttpHeadersInput & CertificateOperationsDeleteHeaders;
+export interface CertificatesDeleteCertificateHeaderParam {
+  headers?: RawHttpHeadersInput & CertificatesDeleteCertificateHeaders;
 }
 
-export type CertificateOperationsDeleteParameters =
-  CertificateOperationsDeleteQueryParam &
-    CertificateOperationsDeleteHeaderParam &
+export type CertificatesDeleteCertificateParameters =
+  CertificatesDeleteCertificateQueryParam &
+    CertificatesDeleteCertificateHeaderParam &
     RequestParameters;
 
-export interface CertificateOperationsGetHeaders {
+export interface CertificatesGetCertificateHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1814,30 +1815,30 @@ export interface CertificateOperationsGetHeaders {
   "ocp-date"?: string;
 }
 
-export interface CertificateOperationsGetQueryParamProperties {
+export interface CertificatesGetCertificateQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
   timeOut?: number;
   /** An OData $select clause. */
-  $select: string;
+  $select?: string;
 }
 
-export interface CertificateOperationsGetQueryParam {
-  queryParameters: CertificateOperationsGetQueryParamProperties;
+export interface CertificatesGetCertificateQueryParam {
+  queryParameters?: CertificatesGetCertificateQueryParamProperties;
 }
 
-export interface CertificateOperationsGetHeaderParam {
-  headers?: RawHttpHeadersInput & CertificateOperationsGetHeaders;
+export interface CertificatesGetCertificateHeaderParam {
+  headers?: RawHttpHeadersInput & CertificatesGetCertificateHeaders;
 }
 
-export type CertificateOperationsGetParameters =
-  CertificateOperationsGetQueryParam &
-    CertificateOperationsGetHeaderParam &
+export type CertificatesGetCertificateParameters =
+  CertificatesGetCertificateQueryParam &
+    CertificatesGetCertificateHeaderParam &
     RequestParameters;
 
-export interface FileDeleteFromTaskHeaders {
+export interface FileDeleteFileFromTaskHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1853,7 +1854,7 @@ export interface FileDeleteFromTaskHeaders {
   "ocp-date"?: string;
 }
 
-export interface FileDeleteFromTaskQueryParamProperties {
+export interface FileDeleteFileFromTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1865,22 +1866,23 @@ export interface FileDeleteFromTaskQueryParamProperties {
    * directory and all of the files and subdirectories in it. If recursive is false
    * then the directory must be empty or deletion will fail.
    */
-  recursive: boolean;
+  recursive?: boolean;
 }
 
-export interface FileDeleteFromTaskQueryParam {
-  queryParameters: FileDeleteFromTaskQueryParamProperties;
+export interface FileDeleteFileFromTaskQueryParam {
+  queryParameters?: FileDeleteFileFromTaskQueryParamProperties;
 }
 
-export interface FileDeleteFromTaskHeaderParam {
-  headers?: RawHttpHeadersInput & FileDeleteFromTaskHeaders;
+export interface FileDeleteFileFromTaskHeaderParam {
+  headers?: RawHttpHeadersInput & FileDeleteFileFromTaskHeaders;
 }
 
-export type FileDeleteFromTaskParameters = FileDeleteFromTaskQueryParam &
-  FileDeleteFromTaskHeaderParam &
-  RequestParameters;
+export type FileDeleteFileFromTaskParameters =
+  FileDeleteFileFromTaskQueryParam &
+    FileDeleteFileFromTaskHeaderParam &
+    RequestParameters;
 
-export interface FileGetFromTaskHeaders {
+export interface FileGetFileFromTaskHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1913,7 +1915,7 @@ export interface FileGetFromTaskHeaders {
   "ocp-range"?: string;
 }
 
-export interface FileGetFromTaskQueryParamProperties {
+export interface FileGetFileFromTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1921,19 +1923,19 @@ export interface FileGetFromTaskQueryParamProperties {
   timeOut?: number;
 }
 
-export interface FileGetFromTaskQueryParam {
-  queryParameters?: FileGetFromTaskQueryParamProperties;
+export interface FileGetFileFromTaskQueryParam {
+  queryParameters?: FileGetFileFromTaskQueryParamProperties;
 }
 
-export interface FileGetFromTaskHeaderParam {
-  headers?: RawHttpHeadersInput & FileGetFromTaskHeaders;
+export interface FileGetFileFromTaskHeaderParam {
+  headers?: RawHttpHeadersInput & FileGetFileFromTaskHeaders;
 }
 
-export type FileGetFromTaskParameters = FileGetFromTaskQueryParam &
-  FileGetFromTaskHeaderParam &
+export type FileGetFileFromTaskParameters = FileGetFileFromTaskQueryParam &
+  FileGetFileFromTaskHeaderParam &
   RequestParameters;
 
-export interface FileGetPropertiesFromTaskHeaders {
+export interface FileGetFilePropertiesFromTaskHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -1961,7 +1963,7 @@ export interface FileGetPropertiesFromTaskHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface FileGetPropertiesFromTaskQueryParamProperties {
+export interface FileGetFilePropertiesFromTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -1969,17 +1971,17 @@ export interface FileGetPropertiesFromTaskQueryParamProperties {
   timeOut?: number;
 }
 
-export interface FileGetPropertiesFromTaskQueryParam {
-  queryParameters?: FileGetPropertiesFromTaskQueryParamProperties;
+export interface FileGetFilePropertiesFromTaskQueryParam {
+  queryParameters?: FileGetFilePropertiesFromTaskQueryParamProperties;
 }
 
-export interface FileGetPropertiesFromTaskHeaderParam {
-  headers?: RawHttpHeadersInput & FileGetPropertiesFromTaskHeaders;
+export interface FileGetFilePropertiesFromTaskHeaderParam {
+  headers?: RawHttpHeadersInput & FileGetFilePropertiesFromTaskHeaders;
 }
 
-export type FileGetPropertiesFromTaskParameters =
-  FileGetPropertiesFromTaskQueryParam &
-    FileGetPropertiesFromTaskHeaderParam &
+export type FileGetFilePropertiesFromTaskParameters =
+  FileGetFilePropertiesFromTaskQueryParam &
+    FileGetFilePropertiesFromTaskHeaderParam &
     RequestParameters;
 
 export interface FileDeleteFromComputeNodeHeaders {
@@ -2026,7 +2028,7 @@ export type FileDeleteFromComputeNodeParameters =
     FileDeleteFromComputeNodeHeaderParam &
     RequestParameters;
 
-export interface FileGetFromComputeNodeHeaders {
+export interface FileGetFileFromComputeNodeHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2059,7 +2061,7 @@ export interface FileGetFromComputeNodeHeaders {
   "ocp-range"?: string;
 }
 
-export interface FileGetFromComputeNodeQueryParamProperties {
+export interface FileGetFileFromComputeNodeQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2067,20 +2069,20 @@ export interface FileGetFromComputeNodeQueryParamProperties {
   timeOut?: number;
 }
 
-export interface FileGetFromComputeNodeQueryParam {
-  queryParameters?: FileGetFromComputeNodeQueryParamProperties;
+export interface FileGetFileFromComputeNodeQueryParam {
+  queryParameters?: FileGetFileFromComputeNodeQueryParamProperties;
 }
 
-export interface FileGetFromComputeNodeHeaderParam {
-  headers?: RawHttpHeadersInput & FileGetFromComputeNodeHeaders;
+export interface FileGetFileFromComputeNodeHeaderParam {
+  headers?: RawHttpHeadersInput & FileGetFileFromComputeNodeHeaders;
 }
 
-export type FileGetFromComputeNodeParameters =
-  FileGetFromComputeNodeQueryParam &
-    FileGetFromComputeNodeHeaderParam &
+export type FileGetFileFromComputeNodeParameters =
+  FileGetFileFromComputeNodeQueryParam &
+    FileGetFileFromComputeNodeHeaderParam &
     RequestParameters;
 
-export interface FileGetPropertiesFromComputeNodeHeaders {
+export interface FileGetFilePropertiesFromComputeNodeHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2108,7 +2110,7 @@ export interface FileGetPropertiesFromComputeNodeHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface FileGetPropertiesFromComputeNodeQueryParamProperties {
+export interface FileGetFilePropertiesFromComputeNodeQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2116,20 +2118,20 @@ export interface FileGetPropertiesFromComputeNodeQueryParamProperties {
   timeOut?: number;
 }
 
-export interface FileGetPropertiesFromComputeNodeQueryParam {
-  queryParameters?: FileGetPropertiesFromComputeNodeQueryParamProperties;
+export interface FileGetFilePropertiesFromComputeNodeQueryParam {
+  queryParameters?: FileGetFilePropertiesFromComputeNodeQueryParamProperties;
 }
 
-export interface FileGetPropertiesFromComputeNodeHeaderParam {
-  headers?: RawHttpHeadersInput & FileGetPropertiesFromComputeNodeHeaders;
+export interface FileGetFilePropertiesFromComputeNodeHeaderParam {
+  headers?: RawHttpHeadersInput & FileGetFilePropertiesFromComputeNodeHeaders;
 }
 
-export type FileGetPropertiesFromComputeNodeParameters =
-  FileGetPropertiesFromComputeNodeQueryParam &
-    FileGetPropertiesFromComputeNodeHeaderParam &
+export type FileGetFilePropertiesFromComputeNodeParameters =
+  FileGetFilePropertiesFromComputeNodeQueryParam &
+    FileGetFilePropertiesFromComputeNodeHeaderParam &
     RequestParameters;
 
-export interface FileListFromTaskHeaders {
+export interface FileListFilesFromTaskHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -2145,7 +2147,7 @@ export interface FileListFromTaskHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface FileListFromTaskQueryParamProperties {
+export interface FileListFilesFromTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2160,27 +2162,27 @@ export interface FileListFromTaskQueryParamProperties {
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-task-files.
    */
-  $filter: string;
+  $filter?: string;
   /**
    * Whether to list children of the Task directory. This parameter can be used in
    * combination with the filter parameter to list specific type of files.
    */
-  recursive: boolean;
+  recursive?: boolean;
 }
 
-export interface FileListFromTaskQueryParam {
-  queryParameters: FileListFromTaskQueryParamProperties;
+export interface FileListFilesFromTaskQueryParam {
+  queryParameters?: FileListFilesFromTaskQueryParamProperties;
 }
 
-export interface FileListFromTaskHeaderParam {
-  headers?: RawHttpHeadersInput & FileListFromTaskHeaders;
+export interface FileListFilesFromTaskHeaderParam {
+  headers?: RawHttpHeadersInput & FileListFilesFromTaskHeaders;
 }
 
-export type FileListFromTaskParameters = FileListFromTaskQueryParam &
-  FileListFromTaskHeaderParam &
+export type FileListFilesFromTaskParameters = FileListFilesFromTaskQueryParam &
+  FileListFilesFromTaskHeaderParam &
   RequestParameters;
 
-export interface FileListFromComputeNodeHeaders {
+export interface FileListFilesFromComputeNodeHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -2196,7 +2198,7 @@ export interface FileListFromComputeNodeHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface FileListFromComputeNodeQueryParamProperties {
+export interface FileListFilesFromComputeNodeQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2211,25 +2213,25 @@ export interface FileListFromComputeNodeQueryParamProperties {
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-compute-node-files.
    */
-  $filter: string;
+  $filter?: string;
   /** Whether to list children of a directory. */
-  recursive: boolean;
+  recursive?: boolean;
 }
 
-export interface FileListFromComputeNodeQueryParam {
-  queryParameters: FileListFromComputeNodeQueryParamProperties;
+export interface FileListFilesFromComputeNodeQueryParam {
+  queryParameters?: FileListFilesFromComputeNodeQueryParamProperties;
 }
 
-export interface FileListFromComputeNodeHeaderParam {
-  headers?: RawHttpHeadersInput & FileListFromComputeNodeHeaders;
+export interface FileListFilesFromComputeNodeHeaderParam {
+  headers?: RawHttpHeadersInput & FileListFilesFromComputeNodeHeaders;
 }
 
-export type FileListFromComputeNodeParameters =
-  FileListFromComputeNodeQueryParam &
-    FileListFromComputeNodeHeaderParam &
+export type FileListFilesFromComputeNodeParameters =
+  FileListFilesFromComputeNodeQueryParam &
+    FileListFilesFromComputeNodeHeaderParam &
     RequestParameters;
 
-export interface JobScheduleExistsHeaders {
+export interface JobScheduleJobScheduleExistsHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2269,7 +2271,7 @@ export interface JobScheduleExistsHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobScheduleExistsQueryParamProperties {
+export interface JobScheduleJobScheduleExistsQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2277,19 +2279,20 @@ export interface JobScheduleExistsQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobScheduleExistsQueryParam {
-  queryParameters?: JobScheduleExistsQueryParamProperties;
+export interface JobScheduleJobScheduleExistsQueryParam {
+  queryParameters?: JobScheduleJobScheduleExistsQueryParamProperties;
 }
 
-export interface JobScheduleExistsHeaderParam {
-  headers?: RawHttpHeadersInput & JobScheduleExistsHeaders;
+export interface JobScheduleJobScheduleExistsHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleJobScheduleExistsHeaders;
 }
 
-export type JobScheduleExistsParameters = JobScheduleExistsQueryParam &
-  JobScheduleExistsHeaderParam &
-  RequestParameters;
+export type JobScheduleJobScheduleExistsParameters =
+  JobScheduleJobScheduleExistsQueryParam &
+    JobScheduleJobScheduleExistsHeaderParam &
+    RequestParameters;
 
-export interface JobScheduleDeleteHeaders {
+export interface JobScheduleDeleteJobScheduleHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2329,7 +2332,7 @@ export interface JobScheduleDeleteHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobScheduleDeleteQueryParamProperties {
+export interface JobScheduleDeleteJobScheduleQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2337,19 +2340,20 @@ export interface JobScheduleDeleteQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobScheduleDeleteQueryParam {
-  queryParameters?: JobScheduleDeleteQueryParamProperties;
+export interface JobScheduleDeleteJobScheduleQueryParam {
+  queryParameters?: JobScheduleDeleteJobScheduleQueryParamProperties;
 }
 
-export interface JobScheduleDeleteHeaderParam {
-  headers?: RawHttpHeadersInput & JobScheduleDeleteHeaders;
+export interface JobScheduleDeleteJobScheduleHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleDeleteJobScheduleHeaders;
 }
 
-export type JobScheduleDeleteParameters = JobScheduleDeleteQueryParam &
-  JobScheduleDeleteHeaderParam &
-  RequestParameters;
+export type JobScheduleDeleteJobScheduleParameters =
+  JobScheduleDeleteJobScheduleQueryParam &
+    JobScheduleDeleteJobScheduleHeaderParam &
+    RequestParameters;
 
-export interface JobScheduleGetHeaders {
+export interface JobScheduleGetJobScheduleHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2389,7 +2393,7 @@ export interface JobScheduleGetHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobScheduleGetQueryParamProperties {
+export interface JobScheduleGetJobScheduleQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2401,19 +2405,20 @@ export interface JobScheduleGetQueryParamProperties {
   $expand?: string;
 }
 
-export interface JobScheduleGetQueryParam {
-  queryParameters?: JobScheduleGetQueryParamProperties;
+export interface JobScheduleGetJobScheduleQueryParam {
+  queryParameters?: JobScheduleGetJobScheduleQueryParamProperties;
 }
 
-export interface JobScheduleGetHeaderParam {
-  headers?: RawHttpHeadersInput & JobScheduleGetHeaders;
+export interface JobScheduleGetJobScheduleHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleGetJobScheduleHeaders;
 }
 
-export type JobScheduleGetParameters = JobScheduleGetQueryParam &
-  JobScheduleGetHeaderParam &
-  RequestParameters;
+export type JobScheduleGetJobScheduleParameters =
+  JobScheduleGetJobScheduleQueryParam &
+    JobScheduleGetJobScheduleHeaderParam &
+    RequestParameters;
 
-export interface JobSchedulePatchHeaders {
+export interface JobScheduleUpdateJobScheduleHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2453,12 +2458,12 @@ export interface JobSchedulePatchHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobSchedulePatchBodyParam {
+export interface JobScheduleUpdateJobScheduleBodyParam {
   /** The parameters for the request. */
   body: BatchJobSchedule;
 }
 
-export interface JobSchedulePatchQueryParamProperties {
+export interface JobScheduleUpdateJobScheduleQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2466,20 +2471,21 @@ export interface JobSchedulePatchQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobSchedulePatchQueryParam {
-  queryParameters?: JobSchedulePatchQueryParamProperties;
+export interface JobScheduleUpdateJobScheduleQueryParam {
+  queryParameters?: JobScheduleUpdateJobScheduleQueryParamProperties;
 }
 
-export interface JobSchedulePatchHeaderParam {
-  headers?: RawHttpHeadersInput & JobSchedulePatchHeaders;
+export interface JobScheduleUpdateJobScheduleHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleUpdateJobScheduleHeaders;
 }
 
-export type JobSchedulePatchParameters = JobSchedulePatchQueryParam &
-  JobSchedulePatchHeaderParam &
-  JobSchedulePatchBodyParam &
-  RequestParameters;
+export type JobScheduleUpdateJobScheduleParameters =
+  JobScheduleUpdateJobScheduleQueryParam &
+    JobScheduleUpdateJobScheduleHeaderParam &
+    JobScheduleUpdateJobScheduleBodyParam &
+    RequestParameters;
 
-export interface JobScheduleUpdateHeaders {
+export interface JobScheduleReplaceJobScheduleHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2519,12 +2525,12 @@ export interface JobScheduleUpdateHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobScheduleUpdateBodyParam {
+export interface JobScheduleReplaceJobScheduleBodyParam {
   /** The parameters for the request. */
   body: BatchJobSchedule;
 }
 
-export interface JobScheduleUpdateQueryParamProperties {
+export interface JobScheduleReplaceJobScheduleQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2532,20 +2538,21 @@ export interface JobScheduleUpdateQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobScheduleUpdateQueryParam {
-  queryParameters?: JobScheduleUpdateQueryParamProperties;
+export interface JobScheduleReplaceJobScheduleQueryParam {
+  queryParameters?: JobScheduleReplaceJobScheduleQueryParamProperties;
 }
 
-export interface JobScheduleUpdateHeaderParam {
-  headers?: RawHttpHeadersInput & JobScheduleUpdateHeaders;
+export interface JobScheduleReplaceJobScheduleHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleReplaceJobScheduleHeaders;
 }
 
-export type JobScheduleUpdateParameters = JobScheduleUpdateQueryParam &
-  JobScheduleUpdateHeaderParam &
-  JobScheduleUpdateBodyParam &
-  RequestParameters;
+export type JobScheduleReplaceJobScheduleParameters =
+  JobScheduleReplaceJobScheduleQueryParam &
+    JobScheduleReplaceJobScheduleHeaderParam &
+    JobScheduleReplaceJobScheduleBodyParam &
+    RequestParameters;
 
-export interface JobScheduleDisableHeaders {
+export interface JobScheduleDisableJobScheduleHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2585,7 +2592,7 @@ export interface JobScheduleDisableHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobScheduleDisableQueryParamProperties {
+export interface JobScheduleDisableJobScheduleQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2593,19 +2600,20 @@ export interface JobScheduleDisableQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobScheduleDisableQueryParam {
-  queryParameters?: JobScheduleDisableQueryParamProperties;
+export interface JobScheduleDisableJobScheduleQueryParam {
+  queryParameters?: JobScheduleDisableJobScheduleQueryParamProperties;
 }
 
-export interface JobScheduleDisableHeaderParam {
-  headers?: RawHttpHeadersInput & JobScheduleDisableHeaders;
+export interface JobScheduleDisableJobScheduleHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleDisableJobScheduleHeaders;
 }
 
-export type JobScheduleDisableParameters = JobScheduleDisableQueryParam &
-  JobScheduleDisableHeaderParam &
-  RequestParameters;
+export type JobScheduleDisableJobScheduleParameters =
+  JobScheduleDisableJobScheduleQueryParam &
+    JobScheduleDisableJobScheduleHeaderParam &
+    RequestParameters;
 
-export interface JobScheduleEnableHeaders {
+export interface JobScheduleEnableJobScheduleHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2645,7 +2653,7 @@ export interface JobScheduleEnableHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobScheduleEnableQueryParamProperties {
+export interface JobScheduleEnableJobScheduleQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2653,19 +2661,20 @@ export interface JobScheduleEnableQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobScheduleEnableQueryParam {
-  queryParameters?: JobScheduleEnableQueryParamProperties;
+export interface JobScheduleEnableJobScheduleQueryParam {
+  queryParameters?: JobScheduleEnableJobScheduleQueryParamProperties;
 }
 
-export interface JobScheduleEnableHeaderParam {
-  headers?: RawHttpHeadersInput & JobScheduleEnableHeaders;
+export interface JobScheduleEnableJobScheduleHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleEnableJobScheduleHeaders;
 }
 
-export type JobScheduleEnableParameters = JobScheduleEnableQueryParam &
-  JobScheduleEnableHeaderParam &
-  RequestParameters;
+export type JobScheduleEnableJobScheduleParameters =
+  JobScheduleEnableJobScheduleQueryParam &
+    JobScheduleEnableJobScheduleHeaderParam &
+    RequestParameters;
 
-export interface JobScheduleTerminateHeaders {
+export interface JobScheduleTerminateJobScheduleHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2705,7 +2714,7 @@ export interface JobScheduleTerminateHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface JobScheduleTerminateQueryParamProperties {
+export interface JobScheduleTerminateJobScheduleQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2713,19 +2722,20 @@ export interface JobScheduleTerminateQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobScheduleTerminateQueryParam {
-  queryParameters?: JobScheduleTerminateQueryParamProperties;
+export interface JobScheduleTerminateJobScheduleQueryParam {
+  queryParameters?: JobScheduleTerminateJobScheduleQueryParamProperties;
 }
 
-export interface JobScheduleTerminateHeaderParam {
-  headers?: RawHttpHeadersInput & JobScheduleTerminateHeaders;
+export interface JobScheduleTerminateJobScheduleHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleTerminateJobScheduleHeaders;
 }
 
-export type JobScheduleTerminateParameters = JobScheduleTerminateQueryParam &
-  JobScheduleTerminateHeaderParam &
-  RequestParameters;
+export type JobScheduleTerminateJobScheduleParameters =
+  JobScheduleTerminateJobScheduleQueryParam &
+    JobScheduleTerminateJobScheduleHeaderParam &
+    RequestParameters;
 
-export interface JobScheduleAddHeaders {
+export interface JobScheduleAddJobScheduleHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2741,12 +2751,12 @@ export interface JobScheduleAddHeaders {
   "ocp-date"?: string;
 }
 
-export interface JobScheduleAddBodyParam {
+export interface JobScheduleAddJobScheduleBodyParam {
   /** The Job Schedule to be added. */
   body: BatchJobSchedule;
 }
 
-export interface JobScheduleAddQueryParamProperties {
+export interface JobScheduleAddJobScheduleQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2754,20 +2764,21 @@ export interface JobScheduleAddQueryParamProperties {
   timeOut?: number;
 }
 
-export interface JobScheduleAddQueryParam {
-  queryParameters?: JobScheduleAddQueryParamProperties;
+export interface JobScheduleAddJobScheduleQueryParam {
+  queryParameters?: JobScheduleAddJobScheduleQueryParamProperties;
 }
 
-export interface JobScheduleAddHeaderParam {
-  headers?: RawHttpHeadersInput & JobScheduleAddHeaders;
+export interface JobScheduleAddJobScheduleHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleAddJobScheduleHeaders;
 }
 
-export type JobScheduleAddParameters = JobScheduleAddQueryParam &
-  JobScheduleAddHeaderParam &
-  JobScheduleAddBodyParam &
-  RequestParameters;
+export type JobScheduleAddJobScheduleParameters =
+  JobScheduleAddJobScheduleQueryParam &
+    JobScheduleAddJobScheduleHeaderParam &
+    JobScheduleAddJobScheduleBodyParam &
+    RequestParameters;
 
-export interface JobScheduleListHeaders {
+export interface JobScheduleListJobSchedulesHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -2783,7 +2794,7 @@ export interface JobScheduleListHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface JobScheduleListQueryParamProperties {
+export interface JobScheduleListJobSchedulesQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2805,19 +2816,20 @@ export interface JobScheduleListQueryParamProperties {
   $expand?: string;
 }
 
-export interface JobScheduleListQueryParam {
-  queryParameters?: JobScheduleListQueryParamProperties;
+export interface JobScheduleListJobSchedulesQueryParam {
+  queryParameters?: JobScheduleListJobSchedulesQueryParamProperties;
 }
 
-export interface JobScheduleListHeaderParam {
-  headers?: RawHttpHeadersInput & JobScheduleListHeaders;
+export interface JobScheduleListJobSchedulesHeaderParam {
+  headers?: RawHttpHeadersInput & JobScheduleListJobSchedulesHeaders;
 }
 
-export type JobScheduleListParameters = JobScheduleListQueryParam &
-  JobScheduleListHeaderParam &
-  RequestParameters;
+export type JobScheduleListJobSchedulesParameters =
+  JobScheduleListJobSchedulesQueryParam &
+    JobScheduleListJobSchedulesHeaderParam &
+    RequestParameters;
 
-export interface TaskAddHeaders {
+export interface TaskAddTaskHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2833,12 +2845,12 @@ export interface TaskAddHeaders {
   "ocp-date"?: string;
 }
 
-export interface TaskAddBodyParam {
+export interface TaskAddTaskBodyParam {
   /** The Task to be added. */
   body: BatchTask;
 }
 
-export interface TaskAddQueryParamProperties {
+export interface TaskAddTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2846,20 +2858,20 @@ export interface TaskAddQueryParamProperties {
   timeOut?: number;
 }
 
-export interface TaskAddQueryParam {
-  queryParameters?: TaskAddQueryParamProperties;
+export interface TaskAddTaskQueryParam {
+  queryParameters?: TaskAddTaskQueryParamProperties;
 }
 
-export interface TaskAddHeaderParam {
-  headers?: RawHttpHeadersInput & TaskAddHeaders;
+export interface TaskAddTaskHeaderParam {
+  headers?: RawHttpHeadersInput & TaskAddTaskHeaders;
 }
 
-export type TaskAddParameters = TaskAddQueryParam &
-  TaskAddHeaderParam &
-  TaskAddBodyParam &
+export type TaskAddTaskParameters = TaskAddTaskQueryParam &
+  TaskAddTaskHeaderParam &
+  TaskAddTaskBodyParam &
   RequestParameters;
 
-export interface TaskListHeaders {
+export interface TaskListTasksHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -2875,7 +2887,7 @@ export interface TaskListHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface TaskListQueryParamProperties {
+export interface TaskListTasksQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2897,16 +2909,16 @@ export interface TaskListQueryParamProperties {
   $expand?: string;
 }
 
-export interface TaskListQueryParam {
-  queryParameters?: TaskListQueryParamProperties;
+export interface TaskListTasksQueryParam {
+  queryParameters?: TaskListTasksQueryParamProperties;
 }
 
-export interface TaskListHeaderParam {
-  headers?: RawHttpHeadersInput & TaskListHeaders;
+export interface TaskListTasksHeaderParam {
+  headers?: RawHttpHeadersInput & TaskListTasksHeaders;
 }
 
-export type TaskListParameters = TaskListQueryParam &
-  TaskListHeaderParam &
+export type TaskListTasksParameters = TaskListTasksQueryParam &
+  TaskListTasksHeaderParam &
   RequestParameters;
 
 export interface TaskAddCollectionHeaders {
@@ -2951,7 +2963,7 @@ export type TaskAddCollectionParameters = TaskAddCollectionQueryParam &
   TaskAddCollectionBodyParam &
   RequestParameters;
 
-export interface TaskDeleteHeaders {
+export interface TaskDeleteTaskHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -2991,7 +3003,7 @@ export interface TaskDeleteHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface TaskDeleteQueryParamProperties {
+export interface TaskDeleteTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2999,19 +3011,19 @@ export interface TaskDeleteQueryParamProperties {
   timeOut?: number;
 }
 
-export interface TaskDeleteQueryParam {
-  queryParameters?: TaskDeleteQueryParamProperties;
+export interface TaskDeleteTaskQueryParam {
+  queryParameters?: TaskDeleteTaskQueryParamProperties;
 }
 
-export interface TaskDeleteHeaderParam {
-  headers?: RawHttpHeadersInput & TaskDeleteHeaders;
+export interface TaskDeleteTaskHeaderParam {
+  headers?: RawHttpHeadersInput & TaskDeleteTaskHeaders;
 }
 
-export type TaskDeleteParameters = TaskDeleteQueryParam &
-  TaskDeleteHeaderParam &
+export type TaskDeleteTaskParameters = TaskDeleteTaskQueryParam &
+  TaskDeleteTaskHeaderParam &
   RequestParameters;
 
-export interface TaskGetHeaders {
+export interface TaskGetTaskHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3051,7 +3063,7 @@ export interface TaskGetHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface TaskGetQueryParamProperties {
+export interface TaskGetTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3063,19 +3075,19 @@ export interface TaskGetQueryParamProperties {
   $expand?: string;
 }
 
-export interface TaskGetQueryParam {
-  queryParameters?: TaskGetQueryParamProperties;
+export interface TaskGetTaskQueryParam {
+  queryParameters?: TaskGetTaskQueryParamProperties;
 }
 
-export interface TaskGetHeaderParam {
-  headers?: RawHttpHeadersInput & TaskGetHeaders;
+export interface TaskGetTaskHeaderParam {
+  headers?: RawHttpHeadersInput & TaskGetTaskHeaders;
 }
 
-export type TaskGetParameters = TaskGetQueryParam &
-  TaskGetHeaderParam &
+export type TaskGetTaskParameters = TaskGetTaskQueryParam &
+  TaskGetTaskHeaderParam &
   RequestParameters;
 
-export interface TaskUpdateHeaders {
+export interface TaskUpdateTaskHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3115,12 +3127,12 @@ export interface TaskUpdateHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface TaskUpdateBodyParam {
+export interface TaskUpdateTaskBodyParam {
   /** The parameters for the request. */
   body: BatchTask;
 }
 
-export interface TaskUpdateQueryParamProperties {
+export interface TaskUpdateTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3128,17 +3140,17 @@ export interface TaskUpdateQueryParamProperties {
   timeOut?: number;
 }
 
-export interface TaskUpdateQueryParam {
-  queryParameters?: TaskUpdateQueryParamProperties;
+export interface TaskUpdateTaskQueryParam {
+  queryParameters?: TaskUpdateTaskQueryParamProperties;
 }
 
-export interface TaskUpdateHeaderParam {
-  headers?: RawHttpHeadersInput & TaskUpdateHeaders;
+export interface TaskUpdateTaskHeaderParam {
+  headers?: RawHttpHeadersInput & TaskUpdateTaskHeaders;
 }
 
-export type TaskUpdateParameters = TaskUpdateQueryParam &
-  TaskUpdateHeaderParam &
-  TaskUpdateBodyParam &
+export type TaskUpdateTaskParameters = TaskUpdateTaskQueryParam &
+  TaskUpdateTaskHeaderParam &
+  TaskUpdateTaskBodyParam &
   RequestParameters;
 
 export interface TaskListSubtasksHeaders {
@@ -3179,7 +3191,7 @@ export type TaskListSubtasksParameters = TaskListSubtasksQueryParam &
   TaskListSubtasksHeaderParam &
   RequestParameters;
 
-export interface TaskTerminateHeaders {
+export interface TaskTerminateTaskHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3219,7 +3231,7 @@ export interface TaskTerminateHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface TaskTerminateQueryParamProperties {
+export interface TaskTerminateTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3227,19 +3239,19 @@ export interface TaskTerminateQueryParamProperties {
   timeOut?: number;
 }
 
-export interface TaskTerminateQueryParam {
-  queryParameters?: TaskTerminateQueryParamProperties;
+export interface TaskTerminateTaskQueryParam {
+  queryParameters?: TaskTerminateTaskQueryParamProperties;
 }
 
-export interface TaskTerminateHeaderParam {
-  headers?: RawHttpHeadersInput & TaskTerminateHeaders;
+export interface TaskTerminateTaskHeaderParam {
+  headers?: RawHttpHeadersInput & TaskTerminateTaskHeaders;
 }
 
-export type TaskTerminateParameters = TaskTerminateQueryParam &
-  TaskTerminateHeaderParam &
+export type TaskTerminateTaskParameters = TaskTerminateTaskQueryParam &
+  TaskTerminateTaskHeaderParam &
   RequestParameters;
 
-export interface TaskReactivateHeaders {
+export interface TaskReactivateTaskHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3279,7 +3291,7 @@ export interface TaskReactivateHeaders {
   "if-unmodified-since"?: string;
 }
 
-export interface TaskReactivateQueryParamProperties {
+export interface TaskReactivateTaskQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3287,19 +3299,19 @@ export interface TaskReactivateQueryParamProperties {
   timeOut?: number;
 }
 
-export interface TaskReactivateQueryParam {
-  queryParameters?: TaskReactivateQueryParamProperties;
+export interface TaskReactivateTaskQueryParam {
+  queryParameters?: TaskReactivateTaskQueryParamProperties;
 }
 
-export interface TaskReactivateHeaderParam {
-  headers?: RawHttpHeadersInput & TaskReactivateHeaders;
+export interface TaskReactivateTaskHeaderParam {
+  headers?: RawHttpHeadersInput & TaskReactivateTaskHeaders;
 }
 
-export type TaskReactivateParameters = TaskReactivateQueryParam &
-  TaskReactivateHeaderParam &
+export type TaskReactivateTaskParameters = TaskReactivateTaskQueryParam &
+  TaskReactivateTaskHeaderParam &
   RequestParameters;
 
-export interface ComputeNodeOperationsAddUserHeaders {
+export interface ComputeNodesAddUserHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3315,12 +3327,12 @@ export interface ComputeNodeOperationsAddUserHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsAddUserBodyParam {
+export interface ComputeNodesAddUserBodyParam {
   /** The user Account to be created. */
   body: ComputeNodeUser;
 }
 
-export interface ComputeNodeOperationsAddUserQueryParamProperties {
+export interface ComputeNodesAddUserQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3328,21 +3340,20 @@ export interface ComputeNodeOperationsAddUserQueryParamProperties {
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsAddUserQueryParam {
-  queryParameters?: ComputeNodeOperationsAddUserQueryParamProperties;
+export interface ComputeNodesAddUserQueryParam {
+  queryParameters?: ComputeNodesAddUserQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsAddUserHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsAddUserHeaders;
+export interface ComputeNodesAddUserHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesAddUserHeaders;
 }
 
-export type ComputeNodeOperationsAddUserParameters =
-  ComputeNodeOperationsAddUserQueryParam &
-    ComputeNodeOperationsAddUserHeaderParam &
-    ComputeNodeOperationsAddUserBodyParam &
-    RequestParameters;
+export type ComputeNodesAddUserParameters = ComputeNodesAddUserQueryParam &
+  ComputeNodesAddUserHeaderParam &
+  ComputeNodesAddUserBodyParam &
+  RequestParameters;
 
-export interface ComputeNodeOperationsDeleteUserHeaders {
+export interface ComputeNodesDeleteUserHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3358,7 +3369,7 @@ export interface ComputeNodeOperationsDeleteUserHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsDeleteUserQueryParamProperties {
+export interface ComputeNodesDeleteUserQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3366,20 +3377,20 @@ export interface ComputeNodeOperationsDeleteUserQueryParamProperties {
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsDeleteUserQueryParam {
-  queryParameters?: ComputeNodeOperationsDeleteUserQueryParamProperties;
+export interface ComputeNodesDeleteUserQueryParam {
+  queryParameters?: ComputeNodesDeleteUserQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsDeleteUserHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsDeleteUserHeaders;
+export interface ComputeNodesDeleteUserHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesDeleteUserHeaders;
 }
 
-export type ComputeNodeOperationsDeleteUserParameters =
-  ComputeNodeOperationsDeleteUserQueryParam &
-    ComputeNodeOperationsDeleteUserHeaderParam &
+export type ComputeNodesDeleteUserParameters =
+  ComputeNodesDeleteUserQueryParam &
+    ComputeNodesDeleteUserHeaderParam &
     RequestParameters;
 
-export interface ComputeNodeOperationsUpdateUserHeaders {
+export interface ComputeNodesUpdateUserHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3395,12 +3406,12 @@ export interface ComputeNodeOperationsUpdateUserHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsUpdateUserBodyParam {
+export interface ComputeNodesUpdateUserBodyParam {
   /** The parameters for the request. */
   body: NodeUpdateUserParameters;
 }
 
-export interface ComputeNodeOperationsUpdateUserQueryParamProperties {
+export interface ComputeNodesUpdateUserQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3408,21 +3419,21 @@ export interface ComputeNodeOperationsUpdateUserQueryParamProperties {
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsUpdateUserQueryParam {
-  queryParameters?: ComputeNodeOperationsUpdateUserQueryParamProperties;
+export interface ComputeNodesUpdateUserQueryParam {
+  queryParameters?: ComputeNodesUpdateUserQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsUpdateUserHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsUpdateUserHeaders;
+export interface ComputeNodesUpdateUserHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesUpdateUserHeaders;
 }
 
-export type ComputeNodeOperationsUpdateUserParameters =
-  ComputeNodeOperationsUpdateUserQueryParam &
-    ComputeNodeOperationsUpdateUserHeaderParam &
-    ComputeNodeOperationsUpdateUserBodyParam &
+export type ComputeNodesUpdateUserParameters =
+  ComputeNodesUpdateUserQueryParam &
+    ComputeNodesUpdateUserHeaderParam &
+    ComputeNodesUpdateUserBodyParam &
     RequestParameters;
 
-export interface ComputeNodeOperationsGetHeaders {
+export interface ComputeNodesGetNodeHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3438,7 +3449,7 @@ export interface ComputeNodeOperationsGetHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsGetQueryParamProperties {
+export interface ComputeNodesGetNodeQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3448,20 +3459,19 @@ export interface ComputeNodeOperationsGetQueryParamProperties {
   $select?: string;
 }
 
-export interface ComputeNodeOperationsGetQueryParam {
-  queryParameters?: ComputeNodeOperationsGetQueryParamProperties;
+export interface ComputeNodesGetNodeQueryParam {
+  queryParameters?: ComputeNodesGetNodeQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsGetHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsGetHeaders;
+export interface ComputeNodesGetNodeHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesGetNodeHeaders;
 }
 
-export type ComputeNodeOperationsGetParameters =
-  ComputeNodeOperationsGetQueryParam &
-    ComputeNodeOperationsGetHeaderParam &
-    RequestParameters;
+export type ComputeNodesGetNodeParameters = ComputeNodesGetNodeQueryParam &
+  ComputeNodesGetNodeHeaderParam &
+  RequestParameters;
 
-export interface ComputeNodeOperationsRebootHeaders {
+export interface ComputeNodesRebootNodeHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3477,12 +3487,12 @@ export interface ComputeNodeOperationsRebootHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsRebootBodyParam {
+export interface ComputeNodesRebootNodeBodyParam {
   /** The parameters for the request. */
-  body: NodeRebootParameters;
+  body?: NodeRebootParameters;
 }
 
-export interface ComputeNodeOperationsRebootQueryParamProperties {
+export interface ComputeNodesRebootNodeQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3490,21 +3500,21 @@ export interface ComputeNodeOperationsRebootQueryParamProperties {
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsRebootQueryParam {
-  queryParameters?: ComputeNodeOperationsRebootQueryParamProperties;
+export interface ComputeNodesRebootNodeQueryParam {
+  queryParameters?: ComputeNodesRebootNodeQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsRebootHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsRebootHeaders;
+export interface ComputeNodesRebootNodeHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesRebootNodeHeaders;
 }
 
-export type ComputeNodeOperationsRebootParameters =
-  ComputeNodeOperationsRebootQueryParam &
-    ComputeNodeOperationsRebootHeaderParam &
-    ComputeNodeOperationsRebootBodyParam &
+export type ComputeNodesRebootNodeParameters =
+  ComputeNodesRebootNodeQueryParam &
+    ComputeNodesRebootNodeHeaderParam &
+    ComputeNodesRebootNodeBodyParam &
     RequestParameters;
 
-export interface ComputeNodeOperationsReimageHeaders {
+export interface ComputeNodesReimageNodeHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3520,12 +3530,12 @@ export interface ComputeNodeOperationsReimageHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsReimageBodyParam {
+export interface ComputeNodesReimageNodeBodyParam {
   /** The parameters for the request. */
-  body: NodeReimageParameters;
+  body?: NodeReimageParameters;
 }
 
-export interface ComputeNodeOperationsReimageQueryParamProperties {
+export interface ComputeNodesReimageNodeQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3533,21 +3543,21 @@ export interface ComputeNodeOperationsReimageQueryParamProperties {
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsReimageQueryParam {
-  queryParameters?: ComputeNodeOperationsReimageQueryParamProperties;
+export interface ComputeNodesReimageNodeQueryParam {
+  queryParameters?: ComputeNodesReimageNodeQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsReimageHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsReimageHeaders;
+export interface ComputeNodesReimageNodeHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesReimageNodeHeaders;
 }
 
-export type ComputeNodeOperationsReimageParameters =
-  ComputeNodeOperationsReimageQueryParam &
-    ComputeNodeOperationsReimageHeaderParam &
-    ComputeNodeOperationsReimageBodyParam &
+export type ComputeNodesReimageNodeParameters =
+  ComputeNodesReimageNodeQueryParam &
+    ComputeNodesReimageNodeHeaderParam &
+    ComputeNodesReimageNodeBodyParam &
     RequestParameters;
 
-export interface ComputeNodeOperationsDisableSchedulingHeaders {
+export interface ComputeNodesDisableSchedulingHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3563,12 +3573,12 @@ export interface ComputeNodeOperationsDisableSchedulingHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsDisableSchedulingBodyParam {
+export interface ComputeNodesDisableSchedulingBodyParam {
   /** The parameters for the request. */
-  body: NodeDisableSchedulingParameters;
+  body?: NodeDisableSchedulingParameters;
 }
 
-export interface ComputeNodeOperationsDisableSchedulingQueryParamProperties {
+export interface ComputeNodesDisableSchedulingQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3576,21 +3586,21 @@ export interface ComputeNodeOperationsDisableSchedulingQueryParamProperties {
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsDisableSchedulingQueryParam {
-  queryParameters?: ComputeNodeOperationsDisableSchedulingQueryParamProperties;
+export interface ComputeNodesDisableSchedulingQueryParam {
+  queryParameters?: ComputeNodesDisableSchedulingQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsDisableSchedulingHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsDisableSchedulingHeaders;
+export interface ComputeNodesDisableSchedulingHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesDisableSchedulingHeaders;
 }
 
-export type ComputeNodeOperationsDisableSchedulingParameters =
-  ComputeNodeOperationsDisableSchedulingQueryParam &
-    ComputeNodeOperationsDisableSchedulingHeaderParam &
-    ComputeNodeOperationsDisableSchedulingBodyParam &
+export type ComputeNodesDisableSchedulingParameters =
+  ComputeNodesDisableSchedulingQueryParam &
+    ComputeNodesDisableSchedulingHeaderParam &
+    ComputeNodesDisableSchedulingBodyParam &
     RequestParameters;
 
-export interface ComputeNodeOperationsEnableSchedulingHeaders {
+export interface ComputeNodesEnableSchedulingHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3606,7 +3616,7 @@ export interface ComputeNodeOperationsEnableSchedulingHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsEnableSchedulingQueryParamProperties {
+export interface ComputeNodesEnableSchedulingQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3614,20 +3624,20 @@ export interface ComputeNodeOperationsEnableSchedulingQueryParamProperties {
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsEnableSchedulingQueryParam {
-  queryParameters?: ComputeNodeOperationsEnableSchedulingQueryParamProperties;
+export interface ComputeNodesEnableSchedulingQueryParam {
+  queryParameters?: ComputeNodesEnableSchedulingQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsEnableSchedulingHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsEnableSchedulingHeaders;
+export interface ComputeNodesEnableSchedulingHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesEnableSchedulingHeaders;
 }
 
-export type ComputeNodeOperationsEnableSchedulingParameters =
-  ComputeNodeOperationsEnableSchedulingQueryParam &
-    ComputeNodeOperationsEnableSchedulingHeaderParam &
+export type ComputeNodesEnableSchedulingParameters =
+  ComputeNodesEnableSchedulingQueryParam &
+    ComputeNodesEnableSchedulingHeaderParam &
     RequestParameters;
 
-export interface ComputeNodeOperationsGetRemoteLoginSettingsHeaders {
+export interface ComputeNodesGetRemoteLoginSettingsHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3643,7 +3653,7 @@ export interface ComputeNodeOperationsGetRemoteLoginSettingsHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsGetRemoteLoginSettingsQueryParamProperties {
+export interface ComputeNodesGetRemoteLoginSettingsQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3651,21 +3661,20 @@ export interface ComputeNodeOperationsGetRemoteLoginSettingsQueryParamProperties
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsGetRemoteLoginSettingsQueryParam {
-  queryParameters?: ComputeNodeOperationsGetRemoteLoginSettingsQueryParamProperties;
+export interface ComputeNodesGetRemoteLoginSettingsQueryParam {
+  queryParameters?: ComputeNodesGetRemoteLoginSettingsQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsGetRemoteLoginSettingsHeaderParam {
-  headers?: RawHttpHeadersInput &
-    ComputeNodeOperationsGetRemoteLoginSettingsHeaders;
+export interface ComputeNodesGetRemoteLoginSettingsHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesGetRemoteLoginSettingsHeaders;
 }
 
-export type ComputeNodeOperationsGetRemoteLoginSettingsParameters =
-  ComputeNodeOperationsGetRemoteLoginSettingsQueryParam &
-    ComputeNodeOperationsGetRemoteLoginSettingsHeaderParam &
+export type ComputeNodesGetRemoteLoginSettingsParameters =
+  ComputeNodesGetRemoteLoginSettingsQueryParam &
+    ComputeNodesGetRemoteLoginSettingsHeaderParam &
     RequestParameters;
 
-export interface ComputeNodeOperationsGetRemoteDesktopHeaders {
+export interface ComputeNodesGetRemoteDesktopHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3681,7 +3690,7 @@ export interface ComputeNodeOperationsGetRemoteDesktopHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsGetRemoteDesktopQueryParamProperties {
+export interface ComputeNodesGetRemoteDesktopQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3689,20 +3698,20 @@ export interface ComputeNodeOperationsGetRemoteDesktopQueryParamProperties {
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsGetRemoteDesktopQueryParam {
-  queryParameters?: ComputeNodeOperationsGetRemoteDesktopQueryParamProperties;
+export interface ComputeNodesGetRemoteDesktopQueryParam {
+  queryParameters?: ComputeNodesGetRemoteDesktopQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsGetRemoteDesktopHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsGetRemoteDesktopHeaders;
+export interface ComputeNodesGetRemoteDesktopHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesGetRemoteDesktopHeaders;
 }
 
-export type ComputeNodeOperationsGetRemoteDesktopParameters =
-  ComputeNodeOperationsGetRemoteDesktopQueryParam &
-    ComputeNodeOperationsGetRemoteDesktopHeaderParam &
+export type ComputeNodesGetRemoteDesktopParameters =
+  ComputeNodesGetRemoteDesktopQueryParam &
+    ComputeNodesGetRemoteDesktopHeaderParam &
     RequestParameters;
 
-export interface ComputeNodeOperationsUploadBatchServiceLogsHeaders {
+export interface ComputeNodesUploadBatchServiceLogsHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3718,12 +3727,12 @@ export interface ComputeNodeOperationsUploadBatchServiceLogsHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeOperationsUploadBatchServiceLogsBodyParam {
+export interface ComputeNodesUploadBatchServiceLogsBodyParam {
   /** The Azure Batch service log files upload configuration. */
   body: UploadBatchServiceLogsConfiguration;
 }
 
-export interface ComputeNodeOperationsUploadBatchServiceLogsQueryParamProperties {
+export interface ComputeNodesUploadBatchServiceLogsQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3731,22 +3740,21 @@ export interface ComputeNodeOperationsUploadBatchServiceLogsQueryParamProperties
   timeOut?: number;
 }
 
-export interface ComputeNodeOperationsUploadBatchServiceLogsQueryParam {
-  queryParameters?: ComputeNodeOperationsUploadBatchServiceLogsQueryParamProperties;
+export interface ComputeNodesUploadBatchServiceLogsQueryParam {
+  queryParameters?: ComputeNodesUploadBatchServiceLogsQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsUploadBatchServiceLogsHeaderParam {
-  headers?: RawHttpHeadersInput &
-    ComputeNodeOperationsUploadBatchServiceLogsHeaders;
+export interface ComputeNodesUploadBatchServiceLogsHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesUploadBatchServiceLogsHeaders;
 }
 
-export type ComputeNodeOperationsUploadBatchServiceLogsParameters =
-  ComputeNodeOperationsUploadBatchServiceLogsQueryParam &
-    ComputeNodeOperationsUploadBatchServiceLogsHeaderParam &
-    ComputeNodeOperationsUploadBatchServiceLogsBodyParam &
+export type ComputeNodesUploadBatchServiceLogsParameters =
+  ComputeNodesUploadBatchServiceLogsQueryParam &
+    ComputeNodesUploadBatchServiceLogsHeaderParam &
+    ComputeNodesUploadBatchServiceLogsBodyParam &
     RequestParameters;
 
-export interface ComputeNodeOperationsListHeaders {
+export interface ComputeNodesListNodesHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -3762,7 +3770,7 @@ export interface ComputeNodeOperationsListHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface ComputeNodeOperationsListQueryParamProperties {
+export interface ComputeNodesListNodesQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3777,25 +3785,24 @@ export interface ComputeNodeOperationsListQueryParamProperties {
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-nodes-in-a-pool.
    */
-  $filter: string;
+  $filter?: string;
   /** An OData $select clause. */
   $select?: string;
 }
 
-export interface ComputeNodeOperationsListQueryParam {
-  queryParameters: ComputeNodeOperationsListQueryParamProperties;
+export interface ComputeNodesListNodesQueryParam {
+  queryParameters?: ComputeNodesListNodesQueryParamProperties;
 }
 
-export interface ComputeNodeOperationsListHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeOperationsListHeaders;
+export interface ComputeNodesListNodesHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodesListNodesHeaders;
 }
 
-export type ComputeNodeOperationsListParameters =
-  ComputeNodeOperationsListQueryParam &
-    ComputeNodeOperationsListHeaderParam &
-    RequestParameters;
+export type ComputeNodesListNodesParameters = ComputeNodesListNodesQueryParam &
+  ComputeNodesListNodesHeaderParam &
+  RequestParameters;
 
-export interface ComputeNodeExtensionOperationsGetHeaders {
+export interface ComputeNodeExtensionsGetExtensionHeaders {
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
@@ -3811,7 +3818,7 @@ export interface ComputeNodeExtensionOperationsGetHeaders {
   "ocp-date"?: string;
 }
 
-export interface ComputeNodeExtensionOperationsGetQueryParamProperties {
+export interface ComputeNodeExtensionsGetExtensionQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3821,20 +3828,20 @@ export interface ComputeNodeExtensionOperationsGetQueryParamProperties {
   $select?: string;
 }
 
-export interface ComputeNodeExtensionOperationsGetQueryParam {
-  queryParameters?: ComputeNodeExtensionOperationsGetQueryParamProperties;
+export interface ComputeNodeExtensionsGetExtensionQueryParam {
+  queryParameters?: ComputeNodeExtensionsGetExtensionQueryParamProperties;
 }
 
-export interface ComputeNodeExtensionOperationsGetHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeExtensionOperationsGetHeaders;
+export interface ComputeNodeExtensionsGetExtensionHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodeExtensionsGetExtensionHeaders;
 }
 
-export type ComputeNodeExtensionOperationsGetParameters =
-  ComputeNodeExtensionOperationsGetQueryParam &
-    ComputeNodeExtensionOperationsGetHeaderParam &
+export type ComputeNodeExtensionsGetExtensionParameters =
+  ComputeNodeExtensionsGetExtensionQueryParam &
+    ComputeNodeExtensionsGetExtensionHeaderParam &
     RequestParameters;
 
-export interface ComputeNodeExtensionOperationsListHeaders {
+export interface ComputeNodeExtensionsListExtensionsHeaders {
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
@@ -3850,7 +3857,7 @@ export interface ComputeNodeExtensionOperationsListHeaders {
   "return-client-request-id"?: boolean;
 }
 
-export interface ComputeNodeExtensionOperationsListQueryParamProperties {
+export interface ComputeNodeExtensionsListExtensionsQueryParamProperties {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3865,15 +3872,15 @@ export interface ComputeNodeExtensionOperationsListQueryParamProperties {
   $select?: string;
 }
 
-export interface ComputeNodeExtensionOperationsListQueryParam {
-  queryParameters?: ComputeNodeExtensionOperationsListQueryParamProperties;
+export interface ComputeNodeExtensionsListExtensionsQueryParam {
+  queryParameters?: ComputeNodeExtensionsListExtensionsQueryParamProperties;
 }
 
-export interface ComputeNodeExtensionOperationsListHeaderParam {
-  headers?: RawHttpHeadersInput & ComputeNodeExtensionOperationsListHeaders;
+export interface ComputeNodeExtensionsListExtensionsHeaderParam {
+  headers?: RawHttpHeadersInput & ComputeNodeExtensionsListExtensionsHeaders;
 }
 
-export type ComputeNodeExtensionOperationsListParameters =
-  ComputeNodeExtensionOperationsListQueryParam &
-    ComputeNodeExtensionOperationsListHeaderParam &
+export type ComputeNodeExtensionsListExtensionsParameters =
+  ComputeNodeExtensionsListExtensionsQueryParam &
+    ComputeNodeExtensionsListExtensionsHeaderParam &
     RequestParameters;

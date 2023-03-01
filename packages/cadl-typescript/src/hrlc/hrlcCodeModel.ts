@@ -54,11 +54,13 @@ export interface Type {
   type:
     | "string"
     | "Key"
+    | "OAuth2"
     | "constant"
     | "model"
     | "list"
     | "datetime"
     | "float"
+    | "duration"
     | "enum"
     | "integer"
     | "float"

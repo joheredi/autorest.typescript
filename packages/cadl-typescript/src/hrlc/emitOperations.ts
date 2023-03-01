@@ -1,5 +1,6 @@
 import { File } from "@azure-tools/rlc-common";
 import {
+  FunctionDeclarationStructure,
   OptionalKind,
   ParameterDeclarationStructure,
   Project,
@@ -91,38 +92,40 @@ function emitOperation(
       ? buildParameterType(response.type.name!, response.type!, imports)
       : { name: "", type: "void" };
 
-  const operationDeclaration = sourceFile.addFunction({
+  const functionStatement: OptionalKind<FunctionDeclarationStructure> = {
     docs: [operation.description],
     isAsync: true,
     isExported: true,
     name: operation.name,
     parameters,
     returnType: `Promise<${returnType.type}>`
-  });
+  };
 
   const operationPath = operation.url;
   const operationMethod = operation.method.toLowerCase();
-  operationDeclaration.addStatements([
+  const statements: string[] = [];
+  statements.push(
     `const result = await context.path("${operationPath}", ${getPathParameters(
       operation
     )}).${operationMethod}({${getRequestParameters(operation)}});`
-  ]);
+  );
 
-  operationDeclaration.addStatements([
-    `if(isUnexpected(result)){`,
-    "throw result.body",
-    "}"
-  ]);
+  statements.push(`if(isUnexpected(result)){`, "throw result.body", "}");
 
   if (!response?.type?.properties) {
-    operationDeclaration.addStatements([`return;`]);
+    statements.push(`return;`);
   } else {
-    operationDeclaration.addStatements([
+    statements.push(
       `return {`,
       getResponseMapping(response.type.properties ?? []).join(","),
       `}`
-    ]);
+    );
   }
+
+  sourceFile.addFunction({
+    ...functionStatement,
+    statements
+  });
 }
 
 function getResponseMapping(
@@ -236,6 +239,10 @@ function getRequestParameters(operation: Operation): string {
     return "";
   }
 
+  const operationParameters = operation.parameters.filter(
+    (p) => p.implementation !== "Client"
+  );
+
   const parametersImplementation: Record<
     "header" | "query" | "body",
     string[]
@@ -245,7 +252,7 @@ function getRequestParameters(operation: Operation): string {
     body: []
   };
 
-  for (const param of operation.parameters) {
+  for (const param of operationParameters) {
     if (param.location === "header" || param.location === "query") {
       parametersImplementation[param.location].push(getParameterMap(param));
     }
@@ -289,6 +296,13 @@ function getDefaultValue(param: Parameter | Property) {
 
 function getParameterMap(param: Parameter | Property) {
   const defaultValue = getDefaultValue(param);
+
+  if (param.optional || (param.type.type === "constant" && !defaultValue)) {
+    return `...(options.${param.clientName} && {"${
+      param.restApiName
+    }": ${`options.${param.clientName}})`},`;
+  }
+
   return `"${param.restApiName}": ${
     param.optional || param.type.type === "constant"
       ? `options.${param.clientName} ${defaultValue}`
@@ -325,7 +339,7 @@ function emitOptionsInterface(
     operation.bodyParameter?.type.properties ?? []
   ).filter((p) => p.optional);
   const options = [...optionalBodyParams, ...optionalParameters];
-  const name = toPascalCase(`${operation.name}Options`);
+  const name = toPascalCase(`${operation.groupName}${operation.name}Options`);
   sourceFile.addInterface({
     name,
     isExported: true,

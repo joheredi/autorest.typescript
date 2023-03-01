@@ -3,6 +3,7 @@ emit:
 options:
   "@azure-tools/cadl-typescript":
     title: Batch Service
+    isHrlc: true
     generateMetadata: true
     generateTest: true
     azureSdkForJs: false

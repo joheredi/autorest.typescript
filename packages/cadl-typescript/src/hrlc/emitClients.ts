@@ -19,9 +19,32 @@ export function emitClients(
   srcPath: string = "src"
 ) {
   const project: Project = new Project();
+  const coreClientImports: string[] = [];
+  const importedModels: string[] = [];
   let files: ClientSourceFile[] = [];
   for (const client of codeModel.clients) {
     const { name, description, parameters } = client;
+    let optionsParam = {
+      name: "options",
+      type: `${name}Options`,
+      initializer: "{}"
+    };
+    if (
+      !client.parameters
+        .filter(
+          (p) => p.implementation === "Client" && p.clientName !== "api_version"
+        )
+        .some((p) => p.optional || (!p.optional && p.clientDefaultValue))
+    ) {
+      optionsParam = {
+        name: "options",
+        type: `RequestParameters`,
+        initializer: "{}"
+      };
+      coreClientImports.push("RequestParameters");
+    } else {
+      importedModels.push(`${name}Options`);
+    }
     const clientFile = project.createSourceFile(`${name}.ts`);
     exports.push(`${name}.js`);
     const params: OptionalKind<ParameterDeclarationStructure>[] = [
@@ -33,7 +56,7 @@ export function emitClients(
             type: getParameterType(p)
           };
         }),
-      { name: "options", type: `${name}Options`, initializer: "{}" }
+      optionsParam
     ];
     const factoryFunction = clientFile.addFunction({
       docs: [description],
@@ -47,14 +70,13 @@ export function emitClients(
       (p) => p.location === "endpointPath"
     );
 
-    if (!baseUrlParam) {
-      throw new Error("Couldn't find the endpoint parameter");
+    let baseUrl: string | undefined = "endpoint";
+    if (baseUrlParam) {
+      baseUrl =
+        baseUrlParam.type.type === "constant"
+          ? baseUrlParam.type.value
+          : baseUrlParam.clientName;
     }
-
-    const baseUrl =
-      baseUrlParam.type.type === "constant"
-        ? baseUrlParam.type.value
-        : baseUrlParam.clientName;
 
     factoryFunction.addStatements([`const baseUrl = ${baseUrl}`]);
 
@@ -79,7 +101,11 @@ export function emitClients(
       {
         moduleSpecifier: "../rest/index.js",
         defaultImport: "getClient",
-        namedImports: [name, `${name}Options`]
+        namedImports: [name, ...importedModels.map((im) => `${im}Options`)]
+      },
+      {
+        moduleSpecifier: "@azure-rest/core-client",
+        namedImports: coreClientImports
       }
     ]);
     const operationFiles = emitOperationGroups(
@@ -109,6 +135,13 @@ function importCredential(
       clientSourceFile.addImportDeclaration({
         moduleSpecifier: "@azure/core-auth",
         namedImports: [azureKeyCredential]
+      });
+      return;
+    case "OAuth2":
+      const azureTokenCredential = "TokenCredential";
+      clientSourceFile.addImportDeclaration({
+        moduleSpecifier: "@azure/core-auth",
+        namedImports: [azureTokenCredential]
       });
       return;
     default:
@@ -151,6 +184,8 @@ function getParameterType(param: Parameter): string {
   switch (param.type.type) {
     case "Key":
       return "AzureKeyCredential";
+    case "OAuth2":
+      return "TokenCredential";
     default:
       return param.type.type;
   }

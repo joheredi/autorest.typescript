@@ -44,6 +44,7 @@ export function getType(type: Type): TypeMetadata {
       }
       return { name: type.name, originModule: "./models.js" };
     case "string":
+    case "duration":
       return { name: "string" };
     case "dict":
       if (!type.elementType) {

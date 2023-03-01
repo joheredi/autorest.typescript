@@ -21,7 +21,7 @@ export default function createClient(
   options = {
     ...options,
     credentials: {
-      scopes: ["user_impersonation"],
+      scopes: ["https://batch.core.windows.net//.default"],
     },
   };
 
