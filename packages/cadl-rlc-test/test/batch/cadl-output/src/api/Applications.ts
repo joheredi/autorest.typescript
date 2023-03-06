@@ -3,9 +3,17 @@
 
 import { ApplicationListResult, Application } from "./models.js";
 import { BatchServiceClient as Client, isUnexpected } from "../rest/index.js";
-import { RequestParameters } from "@azure-rest/core-client";
 
-export interface ApplicationslistApplicationsOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ApplicationslistApplicationsOptions
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -16,19 +24,19 @@ export interface ApplicationslistApplicationsOptions extends RequestParameters {
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
 }
 
 /**
@@ -40,22 +48,23 @@ export interface ApplicationslistApplicationsOptions extends RequestParameters {
  */
 export async function listApplications(
   context: Client,
-  options: ApplicationslistApplicationsOptions = {}
+  options: ApplicationslistApplicationsOptions = { requestOptions: {} }
 ): Promise<ApplicationListResult> {
   const result = await context.path("/applications").get({
     headers: {
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      Accept: options.accept ?? "application/json",
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
     queryParameters: {
       ...(options.maxresults && { maxresults: options.maxresults }),
-      ...(options.time_out && { timeOut: options.time_out }),
+      ...(options.timeOut && { timeOut: options.timeOut }),
     },
   });
   if (isUnexpected(result)) {
@@ -68,11 +77,20 @@ export async function listApplications(
       displayName: p.displayName,
       versions: p.versions,
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }
 
-export interface ApplicationsgetApplicationOptions extends RequestParameters {}
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ApplicationsgetApplicationOptions
+  extends RequestParametersCommon {}
 
 /**
  * This operation returns only Applications and versions that are available for
@@ -83,13 +101,16 @@ export interface ApplicationsgetApplicationOptions extends RequestParameters {}
  */
 export async function getApplication(
   context: Client,
-  application_id: string,
-  options: ApplicationsgetApplicationOptions = {}
+  applicationId: string,
+  options: ApplicationsgetApplicationOptions = { requestOptions: {} }
 ): Promise<Application> {
   const result = await context
-    .path("/applications/{applicationId}", application_id)
+    .path("/applications/{applicationId}", applicationId)
     .get({
-      headers: { Accept: options.accept ?? "application/json" },
+      headers: {
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
+      },
     });
   if (isUnexpected(result)) {
     throw result.body;

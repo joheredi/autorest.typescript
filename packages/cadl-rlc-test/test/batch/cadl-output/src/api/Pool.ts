@@ -25,9 +25,16 @@ import {
   ComputeNodeDeallocationOption,
 } from "./models.js";
 import { BatchServiceClient as Client, isUnexpected } from "../rest/index.js";
-import { RequestParameters } from "@azure-rest/core-client";
 
-export interface PoollistUsageMetricsOptions extends RequestParameters {}
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoollistUsageMetricsOptions extends RequestParametersCommon {}
 
 /**
  * If you do not specify a $filter clause including a poolId, the response
@@ -39,10 +46,13 @@ export interface PoollistUsageMetricsOptions extends RequestParameters {}
  */
 export async function listUsageMetrics(
   context: Client,
-  options: PoollistUsageMetricsOptions = {}
+  options: PoollistUsageMetricsOptions = { requestOptions: {} }
 ): Promise<CustomPagePoolUsageMetrics> {
   const result = await context.path("/poolusagemetrics").get({
-    headers: { Accept: options.accept ?? "application/json" },
+    headers: {
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
+    },
   });
   if (isUnexpected(result)) {
     throw result.body;
@@ -60,26 +70,34 @@ export async function listUsageMetrics(
   };
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface PoolgetAllPoolLifetimeStatisticsOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /**
@@ -90,20 +108,21 @@ export interface PoolgetAllPoolLifetimeStatisticsOptions
  */
 export async function getAllPoolLifetimeStatistics(
   context: Client,
-  options: PoolgetAllPoolLifetimeStatisticsOptions = {}
+  options: PoolgetAllPoolLifetimeStatisticsOptions = { requestOptions: {} }
 ): Promise<PoolStatistics> {
   const result = await context.path("/lifetimepoolstats").get({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      Accept: options.accept ?? "application/json",
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
   });
   if (isUnexpected(result)) {
     throw result.body;
@@ -144,7 +163,15 @@ export async function getAllPoolLifetimeStatistics(
   };
 }
 
-export interface PooladdPoolOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PooladdPoolOptions extends RequestParametersCommon {
   /**
    * The ID can contain any combination of alphanumeric characters including hyphens
    * and underscores, and cannot contain more than 64 characters. The ID is
@@ -322,20 +349,20 @@ export interface PooladdPoolOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -347,20 +374,21 @@ export interface PooladdPoolOptions extends RequestParameters {
  */
 export async function addPool(
   context: Client,
-  options: PooladdPoolOptions = {}
+  options: PooladdPoolOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context.path("/pools").post({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
       ...(options.content_type && { "Content-Type": options.content_type }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     body: {
       ...(options.startTask && { startTask: options.startTask }),
       ...(options.certificateReferences && {
@@ -382,7 +410,15 @@ export async function addPool(
   return;
 }
 
-export interface PoollistPoolsOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoollistPoolsOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -393,52 +429,53 @@ export interface PoollistPoolsOptions extends RequestParameters {
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-pools.
    */
-  filter?: string;
+  $filter?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
   /** An OData $expand clause. */
-  expand?: string;
+  $expand?: string;
 }
 
 /** Lists all of the Pools in the specified Account. */
 export async function listPools(
   context: Client,
-  options: PoollistPoolsOptions = {}
+  options: PoollistPoolsOptions = { requestOptions: {} }
 ): Promise<BatchPoolListResult> {
   const result = await context.path("/pools").get({
     headers: {
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      Accept: options.accept ?? "application/json",
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
     queryParameters: {
       ...(options.maxresults && { maxresults: options.maxresults }),
-      ...(options.time_out && { timeOut: options.time_out }),
-      ...(options.filter && { $filter: options.filter }),
-      ...(options.select && { $select: options.select }),
-      ...(options.expand && { $expand: options.expand }),
+      ...(options.timeOut && { timeOut: options.timeOut }),
+      ...(options.$filter && { $filter: options.$filter }),
+      ...(options.$select && { $select: options.$select }),
+      ...(options.$expand && { $expand: options.$expand }),
     },
   });
   if (isUnexpected(result)) {
@@ -825,53 +862,61 @@ export async function listPools(
       targetNodeCommunicationMode: p.targetNodeCommunicationMode,
       currentNodeCommunicationMode: p.currentNodeCommunicationMode,
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }
 
-export interface PooldeletePoolOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PooldeletePoolOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
 }
 
 /**
@@ -890,30 +935,29 @@ export interface PooldeletePoolOptions extends RequestParameters {
  */
 export async function deletePool(
   context: Client,
-  pool_id: string,
-  options: PooldeletePoolOptions = {}
+  poolId: string,
+  options: PooldeletePoolOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/pools/{poolId}", pool_id).delete({
+  const result = await context.path("/pools/{poolId}", poolId).delete({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
-      }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
   });
   if (isUnexpected(result)) {
     throw result.body;
@@ -922,78 +966,85 @@ export async function deletePool(
   return;
 }
 
-export interface PoolpoolExistsOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoolpoolExistsOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
 }
 
 /** Gets basic properties of a Pool. */
 export async function poolExists(
   context: Client,
-  pool_id: string,
-  options: PoolpoolExistsOptions = {}
+  poolId: string,
+  options: PoolpoolExistsOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/pools/{poolId}", pool_id).head({
+  const result = await context.path("/pools/{poolId}", poolId).head({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
-      }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
   });
   if (isUnexpected(result)) {
     throw result.body;
@@ -1002,86 +1053,93 @@ export async function poolExists(
   return;
 }
 
-export interface PoolgetPoolOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoolgetPoolOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
   /** An OData $expand clause. */
-  expand?: string;
+  $expand?: string;
 }
 
 /** Gets information about the specified Pool. */
 export async function getPool(
   context: Client,
-  pool_id: string,
-  options: PoolgetPoolOptions = {}
+  poolId: string,
+  options: PoolgetPoolOptions = { requestOptions: {} }
 ): Promise<BatchPool> {
-  const result = await context.path("/pools/{poolId}", pool_id).get({
+  const result = await context.path("/pools/{poolId}", poolId).get({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
-      }),
-      Accept: options.accept ?? "application/json",
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
     queryParameters: {
-      ...(options.time_out && { timeOut: options.time_out }),
-      ...(options.select && { $select: options.select }),
-      ...(options.expand && { $expand: options.expand }),
+      ...(options.timeOut && { timeOut: options.timeOut }),
+      ...(options.$select && { $select: options.$select }),
+      ...(options.$expand && { $expand: options.$expand }),
     },
   });
   if (isUnexpected(result)) {
@@ -1487,7 +1545,15 @@ export async function getPool(
   };
 }
 
-export interface PoolupdatePoolOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoolupdatePoolOptions extends RequestParametersCommon {
   /**
    * The ID can contain any combination of alphanumeric characters including hyphens
    * and underscores, and cannot contain more than 64 characters. The ID is
@@ -1665,44 +1731,44 @@ export interface PoolupdatePoolOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -1714,31 +1780,30 @@ export interface PoolupdatePoolOptions extends RequestParameters {
  */
 export async function updatePool(
   context: Client,
-  pool_id: string,
-  options: PoolupdatePoolOptions = {}
+  poolId: string,
+  options: PoolupdatePoolOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/pools/{poolId}", pool_id).patch({
+  const result = await context.path("/pools/{poolId}", poolId).patch({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
-      }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
       ...(options.content_type && { "Content-Type": options.content_type }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     body: {
       ...(options.startTask && { startTask: options.startTask }),
       ...(options.certificateReferences && {
@@ -1760,48 +1825,55 @@ export async function updatePool(
   return;
 }
 
-export interface PooldisableAutoScaleOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PooldisableAutoScaleOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /** Disables automatic scaling for a Pool. */
 export async function disableAutoScale(
   context: Client,
-  pool_id: string,
-  options: PooldisableAutoScaleOptions = {}
+  poolId: string,
+  options: PooldisableAutoScaleOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/disableautoscale", pool_id)
+    .path("/pools/{poolId}/disableautoscale", poolId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -1810,7 +1882,15 @@ export async function disableAutoScale(
   return;
 }
 
-export interface PoolenableAutoScaleOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoolenableAutoScaleOptions extends RequestParametersCommon {
   /**
    * The formula is checked for validity before it is applied to the Pool. If the
    * formula is not valid, the Batch service rejects the request with detailed error
@@ -1834,44 +1914,44 @@ export interface PoolenableAutoScaleOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -1886,35 +1966,32 @@ export interface PoolenableAutoScaleOptions extends RequestParameters {
  */
 export async function enableAutoScale(
   context: Client,
-  pool_id: string,
-  options: PoolenableAutoScaleOptions = {}
+  poolId: string,
+  options: PoolenableAutoScaleOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/enableautoscale", pool_id)
+    .path("/pools/{poolId}/enableautoscale", poolId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.if__match && { "if-match": options.if__match }),
-        ...(options.if__none__match && {
-          "if-none-match": options.if__none__match,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.ifMatch && { "if-match": options.ifMatch }),
+        ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+        ...(options.ifModifiedSince && {
+          "if-modified-since": options.ifModifiedSince,
         }),
-        ...(options.if__modified__since && {
-          "if-modified-since": options.if__modified__since,
-        }),
-        ...(options.if__unmodified__since && {
-          "if-unmodified-since": options.if__unmodified__since,
+        ...(options.ifUnmodifiedSince && {
+          "if-unmodified-since": options.ifUnmodifiedSince,
         }),
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: {
         ...(options.autoScaleFormula && {
           autoScaleFormula: options.autoScaleFormula,
@@ -1931,25 +2008,33 @@ export async function enableAutoScale(
   return;
 }
 
-export interface PoolevaluateAutoScaleOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoolevaluateAutoScaleOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -1962,26 +2047,25 @@ export interface PoolevaluateAutoScaleOptions extends RequestParameters {
 export async function evaluateAutoScale(
   context: Client,
   autoScaleFormula: string,
-  pool_id: string,
-  options: PoolevaluateAutoScaleOptions = {}
+  poolId: string,
+  options: PoolevaluateAutoScaleOptions = { requestOptions: {} }
 ): Promise<AutoScaleRun> {
   const result = await context
-    .path("/pools/{poolId}/evaluateautoscale", pool_id)
+    .path("/pools/{poolId}/evaluateautoscale", poolId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        Accept: options.accept ?? "application/json",
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        Accept: "application/json",
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: { autoScaleFormula: autoScaleFormula },
     });
   if (isUnexpected(result)) {
@@ -2004,7 +2088,15 @@ export async function evaluateAutoScale(
   };
 }
 
-export interface PoolresizePoolOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoolresizePoolOptions extends RequestParametersCommon {
   /** The desired number of dedicated Compute Nodes in the Pool. */
   targetDedicatedNodes?: number;
   /** The desired number of Spot/Low-priority Compute Nodes in the Pool. */
@@ -2021,44 +2113,44 @@ export interface PoolresizePoolOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -2074,31 +2166,30 @@ export interface PoolresizePoolOptions extends RequestParameters {
  */
 export async function resizePool(
   context: Client,
-  pool_id: string,
-  options: PoolresizePoolOptions = {}
+  poolId: string,
+  options: PoolresizePoolOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/pools/{poolId}/resize", pool_id).post({
+  const result = await context.path("/pools/{poolId}/resize", poolId).post({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
-      }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
       ...(options.content_type && { "Content-Type": options.content_type }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     body: {
       ...(options.targetDedicatedNodes && {
         targetDedicatedNodes: options.targetDedicatedNodes,
@@ -2119,49 +2210,57 @@ export async function resizePool(
   return;
 }
 
-export interface PoolstopResizePoolOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoolstopResizePoolOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
 }
 
 /**
@@ -2175,35 +2274,30 @@ export interface PoolstopResizePoolOptions extends RequestParameters {
  */
 export async function stopResizePool(
   context: Client,
-  pool_id: string,
-  options: PoolstopResizePoolOptions = {}
+  poolId: string,
+  options: PoolstopResizePoolOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context
-    .path("/pools/{poolId}/stopresize", pool_id)
-    .post({
-      headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
-        }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
-        }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.if__match && { "if-match": options.if__match }),
-        ...(options.if__none__match && {
-          "if-none-match": options.if__none__match,
-        }),
-        ...(options.if__modified__since && {
-          "if-modified-since": options.if__modified__since,
-        }),
-        ...(options.if__unmodified__since && {
-          "if-unmodified-since": options.if__unmodified__since,
-        }),
-      },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
-    });
+  const result = await context.path("/pools/{poolId}/stopresize", poolId).post({
+    headers: {
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
+      }),
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
+      }),
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
+      }),
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
+      }),
+      ...options.requestOptions?.customHeaders,
+    },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
+  });
   if (isUnexpected(result)) {
     throw result.body;
   }
@@ -2211,7 +2305,16 @@ export async function stopResizePool(
   return;
 }
 
-export interface PoolupdatePoolPropertiesOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoolupdatePoolPropertiesOptions
+  extends RequestParametersCommon {
   /**
    * The ID can contain any combination of alphanumeric characters including hyphens
    * and underscores, and cannot contain more than 64 characters. The ID is
@@ -2389,20 +2492,20 @@ export interface PoolupdatePoolPropertiesOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -2414,25 +2517,24 @@ export interface PoolupdatePoolPropertiesOptions extends RequestParameters {
  */
 export async function updatePoolProperties(
   context: Client,
-  pool_id: string,
-  options: PoolupdatePoolPropertiesOptions = {}
+  poolId: string,
+  options: PoolupdatePoolPropertiesOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/updateproperties", pool_id)
+    .path("/pools/{poolId}/updateproperties", poolId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: {
         ...(options.startTask && { startTask: options.startTask }),
         ...(options.certificateReferences && {
@@ -2454,7 +2556,15 @@ export async function updatePoolProperties(
   return;
 }
 
-export interface PoolremovePoolNodesOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface PoolremovePoolNodesOptions extends RequestParametersCommon {
   /**
    * The default value is 15 minutes. The minimum value is 5 minutes. If you specify
    * a value less than 5 minutes, the Batch service returns an error; if you are
@@ -2467,44 +2577,44 @@ export interface PoolremovePoolNodesOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -2517,35 +2627,32 @@ export interface PoolremovePoolNodesOptions extends RequestParameters {
 export async function removePoolNodes(
   context: Client,
   nodeList: string[],
-  pool_id: string,
-  options: PoolremovePoolNodesOptions = {}
+  poolId: string,
+  options: PoolremovePoolNodesOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/removenodes", pool_id)
+    .path("/pools/{poolId}/removenodes", poolId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.if__match && { "if-match": options.if__match }),
-        ...(options.if__none__match && {
-          "if-none-match": options.if__none__match,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.ifMatch && { "if-match": options.ifMatch }),
+        ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+        ...(options.ifModifiedSince && {
+          "if-modified-since": options.ifModifiedSince,
         }),
-        ...(options.if__modified__since && {
-          "if-modified-since": options.if__modified__since,
-        }),
-        ...(options.if__unmodified__since && {
-          "if-unmodified-since": options.if__unmodified__since,
+        ...(options.ifUnmodifiedSince && {
+          "if-unmodified-since": options.ifUnmodifiedSince,
         }),
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: {
         nodeList: nodeList,
         ...(options.resizeTimeout && { resizeTimeout: options.resizeTimeout }),

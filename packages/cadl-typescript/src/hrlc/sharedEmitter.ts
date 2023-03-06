@@ -35,7 +35,8 @@ import {
   Union,
   isNullType,
   SyntaxKind,
-  Type
+  Type,
+  getProjectedName
 } from "@cadl-lang/compiler";
 import {
   getAuthentication,
@@ -76,6 +77,8 @@ import {
   Type as HrlcType,
   Header
 } from "./hrlcCodeModel.js";
+import { transformRLCOptions } from "../transform/transfromRLCOptions.js";
+import { camelToSnakeCase, toCamelCase } from "../casingUtils.js";
 
 interface HttpServerParameter {
   type: "endpointPath";
@@ -115,21 +118,6 @@ function applyCasing(
   }
 
   return camelToSnakeCase(name);
-}
-
-function toCamelCase(name: string): string {
-  return name[0]!.toLowerCase() + name.slice(1);
-}
-
-function camelToSnakeCase(name: string): string {
-  const camelToSnakeCaseRe = (str: string) =>
-    str
-      .replace(/\s+/g, "_")
-      .replace(/\$/g, "")
-      .replace(/-/g, "_")
-      .replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-
-  return camelToSnakeCaseRe(name[0]!.toLowerCase() + name.slice(1));
 }
 
 const typesMap = new Map<EmitterType, HrlcType>();
@@ -295,7 +283,7 @@ function emitParamBase(
     optional,
     description,
     addedOn,
-    clientName: applyCasing(name),
+    clientName: applyCasing(name, { casing: CASING }),
     inOverload: false
   };
 }
@@ -795,9 +783,10 @@ function emitProperty(
   ) {
     clientDefaultValue = property.default.value;
   }
+  const restApiName = getProjectedName(program, property, "json");
   return {
     clientName: applyCasing(property.name, { casing: CASING }),
-    restApiName: property.name,
+    restApiName: restApiName ?? property.name,
     type: getType(program, property.type),
     optional: property.optional,
     description: getDocStr(program, property),
@@ -1413,12 +1402,17 @@ export function emitCodeModel(
   context: EmitContext<EmitterOptions>,
   options: { casing: "snake" | "camel" } = { casing: "snake" }
 ): HrlcCodeModel {
-  CASING = options.casing;
+  CASING = options.casing ?? CASING;
   const dpgContext = createDpgContext(context);
   const clientNamespaceString =
     getClientNamespaceString(dpgContext)?.toLowerCase();
   // Get types
   const codeModel: HrlcCodeModel = {
+    options: transformRLCOptions(
+      context.program,
+      context.options as any,
+      context.emitterOutputDir
+    ),
     namespace: clientNamespaceString,
     subnamespaceToClients: {},
     clients: [],

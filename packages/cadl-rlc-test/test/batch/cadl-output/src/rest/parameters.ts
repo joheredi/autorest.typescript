@@ -22,7 +22,7 @@ import {
   NodeReimageParameters,
   NodeDisableSchedulingParameters,
   UploadBatchServiceLogsConfiguration,
-} from "./models";
+} from "./models.js";
 
 export interface ApplicationsListApplicationsHeaders {
   /**

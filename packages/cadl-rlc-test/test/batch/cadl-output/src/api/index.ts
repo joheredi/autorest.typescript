@@ -13,3 +13,4 @@ export * from "./Task.js";
 export * from "./ComputeNodes.js";
 export * from "./ComputeNodeExtensions.js";
 export * from "./models.js";
+export * from "./BatchServiceClient.js";

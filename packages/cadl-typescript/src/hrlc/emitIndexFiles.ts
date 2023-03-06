@@ -2,7 +2,7 @@ import { Project } from "ts-morph";
 
 export function emitApiIndex(exports: string[], srcPath: string = "src") {
   const project = new Project();
-  const indexFile = project.createSourceFile("index.ts");
+  const indexFile = project.createSourceFile(`${srcPath}/src/api/index.ts`);
   indexFile.addExportDeclarations(
     exports.map((e) => ({
       moduleSpecifier: `./${e}`

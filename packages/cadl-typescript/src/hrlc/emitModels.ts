@@ -10,7 +10,7 @@ export function emitModels(
   srcPath: string = "src"
 ): File[] {
   const files: File[] = [];
-  const modelsFile = project.createSourceFile(`models.ts`);
+  const modelsFile = project.createSourceFile(`${srcPath}/src/api/models.ts`);
   exports.push("models.js");
   const models = codeModel.types.filter(
     (t) => t.type === "model" || t.type === "enum"

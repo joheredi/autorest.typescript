@@ -22,27 +22,35 @@ import {
   TaskCountsResult,
 } from "./models.js";
 import { BatchServiceClient as Client, isUnexpected } from "../rest/index.js";
-import { RequestParameters } from "@azure-rest/core-client";
 
-export interface JobgetAllLifetimeStatisticsOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobgetAllLifetimeStatisticsOptions
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /**
@@ -53,20 +61,21 @@ export interface JobgetAllLifetimeStatisticsOptions extends RequestParameters {
  */
 export async function getAllLifetimeStatistics(
   context: Client,
-  options: JobgetAllLifetimeStatisticsOptions = {}
+  options: JobgetAllLifetimeStatisticsOptions = { requestOptions: {} }
 ): Promise<JobStatistics> {
   const result = await context.path("/lifetimejobstats").get({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      Accept: options.accept ?? "application/json",
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
   });
   if (isUnexpected(result)) {
     throw result.body;
@@ -90,49 +99,57 @@ export async function getAllLifetimeStatistics(
   };
 }
 
-export interface JobdeleteJobOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobdeleteJobOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
 }
 
 /**
@@ -147,30 +164,29 @@ export interface JobdeleteJobOptions extends RequestParameters {
  */
 export async function deleteJob(
   context: Client,
-  job_id: string,
-  options: JobdeleteJobOptions = {}
+  jobId: string,
+  options: JobdeleteJobOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/jobs/{jobId}", job_id).delete({
+  const result = await context.path("/jobs/{jobId}", jobId).delete({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
-      }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
   });
   if (isUnexpected(result)) {
     throw result.body;
@@ -179,86 +195,93 @@ export async function deleteJob(
   return;
 }
 
-export interface JobgetJobOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobgetJobOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
   /** An OData $expand clause. */
-  expand?: string;
+  $expand?: string;
 }
 
 /** Gets information about the specified Job. */
 export async function getJob(
   context: Client,
-  job_id: string,
-  options: JobgetJobOptions = {}
+  jobId: string,
+  options: JobgetJobOptions = { requestOptions: {} }
 ): Promise<BatchJob> {
-  const result = await context.path("/jobs/{jobId}", job_id).get({
+  const result = await context.path("/jobs/{jobId}", jobId).get({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
-      }),
-      Accept: options.accept ?? "application/json",
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
     queryParameters: {
-      ...(options.time_out && { timeOut: options.time_out }),
-      ...(options.select && { $select: options.select }),
-      ...(options.expand && { $expand: options.expand }),
+      ...(options.timeOut && { timeOut: options.timeOut }),
+      ...(options.$select && { $select: options.$select }),
+      ...(options.$expand && { $expand: options.$expand }),
     },
   });
   if (isUnexpected(result)) {
@@ -1132,7 +1155,15 @@ export async function getJob(
   };
 }
 
-export interface JobupdateJobOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobupdateJobOptions extends RequestParametersCommon {
   /**
    * The ID is case-preserving and case-insensitive (that is, you may not have two
    * IDs within an Account that differ only by case).
@@ -1262,44 +1293,44 @@ export interface JobupdateJobOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -1311,31 +1342,30 @@ export interface JobupdateJobOptions extends RequestParameters {
  */
 export async function updateJob(
   context: Client,
-  job_id: string,
-  options: JobupdateJobOptions = {}
+  jobId: string,
+  options: JobupdateJobOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/jobs/{jobId}", job_id).patch({
+  const result = await context.path("/jobs/{jobId}", jobId).patch({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
-      }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
       ...(options.content_type && { "Content-Type": options.content_type }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     body: {
       ...(options.priority && { priority: options.priority }),
       ...(options.allowTaskPreemption && {
@@ -1359,7 +1389,15 @@ export async function updateJob(
   return;
 }
 
-export interface JobreplaceJobOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobreplaceJobOptions extends RequestParametersCommon {
   /**
    * The ID is case-preserving and case-insensitive (that is, you may not have two
    * IDs within an Account that differ only by case).
@@ -1489,44 +1527,44 @@ export interface JobreplaceJobOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -1538,31 +1576,30 @@ export interface JobreplaceJobOptions extends RequestParameters {
  */
 export async function replaceJob(
   context: Client,
-  job_id: string,
-  options: JobreplaceJobOptions = {}
+  jobId: string,
+  options: JobreplaceJobOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/jobs/{jobId}", job_id).put({
+  const result = await context.path("/jobs/{jobId}", jobId).put({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
-      }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
       ...(options.content_type && { "Content-Type": options.content_type }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     body: {
       ...(options.priority && { priority: options.priority }),
       ...(options.allowTaskPreemption && {
@@ -1586,49 +1623,57 @@ export async function replaceJob(
   return;
 }
 
-export interface JobdisableJobOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobdisableJobOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -1646,31 +1691,30 @@ export interface JobdisableJobOptions extends RequestParameters {
 export async function disableJob(
   context: Client,
   disableTasks: DisableJobOption,
-  job_id: string,
-  options: JobdisableJobOptions = {}
+  jobId: string,
+  options: JobdisableJobOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/jobs/{jobId}/disable", job_id).post({
+  const result = await context.path("/jobs/{jobId}/disable", jobId).post({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
-      }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
       ...(options.content_type && { "Content-Type": options.content_type }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     body: { disableTasks: disableTasks },
   });
   if (isUnexpected(result)) {
@@ -1680,49 +1724,57 @@ export async function disableJob(
   return;
 }
 
-export interface JobenableJobOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobenableJobOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
 }
 
 /**
@@ -1735,30 +1787,29 @@ export interface JobenableJobOptions extends RequestParameters {
  */
 export async function enableJob(
   context: Client,
-  job_id: string,
-  options: JobenableJobOptions = {}
+  jobId: string,
+  options: JobenableJobOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/jobs/{jobId}/enable", job_id).post({
+  const result = await context.path("/jobs/{jobId}/enable", jobId).post({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
-      }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
   });
   if (isUnexpected(result)) {
     throw result.body;
@@ -1767,7 +1818,15 @@ export async function enableJob(
   return;
 }
 
-export interface JobterminateJobOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobterminateJobOptions extends RequestParametersCommon {
   /**
    * The text you want to appear as the Job's TerminateReason. The default is
    * 'UserTerminate'.
@@ -1777,44 +1836,44 @@ export interface JobterminateJobOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service exactly matches the value specified by the client.
    */
-  if__match?: string;
+  ifMatch?: string;
   /**
    * An ETag value associated with the version of the resource known to the client.
    * The operation will be performed only if the resource's current ETag on the
    * service does not match the value specified by the client.
    */
-  if__none__match?: string;
+  ifNoneMatch?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -1829,31 +1888,30 @@ export interface JobterminateJobOptions extends RequestParameters {
  */
 export async function terminateJob(
   context: Client,
-  job_id: string,
-  options: JobterminateJobOptions = {}
+  jobId: string,
+  options: JobterminateJobOptions = { requestOptions: {} }
 ): Promise<void> {
-  const result = await context.path("/jobs/{jobId}/terminate", job_id).post({
+  const result = await context.path("/jobs/{jobId}/terminate", jobId).post({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.if__match && { "if-match": options.if__match }),
-      ...(options.if__none__match && {
-        "if-none-match": options.if__none__match,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.ifMatch && { "if-match": options.ifMatch }),
+      ...(options.ifNoneMatch && { "if-none-match": options.ifNoneMatch }),
+      ...(options.ifModifiedSince && {
+        "if-modified-since": options.ifModifiedSince,
       }),
-      ...(options.if__modified__since && {
-        "if-modified-since": options.if__modified__since,
-      }),
-      ...(options.if__unmodified__since && {
-        "if-unmodified-since": options.if__unmodified__since,
+      ...(options.ifUnmodifiedSince && {
+        "if-unmodified-since": options.ifUnmodifiedSince,
       }),
       ...(options.content_type && { "Content-Type": options.content_type }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     body: {
       ...(options.terminateReason && {
         terminateReason: options.terminateReason,
@@ -1867,7 +1925,15 @@ export async function terminateJob(
   return;
 }
 
-export interface JobaddJobOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobaddJobOptions extends RequestParametersCommon {
   /**
    * The ID is case-preserving and case-insensitive (that is, you may not have two
    * IDs within an Account that differ only by case).
@@ -1997,20 +2063,20 @@ export interface JobaddJobOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -2028,20 +2094,21 @@ export interface JobaddJobOptions extends RequestParameters {
  */
 export async function addJob(
   context: Client,
-  options: JobaddJobOptions = {}
+  options: JobaddJobOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context.path("/jobs").post({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
       ...(options.content_type && { "Content-Type": options.content_type }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     body: {
       ...(options.priority && { priority: options.priority }),
       ...(options.allowTaskPreemption && {
@@ -2065,7 +2132,15 @@ export async function addJob(
   return;
 }
 
-export interface JoblistJobsOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JoblistJobsOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2076,52 +2151,53 @@ export interface JoblistJobsOptions extends RequestParameters {
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-jobs.
    */
-  filter?: string;
+  $filter?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
   /** An OData $expand clause. */
-  expand?: string;
+  $expand?: string;
 }
 
 /** Lists all of the Jobs in the specified Account. */
 export async function listJobs(
   context: Client,
-  options: JoblistJobsOptions = {}
+  options: JoblistJobsOptions = { requestOptions: {} }
 ): Promise<BatchJobListResult> {
   const result = await context.path("/jobs").get({
     headers: {
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      Accept: options.accept ?? "application/json",
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
     queryParameters: {
       ...(options.maxresults && { maxresults: options.maxresults }),
-      ...(options.time_out && { timeOut: options.time_out }),
-      ...(options.filter && { $filter: options.filter }),
-      ...(options.select && { $select: options.select }),
-      ...(options.expand && { $expand: options.expand }),
+      ...(options.timeOut && { timeOut: options.timeOut }),
+      ...(options.$filter && { $filter: options.$filter }),
+      ...(options.$select && { $select: options.$select }),
+      ...(options.$expand && { $expand: options.$expand }),
     },
   });
   if (isUnexpected(result)) {
@@ -2962,11 +3038,19 @@ export async function listJobs(
             waitTime: p.stats?.waitTime,
           },
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }
 
-export interface JoblistFromJobScheduleOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JoblistFromJobScheduleOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -2977,55 +3061,56 @@ export interface JoblistFromJobScheduleOptions extends RequestParameters {
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-jobs-in-a-job-schedule.
    */
-  filter?: string;
+  $filter?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
   /** An OData $expand clause. */
-  expand?: string;
+  $expand?: string;
 }
 
 /** Lists the Jobs that have been created under the specified Job Schedule. */
 export async function listFromJobSchedule(
   context: Client,
-  job_schedule_id: string,
-  options: JoblistFromJobScheduleOptions = {}
+  jobScheduleId: string,
+  options: JoblistFromJobScheduleOptions = { requestOptions: {} }
 ): Promise<BatchJobListResult> {
   const result = await context
-    .path("/jobschedules/{jobScheduleId}/jobs", job_schedule_id)
+    .path("/jobschedules/{jobScheduleId}/jobs", jobScheduleId)
     .get({
       headers: {
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        Accept: options.accept ?? "application/json",
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
         ...(options.maxresults && { maxresults: options.maxresults }),
-        ...(options.time_out && { timeOut: options.time_out }),
-        ...(options.filter && { $filter: options.filter }),
-        ...(options.select && { $select: options.select }),
-        ...(options.expand && { $expand: options.expand }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
+        ...(options.$filter && { $filter: options.$filter }),
+        ...(options.$select && { $select: options.$select }),
+        ...(options.$expand && { $expand: options.$expand }),
       },
     });
   if (isUnexpected(result)) {
@@ -3866,12 +3951,20 @@ export async function listFromJobSchedule(
             waitTime: p.stats?.waitTime,
           },
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface JoblistPreparationAndReleaseTaskStatusOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -3882,26 +3975,26 @@ export interface JoblistPreparationAndReleaseTaskStatusOptions
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-job-preparation-and-release-status.
    */
-  filter?: string;
+  $filter?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
 }
 
 /**
@@ -3914,27 +4007,30 @@ export interface JoblistPreparationAndReleaseTaskStatusOptions
  */
 export async function listPreparationAndReleaseTaskStatus(
   context: Client,
-  job_id: string,
-  options: JoblistPreparationAndReleaseTaskStatusOptions = {}
+  jobId: string,
+  options: JoblistPreparationAndReleaseTaskStatusOptions = {
+    requestOptions: {},
+  }
 ): Promise<BatchJobListPreparationAndReleaseTaskStatusResult> {
   const result = await context
-    .path("/jobs/{jobId}/jobpreparationandreleasetaskstatus", job_id)
+    .path("/jobs/{jobId}/jobpreparationandreleasetaskstatus", jobId)
     .get({
       headers: {
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        Accept: options.accept ?? "application/json",
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
         ...(options.maxresults && { maxresults: options.maxresults }),
-        ...(options.time_out && { timeOut: options.time_out }),
-        ...(options.filter && { $filter: options.filter }),
-        ...(options.select && { $select: options.select }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
+        ...(options.$filter && { $filter: options.$filter }),
+        ...(options.$select && { $select: options.$select }),
       },
     });
   if (isUnexpected(result)) {
@@ -4021,29 +4117,37 @@ export async function listPreparationAndReleaseTaskStatus(
             result: p.jobReleaseTaskExecutionInfo?.result,
           },
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }
 
-export interface JobgetTaskCountsOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface JobgetTaskCountsOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /**
@@ -4054,21 +4158,22 @@ export interface JobgetTaskCountsOptions extends RequestParameters {
  */
 export async function getTaskCounts(
   context: Client,
-  job_id: string,
-  options: JobgetTaskCountsOptions = {}
+  jobId: string,
+  options: JobgetTaskCountsOptions = { requestOptions: {} }
 ): Promise<TaskCountsResult> {
-  const result = await context.path("/jobs/{jobId}/taskcounts", job_id).get({
+  const result = await context.path("/jobs/{jobId}/taskcounts", jobId).get({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      Accept: options.accept ?? "application/json",
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
   });
   if (isUnexpected(result)) {
     throw result.body;

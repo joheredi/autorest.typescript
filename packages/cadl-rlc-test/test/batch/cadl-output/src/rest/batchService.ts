@@ -3,7 +3,7 @@
 
 import { getClient, ClientOptions } from "@azure-rest/core-client";
 import { TokenCredential } from "@azure/core-auth";
-import { BatchServiceClient } from "./clientDefinitions";
+import { BatchServiceClient } from "./clientDefinitions.js";
 
 /**
  * Initialize a new instance of `BatchServiceClient`

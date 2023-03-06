@@ -12,9 +12,16 @@ import {
   ComputeNodeListResult,
 } from "./models.js";
 import { BatchServiceClient as Client, isUnexpected } from "../rest/index.js";
-import { RequestParameters } from "@azure-rest/core-client";
 
-export interface ComputeNodesaddUserOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ComputeNodesaddUserOptions extends RequestParametersCommon {
   /** The default value is false. */
   isAdmin?: boolean;
   /**
@@ -41,20 +48,20 @@ export interface ComputeNodesaddUserOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -66,26 +73,25 @@ export interface ComputeNodesaddUserOptions extends RequestParameters {
 export async function addUser(
   context: Client,
   name: string,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodesaddUserOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodesaddUserOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/nodes/{nodeId}/users", pool_id, node_id)
+    .path("/pools/{poolId}/nodes/{nodeId}/users", poolId, nodeId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: {
         name: name,
         ...(options.isAdmin && { isAdmin: options.isAdmin }),
@@ -101,25 +107,33 @@ export async function addUser(
   return;
 }
 
-export interface ComputeNodesdeleteUserOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ComputeNodesdeleteUserOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /**
@@ -128,31 +142,30 @@ export interface ComputeNodesdeleteUserOptions extends RequestParameters {
  */
 export async function deleteUser(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  user_name: string,
-  options: ComputeNodesdeleteUserOptions = {}
+  poolId: string,
+  nodeId: string,
+  userName: string,
+  options: ComputeNodesdeleteUserOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/pools/{poolId}/nodes/{nodeId}/users/{userName}",
-      pool_id,
-      node_id,
-      user_name
+      poolId,
+      nodeId,
+      userName
     )
     .delete({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -161,7 +174,15 @@ export async function deleteUser(
   return;
 }
 
-export interface ComputeNodesupdateUserOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ComputeNodesupdateUserOptions extends RequestParametersCommon {
   /**
    * The password is required for Windows Compute Nodes (those created with
    * 'cloudServiceConfiguration', or created with 'virtualMachineConfiguration'
@@ -187,20 +208,20 @@ export interface ComputeNodesupdateUserOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -213,32 +234,31 @@ export interface ComputeNodesupdateUserOptions extends RequestParameters {
  */
 export async function updateUser(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  user_name: string,
-  options: ComputeNodesupdateUserOptions = {}
+  poolId: string,
+  nodeId: string,
+  userName: string,
+  options: ComputeNodesupdateUserOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/pools/{poolId}/nodes/{nodeId}/users/{userName}",
-      pool_id,
-      node_id,
-      user_name
+      poolId,
+      nodeId,
+      userName
     )
     .put({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: {
         ...(options.password && { password: options.password }),
         ...(options.expiryTime && { expiryTime: options.expiryTime }),
@@ -252,52 +272,61 @@ export async function updateUser(
   return;
 }
 
-export interface ComputeNodesgetNodeOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ComputeNodesgetNodeOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
 }
 
 /** Gets information about the specified Compute Node. */
 export async function getNode(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodesgetNodeOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodesgetNodeOptions = { requestOptions: {} }
 ): Promise<ComputeNode> {
   const result = await context
-    .path("/pools/{poolId}/nodes/{nodeId}", pool_id, node_id)
+    .path("/pools/{poolId}/nodes/{nodeId}", poolId, nodeId)
     .get({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        Accept: options.accept ?? "application/json",
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-        ...(options.select && { $select: options.select }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
+        ...(options.$select && { $select: options.$select }),
       },
     });
   if (isUnexpected(result)) {
@@ -515,27 +544,35 @@ export async function getNode(
   };
 }
 
-export interface ComputeNodesrebootNodeOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ComputeNodesrebootNodeOptions extends RequestParametersCommon {
   /** The default value is requeue. */
   nodeRebootOption?: ComputeNodeRebootOption;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -543,26 +580,25 @@ export interface ComputeNodesrebootNodeOptions extends RequestParameters {
 /** You can restart a Compute Node only if it is in an idle or running state. */
 export async function rebootNode(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodesrebootNodeOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodesrebootNodeOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/nodes/{nodeId}/reboot", pool_id, node_id)
+    .path("/pools/{poolId}/nodes/{nodeId}/reboot", poolId, nodeId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: {
         ...(options.nodeRebootOption && {
           nodeRebootOption: options.nodeRebootOption,
@@ -576,27 +612,36 @@ export async function rebootNode(
   return;
 }
 
-export interface ComputeNodesreimageNodeOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ComputeNodesreimageNodeOptions
+  extends RequestParametersCommon {
   /** The default value is requeue. */
   nodeReimageOption?: ComputeNodeReimageOption;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -608,26 +653,25 @@ export interface ComputeNodesreimageNodeOptions extends RequestParameters {
  */
 export async function reimageNode(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodesreimageNodeOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodesreimageNodeOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/nodes/{nodeId}/reimage", pool_id, node_id)
+    .path("/pools/{poolId}/nodes/{nodeId}/reimage", poolId, nodeId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: {
         ...(options.nodeReimageOption && {
           nodeReimageOption: options.nodeReimageOption,
@@ -641,28 +685,36 @@ export async function reimageNode(
   return;
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface ComputeNodesdisableSchedulingOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /** The default value is requeue. */
   nodeDisableSchedulingOption?: DisableComputeNodeSchedulingOption;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -673,26 +725,25 @@ export interface ComputeNodesdisableSchedulingOptions
  */
 export async function disableScheduling(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodesdisableSchedulingOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodesdisableSchedulingOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/nodes/{nodeId}/disablescheduling", pool_id, node_id)
+    .path("/pools/{poolId}/nodes/{nodeId}/disablescheduling", poolId, nodeId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: {
         ...(options.nodeDisableSchedulingOption && {
           nodeDisableSchedulingOption: options.nodeDisableSchedulingOption,
@@ -706,25 +757,34 @@ export async function disableScheduling(
   return;
 }
 
-export interface ComputeNodesenableSchedulingOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ComputeNodesenableSchedulingOptions
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /**
@@ -733,25 +793,24 @@ export interface ComputeNodesenableSchedulingOptions extends RequestParameters {
  */
 export async function enableScheduling(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodesenableSchedulingOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodesenableSchedulingOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/nodes/{nodeId}/enablescheduling", pool_id, node_id)
+    .path("/pools/{poolId}/nodes/{nodeId}/enablescheduling", poolId, nodeId)
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -760,26 +819,34 @@ export async function enableScheduling(
   return;
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface ComputeNodesgetRemoteLoginSettingsOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /**
@@ -791,30 +858,25 @@ export interface ComputeNodesgetRemoteLoginSettingsOptions
  */
 export async function getRemoteLoginSettings(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodesgetRemoteLoginSettingsOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodesgetRemoteLoginSettingsOptions = { requestOptions: {} }
 ): Promise<ComputeNodeGetRemoteLoginSettingsResult> {
   const result = await context
-    .path(
-      "/pools/{poolId}/nodes/{nodeId}/remoteloginsettings",
-      pool_id,
-      node_id
-    )
+    .path("/pools/{poolId}/nodes/{nodeId}/remoteloginsettings", poolId, nodeId)
     .get({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        Accept: options.accept ?? "application/json",
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -826,25 +888,34 @@ export async function getRemoteLoginSettings(
   };
 }
 
-export interface ComputeNodesgetRemoteDesktopOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ComputeNodesgetRemoteDesktopOptions
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /**
@@ -855,26 +926,25 @@ export interface ComputeNodesgetRemoteDesktopOptions extends RequestParameters {
  */
 export async function getRemoteDesktop(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodesgetRemoteDesktopOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodesgetRemoteDesktopOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
-    .path("/pools/{poolId}/nodes/{nodeId}/rdp", pool_id, node_id)
+    .path("/pools/{poolId}/nodes/{nodeId}/rdp", poolId, nodeId)
     .get({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        Accept: options.accept ?? "application/json",
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -883,8 +953,16 @@ export async function getRemoteDesktop(
   return;
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface ComputeNodesuploadBatchServiceLogsOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * Any log file containing a log message in the time range will be uploaded. This
    * means that the operation might retrieve more logs than have been requested
@@ -899,20 +977,20 @@ export interface ComputeNodesuploadBatchServiceLogsOptions
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -927,31 +1005,30 @@ export async function uploadBatchServiceLogs(
   context: Client,
   containerUrl: string,
   startTime: Date,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodesuploadBatchServiceLogsOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodesuploadBatchServiceLogsOptions = { requestOptions: {} }
 ): Promise<UploadBatchServiceLogsResult> {
   const result = await context
     .path(
       "/pools/{poolId}/nodes/{nodeId}/uploadbatchservicelogs",
-      pool_id,
-      node_id
+      poolId,
+      nodeId
     )
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        Accept: options.accept ?? "application/json",
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        Accept: "application/json",
         ...(options.content_type && { "Content-Type": options.content_type }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
       body: {
         containerUrl: containerUrl,
         startTime: startTime,
@@ -971,7 +1048,15 @@ export async function uploadBatchServiceLogs(
   };
 }
 
-export interface ComputeNodeslistNodesOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface ComputeNodeslistNodesOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -982,50 +1067,51 @@ export interface ComputeNodeslistNodesOptions extends RequestParameters {
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-nodes-in-a-pool.
    */
-  filter?: string;
+  $filter?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
 }
 
 /** Lists the Compute Nodes in the specified Pool. */
 export async function listNodes(
   context: Client,
-  pool_id: string,
-  options: ComputeNodeslistNodesOptions = {}
+  poolId: string,
+  options: ComputeNodeslistNodesOptions = { requestOptions: {} }
 ): Promise<ComputeNodeListResult> {
-  const result = await context.path("/pools/{poolId}/nodes", pool_id).get({
+  const result = await context.path("/pools/{poolId}/nodes", poolId).get({
     headers: {
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      Accept: options.accept ?? "application/json",
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
     queryParameters: {
       ...(options.maxresults && { maxresults: options.maxresults }),
-      ...(options.time_out && { timeOut: options.time_out }),
-      ...(options.filter && { $filter: options.filter }),
-      ...(options.select && { $select: options.select }),
+      ...(options.timeOut && { timeOut: options.timeOut }),
+      ...(options.$filter && { $filter: options.$filter }),
+      ...(options.$select && { $select: options.$select }),
     },
   });
   if (isUnexpected(result)) {
@@ -1226,6 +1312,6 @@ export async function listNodes(
                 },
           },
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }

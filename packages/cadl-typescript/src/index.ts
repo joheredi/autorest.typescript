@@ -12,9 +12,9 @@ import {
   buildIndexFile,
   buildTopLevelIndex,
   buildRollupConfig,
-  buildTsConfig,
+  // buildTsConfig,
   buildApiExtractorConfig,
-  buildPackageFile,
+  // buildPackageFile,
   buildPollingHelper,
   buildPaginateHelper,
   buildEsLintConfig,
@@ -84,9 +84,9 @@ export async function $onEmit(context: EmitContext) {
       [
         buildEsLintConfig,
         buildRollupConfig,
-        buildTsConfig,
+        // buildTsConfig,
         buildApiExtractorConfig,
-        buildPackageFile,
+        // buildPackageFile,
         buildReadmeFile
       ],
       rlcModels,

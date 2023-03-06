@@ -9,9 +9,17 @@ import {
   Certificate,
 } from "./models.js";
 import { BatchServiceClient as Client, isUnexpected } from "../rest/index.js";
-import { RequestParameters } from "@azure-rest/core-client";
 
-export interface CertificatesaddCertificateOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface CertificatesaddCertificateOptions
+  extends RequestParametersCommon {
   /**
    * The X.509 thumbprint of the Certificate. This is a sequence of up to 40 hex
    * digits.
@@ -43,20 +51,20 @@ export interface CertificatesaddCertificateOptions extends RequestParameters {
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** Body parameter Content-Type. Known values are: application/json. */
   content_type?: string;
 }
@@ -64,20 +72,21 @@ export interface CertificatesaddCertificateOptions extends RequestParameters {
 /** Adds a Certificate to the specified Account. */
 export async function addCertificate(
   context: Client,
-  options: CertificatesaddCertificateOptions = {}
+  options: CertificatesaddCertificateOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context.path("/certificates").post({
     headers: {
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
       ...(options.content_type && { "Content-Type": options.content_type }),
+      ...options.requestOptions?.customHeaders,
     },
-    queryParameters: { ...(options.time_out && { timeOut: options.time_out }) },
+    queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     body: {
       ...(options.thumbprint && { thumbprint: options.thumbprint }),
       ...(options.thumbprintAlgorithm && {
@@ -97,7 +106,16 @@ export async function addCertificate(
   return;
 }
 
-export interface CertificateslistCertificatesOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface CertificateslistCertificatesOptions
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -108,49 +126,50 @@ export interface CertificateslistCertificatesOptions extends RequestParameters {
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-certificates.
    */
-  filter?: string;
+  $filter?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
 }
 
 /** Lists all of the Certificates that have been added to the specified Account. */
 export async function listCertificates(
   context: Client,
-  options: CertificateslistCertificatesOptions = {}
+  options: CertificateslistCertificatesOptions = { requestOptions: {} }
 ): Promise<CertificateListResult> {
   const result = await context.path("/certificates").get({
     headers: {
-      ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-      ...(options.client_request_id && {
-        "client-request-id": options.client_request_id,
+      ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+      ...(options.clientRequestId && {
+        "client-request-id": options.clientRequestId,
       }),
-      ...(options.return_client_request_id && {
-        "return-client-request-id": options.return_client_request_id,
+      ...(options.returnClientRequestId && {
+        "return-client-request-id": options.returnClientRequestId,
       }),
-      Accept: options.accept ?? "application/json",
+      Accept: "application/json",
+      ...options.requestOptions?.customHeaders,
     },
     queryParameters: {
       ...(options.maxresults && { maxresults: options.maxresults }),
-      ...(options.time_out && { timeOut: options.time_out }),
-      ...(options.filter && { $filter: options.filter }),
-      ...(options.select && { $select: options.select }),
+      ...(options.timeOut && { timeOut: options.timeOut }),
+      ...(options.$filter && { $filter: options.$filter }),
+      ...(options.$select && { $select: options.$select }),
     },
   });
   if (isUnexpected(result)) {
@@ -183,30 +202,38 @@ export async function listCertificates(
       certificateFormat: p.certificateFormat,
       password: p.password,
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface CertificatescancelCertificateDeletionOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /**
@@ -220,29 +247,28 @@ export interface CertificatescancelCertificateDeletionOptions
  */
 export async function cancelCertificateDeletion(
   context: Client,
-  thumbprint_algorithm: string,
+  thumbprintAlgorithm: string,
   thumbprint: string,
-  options: CertificatescancelCertificateDeletionOptions = {}
+  options: CertificatescancelCertificateDeletionOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/certificates(thumbprintAlgorithm={thumbprintAlgorithm},thumbprint={thumbprint})/canceldelete",
-      thumbprint_algorithm,
+      thumbprintAlgorithm,
       thumbprint
     )
     .post({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -251,26 +277,34 @@ export async function cancelCertificateDeletion(
   return;
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface CertificatesdeleteCertificateOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
 }
 
 /**
@@ -286,29 +320,28 @@ export interface CertificatesdeleteCertificateOptions
  */
 export async function deleteCertificate(
   context: Client,
-  thumbprint_algorithm: string,
+  thumbprintAlgorithm: string,
   thumbprint: string,
-  options: CertificatesdeleteCertificateOptions = {}
+  options: CertificatesdeleteCertificateOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/certificates(thumbprintAlgorithm={thumbprintAlgorithm},thumbprint={thumbprint})",
-      thumbprint_algorithm,
+      thumbprintAlgorithm,
       thumbprint
     )
     .delete({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -317,56 +350,66 @@ export async function deleteCertificate(
   return;
 }
 
-export interface CertificatesgetCertificateOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface CertificatesgetCertificateOptions
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
 }
 
 /** Gets information about the specified Certificate. */
 export async function getCertificate(
   context: Client,
-  thumbprint_algorithm: string,
+  thumbprintAlgorithm: string,
   thumbprint: string,
-  options: CertificatesgetCertificateOptions = {}
+  options: CertificatesgetCertificateOptions = { requestOptions: {} }
 ): Promise<Certificate> {
   const result = await context
     .path(
       "/certificates(thumbprintAlgorithm={thumbprintAlgorithm},thumbprint={thumbprint})",
-      thumbprint_algorithm,
+      thumbprintAlgorithm,
       thumbprint
     )
     .get({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        Accept: options.accept ?? "application/json",
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-        ...(options.select && { $select: options.select }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
+        ...(options.$select && { $select: options.$select }),
       },
     });
   if (isUnexpected(result)) {

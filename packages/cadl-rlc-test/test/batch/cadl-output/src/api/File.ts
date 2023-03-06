@@ -3,27 +3,34 @@
 
 import { NodeFileListResult } from "./models.js";
 import { BatchServiceClient as Client, isUnexpected } from "../rest/index.js";
-import { RequestParameters } from "@azure-rest/core-client";
 
-export interface FiledeleteFileFromTaskOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface FiledeleteFileFromTaskOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * Whether to delete children of a directory. If the filePath parameter represents
    * a directory instead of a file, you can set recursive to true to delete the
@@ -36,30 +43,31 @@ export interface FiledeleteFileFromTaskOptions extends RequestParameters {
 /** Deletes the specified Task file from the Compute Node where the Task ran. */
 export async function deleteFileFromTask(
   context: Client,
-  job_id: string,
-  task_id: string,
-  file_path: string,
-  options: FiledeleteFileFromTaskOptions = {}
+  jobId: string,
+  taskId: string,
+  filePath: string,
+  options: FiledeleteFileFromTaskOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/jobs/{jobId}/tasks/{taskId}/files/{filePath}",
-      job_id,
-      task_id,
-      file_path
+      jobId,
+      taskId,
+      filePath
     )
     .delete({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
         ...(options.recursive && { recursive: options.recursive }),
       },
     });
@@ -70,80 +78,87 @@ export async function deleteFileFromTask(
   return;
 }
 
-export interface FilegetFileFromTaskOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface FilegetFileFromTaskOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /**
    * The byte range to be retrieved. The default is to retrieve the entire file. The
    * format is bytes=startRange-endRange.
    */
-  ocp_range?: string;
+  ocpRange?: string;
 }
 
 /** Returns the content of the specified Task file. */
 export async function getFileFromTask(
   context: Client,
-  job_id: string,
-  task_id: string,
-  file_path: string,
-  options: FilegetFileFromTaskOptions = {}
+  jobId: string,
+  taskId: string,
+  filePath: string,
+  options: FilegetFileFromTaskOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/jobs/{jobId}/tasks/{taskId}/files/{filePath}",
-      job_id,
-      task_id,
-      file_path
+      jobId,
+      taskId,
+      filePath
     )
     .get({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.if__modified__since && {
-          "if-modified-since": options.if__modified__since,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.ifModifiedSince && {
+          "if-modified-since": options.ifModifiedSince,
         }),
-        ...(options.if__unmodified__since && {
-          "if-unmodified-since": options.if__unmodified__since,
+        ...(options.ifUnmodifiedSince && {
+          "if-unmodified-since": options.ifUnmodifiedSince,
         }),
-        ...(options.ocp_range && { "ocp-range": options.ocp_range }),
-        Accept: options.accept ?? "application/json",
+        ...(options.ocpRange && { "ocp-range": options.ocpRange }),
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -152,74 +167,81 @@ export async function getFileFromTask(
   return;
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface FilegetFilePropertiesFromTaskOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
 }
 
 /** Gets the properties of the specified Task file. */
 export async function getFilePropertiesFromTask(
   context: Client,
-  job_id: string,
-  task_id: string,
-  file_path: string,
-  options: FilegetFilePropertiesFromTaskOptions = {}
+  jobId: string,
+  taskId: string,
+  filePath: string,
+  options: FilegetFilePropertiesFromTaskOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/jobs/{jobId}/tasks/{taskId}/files/{filePath}",
-      job_id,
-      task_id,
-      file_path
+      jobId,
+      taskId,
+      filePath
     )
     .head({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.if__modified__since && {
-          "if-modified-since": options.if__modified__since,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.ifModifiedSince && {
+          "if-modified-since": options.ifModifiedSince,
         }),
-        ...(options.if__unmodified__since && {
-          "if-unmodified-since": options.if__unmodified__since,
+        ...(options.ifUnmodifiedSince && {
+          "if-unmodified-since": options.ifUnmodifiedSince,
         }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -228,25 +250,34 @@ export async function getFilePropertiesFromTask(
   return;
 }
 
-export interface FiledeleteFromComputeNodeOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface FiledeleteFromComputeNodeOptions
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * Whether to delete children of a directory. If the filePath parameter represents
    * a directory instead of a file, you can set recursive to true to delete the
@@ -259,30 +290,31 @@ export interface FiledeleteFromComputeNodeOptions extends RequestParameters {
 /** Deletes the specified file from the Compute Node. */
 export async function deleteFromComputeNode(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  file_path: string,
-  options: FiledeleteFromComputeNodeOptions = {}
+  poolId: string,
+  nodeId: string,
+  filePath: string,
+  options: FiledeleteFromComputeNodeOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/pools/{poolId}/nodes/{nodeId}/files/{filePath}",
-      pool_id,
-      node_id,
-      file_path
+      poolId,
+      nodeId,
+      filePath
     )
     .delete({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
         ...(options.recursive && { recursive: options.recursive }),
       },
     });
@@ -293,80 +325,88 @@ export async function deleteFromComputeNode(
   return;
 }
 
-export interface FilegetFileFromComputeNodeOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface FilegetFileFromComputeNodeOptions
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
   /**
    * The byte range to be retrieved. The default is to retrieve the entire file. The
    * format is bytes=startRange-endRange.
    */
-  ocp_range?: string;
+  ocpRange?: string;
 }
 
 /** Returns the content of the specified Compute Node file. */
 export async function getFileFromComputeNode(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  file_path: string,
-  options: FilegetFileFromComputeNodeOptions = {}
+  poolId: string,
+  nodeId: string,
+  filePath: string,
+  options: FilegetFileFromComputeNodeOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/pools/{poolId}/nodes/{nodeId}/files/{filePath}",
-      pool_id,
-      node_id,
-      file_path
+      poolId,
+      nodeId,
+      filePath
     )
     .get({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.if__modified__since && {
-          "if-modified-since": options.if__modified__since,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.ifModifiedSince && {
+          "if-modified-since": options.ifModifiedSince,
         }),
-        ...(options.if__unmodified__since && {
-          "if-unmodified-since": options.if__unmodified__since,
+        ...(options.ifUnmodifiedSince && {
+          "if-unmodified-since": options.ifUnmodifiedSince,
         }),
-        ...(options.ocp_range && { "ocp-range": options.ocp_range }),
-        Accept: options.accept ?? "application/json",
+        ...(options.ocpRange && { "ocp-range": options.ocpRange }),
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -375,74 +415,81 @@ export async function getFileFromComputeNode(
   return;
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface FilegetFilePropertiesFromComputeNodeOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * been modified since the specified time.
    */
-  if__modified__since?: string;
+  ifModifiedSince?: string;
   /**
    * A timestamp indicating the last modified time of the resource known to the
    * client. The operation will be performed only if the resource on the service has
    * not been modified since the specified time.
    */
-  if__unmodified__since?: string;
+  ifUnmodifiedSince?: string;
 }
 
 /** Gets the properties of the specified Compute Node file. */
 export async function getFilePropertiesFromComputeNode(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  file_path: string,
-  options: FilegetFilePropertiesFromComputeNodeOptions = {}
+  poolId: string,
+  nodeId: string,
+  filePath: string,
+  options: FilegetFilePropertiesFromComputeNodeOptions = { requestOptions: {} }
 ): Promise<void> {
   const result = await context
     .path(
       "/pools/{poolId}/nodes/{nodeId}/files/{filePath}",
-      pool_id,
-      node_id,
-      file_path
+      poolId,
+      nodeId,
+      filePath
     )
     .head({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.if__modified__since && {
-          "if-modified-since": options.if__modified__since,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.ifModifiedSince && {
+          "if-modified-since": options.ifModifiedSince,
         }),
-        ...(options.if__unmodified__since && {
-          "if-unmodified-since": options.if__unmodified__since,
+        ...(options.ifUnmodifiedSince && {
+          "if-unmodified-since": options.ifUnmodifiedSince,
         }),
+        ...options.requestOptions?.customHeaders,
       },
-      queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-      },
+      queryParameters: { ...(options.timeOut && { timeOut: options.timeOut }) },
     });
   if (isUnexpected(result)) {
     throw result.body;
@@ -451,7 +498,15 @@ export async function getFilePropertiesFromComputeNode(
   return;
 }
 
-export interface FilelistFilesFromTaskOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface FilelistFilesFromTaskOptions extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -462,24 +517,24 @@ export interface FilelistFilesFromTaskOptions extends RequestParameters {
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-task-files.
    */
-  filter?: string;
+  $filter?: string;
   /**
    * Whether to list children of the Task directory. This parameter can be used in
    * combination with the filter parameter to list specific type of files.
@@ -490,27 +545,28 @@ export interface FilelistFilesFromTaskOptions extends RequestParameters {
 /** Lists the files in a Task's directory on its Compute Node. */
 export async function listFilesFromTask(
   context: Client,
-  job_id: string,
-  task_id: string,
-  options: FilelistFilesFromTaskOptions = {}
+  jobId: string,
+  taskId: string,
+  options: FilelistFilesFromTaskOptions = { requestOptions: {} }
 ): Promise<NodeFileListResult> {
   const result = await context
-    .path("/jobs/{jobId}/tasks/{taskId}/files", job_id, task_id)
+    .path("/jobs/{jobId}/tasks/{taskId}/files", jobId, taskId)
     .get({
       headers: {
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        Accept: options.accept ?? "application/json",
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
         ...(options.maxresults && { maxresults: options.maxresults }),
-        ...(options.time_out && { timeOut: options.time_out }),
-        ...(options.filter && { $filter: options.filter }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
+        ...(options.$filter && { $filter: options.$filter }),
         ...(options.recursive && { recursive: options.recursive }),
       },
     });
@@ -533,11 +589,20 @@ export async function listFilesFromTask(
             fileMode: p.properties?.fileMode,
           },
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }
 
-export interface FilelistFilesFromComputeNodeOptions extends RequestParameters {
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
+export interface FilelistFilesFromComputeNodeOptions
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -548,24 +613,24 @@ export interface FilelistFilesFromComputeNodeOptions extends RequestParameters {
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * An OData $filter clause. For more information on constructing this filter, see
    * https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-compute-node-files.
    */
-  filter?: string;
+  $filter?: string;
   /** Whether to list children of a directory. */
   recursive?: boolean;
 }
@@ -573,27 +638,28 @@ export interface FilelistFilesFromComputeNodeOptions extends RequestParameters {
 /** Lists all of the files in Task directories on the specified Compute Node. */
 export async function listFilesFromComputeNode(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  options: FilelistFilesFromComputeNodeOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: FilelistFilesFromComputeNodeOptions = { requestOptions: {} }
 ): Promise<NodeFileListResult> {
   const result = await context
-    .path("/pools/{poolId}/nodes/{nodeId}/files", pool_id, node_id)
+    .path("/pools/{poolId}/nodes/{nodeId}/files", poolId, nodeId)
     .get({
       headers: {
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        Accept: options.accept ?? "application/json",
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
         ...(options.maxresults && { maxresults: options.maxresults }),
-        ...(options.time_out && { timeOut: options.time_out }),
-        ...(options.filter && { $filter: options.filter }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
+        ...(options.$filter && { $filter: options.$filter }),
         ...(options.recursive && { recursive: options.recursive }),
       },
     });
@@ -616,6 +682,6 @@ export async function listFilesFromComputeNode(
             fileMode: p.properties?.fileMode,
           },
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }

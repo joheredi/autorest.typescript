@@ -160,7 +160,7 @@ import {
   ComputeNodeExtensionsGetExtensionDefaultResponse,
   ComputeNodeExtensionsListExtensions200Response,
   ComputeNodeExtensionsListExtensionsDefaultResponse,
-} from "./responses";
+} from "./responses.js";
 
 const responseMap: Record<string, string[]> = {
   "GET /applications": ["200"],

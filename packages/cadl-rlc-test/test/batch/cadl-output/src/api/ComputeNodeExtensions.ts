@@ -3,61 +3,69 @@
 
 import { NodeVMExtension, NodeVMExtensionList } from "./models.js";
 import { BatchServiceClient as Client, isUnexpected } from "../rest/index.js";
-import { RequestParameters } from "@azure-rest/core-client";
+
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
 
 export interface ComputeNodeExtensionsgetExtensionOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /**
    * The time the request was issued. Client libraries typically set this to the
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
 }
 
 /** Gets information about the specified Compute Node Extension. */
 export async function getExtension(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  extension_name: string,
-  options: ComputeNodeExtensionsgetExtensionOptions = {}
+  poolId: string,
+  nodeId: string,
+  extensionName: string,
+  options: ComputeNodeExtensionsgetExtensionOptions = { requestOptions: {} }
 ): Promise<NodeVMExtension> {
   const result = await context
     .path(
       "/pools/{poolId}/nodes/{nodeId}/extensions/{extensionName}",
-      pool_id,
-      node_id,
-      extension_name
+      poolId,
+      nodeId,
+      extensionName
     )
     .get({
       headers: {
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        Accept: options.accept ?? "application/json",
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
-        ...(options.time_out && { timeOut: options.time_out }),
-        ...(options.select && { $select: options.select }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
+        ...(options.$select && { $select: options.$select }),
       },
     });
   if (isUnexpected(result)) {
@@ -106,8 +114,16 @@ export async function getExtension(
   };
 }
 
+interface RequestOptions {
+  customHeaders?: Record<string, string | number | boolean>;
+}
+
+interface RequestParametersCommon {
+  requestOptions?: RequestOptions;
+}
+
 export interface ComputeNodeExtensionslistExtensionsOptions
-  extends RequestParameters {
+  extends RequestParametersCommon {
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
@@ -118,47 +134,48 @@ export interface ComputeNodeExtensionslistExtensionsOptions
    * current system clock time; set it explicitly if you are calling the REST API
    * directly.
    */
-  ocp_date?: string;
+  ocpDate?: string;
   /**
    * The maximum number of items to return in the response. A maximum of 1000
    * applications can be returned.
    */
-  time_out?: number;
+  timeOut?: number;
   /**
    * The caller-generated request identity, in the form of a GUID with no decoration
    * such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
    */
-  client_request_id?: string;
+  clientRequestId?: string;
   /** Whether the server should return the client-request-id in the response. */
-  return_client_request_id?: boolean;
+  returnClientRequestId?: boolean;
   /** An OData $select clause. */
-  select?: string;
+  $select?: string;
 }
 
 /** Lists the Compute Nodes Extensions in the specified Pool. */
 export async function listExtensions(
   context: Client,
-  pool_id: string,
-  node_id: string,
-  options: ComputeNodeExtensionslistExtensionsOptions = {}
+  poolId: string,
+  nodeId: string,
+  options: ComputeNodeExtensionslistExtensionsOptions = { requestOptions: {} }
 ): Promise<NodeVMExtensionList> {
   const result = await context
-    .path("/pools/{poolId}/nodes/{nodeId}/extensions", pool_id, node_id)
+    .path("/pools/{poolId}/nodes/{nodeId}/extensions", poolId, nodeId)
     .get({
       headers: {
-        ...(options.ocp_date && { "ocp-date": options.ocp_date }),
-        ...(options.client_request_id && {
-          "client-request-id": options.client_request_id,
+        ...(options.ocpDate && { "ocp-date": options.ocpDate }),
+        ...(options.clientRequestId && {
+          "client-request-id": options.clientRequestId,
         }),
-        ...(options.return_client_request_id && {
-          "return-client-request-id": options.return_client_request_id,
+        ...(options.returnClientRequestId && {
+          "return-client-request-id": options.returnClientRequestId,
         }),
-        Accept: options.accept ?? "application/json",
+        Accept: "application/json",
+        ...options.requestOptions?.customHeaders,
       },
       queryParameters: {
         ...(options.maxresults && { maxresults: options.maxresults }),
-        ...(options.time_out && { timeOut: options.time_out }),
-        ...(options.select && { $select: options.select }),
+        ...(options.timeOut && { timeOut: options.timeOut }),
+        ...(options.$select && { $select: options.$select }),
       },
     });
   if (isUnexpected(result)) {
@@ -202,6 +219,6 @@ export async function listExtensions(
             })),
           },
     })),
-    nextLink: result.body.nextLink,
+    nextLink: result.body.odata.nextLink,
   };
 }

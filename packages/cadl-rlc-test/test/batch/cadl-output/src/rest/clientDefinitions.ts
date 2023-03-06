@@ -80,7 +80,7 @@ import {
   ComputeNodesListNodesParameters,
   ComputeNodeExtensionsGetExtensionParameters,
   ComputeNodeExtensionsListExtensionsParameters,
-} from "./parameters";
+} from "./parameters.js";
 import {
   ApplicationsListApplications200Response,
   ApplicationsListApplicationsDefaultResponse,
@@ -240,7 +240,7 @@ import {
   ComputeNodeExtensionsGetExtensionDefaultResponse,
   ComputeNodeExtensionsListExtensions200Response,
   ComputeNodeExtensionsListExtensionsDefaultResponse,
-} from "./responses";
+} from "./responses.js";
 import { Client, StreamableMethod } from "@azure-rest/core-client";
 
 export interface ApplicationsListApplications {

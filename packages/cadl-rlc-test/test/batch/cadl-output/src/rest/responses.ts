@@ -34,7 +34,7 @@ import {
   ComputeNodeListResultOutput,
   NodeVMExtensionOutput,
   NodeVMExtensionListOutput,
-} from "./outputModels";
+} from "./outputModels.js";
 
 export interface ApplicationsListApplications200Headers {
   /** The client-request-id provided by the client during the request. This will be returned only if the return-client-request-id parameter was set to true. */

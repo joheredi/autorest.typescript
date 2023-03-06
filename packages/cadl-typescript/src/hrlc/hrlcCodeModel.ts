@@ -1,4 +1,7 @@
+import { RLCOptions } from "@azure-tools/rlc-common";
+
 export interface HrlcCodeModel {
+  options: RLCOptions;
   namespace?: string;
   subnamespaceToClients?: any;
   clients: Client[];

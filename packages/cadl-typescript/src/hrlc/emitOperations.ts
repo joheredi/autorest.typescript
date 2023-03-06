@@ -1,11 +1,13 @@
 import { File } from "@azure-tools/rlc-common";
 import {
+  ClassDeclaration,
   FunctionDeclarationStructure,
   OptionalKind,
   ParameterDeclarationStructure,
   Project,
   SourceFile
 } from "ts-morph";
+import { toCamelCase } from "../casingUtils.js";
 import { getType } from "./getType.js";
 import {
   Operation,
@@ -14,6 +16,46 @@ import {
   Type,
   Client
 } from "./hrlcCodeModel.js";
+
+export function emitClientOperationGroups(
+  client: Client,
+  clientClass: ClassDeclaration,
+  _clientFile: SourceFile
+) {
+  for (const operationGroup of client.operationGroups) {
+    const imports: Record<string, Set<string>> = {};
+    const operationGroupName = toCamelCase(operationGroup.propertyName);
+    const operationDeclarations: OptionalKind<FunctionDeclarationStructure>[] =
+      operationGroup.operations.map((operation) =>
+        emitOperation(operation, imports)
+      );
+    const tempfile = new Project().createSourceFile("temp.ts");
+
+    const declarations = tempfile.addFunctions(operationDeclarations);
+
+    clientClass.addProperty({
+      name: operationGroupName,
+      initializer: `
+      {
+        ${declarations.map((d) => {
+          return `${d.getName()}: (${d
+            .getParameters()
+            .filter((p) => p.getName() !== "context")
+            .map((p) => p.getText())
+            .join(",")}): ${d
+            .getReturnType()
+            .getText()} => {return ${d.getName()}(${[
+            "this._client",
+            ...d.getParameters().map((p) => p.getName())
+          ]
+            .filter((p) => p !== "context")
+            .join(",")})}`;
+        })}
+      }
+      `
+    });
+  }
+}
 
 export function emitOperationGroups(
   client: Client,
@@ -28,11 +70,15 @@ export function emitOperationGroups(
       ? `${operationGroup.className}`
       : "operations";
 
-    const operationGroupFile = project.createSourceFile(`${fileName}.ts`);
-    exports.push(`${fileName}.js`);
-    operationGroup.operations.forEach((o) =>
-      emitOperation(o, operationGroupFile, imports)
+    const operationGroupFile = project.createSourceFile(
+      `${srcPath}/src/api/${fileName}.ts`
     );
+    exports.push(`${fileName}.js`);
+    operationGroup.operations.forEach((o) => {
+      emitOptionsInterface(o, imports, operationGroupFile);
+      const operationDeclaration = emitOperation(o, imports);
+      operationGroupFile.addFunction(operationDeclaration);
+    });
 
     for (const module in imports) {
       operationGroupFile.addImportDeclaration({
@@ -44,10 +90,6 @@ export function emitOperationGroups(
       {
         moduleSpecifier: "../rest/index.js",
         namedImports: [`${client.name} as Client`, "isUnexpected"]
-      },
-      {
-        moduleSpecifier: "@azure-rest/core-client",
-        namedImports: [`RequestParameters`]
       }
     ]);
     files.push({
@@ -59,11 +101,10 @@ export function emitOperationGroups(
   return files;
 }
 
-function emitOperation(
+export function emitOperation(
   operation: Operation,
-  sourceFile: SourceFile,
   imports: Record<string, Set<string>>
-) {
+): OptionalKind<FunctionDeclarationStructure> {
   let parameters: OptionalKind<ParameterDeclarationStructure>[] = (
     operation.bodyParameter?.type.properties ?? []
   )
@@ -81,9 +122,13 @@ function emitOperation(
       .map((p) => buildParameterType(p.clientName, p.type, imports))
   );
 
+  const optionsType = emitOptionsInterface(operation, imports);
   parameters.unshift({ name: "context", type: "Client" });
-  const optionsType = emitOptionsInterface(operation, sourceFile, imports);
-  parameters.push({ name: "options", type: optionsType, initializer: "{}" });
+  parameters.push({
+    name: "options",
+    type: optionsType,
+    initializer: "{ requestOptions: {} }"
+  });
 
   // TODO: Support operation overloads
   const response = operation.responses[0]!;
@@ -122,10 +167,10 @@ function emitOperation(
     );
   }
 
-  sourceFile.addFunction({
+  return {
     ...functionStatement,
     statements
-  });
+  };
 }
 
 function getResponseMapping(
@@ -149,11 +194,12 @@ function getResponseMapping(
         )}}`
       );
     } else {
-      const restValue = `${propertyPath ? `${propertyPath}.` : "."}${
-        property.clientName
-      }`;
+      const dot = propertyPath.endsWith("?") ? "." : "";
+      const restValue = `${propertyPath ? `${propertyPath}${dot}` : `${dot}`}[${
+        property.restApiName
+      }]`;
       props.push(
-        `"${property.restApiName}": ${deserializeResponseValue(
+        `"${property.clientName}": ${deserializeResponseValue(
           property.type,
           restValue
         )}`
@@ -269,7 +315,7 @@ function getRequestParameters(operation: Operation): string {
   if (parametersImplementation.header.length) {
     paramStr = `${paramStr}\nheaders: {${parametersImplementation.header.join(
       "\n"
-    )}},`;
+    )}...options.requestOptions?.customHeaders},`;
   }
 
   if (parametersImplementation.query.length) {
@@ -290,7 +336,9 @@ function getRequestParameters(operation: Operation): string {
 function getDefaultValue(param: Parameter | Property) {
   return (param.clientDefaultValue ?? param.type.clientDefaultValue) !==
     undefined
-    ? `?? "${param.clientDefaultValue ?? param.type.clientDefaultValue}"`
+    ? `${param.optional ? "??" : ""} "${
+        param.clientDefaultValue ?? param.type.clientDefaultValue
+      }"`
     : "";
 }
 
@@ -304,8 +352,10 @@ function getParameterMap(param: Parameter | Property) {
   }
 
   return `"${param.restApiName}": ${
-    param.optional || param.type.type === "constant"
+    param.optional
       ? `options.${param.clientName} ${defaultValue}`
+      : param.type.type === "constant"
+      ? `${defaultValue}`
       : param.clientName
   },`;
 }
@@ -331,8 +381,8 @@ function getParameterMap(param: Parameter | Property) {
 
 function emitOptionsInterface(
   operation: Operation,
-  sourceFile: SourceFile,
-  imports: Record<string, Set<string>>
+  imports: Record<string, Set<string>>,
+  sourceFile?: SourceFile
 ): string {
   const optionalParameters = operation.parameters.filter((p) => p.optional);
   const optionalBodyParams = (
@@ -340,10 +390,26 @@ function emitOptionsInterface(
   ).filter((p) => p.optional);
   const options = [...optionalBodyParams, ...optionalParameters];
   const name = toPascalCase(`${operation.groupName}${operation.name}Options`);
-  sourceFile.addInterface({
+  sourceFile?.addInterface({
+    name: "RequestOptions",
+    properties: [
+      {
+        name: "customHeaders",
+        type: "Record<string, string | number | boolean>",
+        hasQuestionToken: true
+      }
+    ]
+  });
+  sourceFile?.addInterface({
+    name: "RequestParametersCommon",
+    properties: [
+      { name: "requestOptions", type: "RequestOptions", hasQuestionToken: true }
+    ]
+  });
+  sourceFile?.addInterface({
     name,
     isExported: true,
-    extends: ["RequestParameters"],
+    extends: ["RequestParametersCommon"],
     properties: options.map((p) => {
       return {
         docs: [p.description],
