@@ -172,7 +172,13 @@ function generateRLCIndex(file: SourceFile, model: RLCModel) {
   const moduleName = normalizeName(clientName, NameType.File);
 
   file.addImportDeclaration({
-    moduleSpecifier: `./${moduleName}`,
+    moduleSpecifier: getImportModuleName(
+      {
+        cjsName: `./${moduleName}`,
+        esModulesName: `./${moduleName}.js`
+      },
+      model
+    ),
     defaultImport: createClientFuncName
   });
 

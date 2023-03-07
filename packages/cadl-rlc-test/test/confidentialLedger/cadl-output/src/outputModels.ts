@@ -42,7 +42,7 @@ export interface PagedLedgerEntriesOutput {
   /** State of the ledger query. */
   state: "Loading" | "Ready";
   /** Path from which to retrieve the next page of results. */
-  nextLink?: string;
+  nextLinkFoo?: string;
 }
 
 /** Details about a ledger entry. */

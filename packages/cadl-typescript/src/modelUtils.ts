@@ -9,7 +9,6 @@ import {
   getDoc,
   getEffectiveModelType,
   getFormat,
-  getFriendlyName,
   getMaxLength,
   getMaxValue,
   getMinLength,
@@ -31,7 +30,8 @@ import {
   Type,
   Union,
   isNullType,
-  Scalar
+  Scalar,
+  getProjectedName
 } from "@cadl-lang/compiler";
 import { reportDiagnostic } from "./lib.js";
 import {
@@ -313,10 +313,10 @@ function getSchemaForModel(
   usage?: SchemaContext[],
   needRef?: boolean
 ) {
-  const friendlyName = getFriendlyName(program, model);
+  const restApiName = getProjectedName(program, model, "json");
   let name = model.name;
   if (
-    !friendlyName &&
+    !restApiName &&
     model.templateArguments &&
     model.templateArguments.length > 0 &&
     getPagedResult(program, model)
@@ -336,7 +336,7 @@ function getSchemaForModel(
         .join("") + "List";
   }
   let modelSchema: ObjectSchema = {
-    name: friendlyName ?? name,
+    name: restApiName ?? name,
     type: "object",
     description: getDoc(program, model) ?? ""
   };
@@ -399,7 +399,8 @@ function getSchemaForModel(
     return modelSchema;
   }
   for (const [propName, prop] of model.properties) {
-    const name = `"${propName}"`;
+    const restApiName = getProjectedName(program, prop, "json");
+    const name = `"${restApiName ?? propName}"`;
     if (!isSchemaProperty(program, prop)) {
       continue;
     }
@@ -528,9 +529,9 @@ function applyIntrinsicDecorators(
     newTarget.description = docStr;
   }
 
-  const friendlyName = getFriendlyName(program, cadlType);
-  if (friendlyName) {
-    newTarget.name = friendlyName;
+  const restApiName = getProjectedName(program, cadlType, "json");
+  if (restApiName) {
+    newTarget.name = restApiName;
   }
 
   const summaryStr = getSummary(program, cadlType);

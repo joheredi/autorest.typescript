@@ -171,7 +171,7 @@ function emitApiIndexFile(
   }
 
   files.push({
-    path: `${srcPath}/src/index.ts`,
+    path: `${srcPath}/src/api/index.ts`,
     content: indexFile.getFullText()
   });
 }

@@ -195,9 +195,9 @@ function getResponseMapping(
       );
     } else {
       const dot = propertyPath.endsWith("?") ? "." : "";
-      const restValue = `${propertyPath ? `${propertyPath}${dot}` : `${dot}`}[${
-        property.restApiName
-      }]`;
+      const restValue = `${
+        propertyPath ? `${propertyPath}${dot}` : `${dot}`
+      }["${property.restApiName}"]`;
       props.push(
         `"${property.clientName}": ${deserializeResponseValue(
           property.type,
