@@ -6,7 +6,7 @@ export interface ApplicationListResultOutput {
   /** The list of applications available in the Account. */
   value?: Array<ApplicationOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /** Contains information about an application in an Azure Batch Account. */
@@ -1363,7 +1363,7 @@ export interface BatchPoolListResultOutput {
   /** The list of Pools. */
   value?: Array<BatchPoolOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /** The result of listing the supported Virtual Machine Images. */
@@ -1371,7 +1371,7 @@ export interface AccountListSupportedImagesResultOutput {
   /** The list of supported Virtual Machine Images. */
   value?: Array<ImageInformationOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /**
@@ -1418,7 +1418,7 @@ export interface PoolNodeCountsListResultOutput {
   /** A list of Compute Node counts by Pool. */
   value?: Array<PoolNodeCountsOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /** The number of Compute Nodes in each state for a Pool. */
@@ -2395,7 +2395,7 @@ export interface BatchJobListResultOutput {
   /** The list of Jobs. */
   value?: Array<BatchJobOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /**
@@ -2406,7 +2406,7 @@ export interface BatchJobListPreparationAndReleaseTaskStatusResultOutput {
   /** A list of Job Preparation and Job Release Task execution information. */
   value?: Array<JobPreparationAndReleaseTaskExecutionInformationOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /** The status of the Job Preparation and Job Release Tasks on a Compute Node. */
@@ -2691,7 +2691,7 @@ export interface CertificateListResultOutput {
   /** The list of Certificates. */
   value?: Array<CertificateOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /**
@@ -2702,7 +2702,7 @@ export interface NodeFileListResultOutput {
   /** The list of files. */
   value?: Array<NodeFileOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /** Information about a file or directory on a Compute Node. */
@@ -3038,7 +3038,7 @@ export interface BatchJobScheduleListResultOutput {
   /** The list of Job Schedules. */
   value?: Array<BatchJobScheduleOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /**
@@ -3471,7 +3471,7 @@ export interface BatchTaskListResultOutput {
   /** The list of Tasks. */
   value?: Array<BatchTaskOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /** The result of adding a collection of Tasks to a Job. */
@@ -3868,7 +3868,7 @@ export interface ComputeNodeListResultOutput {
   /** The list of Compute Nodes. */
   value?: Array<ComputeNodeOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }
 
 /** The configuration for virtual machine extension instance view. */
@@ -3914,5 +3914,5 @@ export interface NodeVMExtensionListOutput {
   /** The list of Compute Node extensions. */
   value?: Array<NodeVMExtensionOutput>;
   /** The URL to get the next set of results. */
-  nextLink?: string;
+  "odata.nextLink"?: string;
 }

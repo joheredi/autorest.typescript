@@ -73,41 +73,41 @@ export async function getExtension(
   }
 
   return {
-    provisioningState: result.body.provisioningState,
+    provisioningState: result.body["provisioningState"],
     vmExtension: !result.body.vmExtension
       ? undefined
       : {
-          name: result.body.vmExtension?.name,
-          publisher: result.body.vmExtension?.publisher,
-          type: result.body.vmExtension?.type,
-          typeHandlerVersion: result.body.vmExtension?.typeHandlerVersion,
+          name: result.body.vmExtension?.["name"],
+          publisher: result.body.vmExtension?.["publisher"],
+          type: result.body.vmExtension?.["type"],
+          typeHandlerVersion: result.body.vmExtension?.["typeHandlerVersion"],
           autoUpgradeMinorVersion:
-            result.body.vmExtension?.autoUpgradeMinorVersion,
+            result.body.vmExtension?.["autoUpgradeMinorVersion"],
           settings: !result.body.vmExtension?.settings ? undefined : {},
           protectedSettings: !result.body.vmExtension?.protectedSettings
             ? undefined
             : {},
           provisionAfterExtensions:
-            result.body.vmExtension?.provisionAfterExtensions,
+            result.body.vmExtension?.["provisionAfterExtensions"],
         },
     instanceView: !result.body.instanceView
       ? undefined
       : {
-          name: result.body.instanceView?.name,
-          statuses: (result.body.instanceView?.statuses ?? []).map((p) => ({
-            code: p.code,
-            displayStatus: p.displayStatus,
-            level: p.level,
-            message: p.message,
-            time: p.time,
+          name: result.body.instanceView?.["name"],
+          statuses: (result.body.instanceView?.["statuses"] ?? []).map((p) => ({
+            code: p["code"],
+            displayStatus: p["displayStatus"],
+            level: p["level"],
+            message: p["message"],
+            time: p["time"],
           })),
-          subStatuses: (result.body.instanceView?.subStatuses ?? []).map(
+          subStatuses: (result.body.instanceView?.["subStatuses"] ?? []).map(
             (p) => ({
-              code: p.code,
-              displayStatus: p.displayStatus,
-              level: p.level,
-              message: p.message,
-              time: p.time,
+              code: p["code"],
+              displayStatus: p["displayStatus"],
+              level: p["level"],
+              message: p["message"],
+              time: p["time"],
             })
           ),
         },
@@ -183,42 +183,43 @@ export async function listExtensions(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      provisioningState: p.provisioningState,
+    value: (result.body["value"] ?? []).map((p) => ({
+      provisioningState: p["provisioningState"],
       vmExtension: !p.vmExtension
         ? undefined
         : {
-            name: p.vmExtension?.name,
-            publisher: p.vmExtension?.publisher,
-            type: p.vmExtension?.type,
-            typeHandlerVersion: p.vmExtension?.typeHandlerVersion,
-            autoUpgradeMinorVersion: p.vmExtension?.autoUpgradeMinorVersion,
+            name: p.vmExtension?.["name"],
+            publisher: p.vmExtension?.["publisher"],
+            type: p.vmExtension?.["type"],
+            typeHandlerVersion: p.vmExtension?.["typeHandlerVersion"],
+            autoUpgradeMinorVersion: p.vmExtension?.["autoUpgradeMinorVersion"],
             settings: !p.vmExtension?.settings ? undefined : {},
             protectedSettings: !p.vmExtension?.protectedSettings
               ? undefined
               : {},
-            provisionAfterExtensions: p.vmExtension?.provisionAfterExtensions,
+            provisionAfterExtensions:
+              p.vmExtension?.["provisionAfterExtensions"],
           },
       instanceView: !p.instanceView
         ? undefined
         : {
-            name: p.instanceView?.name,
-            statuses: (p.instanceView?.statuses ?? []).map((p) => ({
-              code: p.code,
-              displayStatus: p.displayStatus,
-              level: p.level,
-              message: p.message,
-              time: p.time,
+            name: p.instanceView?.["name"],
+            statuses: (p.instanceView?.["statuses"] ?? []).map((p) => ({
+              code: p["code"],
+              displayStatus: p["displayStatus"],
+              level: p["level"],
+              message: p["message"],
+              time: p["time"],
             })),
-            subStatuses: (p.instanceView?.subStatuses ?? []).map((p) => ({
-              code: p.code,
-              displayStatus: p.displayStatus,
-              level: p.level,
-              message: p.message,
-              time: p.time,
+            subStatuses: (p.instanceView?.["subStatuses"] ?? []).map((p) => ({
+              code: p["code"],
+              displayStatus: p["displayStatus"],
+              level: p["level"],
+              message: p["message"],
+              time: p["time"],
             })),
           },
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }

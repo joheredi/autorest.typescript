@@ -575,21 +575,21 @@ export async function listFilesFromTask(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      name: p.name,
-      url: p.url,
-      isDirectory: p.isDirectory,
+    value: (result.body["value"] ?? []).map((p) => ({
+      name: p["name"],
+      url: p["url"],
+      isDirectory: p["isDirectory"],
       properties: !p.properties
         ? undefined
         : {
-            creationTime: new Date(p.properties?.creationTime ?? ""),
-            lastModified: new Date(p.properties?.lastModified ?? ""),
-            contentLength: p.properties?.contentLength,
-            contentType: p.properties?.contentType,
-            fileMode: p.properties?.fileMode,
+            creationTime: new Date(p.properties?.["creationTime"] ?? ""),
+            lastModified: new Date(p.properties?.["lastModified"] ?? ""),
+            contentLength: p.properties?.["contentLength"],
+            contentType: p.properties?.["contentType"],
+            fileMode: p.properties?.["fileMode"],
           },
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }
 
@@ -668,20 +668,20 @@ export async function listFilesFromComputeNode(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      name: p.name,
-      url: p.url,
-      isDirectory: p.isDirectory,
+    value: (result.body["value"] ?? []).map((p) => ({
+      name: p["name"],
+      url: p["url"],
+      isDirectory: p["isDirectory"],
       properties: !p.properties
         ? undefined
         : {
-            creationTime: new Date(p.properties?.creationTime ?? ""),
-            lastModified: new Date(p.properties?.lastModified ?? ""),
-            contentLength: p.properties?.contentLength,
-            contentType: p.properties?.contentType,
-            fileMode: p.properties?.fileMode,
+            creationTime: new Date(p.properties?.["creationTime"] ?? ""),
+            lastModified: new Date(p.properties?.["lastModified"] ?? ""),
+            contentLength: p.properties?.["contentLength"],
+            contentType: p.properties?.["contentType"],
+            fileMode: p.properties?.["fileMode"],
           },
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }

@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import createBatchServiceClient, { BatchServiceClient } from "./rest/index.js";
-import "@azure-rest/core-client";
+import { ClientOptions } from "@azure-rest/core-client";
 import { TokenCredential } from "@azure/core-auth";
 import {
   AccountlistSupportedImagesOptions,
@@ -220,7 +220,7 @@ export class BatchServiceClientClient {
   constructor(
     endpoint: string,
     credential: TokenCredential,
-    options: BatchServiceClientOptions = {}
+    options: ClientOptions = {}
   ) {
     this._client = createBatchServiceClient(endpoint, credential, options);
   }

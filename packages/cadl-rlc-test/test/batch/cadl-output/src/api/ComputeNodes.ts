@@ -334,192 +334,205 @@ export async function getNode(
   }
 
   return {
-    id: result.body.id,
-    url: result.body.url,
-    state: result.body.state,
-    schedulingState: result.body.schedulingState,
-    stateTransitionTime: new Date(result.body.stateTransitionTime ?? ""),
-    lastBootTime: new Date(result.body.lastBootTime ?? ""),
-    allocationTime: new Date(result.body.allocationTime ?? ""),
-    ipAddress: result.body.ipAddress,
-    affinityId: result.body.affinityId,
-    vmSize: result.body.vmSize,
-    totalTasksRun: result.body.totalTasksRun,
-    runningTasksCount: result.body.runningTasksCount,
-    runningTaskSlotsCount: result.body.runningTaskSlotsCount,
-    totalTasksSucceeded: result.body.totalTasksSucceeded,
-    recentTasks: (result.body.recentTasks ?? []).map((p) => ({
-      taskUrl: p.taskUrl,
-      jobId: p.jobId,
-      taskId: p.taskId,
-      subtaskId: p.subtaskId,
-      taskState: p.taskState,
+    id: result.body["id"],
+    url: result.body["url"],
+    state: result.body["state"],
+    schedulingState: result.body["schedulingState"],
+    stateTransitionTime: new Date(result.body["stateTransitionTime"] ?? ""),
+    lastBootTime: new Date(result.body["lastBootTime"] ?? ""),
+    allocationTime: new Date(result.body["allocationTime"] ?? ""),
+    ipAddress: result.body["ipAddress"],
+    affinityId: result.body["affinityId"],
+    vmSize: result.body["vmSize"],
+    totalTasksRun: result.body["totalTasksRun"],
+    runningTasksCount: result.body["runningTasksCount"],
+    runningTaskSlotsCount: result.body["runningTaskSlotsCount"],
+    totalTasksSucceeded: result.body["totalTasksSucceeded"],
+    recentTasks: (result.body["recentTasks"] ?? []).map((p) => ({
+      taskUrl: p["taskUrl"],
+      jobId: p["jobId"],
+      taskId: p["taskId"],
+      subtaskId: p["subtaskId"],
+      taskState: p["taskState"],
       executionInfo: !p.executionInfo
         ? undefined
         : {
-            startTime: new Date(p.executionInfo?.startTime ?? ""),
-            endTime: new Date(p.executionInfo?.endTime ?? ""),
-            exitCode: p.executionInfo?.exitCode,
+            startTime: new Date(p.executionInfo?.["startTime"] ?? ""),
+            endTime: new Date(p.executionInfo?.["endTime"] ?? ""),
+            exitCode: p.executionInfo?.["exitCode"],
             containerInfo: !p.executionInfo?.containerInfo
               ? undefined
               : {
-                  containerId: p.executionInfo?.containerInfo?.containerId,
-                  state: p.executionInfo?.containerInfo?.state,
-                  error: p.executionInfo?.containerInfo?.error,
+                  containerId: p.executionInfo?.containerInfo?.["containerId"],
+                  state: p.executionInfo?.containerInfo?.["state"],
+                  error: p.executionInfo?.containerInfo?.["error"],
                 },
             failureInfo: !p.executionInfo?.failureInfo
               ? undefined
               : {
-                  category: p.executionInfo?.failureInfo?.category,
-                  code: p.executionInfo?.failureInfo?.code,
-                  message: p.executionInfo?.failureInfo?.message,
-                  details: (p.executionInfo?.failureInfo?.details ?? []).map(
-                    (p) => ({ name: p.name, value: p.value })
-                  ),
+                  category: p.executionInfo?.failureInfo?.["category"],
+                  code: p.executionInfo?.failureInfo?.["code"],
+                  message: p.executionInfo?.failureInfo?.["message"],
+                  details: (
+                    p.executionInfo?.failureInfo?.["details"] ?? []
+                  ).map((p) => ({ name: p["name"], value: p["value"] })),
                 },
-            retryCount: p.executionInfo?.retryCount,
-            lastRetryTime: new Date(p.executionInfo?.lastRetryTime ?? ""),
-            requeueCount: p.executionInfo?.requeueCount,
-            lastRequeueTime: new Date(p.executionInfo?.lastRequeueTime ?? ""),
-            result: p.executionInfo?.result,
+            retryCount: p.executionInfo?.["retryCount"],
+            lastRetryTime: new Date(p.executionInfo?.["lastRetryTime"] ?? ""),
+            requeueCount: p.executionInfo?.["requeueCount"],
+            lastRequeueTime: new Date(
+              p.executionInfo?.["lastRequeueTime"] ?? ""
+            ),
+            result: p.executionInfo?.["result"],
           },
     })),
     startTask: !result.body.startTask
       ? undefined
       : {
-          commandLine: result.body.startTask?.commandLine,
+          commandLine: result.body.startTask?.["commandLine"],
           containerSettings: !result.body.startTask?.containerSettings
             ? undefined
             : {
                 containerRunOptions:
-                  result.body.startTask?.containerSettings?.containerRunOptions,
-                imageName: result.body.startTask?.containerSettings?.imageName,
+                  result.body.startTask?.containerSettings?.[
+                    "containerRunOptions"
+                  ],
+                imageName:
+                  result.body.startTask?.containerSettings?.["imageName"],
                 registry: !result.body.startTask?.containerSettings?.registry
                   ? undefined
                   : {
                       username:
-                        result.body.startTask?.containerSettings?.registry
-                          ?.username,
+                        result.body.startTask?.containerSettings?.registry?.[
+                          "username"
+                        ],
                       password:
-                        result.body.startTask?.containerSettings?.registry
-                          ?.password,
+                        result.body.startTask?.containerSettings?.registry?.[
+                          "password"
+                        ],
                       registryServer:
-                        result.body.startTask?.containerSettings?.registry
-                          ?.registryServer,
+                        result.body.startTask?.containerSettings?.registry?.[
+                          "registryServer"
+                        ],
                       identityReference: !result.body.startTask
                         ?.containerSettings?.registry?.identityReference
                         ? undefined
                         : {
                             resourceId:
                               result.body.startTask?.containerSettings?.registry
-                                ?.identityReference?.resourceId,
+                                ?.identityReference?.["resourceId"],
                           },
                     },
                 workingDirectory:
-                  result.body.startTask?.containerSettings?.workingDirectory,
+                  result.body.startTask?.containerSettings?.[
+                    "workingDirectory"
+                  ],
               },
-          resourceFiles: (result.body.startTask?.resourceFiles ?? []).map(
+          resourceFiles: (result.body.startTask?.["resourceFiles"] ?? []).map(
             (p) => ({
-              autoStorageContainerName: p.autoStorageContainerName,
-              storageContainerUrl: p.storageContainerUrl,
-              httpUrl: p.httpUrl,
-              blobPrefix: p.blobPrefix,
-              filePath: p.filePath,
-              fileMode: p.fileMode,
+              autoStorageContainerName: p["autoStorageContainerName"],
+              storageContainerUrl: p["storageContainerUrl"],
+              httpUrl: p["httpUrl"],
+              blobPrefix: p["blobPrefix"],
+              filePath: p["filePath"],
+              fileMode: p["fileMode"],
               identityReference: !p.identityReference
                 ? undefined
-                : { resourceId: p.identityReference?.resourceId },
+                : { resourceId: p.identityReference?.["resourceId"] },
             })
           ),
           environmentSettings: (
-            result.body.startTask?.environmentSettings ?? []
-          ).map((p) => ({ name: p.name, value: p.value })),
+            result.body.startTask?.["environmentSettings"] ?? []
+          ).map((p) => ({ name: p["name"], value: p["value"] })),
           userIdentity: !result.body.startTask?.userIdentity
             ? undefined
             : {
-                username: result.body.startTask?.userIdentity?.username,
+                username: result.body.startTask?.userIdentity?.["username"],
                 autoUser: !result.body.startTask?.userIdentity?.autoUser
                   ? undefined
                   : {
                       scope:
-                        result.body.startTask?.userIdentity?.autoUser?.scope,
+                        result.body.startTask?.userIdentity?.autoUser?.[
+                          "scope"
+                        ],
                       elevationLevel:
-                        result.body.startTask?.userIdentity?.autoUser
-                          ?.elevationLevel,
+                        result.body.startTask?.userIdentity?.autoUser?.[
+                          "elevationLevel"
+                        ],
                     },
               },
-          maxTaskRetryCount: result.body.startTask?.maxTaskRetryCount,
-          waitForSuccess: result.body.startTask?.waitForSuccess,
+          maxTaskRetryCount: result.body.startTask?.["maxTaskRetryCount"],
+          waitForSuccess: result.body.startTask?.["waitForSuccess"],
         },
     startTaskInfo: !result.body.startTaskInfo
       ? undefined
       : {
-          state: result.body.startTaskInfo?.state,
-          startTime: new Date(result.body.startTaskInfo?.startTime ?? ""),
-          endTime: new Date(result.body.startTaskInfo?.endTime ?? ""),
-          exitCode: result.body.startTaskInfo?.exitCode,
+          state: result.body.startTaskInfo?.["state"],
+          startTime: new Date(result.body.startTaskInfo?.["startTime"] ?? ""),
+          endTime: new Date(result.body.startTaskInfo?.["endTime"] ?? ""),
+          exitCode: result.body.startTaskInfo?.["exitCode"],
           containerInfo: !result.body.startTaskInfo?.containerInfo
             ? undefined
             : {
                 containerId:
-                  result.body.startTaskInfo?.containerInfo?.containerId,
-                state: result.body.startTaskInfo?.containerInfo?.state,
-                error: result.body.startTaskInfo?.containerInfo?.error,
+                  result.body.startTaskInfo?.containerInfo?.["containerId"],
+                state: result.body.startTaskInfo?.containerInfo?.["state"],
+                error: result.body.startTaskInfo?.containerInfo?.["error"],
               },
           failureInfo: !result.body.startTaskInfo?.failureInfo
             ? undefined
             : {
-                category: result.body.startTaskInfo?.failureInfo?.category,
-                code: result.body.startTaskInfo?.failureInfo?.code,
-                message: result.body.startTaskInfo?.failureInfo?.message,
+                category: result.body.startTaskInfo?.failureInfo?.["category"],
+                code: result.body.startTaskInfo?.failureInfo?.["code"],
+                message: result.body.startTaskInfo?.failureInfo?.["message"],
                 details: (
-                  result.body.startTaskInfo?.failureInfo?.details ?? []
-                ).map((p) => ({ name: p.name, value: p.value })),
+                  result.body.startTaskInfo?.failureInfo?.["details"] ?? []
+                ).map((p) => ({ name: p["name"], value: p["value"] })),
               },
-          retryCount: result.body.startTaskInfo?.retryCount,
+          retryCount: result.body.startTaskInfo?.["retryCount"],
           lastRetryTime: new Date(
-            result.body.startTaskInfo?.lastRetryTime ?? ""
+            result.body.startTaskInfo?.["lastRetryTime"] ?? ""
           ),
-          result: result.body.startTaskInfo?.result,
+          result: result.body.startTaskInfo?.["result"],
         },
-    certificateReferences: (result.body.certificateReferences ?? []).map(
+    certificateReferences: (result.body["certificateReferences"] ?? []).map(
       (p) => ({
-        thumbprint: p.thumbprint,
-        thumbprintAlgorithm: p.thumbprintAlgorithm,
-        storeLocation: p.storeLocation,
-        storeName: p.storeName,
-        visibility: p.visibility,
+        thumbprint: p["thumbprint"],
+        thumbprintAlgorithm: p["thumbprintAlgorithm"],
+        storeLocation: p["storeLocation"],
+        storeName: p["storeName"],
+        visibility: p["visibility"],
       })
     ),
-    errors: (result.body.errors ?? []).map((p) => ({
-      code: p.code,
-      message: p.message,
-      errorDetails: (p.errorDetails ?? []).map((p) => ({
-        name: p.name,
-        value: p.value,
+    errors: (result.body["errors"] ?? []).map((p) => ({
+      code: p["code"],
+      message: p["message"],
+      errorDetails: (p["errorDetails"] ?? []).map((p) => ({
+        name: p["name"],
+        value: p["value"],
       })),
     })),
-    isDedicated: result.body.isDedicated,
+    isDedicated: result.body["isDedicated"],
     endpointConfiguration: !result.body.endpointConfiguration
       ? undefined
       : {
           inboundEndpoints: (
-            result.body.endpointConfiguration?.inboundEndpoints ?? []
+            result.body.endpointConfiguration?.["inboundEndpoints"] ?? []
           ).map((p) => ({
-            name: p.name,
-            protocol: p.protocol,
-            publicIPAddress: p.publicIPAddress,
-            publicFQDN: p.publicFQDN,
-            frontendPort: p.frontendPort,
-            backendPort: p.backendPort,
+            name: p["name"],
+            protocol: p["protocol"],
+            publicIPAddress: p["publicIPAddress"],
+            publicFQDN: p["publicFQDN"],
+            frontendPort: p["frontendPort"],
+            backendPort: p["backendPort"],
           })),
         },
     nodeAgentInfo: !result.body.nodeAgentInfo
       ? undefined
       : {
-          version: result.body.nodeAgentInfo?.version,
+          version: result.body.nodeAgentInfo?.["version"],
           lastUpdateTime: new Date(
-            result.body.nodeAgentInfo?.lastUpdateTime ?? ""
+            result.body.nodeAgentInfo?.["lastUpdateTime"] ?? ""
           ),
         },
     virtualMachineInfo: !result.body.virtualMachineInfo
@@ -529,16 +542,20 @@ export async function getNode(
             ? undefined
             : {
                 publisher:
-                  result.body.virtualMachineInfo?.imageReference?.publisher,
-                offer: result.body.virtualMachineInfo?.imageReference?.offer,
-                sku: result.body.virtualMachineInfo?.imageReference?.sku,
+                  result.body.virtualMachineInfo?.imageReference?.["publisher"],
+                offer:
+                  result.body.virtualMachineInfo?.imageReference?.["offer"],
+                sku: result.body.virtualMachineInfo?.imageReference?.["sku"],
                 version:
-                  result.body.virtualMachineInfo?.imageReference?.version,
+                  result.body.virtualMachineInfo?.imageReference?.["version"],
                 virtualMachineImageId:
-                  result.body.virtualMachineInfo?.imageReference
-                    ?.virtualMachineImageId,
+                  result.body.virtualMachineInfo?.imageReference?.[
+                    "virtualMachineImageId"
+                  ],
                 exactVersion:
-                  result.body.virtualMachineInfo?.imageReference?.exactVersion,
+                  result.body.virtualMachineInfo?.imageReference?.[
+                    "exactVersion"
+                  ],
               },
         },
   };
@@ -883,8 +900,8 @@ export async function getRemoteLoginSettings(
   }
 
   return {
-    remoteLoginIPAddress: result.body.remoteLoginIPAddress,
-    remoteLoginPort: result.body.remoteLoginPort,
+    remoteLoginIPAddress: result.body["remoteLoginIPAddress"],
+    remoteLoginPort: result.body["remoteLoginPort"],
   };
 }
 
@@ -1043,8 +1060,8 @@ export async function uploadBatchServiceLogs(
   }
 
   return {
-    virtualDirectoryName: result.body.virtualDirectoryName,
-    numberOfFilesUploaded: result.body.numberOfFilesUploaded,
+    virtualDirectoryName: result.body["virtualDirectoryName"],
+    numberOfFilesUploaded: result.body["numberOfFilesUploaded"],
   };
 }
 
@@ -1119,181 +1136,191 @@ export async function listNodes(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      id: p.id,
-      url: p.url,
-      state: p.state,
-      schedulingState: p.schedulingState,
-      stateTransitionTime: new Date(p.stateTransitionTime ?? ""),
-      lastBootTime: new Date(p.lastBootTime ?? ""),
-      allocationTime: new Date(p.allocationTime ?? ""),
-      ipAddress: p.ipAddress,
-      affinityId: p.affinityId,
-      vmSize: p.vmSize,
-      totalTasksRun: p.totalTasksRun,
-      runningTasksCount: p.runningTasksCount,
-      runningTaskSlotsCount: p.runningTaskSlotsCount,
-      totalTasksSucceeded: p.totalTasksSucceeded,
-      recentTasks: (p.recentTasks ?? []).map((p) => ({
-        taskUrl: p.taskUrl,
-        jobId: p.jobId,
-        taskId: p.taskId,
-        subtaskId: p.subtaskId,
-        taskState: p.taskState,
+    value: (result.body["value"] ?? []).map((p) => ({
+      id: p["id"],
+      url: p["url"],
+      state: p["state"],
+      schedulingState: p["schedulingState"],
+      stateTransitionTime: new Date(p["stateTransitionTime"] ?? ""),
+      lastBootTime: new Date(p["lastBootTime"] ?? ""),
+      allocationTime: new Date(p["allocationTime"] ?? ""),
+      ipAddress: p["ipAddress"],
+      affinityId: p["affinityId"],
+      vmSize: p["vmSize"],
+      totalTasksRun: p["totalTasksRun"],
+      runningTasksCount: p["runningTasksCount"],
+      runningTaskSlotsCount: p["runningTaskSlotsCount"],
+      totalTasksSucceeded: p["totalTasksSucceeded"],
+      recentTasks: (p["recentTasks"] ?? []).map((p) => ({
+        taskUrl: p["taskUrl"],
+        jobId: p["jobId"],
+        taskId: p["taskId"],
+        subtaskId: p["subtaskId"],
+        taskState: p["taskState"],
         executionInfo: !p.executionInfo
           ? undefined
           : {
-              startTime: new Date(p.executionInfo?.startTime ?? ""),
-              endTime: new Date(p.executionInfo?.endTime ?? ""),
-              exitCode: p.executionInfo?.exitCode,
+              startTime: new Date(p.executionInfo?.["startTime"] ?? ""),
+              endTime: new Date(p.executionInfo?.["endTime"] ?? ""),
+              exitCode: p.executionInfo?.["exitCode"],
               containerInfo: !p.executionInfo?.containerInfo
                 ? undefined
                 : {
-                    containerId: p.executionInfo?.containerInfo?.containerId,
-                    state: p.executionInfo?.containerInfo?.state,
-                    error: p.executionInfo?.containerInfo?.error,
+                    containerId:
+                      p.executionInfo?.containerInfo?.["containerId"],
+                    state: p.executionInfo?.containerInfo?.["state"],
+                    error: p.executionInfo?.containerInfo?.["error"],
                   },
               failureInfo: !p.executionInfo?.failureInfo
                 ? undefined
                 : {
-                    category: p.executionInfo?.failureInfo?.category,
-                    code: p.executionInfo?.failureInfo?.code,
-                    message: p.executionInfo?.failureInfo?.message,
-                    details: (p.executionInfo?.failureInfo?.details ?? []).map(
-                      (p) => ({ name: p.name, value: p.value })
-                    ),
+                    category: p.executionInfo?.failureInfo?.["category"],
+                    code: p.executionInfo?.failureInfo?.["code"],
+                    message: p.executionInfo?.failureInfo?.["message"],
+                    details: (
+                      p.executionInfo?.failureInfo?.["details"] ?? []
+                    ).map((p) => ({ name: p["name"], value: p["value"] })),
                   },
-              retryCount: p.executionInfo?.retryCount,
-              lastRetryTime: new Date(p.executionInfo?.lastRetryTime ?? ""),
-              requeueCount: p.executionInfo?.requeueCount,
-              lastRequeueTime: new Date(p.executionInfo?.lastRequeueTime ?? ""),
-              result: p.executionInfo?.result,
+              retryCount: p.executionInfo?.["retryCount"],
+              lastRetryTime: new Date(p.executionInfo?.["lastRetryTime"] ?? ""),
+              requeueCount: p.executionInfo?.["requeueCount"],
+              lastRequeueTime: new Date(
+                p.executionInfo?.["lastRequeueTime"] ?? ""
+              ),
+              result: p.executionInfo?.["result"],
             },
       })),
       startTask: !p.startTask
         ? undefined
         : {
-            commandLine: p.startTask?.commandLine,
+            commandLine: p.startTask?.["commandLine"],
             containerSettings: !p.startTask?.containerSettings
               ? undefined
               : {
                   containerRunOptions:
-                    p.startTask?.containerSettings?.containerRunOptions,
-                  imageName: p.startTask?.containerSettings?.imageName,
+                    p.startTask?.containerSettings?.["containerRunOptions"],
+                  imageName: p.startTask?.containerSettings?.["imageName"],
                   registry: !p.startTask?.containerSettings?.registry
                     ? undefined
                     : {
                         username:
-                          p.startTask?.containerSettings?.registry?.username,
+                          p.startTask?.containerSettings?.registry?.[
+                            "username"
+                          ],
                         password:
-                          p.startTask?.containerSettings?.registry?.password,
+                          p.startTask?.containerSettings?.registry?.[
+                            "password"
+                          ],
                         registryServer:
-                          p.startTask?.containerSettings?.registry
-                            ?.registryServer,
+                          p.startTask?.containerSettings?.registry?.[
+                            "registryServer"
+                          ],
                         identityReference: !p.startTask?.containerSettings
                           ?.registry?.identityReference
                           ? undefined
                           : {
                               resourceId:
                                 p.startTask?.containerSettings?.registry
-                                  ?.identityReference?.resourceId,
+                                  ?.identityReference?.["resourceId"],
                             },
                       },
                   workingDirectory:
-                    p.startTask?.containerSettings?.workingDirectory,
+                    p.startTask?.containerSettings?.["workingDirectory"],
                 },
-            resourceFiles: (p.startTask?.resourceFiles ?? []).map((p) => ({
-              autoStorageContainerName: p.autoStorageContainerName,
-              storageContainerUrl: p.storageContainerUrl,
-              httpUrl: p.httpUrl,
-              blobPrefix: p.blobPrefix,
-              filePath: p.filePath,
-              fileMode: p.fileMode,
+            resourceFiles: (p.startTask?.["resourceFiles"] ?? []).map((p) => ({
+              autoStorageContainerName: p["autoStorageContainerName"],
+              storageContainerUrl: p["storageContainerUrl"],
+              httpUrl: p["httpUrl"],
+              blobPrefix: p["blobPrefix"],
+              filePath: p["filePath"],
+              fileMode: p["fileMode"],
               identityReference: !p.identityReference
                 ? undefined
-                : { resourceId: p.identityReference?.resourceId },
+                : { resourceId: p.identityReference?.["resourceId"] },
             })),
-            environmentSettings: (p.startTask?.environmentSettings ?? []).map(
-              (p) => ({ name: p.name, value: p.value })
-            ),
+            environmentSettings: (
+              p.startTask?.["environmentSettings"] ?? []
+            ).map((p) => ({ name: p["name"], value: p["value"] })),
             userIdentity: !p.startTask?.userIdentity
               ? undefined
               : {
-                  username: p.startTask?.userIdentity?.username,
+                  username: p.startTask?.userIdentity?.["username"],
                   autoUser: !p.startTask?.userIdentity?.autoUser
                     ? undefined
                     : {
-                        scope: p.startTask?.userIdentity?.autoUser?.scope,
+                        scope: p.startTask?.userIdentity?.autoUser?.["scope"],
                         elevationLevel:
-                          p.startTask?.userIdentity?.autoUser?.elevationLevel,
+                          p.startTask?.userIdentity?.autoUser?.[
+                            "elevationLevel"
+                          ],
                       },
                 },
-            maxTaskRetryCount: p.startTask?.maxTaskRetryCount,
-            waitForSuccess: p.startTask?.waitForSuccess,
+            maxTaskRetryCount: p.startTask?.["maxTaskRetryCount"],
+            waitForSuccess: p.startTask?.["waitForSuccess"],
           },
       startTaskInfo: !p.startTaskInfo
         ? undefined
         : {
-            state: p.startTaskInfo?.state,
-            startTime: new Date(p.startTaskInfo?.startTime ?? ""),
-            endTime: new Date(p.startTaskInfo?.endTime ?? ""),
-            exitCode: p.startTaskInfo?.exitCode,
+            state: p.startTaskInfo?.["state"],
+            startTime: new Date(p.startTaskInfo?.["startTime"] ?? ""),
+            endTime: new Date(p.startTaskInfo?.["endTime"] ?? ""),
+            exitCode: p.startTaskInfo?.["exitCode"],
             containerInfo: !p.startTaskInfo?.containerInfo
               ? undefined
               : {
-                  containerId: p.startTaskInfo?.containerInfo?.containerId,
-                  state: p.startTaskInfo?.containerInfo?.state,
-                  error: p.startTaskInfo?.containerInfo?.error,
+                  containerId: p.startTaskInfo?.containerInfo?.["containerId"],
+                  state: p.startTaskInfo?.containerInfo?.["state"],
+                  error: p.startTaskInfo?.containerInfo?.["error"],
                 },
             failureInfo: !p.startTaskInfo?.failureInfo
               ? undefined
               : {
-                  category: p.startTaskInfo?.failureInfo?.category,
-                  code: p.startTaskInfo?.failureInfo?.code,
-                  message: p.startTaskInfo?.failureInfo?.message,
-                  details: (p.startTaskInfo?.failureInfo?.details ?? []).map(
-                    (p) => ({ name: p.name, value: p.value })
-                  ),
+                  category: p.startTaskInfo?.failureInfo?.["category"],
+                  code: p.startTaskInfo?.failureInfo?.["code"],
+                  message: p.startTaskInfo?.failureInfo?.["message"],
+                  details: (
+                    p.startTaskInfo?.failureInfo?.["details"] ?? []
+                  ).map((p) => ({ name: p["name"], value: p["value"] })),
                 },
-            retryCount: p.startTaskInfo?.retryCount,
-            lastRetryTime: new Date(p.startTaskInfo?.lastRetryTime ?? ""),
-            result: p.startTaskInfo?.result,
+            retryCount: p.startTaskInfo?.["retryCount"],
+            lastRetryTime: new Date(p.startTaskInfo?.["lastRetryTime"] ?? ""),
+            result: p.startTaskInfo?.["result"],
           },
-      certificateReferences: (p.certificateReferences ?? []).map((p) => ({
-        thumbprint: p.thumbprint,
-        thumbprintAlgorithm: p.thumbprintAlgorithm,
-        storeLocation: p.storeLocation,
-        storeName: p.storeName,
-        visibility: p.visibility,
+      certificateReferences: (p["certificateReferences"] ?? []).map((p) => ({
+        thumbprint: p["thumbprint"],
+        thumbprintAlgorithm: p["thumbprintAlgorithm"],
+        storeLocation: p["storeLocation"],
+        storeName: p["storeName"],
+        visibility: p["visibility"],
       })),
-      errors: (p.errors ?? []).map((p) => ({
-        code: p.code,
-        message: p.message,
-        errorDetails: (p.errorDetails ?? []).map((p) => ({
-          name: p.name,
-          value: p.value,
+      errors: (p["errors"] ?? []).map((p) => ({
+        code: p["code"],
+        message: p["message"],
+        errorDetails: (p["errorDetails"] ?? []).map((p) => ({
+          name: p["name"],
+          value: p["value"],
         })),
       })),
-      isDedicated: p.isDedicated,
+      isDedicated: p["isDedicated"],
       endpointConfiguration: !p.endpointConfiguration
         ? undefined
         : {
             inboundEndpoints: (
-              p.endpointConfiguration?.inboundEndpoints ?? []
+              p.endpointConfiguration?.["inboundEndpoints"] ?? []
             ).map((p) => ({
-              name: p.name,
-              protocol: p.protocol,
-              publicIPAddress: p.publicIPAddress,
-              publicFQDN: p.publicFQDN,
-              frontendPort: p.frontendPort,
-              backendPort: p.backendPort,
+              name: p["name"],
+              protocol: p["protocol"],
+              publicIPAddress: p["publicIPAddress"],
+              publicFQDN: p["publicFQDN"],
+              frontendPort: p["frontendPort"],
+              backendPort: p["backendPort"],
             })),
           },
       nodeAgentInfo: !p.nodeAgentInfo
         ? undefined
         : {
-            version: p.nodeAgentInfo?.version,
-            lastUpdateTime: new Date(p.nodeAgentInfo?.lastUpdateTime ?? ""),
+            version: p.nodeAgentInfo?.["version"],
+            lastUpdateTime: new Date(p.nodeAgentInfo?.["lastUpdateTime"] ?? ""),
           },
       virtualMachineInfo: !p.virtualMachineInfo
         ? undefined
@@ -1301,17 +1328,20 @@ export async function listNodes(
             imageReference: !p.virtualMachineInfo?.imageReference
               ? undefined
               : {
-                  publisher: p.virtualMachineInfo?.imageReference?.publisher,
-                  offer: p.virtualMachineInfo?.imageReference?.offer,
-                  sku: p.virtualMachineInfo?.imageReference?.sku,
-                  version: p.virtualMachineInfo?.imageReference?.version,
+                  publisher:
+                    p.virtualMachineInfo?.imageReference?.["publisher"],
+                  offer: p.virtualMachineInfo?.imageReference?.["offer"],
+                  sku: p.virtualMachineInfo?.imageReference?.["sku"],
+                  version: p.virtualMachineInfo?.imageReference?.["version"],
                   virtualMachineImageId:
-                    p.virtualMachineInfo?.imageReference?.virtualMachineImageId,
+                    p.virtualMachineInfo?.imageReference?.[
+                      "virtualMachineImageId"
+                    ],
                   exactVersion:
-                    p.virtualMachineInfo?.imageReference?.exactVersion,
+                    p.virtualMachineInfo?.imageReference?.["exactVersion"],
                 },
           },
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }

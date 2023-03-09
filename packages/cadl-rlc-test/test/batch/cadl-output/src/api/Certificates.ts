@@ -177,32 +177,32 @@ export async function listCertificates(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      thumbprint: p.thumbprint,
-      thumbprintAlgorithm: p.thumbprintAlgorithm,
-      url: p.url,
-      state: p.state,
-      stateTransitionTime: new Date(p.stateTransitionTime ?? ""),
-      previousState: p.previousState,
+    value: (result.body["value"] ?? []).map((p) => ({
+      thumbprint: p["thumbprint"],
+      thumbprintAlgorithm: p["thumbprintAlgorithm"],
+      url: p["url"],
+      state: p["state"],
+      stateTransitionTime: new Date(p["stateTransitionTime"] ?? ""),
+      previousState: p["previousState"],
       previousStateTransitionTime: new Date(
-        p.previousStateTransitionTime ?? ""
+        p["previousStateTransitionTime"] ?? ""
       ),
-      publicData: p.publicData,
+      publicData: p["publicData"],
       deleteCertificateError: !p.deleteCertificateError
         ? undefined
         : {
-            code: p.deleteCertificateError?.code,
-            message: p.deleteCertificateError?.message,
-            values: (p.deleteCertificateError?.values ?? []).map((p) => ({
-              name: p.name,
-              value: p.value,
+            code: p.deleteCertificateError?.["code"],
+            message: p.deleteCertificateError?.["message"],
+            values: (p.deleteCertificateError?.["values"] ?? []).map((p) => ({
+              name: p["name"],
+              value: p["value"],
             })),
           },
-      data: p.data,
-      certificateFormat: p.certificateFormat,
-      password: p.password,
+      data: p["data"],
+      certificateFormat: p["certificateFormat"],
+      password: p["password"],
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }
 
@@ -417,27 +417,27 @@ export async function getCertificate(
   }
 
   return {
-    thumbprint: result.body.thumbprint,
-    thumbprintAlgorithm: result.body.thumbprintAlgorithm,
-    url: result.body.url,
-    state: result.body.state,
-    stateTransitionTime: new Date(result.body.stateTransitionTime ?? ""),
-    previousState: result.body.previousState,
+    thumbprint: result.body["thumbprint"],
+    thumbprintAlgorithm: result.body["thumbprintAlgorithm"],
+    url: result.body["url"],
+    state: result.body["state"],
+    stateTransitionTime: new Date(result.body["stateTransitionTime"] ?? ""),
+    previousState: result.body["previousState"],
     previousStateTransitionTime: new Date(
-      result.body.previousStateTransitionTime ?? ""
+      result.body["previousStateTransitionTime"] ?? ""
     ),
-    publicData: result.body.publicData,
+    publicData: result.body["publicData"],
     deleteCertificateError: !result.body.deleteCertificateError
       ? undefined
       : {
-          code: result.body.deleteCertificateError?.code,
-          message: result.body.deleteCertificateError?.message,
-          values: (result.body.deleteCertificateError?.values ?? []).map(
-            (p) => ({ name: p.name, value: p.value })
+          code: result.body.deleteCertificateError?.["code"],
+          message: result.body.deleteCertificateError?.["message"],
+          values: (result.body.deleteCertificateError?.["values"] ?? []).map(
+            (p) => ({ name: p["name"], value: p["value"] })
           ),
         },
-    data: result.body.data,
-    certificateFormat: result.body.certificateFormat,
-    password: result.body.password,
+    data: result.body["data"],
+    certificateFormat: result.body["certificateFormat"],
+    password: result.body["password"],
   };
 }

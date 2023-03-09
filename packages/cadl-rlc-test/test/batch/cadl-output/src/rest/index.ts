@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import BatchService from "./batchService";
+import BatchService from "./batchService.js";
 
 export * from "./batchService.js";
 export * from "./parameters.js";

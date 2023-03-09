@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 export { BatchServiceClient } from "./rest/index.js";
-export * from "@azure-rest/core-client";
+export { ClientOptions } from "@azure-rest/core-client";
 export { TokenCredential } from "@azure/core-auth";
 export {
   AccountlistSupportedImagesOptions,

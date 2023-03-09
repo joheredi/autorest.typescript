@@ -12,8 +12,8 @@ import {
   emitClientOperationGroups,
   emitOperationGroups
 } from "./emitOperations.js";
-import { emitPackage } from "./emitPackageFile.js";
-import { emitTsConfig } from "./emitTsConfig.js";
+// import { emitPackage } from "./emitPackageFile.js";
+// import { emitTsConfig } from "./emitTsConfig.js";
 import { Client, HrlcCodeModel, Parameter } from "./hrlcCodeModel.js";
 
 export interface ClientSourceFile {
@@ -38,9 +38,7 @@ export function emitClients(
     };
     if (
       !client.parameters
-        .filter(
-          (p) => p.implementation === "Client" && p.clientName !== "api_version"
-        )
+        .filter((p) => p.implementation === "Client" && !p.isApiVersion)
         .some((p) => p.optional || (!p.optional && p.clientDefaultValue))
     ) {
       optionsParam = {
@@ -130,8 +128,8 @@ export function emitClients(
     clientFile.fixMissingImports();
     emitRootIndexFile(clientFile, srcPath, files);
     emitApiIndexFile(project, srcPath, files);
-    emitTsConfig(project, srcPath,  codeModel, files);
-    emitPackage(project, srcPath, codeModel, files);
+    // emitTsConfig(project, srcPath,  codeModel, files);
+    // emitPackage(project, srcPath, codeModel, files);
     files.push({
       path: `${srcPath}/src/${name}Client.ts`,
       content: clientFile.getFullText()

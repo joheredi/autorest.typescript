@@ -49,7 +49,7 @@ export function emitModels(
             propertyTypeName = `${propertyTypeName}[]`;
           }
           return {
-            name: p.clientName,
+            name: `"${p.clientName}"`,
             docs: [p.description],
             hasQuestionToken: p.optional,
             isReadonly: p.readonly,

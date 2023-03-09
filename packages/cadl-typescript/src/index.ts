@@ -25,7 +25,9 @@ import {
   buildSampleTest,
   buildReadmeFile,
   buildSerializeHelper,
-  RLCOptions
+  RLCOptions,
+  buildTsConfig,
+  buildPackageFile
 } from "@azure-tools/rlc-common";
 import { transformRLCModel } from "./transform/transform.js";
 import { emitContentByBuilder, emitModels } from "./emitUtil.js";
@@ -84,9 +86,9 @@ export async function $onEmit(context: EmitContext) {
       [
         buildEsLintConfig,
         buildRollupConfig,
-        // buildTsConfig,
+        buildTsConfig,
         buildApiExtractorConfig,
-        // buildPackageFile,
+        buildPackageFile,
         buildReadmeFile
       ],
       rlcModels,

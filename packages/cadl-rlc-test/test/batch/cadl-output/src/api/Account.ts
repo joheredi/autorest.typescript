@@ -75,22 +75,22 @@ export async function listSupportedImages(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      nodeAgentSKUId: p.nodeAgentSKUId,
+    value: (result.body["value"] ?? []).map((p) => ({
+      nodeAgentSKUId: p["nodeAgentSKUId"],
       imageReference: {
-        publisher: p.imageReference.publisher,
-        offer: p.imageReference.offer,
-        sku: p.imageReference.sku,
-        version: p.imageReference.version,
-        virtualMachineImageId: p.imageReference.virtualMachineImageId,
-        exactVersion: p.imageReference.exactVersion,
+        publisher: p.imageReference["publisher"],
+        offer: p.imageReference["offer"],
+        sku: p.imageReference["sku"],
+        version: p.imageReference["version"],
+        virtualMachineImageId: p.imageReference["virtualMachineImageId"],
+        exactVersion: p.imageReference["exactVersion"],
       },
-      osType: p.osType,
-      capabilities: p.capabilities,
-      batchSupportEndOfLife: new Date(p.batchSupportEndOfLife ?? ""),
-      verificationType: p.verificationType,
+      osType: p["osType"],
+      capabilities: p["capabilities"],
+      batchSupportEndOfLife: new Date(p["batchSupportEndOfLife"] ?? ""),
+      verificationType: p["verificationType"],
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }
 
@@ -166,45 +166,45 @@ export async function listPoolNodeCounts(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      poolId: p.poolId,
+    value: (result.body["value"] ?? []).map((p) => ({
+      poolId: p["poolId"],
       dedicated: !p.dedicated
         ? undefined
         : {
-            creating: p.dedicated?.creating,
-            idle: p.dedicated?.idle,
-            offline: p.dedicated?.offline,
-            preempted: p.dedicated?.preempted,
-            rebooting: p.dedicated?.rebooting,
-            reimaging: p.dedicated?.reimaging,
-            running: p.dedicated?.running,
-            starting: p.dedicated?.starting,
-            startTaskFailed: p.dedicated?.startTaskFailed,
-            leavingPool: p.dedicated?.leavingPool,
-            unknown: p.dedicated?.unknown,
-            unusable: p.dedicated?.unusable,
-            waitingForStartTask: p.dedicated?.waitingForStartTask,
-            total: p.dedicated?.total,
+            creating: p.dedicated?.["creating"],
+            idle: p.dedicated?.["idle"],
+            offline: p.dedicated?.["offline"],
+            preempted: p.dedicated?.["preempted"],
+            rebooting: p.dedicated?.["rebooting"],
+            reimaging: p.dedicated?.["reimaging"],
+            running: p.dedicated?.["running"],
+            starting: p.dedicated?.["starting"],
+            startTaskFailed: p.dedicated?.["startTaskFailed"],
+            leavingPool: p.dedicated?.["leavingPool"],
+            unknown: p.dedicated?.["unknown"],
+            unusable: p.dedicated?.["unusable"],
+            waitingForStartTask: p.dedicated?.["waitingForStartTask"],
+            total: p.dedicated?.["total"],
           },
       lowPriority: !p.lowPriority
         ? undefined
         : {
-            creating: p.lowPriority?.creating,
-            idle: p.lowPriority?.idle,
-            offline: p.lowPriority?.offline,
-            preempted: p.lowPriority?.preempted,
-            rebooting: p.lowPriority?.rebooting,
-            reimaging: p.lowPriority?.reimaging,
-            running: p.lowPriority?.running,
-            starting: p.lowPriority?.starting,
-            startTaskFailed: p.lowPriority?.startTaskFailed,
-            leavingPool: p.lowPriority?.leavingPool,
-            unknown: p.lowPriority?.unknown,
-            unusable: p.lowPriority?.unusable,
-            waitingForStartTask: p.lowPriority?.waitingForStartTask,
-            total: p.lowPriority?.total,
+            creating: p.lowPriority?.["creating"],
+            idle: p.lowPriority?.["idle"],
+            offline: p.lowPriority?.["offline"],
+            preempted: p.lowPriority?.["preempted"],
+            rebooting: p.lowPriority?.["rebooting"],
+            reimaging: p.lowPriority?.["reimaging"],
+            running: p.lowPriority?.["running"],
+            starting: p.lowPriority?.["starting"],
+            startTaskFailed: p.lowPriority?.["startTaskFailed"],
+            leavingPool: p.lowPriority?.["leavingPool"],
+            unknown: p.lowPriority?.["unknown"],
+            unusable: p.lowPriority?.["unusable"],
+            waitingForStartTask: p.lowPriority?.["waitingForStartTask"],
+            total: p.lowPriority?.["total"],
           },
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }

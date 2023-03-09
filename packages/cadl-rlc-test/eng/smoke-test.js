@@ -46,7 +46,7 @@ async function build(path) {
     cwd: `${path}/cadl-output`,
   });
 
-  const resultError = installResult.stderr ?? buildResult.stderr;
+  const resultError = installResult?.stderr ?? buildResult?.stderr;
   if (resultError) {
     console.log(Error(resultError));
     process.exitCode = 1;

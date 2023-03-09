@@ -296,84 +296,97 @@ export async function getJobSchedule(
   }
 
   return {
-    id: result.body.id,
-    displayName: result.body.displayName,
-    url: result.body.url,
-    eTag: result.body.eTag,
-    lastModified: new Date(result.body.lastModified ?? ""),
-    creationTime: new Date(result.body.creationTime ?? ""),
-    state: result.body.state,
-    stateTransitionTime: new Date(result.body.stateTransitionTime ?? ""),
-    previousState: result.body.previousState,
+    id: result.body["id"],
+    displayName: result.body["displayName"],
+    url: result.body["url"],
+    eTag: result.body["eTag"],
+    lastModified: new Date(result.body["lastModified"] ?? ""),
+    creationTime: new Date(result.body["creationTime"] ?? ""),
+    state: result.body["state"],
+    stateTransitionTime: new Date(result.body["stateTransitionTime"] ?? ""),
+    previousState: result.body["previousState"],
     previousStateTransitionTime: new Date(
-      result.body.previousStateTransitionTime ?? ""
+      result.body["previousStateTransitionTime"] ?? ""
     ),
     schedule: !result.body.schedule
       ? undefined
       : {
-          doNotRunUntil: new Date(result.body.schedule?.doNotRunUntil ?? ""),
-          doNotRunAfter: new Date(result.body.schedule?.doNotRunAfter ?? ""),
-          startWindow: result.body.schedule?.startWindow,
-          recurrenceInterval: result.body.schedule?.recurrenceInterval,
+          doNotRunUntil: new Date(
+            result.body.schedule?.["doNotRunUntil"] ?? ""
+          ),
+          doNotRunAfter: new Date(
+            result.body.schedule?.["doNotRunAfter"] ?? ""
+          ),
+          startWindow: result.body.schedule?.["startWindow"],
+          recurrenceInterval: result.body.schedule?.["recurrenceInterval"],
         },
     jobSpecification: !result.body.jobSpecification
       ? undefined
       : {
-          priority: result.body.jobSpecification?.priority,
+          priority: result.body.jobSpecification?.["priority"],
           allowTaskPreemption:
-            result.body.jobSpecification?.allowTaskPreemption,
-          maxParallelTasks: result.body.jobSpecification?.maxParallelTasks,
-          displayName: result.body.jobSpecification?.displayName,
+            result.body.jobSpecification?.["allowTaskPreemption"],
+          maxParallelTasks: result.body.jobSpecification?.["maxParallelTasks"],
+          displayName: result.body.jobSpecification?.["displayName"],
           usesTaskDependencies:
-            result.body.jobSpecification?.usesTaskDependencies,
-          onAllTasksComplete: result.body.jobSpecification?.onAllTasksComplete,
-          onTaskFailure: result.body.jobSpecification?.onTaskFailure,
+            result.body.jobSpecification?.["usesTaskDependencies"],
+          onAllTasksComplete:
+            result.body.jobSpecification?.["onAllTasksComplete"],
+          onTaskFailure: result.body.jobSpecification?.["onTaskFailure"],
           networkConfiguration: !result.body.jobSpecification
             ?.networkConfiguration
             ? undefined
             : {
                 subnetId:
-                  result.body.jobSpecification?.networkConfiguration?.subnetId,
+                  result.body.jobSpecification?.networkConfiguration?.[
+                    "subnetId"
+                  ],
               },
           constraints: !result.body.jobSpecification?.constraints
             ? undefined
             : {
                 maxWallClockTime:
-                  result.body.jobSpecification?.constraints?.maxWallClockTime,
+                  result.body.jobSpecification?.constraints?.[
+                    "maxWallClockTime"
+                  ],
                 maxTaskRetryCount:
-                  result.body.jobSpecification?.constraints?.maxTaskRetryCount,
+                  result.body.jobSpecification?.constraints?.[
+                    "maxTaskRetryCount"
+                  ],
               },
           jobManagerTask: !result.body.jobSpecification?.jobManagerTask
             ? undefined
             : {
-                id: result.body.jobSpecification?.jobManagerTask?.id,
+                id: result.body.jobSpecification?.jobManagerTask?.["id"],
                 displayName:
-                  result.body.jobSpecification?.jobManagerTask?.displayName,
+                  result.body.jobSpecification?.jobManagerTask?.["displayName"],
                 commandLine:
-                  result.body.jobSpecification?.jobManagerTask?.commandLine,
+                  result.body.jobSpecification?.jobManagerTask?.["commandLine"],
                 containerSettings: !result.body.jobSpecification?.jobManagerTask
                   ?.containerSettings
                   ? undefined
                   : {
                       containerRunOptions:
                         result.body.jobSpecification?.jobManagerTask
-                          ?.containerSettings?.containerRunOptions,
+                          ?.containerSettings?.["containerRunOptions"],
                       imageName:
                         result.body.jobSpecification?.jobManagerTask
-                          ?.containerSettings?.imageName,
+                          ?.containerSettings?.["imageName"],
                       registry: !result.body.jobSpecification?.jobManagerTask
                         ?.containerSettings?.registry
                         ? undefined
                         : {
                             username:
                               result.body.jobSpecification?.jobManagerTask
-                                ?.containerSettings?.registry?.username,
+                                ?.containerSettings?.registry?.["username"],
                             password:
                               result.body.jobSpecification?.jobManagerTask
-                                ?.containerSettings?.registry?.password,
+                                ?.containerSettings?.registry?.["password"],
                             registryServer:
                               result.body.jobSpecification?.jobManagerTask
-                                ?.containerSettings?.registry?.registryServer,
+                                ?.containerSettings?.registry?.[
+                                "registryServer"
+                              ],
                             identityReference: !result.body.jobSpecification
                               ?.jobManagerTask?.containerSettings?.registry
                               ?.identityReference
@@ -382,105 +395,119 @@ export async function getJobSchedule(
                                   resourceId:
                                     result.body.jobSpecification?.jobManagerTask
                                       ?.containerSettings?.registry
-                                      ?.identityReference?.resourceId,
+                                      ?.identityReference?.["resourceId"],
                                 },
                           },
                       workingDirectory:
                         result.body.jobSpecification?.jobManagerTask
-                          ?.containerSettings?.workingDirectory,
+                          ?.containerSettings?.["workingDirectory"],
                     },
                 resourceFiles: (
-                  result.body.jobSpecification?.jobManagerTask?.resourceFiles ??
-                  []
+                  result.body.jobSpecification?.jobManagerTask?.[
+                    "resourceFiles"
+                  ] ?? []
                 ).map((p) => ({
-                  autoStorageContainerName: p.autoStorageContainerName,
-                  storageContainerUrl: p.storageContainerUrl,
-                  httpUrl: p.httpUrl,
-                  blobPrefix: p.blobPrefix,
-                  filePath: p.filePath,
-                  fileMode: p.fileMode,
+                  autoStorageContainerName: p["autoStorageContainerName"],
+                  storageContainerUrl: p["storageContainerUrl"],
+                  httpUrl: p["httpUrl"],
+                  blobPrefix: p["blobPrefix"],
+                  filePath: p["filePath"],
+                  fileMode: p["fileMode"],
                   identityReference: !p.identityReference
                     ? undefined
-                    : { resourceId: p.identityReference?.resourceId },
+                    : { resourceId: p.identityReference?.["resourceId"] },
                 })),
                 outputFiles: (
-                  result.body.jobSpecification?.jobManagerTask?.outputFiles ??
-                  []
+                  result.body.jobSpecification?.jobManagerTask?.[
+                    "outputFiles"
+                  ] ?? []
                 ).map((p) => ({
-                  filePattern: p.filePattern,
+                  filePattern: p["filePattern"],
                   destination: {
                     container: !p.destination.container
                       ? undefined
                       : {
-                          path: p.destination.container?.path,
-                          containerUrl: p.destination.container?.containerUrl,
+                          path: p.destination.container?.["path"],
+                          containerUrl:
+                            p.destination.container?.["containerUrl"],
                           identityReference: !p.destination.container
                             ?.identityReference
                             ? undefined
                             : {
                                 resourceId:
-                                  p.destination.container?.identityReference
-                                    ?.resourceId,
+                                  p.destination.container?.identityReference?.[
+                                    "resourceId"
+                                  ],
                               },
                           uploadHeaders: (
-                            p.destination.container?.uploadHeaders ?? []
-                          ).map((p) => ({ name: p.name, value: p.value })),
+                            p.destination.container?.["uploadHeaders"] ?? []
+                          ).map((p) => ({
+                            name: p["name"],
+                            value: p["value"],
+                          })),
                         },
                   },
                   uploadOptions: {
-                    uploadCondition: p.uploadOptions.uploadCondition,
+                    uploadCondition: p.uploadOptions["uploadCondition"],
                   },
                 })),
                 environmentSettings: (
-                  result.body.jobSpecification?.jobManagerTask
-                    ?.environmentSettings ?? []
-                ).map((p) => ({ name: p.name, value: p.value })),
+                  result.body.jobSpecification?.jobManagerTask?.[
+                    "environmentSettings"
+                  ] ?? []
+                ).map((p) => ({ name: p["name"], value: p["value"] })),
                 constraints: !result.body.jobSpecification?.jobManagerTask
                   ?.constraints
                   ? undefined
                   : {
                       maxWallClockTime:
                         result.body.jobSpecification?.jobManagerTask
-                          ?.constraints?.maxWallClockTime,
+                          ?.constraints?.["maxWallClockTime"],
                       retentionTime:
                         result.body.jobSpecification?.jobManagerTask
-                          ?.constraints?.retentionTime,
+                          ?.constraints?.["retentionTime"],
                       maxTaskRetryCount:
                         result.body.jobSpecification?.jobManagerTask
-                          ?.constraints?.maxTaskRetryCount,
+                          ?.constraints?.["maxTaskRetryCount"],
                     },
                 requiredSlots:
-                  result.body.jobSpecification?.jobManagerTask?.requiredSlots,
+                  result.body.jobSpecification?.jobManagerTask?.[
+                    "requiredSlots"
+                  ],
                 killJobOnCompletion:
-                  result.body.jobSpecification?.jobManagerTask
-                    ?.killJobOnCompletion,
+                  result.body.jobSpecification?.jobManagerTask?.[
+                    "killJobOnCompletion"
+                  ],
                 userIdentity: !result.body.jobSpecification?.jobManagerTask
                   ?.userIdentity
                   ? undefined
                   : {
                       username:
                         result.body.jobSpecification?.jobManagerTask
-                          ?.userIdentity?.username,
+                          ?.userIdentity?.["username"],
                       autoUser: !result.body.jobSpecification?.jobManagerTask
                         ?.userIdentity?.autoUser
                         ? undefined
                         : {
                             scope:
                               result.body.jobSpecification?.jobManagerTask
-                                ?.userIdentity?.autoUser?.scope,
+                                ?.userIdentity?.autoUser?.["scope"],
                             elevationLevel:
                               result.body.jobSpecification?.jobManagerTask
-                                ?.userIdentity?.autoUser?.elevationLevel,
+                                ?.userIdentity?.autoUser?.["elevationLevel"],
                           },
                     },
                 runExclusive:
-                  result.body.jobSpecification?.jobManagerTask?.runExclusive,
+                  result.body.jobSpecification?.jobManagerTask?.[
+                    "runExclusive"
+                  ],
                 applicationPackageReferences: (
-                  result.body.jobSpecification?.jobManagerTask
-                    ?.applicationPackageReferences ?? []
+                  result.body.jobSpecification?.jobManagerTask?.[
+                    "applicationPackageReferences"
+                  ] ?? []
                 ).map((p) => ({
-                  applicationId: p.applicationId,
-                  version: p.version,
+                  applicationId: p["applicationId"],
+                  version: p["version"],
                 })),
                 authenticationTokenSettings: !result.body.jobSpecification
                   ?.jobManagerTask?.authenticationTokenSettings
@@ -488,41 +515,46 @@ export async function getJobSchedule(
                   : {
                       access:
                         result.body.jobSpecification?.jobManagerTask
-                          ?.authenticationTokenSettings?.access,
+                          ?.authenticationTokenSettings?.["access"],
                     },
                 allowLowPriorityNode:
-                  result.body.jobSpecification?.jobManagerTask
-                    ?.allowLowPriorityNode,
+                  result.body.jobSpecification?.jobManagerTask?.[
+                    "allowLowPriorityNode"
+                  ],
               },
           jobPreparationTask: !result.body.jobSpecification?.jobPreparationTask
             ? undefined
             : {
-                id: result.body.jobSpecification?.jobPreparationTask?.id,
+                id: result.body.jobSpecification?.jobPreparationTask?.["id"],
                 commandLine:
-                  result.body.jobSpecification?.jobPreparationTask?.commandLine,
+                  result.body.jobSpecification?.jobPreparationTask?.[
+                    "commandLine"
+                  ],
                 containerSettings: !result.body.jobSpecification
                   ?.jobPreparationTask?.containerSettings
                   ? undefined
                   : {
                       containerRunOptions:
                         result.body.jobSpecification?.jobPreparationTask
-                          ?.containerSettings?.containerRunOptions,
+                          ?.containerSettings?.["containerRunOptions"],
                       imageName:
                         result.body.jobSpecification?.jobPreparationTask
-                          ?.containerSettings?.imageName,
+                          ?.containerSettings?.["imageName"],
                       registry: !result.body.jobSpecification
                         ?.jobPreparationTask?.containerSettings?.registry
                         ? undefined
                         : {
                             username:
                               result.body.jobSpecification?.jobPreparationTask
-                                ?.containerSettings?.registry?.username,
+                                ?.containerSettings?.registry?.["username"],
                             password:
                               result.body.jobSpecification?.jobPreparationTask
-                                ?.containerSettings?.registry?.password,
+                                ?.containerSettings?.registry?.["password"],
                             registryServer:
                               result.body.jobSpecification?.jobPreparationTask
-                                ?.containerSettings?.registry?.registryServer,
+                                ?.containerSettings?.registry?.[
+                                "registryServer"
+                              ],
                             identityReference: !result.body.jobSpecification
                               ?.jobPreparationTask?.containerSettings?.registry
                               ?.identityReference
@@ -531,100 +563,108 @@ export async function getJobSchedule(
                                   resourceId:
                                     result.body.jobSpecification
                                       ?.jobPreparationTask?.containerSettings
-                                      ?.registry?.identityReference?.resourceId,
+                                      ?.registry?.identityReference?.[
+                                      "resourceId"
+                                    ],
                                 },
                           },
                       workingDirectory:
                         result.body.jobSpecification?.jobPreparationTask
-                          ?.containerSettings?.workingDirectory,
+                          ?.containerSettings?.["workingDirectory"],
                     },
                 resourceFiles: (
-                  result.body.jobSpecification?.jobPreparationTask
-                    ?.resourceFiles ?? []
+                  result.body.jobSpecification?.jobPreparationTask?.[
+                    "resourceFiles"
+                  ] ?? []
                 ).map((p) => ({
-                  autoStorageContainerName: p.autoStorageContainerName,
-                  storageContainerUrl: p.storageContainerUrl,
-                  httpUrl: p.httpUrl,
-                  blobPrefix: p.blobPrefix,
-                  filePath: p.filePath,
-                  fileMode: p.fileMode,
+                  autoStorageContainerName: p["autoStorageContainerName"],
+                  storageContainerUrl: p["storageContainerUrl"],
+                  httpUrl: p["httpUrl"],
+                  blobPrefix: p["blobPrefix"],
+                  filePath: p["filePath"],
+                  fileMode: p["fileMode"],
                   identityReference: !p.identityReference
                     ? undefined
-                    : { resourceId: p.identityReference?.resourceId },
+                    : { resourceId: p.identityReference?.["resourceId"] },
                 })),
                 environmentSettings: (
-                  result.body.jobSpecification?.jobPreparationTask
-                    ?.environmentSettings ?? []
-                ).map((p) => ({ name: p.name, value: p.value })),
+                  result.body.jobSpecification?.jobPreparationTask?.[
+                    "environmentSettings"
+                  ] ?? []
+                ).map((p) => ({ name: p["name"], value: p["value"] })),
                 constraints: !result.body.jobSpecification?.jobPreparationTask
                   ?.constraints
                   ? undefined
                   : {
                       maxWallClockTime:
                         result.body.jobSpecification?.jobPreparationTask
-                          ?.constraints?.maxWallClockTime,
+                          ?.constraints?.["maxWallClockTime"],
                       retentionTime:
                         result.body.jobSpecification?.jobPreparationTask
-                          ?.constraints?.retentionTime,
+                          ?.constraints?.["retentionTime"],
                       maxTaskRetryCount:
                         result.body.jobSpecification?.jobPreparationTask
-                          ?.constraints?.maxTaskRetryCount,
+                          ?.constraints?.["maxTaskRetryCount"],
                     },
                 waitForSuccess:
-                  result.body.jobSpecification?.jobPreparationTask
-                    ?.waitForSuccess,
+                  result.body.jobSpecification?.jobPreparationTask?.[
+                    "waitForSuccess"
+                  ],
                 userIdentity: !result.body.jobSpecification?.jobPreparationTask
                   ?.userIdentity
                   ? undefined
                   : {
                       username:
                         result.body.jobSpecification?.jobPreparationTask
-                          ?.userIdentity?.username,
+                          ?.userIdentity?.["username"],
                       autoUser: !result.body.jobSpecification
                         ?.jobPreparationTask?.userIdentity?.autoUser
                         ? undefined
                         : {
                             scope:
                               result.body.jobSpecification?.jobPreparationTask
-                                ?.userIdentity?.autoUser?.scope,
+                                ?.userIdentity?.autoUser?.["scope"],
                             elevationLevel:
                               result.body.jobSpecification?.jobPreparationTask
-                                ?.userIdentity?.autoUser?.elevationLevel,
+                                ?.userIdentity?.autoUser?.["elevationLevel"],
                           },
                     },
                 rerunOnNodeRebootAfterSuccess:
-                  result.body.jobSpecification?.jobPreparationTask
-                    ?.rerunOnNodeRebootAfterSuccess,
+                  result.body.jobSpecification?.jobPreparationTask?.[
+                    "rerunOnNodeRebootAfterSuccess"
+                  ],
               },
           jobReleaseTask: !result.body.jobSpecification?.jobReleaseTask
             ? undefined
             : {
-                id: result.body.jobSpecification?.jobReleaseTask?.id,
+                id: result.body.jobSpecification?.jobReleaseTask?.["id"],
                 commandLine:
-                  result.body.jobSpecification?.jobReleaseTask?.commandLine,
+                  result.body.jobSpecification?.jobReleaseTask?.["commandLine"],
                 containerSettings: !result.body.jobSpecification?.jobReleaseTask
                   ?.containerSettings
                   ? undefined
                   : {
                       containerRunOptions:
                         result.body.jobSpecification?.jobReleaseTask
-                          ?.containerSettings?.containerRunOptions,
+                          ?.containerSettings?.["containerRunOptions"],
                       imageName:
                         result.body.jobSpecification?.jobReleaseTask
-                          ?.containerSettings?.imageName,
+                          ?.containerSettings?.["imageName"],
                       registry: !result.body.jobSpecification?.jobReleaseTask
                         ?.containerSettings?.registry
                         ? undefined
                         : {
                             username:
                               result.body.jobSpecification?.jobReleaseTask
-                                ?.containerSettings?.registry?.username,
+                                ?.containerSettings?.registry?.["username"],
                             password:
                               result.body.jobSpecification?.jobReleaseTask
-                                ?.containerSettings?.registry?.password,
+                                ?.containerSettings?.registry?.["password"],
                             registryServer:
                               result.body.jobSpecification?.jobReleaseTask
-                                ?.containerSettings?.registry?.registryServer,
+                                ?.containerSettings?.registry?.[
+                                "registryServer"
+                              ],
                             identityReference: !result.body.jobSpecification
                               ?.jobReleaseTask?.containerSettings?.registry
                               ?.identityReference
@@ -633,84 +673,89 @@ export async function getJobSchedule(
                                   resourceId:
                                     result.body.jobSpecification?.jobReleaseTask
                                       ?.containerSettings?.registry
-                                      ?.identityReference?.resourceId,
+                                      ?.identityReference?.["resourceId"],
                                 },
                           },
                       workingDirectory:
                         result.body.jobSpecification?.jobReleaseTask
-                          ?.containerSettings?.workingDirectory,
+                          ?.containerSettings?.["workingDirectory"],
                     },
                 resourceFiles: (
-                  result.body.jobSpecification?.jobReleaseTask?.resourceFiles ??
-                  []
+                  result.body.jobSpecification?.jobReleaseTask?.[
+                    "resourceFiles"
+                  ] ?? []
                 ).map((p) => ({
-                  autoStorageContainerName: p.autoStorageContainerName,
-                  storageContainerUrl: p.storageContainerUrl,
-                  httpUrl: p.httpUrl,
-                  blobPrefix: p.blobPrefix,
-                  filePath: p.filePath,
-                  fileMode: p.fileMode,
+                  autoStorageContainerName: p["autoStorageContainerName"],
+                  storageContainerUrl: p["storageContainerUrl"],
+                  httpUrl: p["httpUrl"],
+                  blobPrefix: p["blobPrefix"],
+                  filePath: p["filePath"],
+                  fileMode: p["fileMode"],
                   identityReference: !p.identityReference
                     ? undefined
-                    : { resourceId: p.identityReference?.resourceId },
+                    : { resourceId: p.identityReference?.["resourceId"] },
                 })),
                 environmentSettings: (
-                  result.body.jobSpecification?.jobReleaseTask
-                    ?.environmentSettings ?? []
-                ).map((p) => ({ name: p.name, value: p.value })),
+                  result.body.jobSpecification?.jobReleaseTask?.[
+                    "environmentSettings"
+                  ] ?? []
+                ).map((p) => ({ name: p["name"], value: p["value"] })),
                 maxWallClockTime:
-                  result.body.jobSpecification?.jobReleaseTask
-                    ?.maxWallClockTime,
+                  result.body.jobSpecification?.jobReleaseTask?.[
+                    "maxWallClockTime"
+                  ],
                 retentionTime:
-                  result.body.jobSpecification?.jobReleaseTask?.retentionTime,
+                  result.body.jobSpecification?.jobReleaseTask?.[
+                    "retentionTime"
+                  ],
                 userIdentity: !result.body.jobSpecification?.jobReleaseTask
                   ?.userIdentity
                   ? undefined
                   : {
                       username:
                         result.body.jobSpecification?.jobReleaseTask
-                          ?.userIdentity?.username,
+                          ?.userIdentity?.["username"],
                       autoUser: !result.body.jobSpecification?.jobReleaseTask
                         ?.userIdentity?.autoUser
                         ? undefined
                         : {
                             scope:
                               result.body.jobSpecification?.jobReleaseTask
-                                ?.userIdentity?.autoUser?.scope,
+                                ?.userIdentity?.autoUser?.["scope"],
                             elevationLevel:
                               result.body.jobSpecification?.jobReleaseTask
-                                ?.userIdentity?.autoUser?.elevationLevel,
+                                ?.userIdentity?.autoUser?.["elevationLevel"],
                           },
                     },
               },
           commonEnvironmentSettings: (
-            result.body.jobSpecification?.commonEnvironmentSettings ?? []
-          ).map((p) => ({ name: p.name, value: p.value })),
+            result.body.jobSpecification?.["commonEnvironmentSettings"] ?? []
+          ).map((p) => ({ name: p["name"], value: p["value"] })),
           poolInfo: {
-            poolId: result.body.jobSpecification?.poolInfo.poolId,
+            poolId: result.body.jobSpecification?.poolInfo["poolId"],
             autoPoolSpecification: !result.body.jobSpecification?.poolInfo
               .autoPoolSpecification
               ? undefined
               : {
                   autoPoolIdPrefix:
-                    result.body.jobSpecification?.poolInfo.autoPoolSpecification
-                      ?.autoPoolIdPrefix,
+                    result.body.jobSpecification?.poolInfo
+                      .autoPoolSpecification?.["autoPoolIdPrefix"],
                   poolLifetimeOption:
-                    result.body.jobSpecification?.poolInfo.autoPoolSpecification
-                      ?.poolLifetimeOption,
+                    result.body.jobSpecification?.poolInfo
+                      .autoPoolSpecification?.["poolLifetimeOption"],
                   keepAlive:
-                    result.body.jobSpecification?.poolInfo.autoPoolSpecification
-                      ?.keepAlive,
+                    result.body.jobSpecification?.poolInfo
+                      .autoPoolSpecification?.["keepAlive"],
                   pool: !result.body.jobSpecification?.poolInfo
                     .autoPoolSpecification?.pool
                     ? undefined
                     : {
                         displayName:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.displayName,
+                            .autoPoolSpecification?.pool?.["displayName"],
                         vmSize:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.vmSize,
+                            .autoPoolSpecification?.pool?.["vmSize"],
                         cloudServiceConfiguration: !result.body.jobSpecification
                           ?.poolInfo.autoPoolSpecification?.pool
                           ?.cloudServiceConfiguration
@@ -719,11 +764,11 @@ export async function getJobSchedule(
                               osFamily:
                                 result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.cloudServiceConfiguration?.osFamily,
+                                  ?.cloudServiceConfiguration?.["osFamily"],
                               osVersion:
                                 result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.cloudServiceConfiguration?.osVersion,
+                                  ?.cloudServiceConfiguration?.["osVersion"],
                             },
                         virtualMachineConfiguration: !result.body
                           .jobSpecification?.poolInfo.autoPoolSpecification
@@ -735,36 +780,39 @@ export async function getJobSchedule(
                                   result.body.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
                                     ?.virtualMachineConfiguration
-                                    ?.imageReference.publisher,
+                                    ?.imageReference["publisher"],
                                 offer:
                                   result.body.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
                                     ?.virtualMachineConfiguration
-                                    ?.imageReference.offer,
+                                    ?.imageReference["offer"],
                                 sku: result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.virtualMachineConfiguration?.imageReference
-                                  .sku,
+                                  ?.virtualMachineConfiguration?.imageReference[
+                                  "sku"
+                                ],
                                 version:
                                   result.body.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
                                     ?.virtualMachineConfiguration
-                                    ?.imageReference.version,
+                                    ?.imageReference["version"],
                                 virtualMachineImageId:
                                   result.body.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
                                     ?.virtualMachineConfiguration
-                                    ?.imageReference.virtualMachineImageId,
+                                    ?.imageReference["virtualMachineImageId"],
                                 exactVersion:
                                   result.body.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
                                     ?.virtualMachineConfiguration
-                                    ?.imageReference.exactVersion,
+                                    ?.imageReference["exactVersion"],
                               },
                               nodeAgentSKUId:
                                 result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.virtualMachineConfiguration?.nodeAgentSKUId,
+                                  ?.virtualMachineConfiguration?.[
+                                  "nodeAgentSKUId"
+                                ],
                               windowsConfiguration: !result.body
                                 .jobSpecification?.poolInfo
                                 .autoPoolSpecification?.pool
@@ -776,23 +824,28 @@ export async function getJobSchedule(
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool
                                         ?.virtualMachineConfiguration
-                                        ?.windowsConfiguration
-                                        ?.enableAutomaticUpdates,
+                                        ?.windowsConfiguration?.[
+                                        "enableAutomaticUpdates"
+                                      ],
                                   },
                               dataDisks: (
                                 result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.virtualMachineConfiguration?.dataDisks ?? []
+                                  ?.virtualMachineConfiguration?.[
+                                  "dataDisks"
+                                ] ?? []
                               ).map((p) => ({
-                                lun: p.lun,
-                                caching: p.caching,
-                                diskSizeGB: p.diskSizeGB,
-                                storageAccountType: p.storageAccountType,
+                                lun: p["lun"],
+                                caching: p["caching"],
+                                diskSizeGB: p["diskSizeGB"],
+                                storageAccountType: p["storageAccountType"],
                               })),
                               licenseType:
                                 result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.virtualMachineConfiguration?.licenseType,
+                                  ?.virtualMachineConfiguration?.[
+                                  "licenseType"
+                                ],
                               containerConfiguration: !result.body
                                 .jobSpecification?.poolInfo
                                 .autoPoolSpecification?.pool
@@ -803,28 +856,32 @@ export async function getJobSchedule(
                                     type: result.body.jobSpecification?.poolInfo
                                       .autoPoolSpecification?.pool
                                       ?.virtualMachineConfiguration
-                                      ?.containerConfiguration?.type,
+                                      ?.containerConfiguration?.["type"],
                                     containerImageNames:
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool
                                         ?.virtualMachineConfiguration
-                                        ?.containerConfiguration
-                                        ?.containerImageNames,
+                                        ?.containerConfiguration?.[
+                                        "containerImageNames"
+                                      ],
                                     containerRegistries: (
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool
                                         ?.virtualMachineConfiguration
-                                        ?.containerConfiguration
-                                        ?.containerRegistries ?? []
+                                        ?.containerConfiguration?.[
+                                        "containerRegistries"
+                                      ] ?? []
                                     ).map((p) => ({
-                                      username: p.username,
-                                      password: p.password,
-                                      registryServer: p.registryServer,
+                                      username: p["username"],
+                                      password: p["password"],
+                                      registryServer: p["registryServer"],
                                       identityReference: !p.identityReference
                                         ? undefined
                                         : {
                                             resourceId:
-                                              p.identityReference?.resourceId,
+                                              p.identityReference?.[
+                                                "resourceId"
+                                              ],
                                           },
                                     })),
                                   },
@@ -839,7 +896,9 @@ export async function getJobSchedule(
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool
                                         ?.virtualMachineConfiguration
-                                        ?.diskEncryptionConfiguration?.targets,
+                                        ?.diskEncryptionConfiguration?.[
+                                        "targets"
+                                      ],
                                   },
                               nodePlacementConfiguration: !result.body
                                 .jobSpecification?.poolInfo
@@ -852,26 +911,29 @@ export async function getJobSchedule(
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool
                                         ?.virtualMachineConfiguration
-                                        ?.nodePlacementConfiguration?.policy,
+                                        ?.nodePlacementConfiguration?.[
+                                        "policy"
+                                      ],
                                   },
                               extensions: (
                                 result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.virtualMachineConfiguration?.extensions ??
-                                []
+                                  ?.virtualMachineConfiguration?.[
+                                  "extensions"
+                                ] ?? []
                               ).map((p) => ({
-                                name: p.name,
-                                publisher: p.publisher,
-                                type: p.type,
-                                typeHandlerVersion: p.typeHandlerVersion,
+                                name: p["name"],
+                                publisher: p["publisher"],
+                                type: p["type"],
+                                typeHandlerVersion: p["typeHandlerVersion"],
                                 autoUpgradeMinorVersion:
-                                  p.autoUpgradeMinorVersion,
+                                  p["autoUpgradeMinorVersion"],
                                 settings: !p.settings ? undefined : {},
                                 protectedSettings: !p.protectedSettings
                                   ? undefined
                                   : {},
                                 provisionAfterExtensions:
-                                  p.provisionAfterExtensions,
+                                  p["provisionAfterExtensions"],
                               })),
                               osDisk: !result.body.jobSpecification?.poolInfo
                                 .autoPoolSpecification?.pool
@@ -890,14 +952,16 @@ export async function getJobSchedule(
                                               ?.poolInfo.autoPoolSpecification
                                               ?.pool
                                               ?.virtualMachineConfiguration
-                                              ?.osDisk?.ephemeralOSDiskSettings
-                                              ?.placement,
+                                              ?.osDisk
+                                              ?.ephemeralOSDiskSettings?.[
+                                              "placement"
+                                            ],
                                         },
                                   },
                             },
                         taskSlotsPerNode:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.taskSlotsPerNode,
+                            .autoPoolSpecification?.pool?.["taskSlotsPerNode"],
                         taskSchedulingPolicy: !result.body.jobSpecification
                           ?.poolInfo.autoPoolSpecification?.pool
                           ?.taskSchedulingPolicy
@@ -906,32 +970,37 @@ export async function getJobSchedule(
                               nodeFillType:
                                 result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.taskSchedulingPolicy?.nodeFillType,
+                                  ?.taskSchedulingPolicy?.["nodeFillType"],
                             },
                         resizeTimeout:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.resizeTimeout,
+                            .autoPoolSpecification?.pool?.["resizeTimeout"],
                         targetDedicatedNodes:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.targetDedicatedNodes,
+                            .autoPoolSpecification?.pool?.[
+                            "targetDedicatedNodes"
+                          ],
                         targetLowPriorityNodes:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool
-                            ?.targetLowPriorityNodes,
+                            .autoPoolSpecification?.pool?.[
+                            "targetLowPriorityNodes"
+                          ],
                         enableAutoScale:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.enableAutoScale,
+                            .autoPoolSpecification?.pool?.["enableAutoScale"],
                         autoScaleFormula:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.autoScaleFormula,
+                            .autoPoolSpecification?.pool?.["autoScaleFormula"],
                         autoScaleEvaluationInterval:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool
-                            ?.autoScaleEvaluationInterval,
+                            .autoPoolSpecification?.pool?.[
+                            "autoScaleEvaluationInterval"
+                          ],
                         enableInterNodeCommunication:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool
-                            ?.enableInterNodeCommunication,
+                            .autoPoolSpecification?.pool?.[
+                            "enableInterNodeCommunication"
+                          ],
                         networkConfiguration: !result.body.jobSpecification
                           ?.poolInfo.autoPoolSpecification?.pool
                           ?.networkConfiguration
@@ -940,12 +1009,13 @@ export async function getJobSchedule(
                               subnetId:
                                 result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.networkConfiguration?.subnetId,
+                                  ?.networkConfiguration?.["subnetId"],
                               dynamicVNetAssignmentScope:
                                 result.body.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
-                                  ?.networkConfiguration
-                                  ?.dynamicVNetAssignmentScope,
+                                  ?.networkConfiguration?.[
+                                  "dynamicVNetAssignmentScope"
+                                ],
                               endpointConfiguration: !result.body
                                 .jobSpecification?.poolInfo
                                 .autoPoolSpecification?.pool
@@ -956,24 +1026,25 @@ export async function getJobSchedule(
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool
                                         ?.networkConfiguration
-                                        ?.endpointConfiguration
-                                        ?.inboundNATPools ?? []
+                                        ?.endpointConfiguration?.[
+                                        "inboundNATPools"
+                                      ] ?? []
                                     ).map((p) => ({
-                                      name: p.name,
-                                      protocol: p.protocol,
-                                      backendPort: p.backendPort,
+                                      name: p["name"],
+                                      protocol: p["protocol"],
+                                      backendPort: p["backendPort"],
                                       frontendPortRangeStart:
-                                        p.frontendPortRangeStart,
+                                        p["frontendPortRangeStart"],
                                       frontendPortRangeEnd:
-                                        p.frontendPortRangeEnd,
+                                        p["frontendPortRangeEnd"],
                                       networkSecurityGroupRules: (
-                                        p.networkSecurityGroupRules ?? []
+                                        p["networkSecurityGroupRules"] ?? []
                                       ).map((p) => ({
-                                        priority: p.priority,
-                                        access: p.access,
+                                        priority: p["priority"],
+                                        access: p["access"],
                                         sourceAddressPrefix:
-                                          p.sourceAddressPrefix,
-                                        sourcePortRanges: p.sourcePortRanges,
+                                          p["sourceAddressPrefix"],
+                                        sourcePortRanges: p["sourcePortRanges"],
                                       })),
                                     })),
                                   },
@@ -988,14 +1059,16 @@ export async function getJobSchedule(
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool
                                         ?.networkConfiguration
-                                        ?.publicIPAddressConfiguration
-                                        ?.provision,
+                                        ?.publicIPAddressConfiguration?.[
+                                        "provision"
+                                      ],
                                     ipAddressIds:
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool
                                         ?.networkConfiguration
-                                        ?.publicIPAddressConfiguration
-                                        ?.ipAddressIds,
+                                        ?.publicIPAddressConfiguration?.[
+                                        "ipAddressIds"
+                                      ],
                                   },
                             },
                         startTask: !result.body.jobSpecification?.poolInfo
@@ -1004,8 +1077,9 @@ export async function getJobSchedule(
                           : {
                               commandLine:
                                 result.body.jobSpecification?.poolInfo
-                                  .autoPoolSpecification?.pool?.startTask
-                                  ?.commandLine,
+                                  .autoPoolSpecification?.pool?.startTask?.[
+                                  "commandLine"
+                                ],
                               containerSettings: !result.body.jobSpecification
                                 ?.poolInfo.autoPoolSpecification?.pool
                                 ?.startTask?.containerSettings
@@ -1014,12 +1088,13 @@ export async function getJobSchedule(
                                     containerRunOptions:
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool?.startTask
-                                        ?.containerSettings
-                                        ?.containerRunOptions,
+                                        ?.containerSettings?.[
+                                        "containerRunOptions"
+                                      ],
                                     imageName:
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool?.startTask
-                                        ?.containerSettings?.imageName,
+                                        ?.containerSettings?.["imageName"],
                                     registry: !result.body.jobSpecification
                                       ?.poolInfo.autoPoolSpecification?.pool
                                       ?.startTask?.containerSettings?.registry
@@ -1029,20 +1104,23 @@ export async function getJobSchedule(
                                             result.body.jobSpecification
                                               ?.poolInfo.autoPoolSpecification
                                               ?.pool?.startTask
-                                              ?.containerSettings?.registry
-                                              ?.username,
+                                              ?.containerSettings?.registry?.[
+                                              "username"
+                                            ],
                                           password:
                                             result.body.jobSpecification
                                               ?.poolInfo.autoPoolSpecification
                                               ?.pool?.startTask
-                                              ?.containerSettings?.registry
-                                              ?.password,
+                                              ?.containerSettings?.registry?.[
+                                              "password"
+                                            ],
                                           registryServer:
                                             result.body.jobSpecification
                                               ?.poolInfo.autoPoolSpecification
                                               ?.pool?.startTask
-                                              ?.containerSettings?.registry
-                                              ?.registryServer,
+                                              ?.containerSettings?.registry?.[
+                                              "registryServer"
+                                            ],
                                           identityReference: !result.body
                                             .jobSpecification?.poolInfo
                                             .autoPoolSpecification?.pool
@@ -1057,39 +1135,47 @@ export async function getJobSchedule(
                                                     ?.startTask
                                                     ?.containerSettings
                                                     ?.registry
-                                                    ?.identityReference
-                                                    ?.resourceId,
+                                                    ?.identityReference?.[
+                                                    "resourceId"
+                                                  ],
                                               },
                                         },
                                     workingDirectory:
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool?.startTask
-                                        ?.containerSettings?.workingDirectory,
+                                        ?.containerSettings?.[
+                                        "workingDirectory"
+                                      ],
                                   },
                               resourceFiles: (
                                 result.body.jobSpecification?.poolInfo
-                                  .autoPoolSpecification?.pool?.startTask
-                                  ?.resourceFiles ?? []
+                                  .autoPoolSpecification?.pool?.startTask?.[
+                                  "resourceFiles"
+                                ] ?? []
                               ).map((p) => ({
                                 autoStorageContainerName:
-                                  p.autoStorageContainerName,
-                                storageContainerUrl: p.storageContainerUrl,
-                                httpUrl: p.httpUrl,
-                                blobPrefix: p.blobPrefix,
-                                filePath: p.filePath,
-                                fileMode: p.fileMode,
+                                  p["autoStorageContainerName"],
+                                storageContainerUrl: p["storageContainerUrl"],
+                                httpUrl: p["httpUrl"],
+                                blobPrefix: p["blobPrefix"],
+                                filePath: p["filePath"],
+                                fileMode: p["fileMode"],
                                 identityReference: !p.identityReference
                                   ? undefined
                                   : {
                                       resourceId:
-                                        p.identityReference?.resourceId,
+                                        p.identityReference?.["resourceId"],
                                     },
                               })),
                               environmentSettings: (
                                 result.body.jobSpecification?.poolInfo
-                                  .autoPoolSpecification?.pool?.startTask
-                                  ?.environmentSettings ?? []
-                              ).map((p) => ({ name: p.name, value: p.value })),
+                                  .autoPoolSpecification?.pool?.startTask?.[
+                                  "environmentSettings"
+                                ] ?? []
+                              ).map((p) => ({
+                                name: p["name"],
+                                value: p["value"],
+                              })),
                               userIdentity: !result.body.jobSpecification
                                 ?.poolInfo.autoPoolSpecification?.pool
                                 ?.startTask?.userIdentity
@@ -1098,7 +1184,7 @@ export async function getJobSchedule(
                                     username:
                                       result.body.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool?.startTask
-                                        ?.userIdentity?.username,
+                                        ?.userIdentity?.["username"],
                                     autoUser: !result.body.jobSpecification
                                       ?.poolInfo.autoPoolSpecification?.pool
                                       ?.startTask?.userIdentity?.autoUser
@@ -1108,97 +1194,111 @@ export async function getJobSchedule(
                                             result.body.jobSpecification
                                               ?.poolInfo.autoPoolSpecification
                                               ?.pool?.startTask?.userIdentity
-                                              ?.autoUser?.scope,
+                                              ?.autoUser?.["scope"],
                                           elevationLevel:
                                             result.body.jobSpecification
                                               ?.poolInfo.autoPoolSpecification
                                               ?.pool?.startTask?.userIdentity
-                                              ?.autoUser?.elevationLevel,
+                                              ?.autoUser?.["elevationLevel"],
                                         },
                                   },
                               maxTaskRetryCount:
                                 result.body.jobSpecification?.poolInfo
-                                  .autoPoolSpecification?.pool?.startTask
-                                  ?.maxTaskRetryCount,
+                                  .autoPoolSpecification?.pool?.startTask?.[
+                                  "maxTaskRetryCount"
+                                ],
                               waitForSuccess:
                                 result.body.jobSpecification?.poolInfo
-                                  .autoPoolSpecification?.pool?.startTask
-                                  ?.waitForSuccess,
+                                  .autoPoolSpecification?.pool?.startTask?.[
+                                  "waitForSuccess"
+                                ],
                             },
                         certificateReferences: (
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool
-                            ?.certificateReferences ?? []
+                            .autoPoolSpecification?.pool?.[
+                            "certificateReferences"
+                          ] ?? []
                         ).map((p) => ({
-                          thumbprint: p.thumbprint,
-                          thumbprintAlgorithm: p.thumbprintAlgorithm,
-                          storeLocation: p.storeLocation,
-                          storeName: p.storeName,
-                          visibility: p.visibility,
+                          thumbprint: p["thumbprint"],
+                          thumbprintAlgorithm: p["thumbprintAlgorithm"],
+                          storeLocation: p["storeLocation"],
+                          storeName: p["storeName"],
+                          visibility: p["visibility"],
                         })),
                         applicationPackageReferences: (
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool
-                            ?.applicationPackageReferences ?? []
+                            .autoPoolSpecification?.pool?.[
+                            "applicationPackageReferences"
+                          ] ?? []
                         ).map((p) => ({
-                          applicationId: p.applicationId,
-                          version: p.version,
+                          applicationId: p["applicationId"],
+                          version: p["version"],
                         })),
                         applicationLicenses:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.applicationLicenses,
+                            .autoPoolSpecification?.pool?.[
+                            "applicationLicenses"
+                          ],
                         userAccounts: (
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.userAccounts ?? []
+                            .autoPoolSpecification?.pool?.["userAccounts"] ?? []
                         ).map((p) => ({
-                          name: p.name,
-                          password: p.password,
-                          elevationLevel: p.elevationLevel,
+                          name: p["name"],
+                          password: p["password"],
+                          elevationLevel: p["elevationLevel"],
                           linuxUserConfiguration: !p.linuxUserConfiguration
                             ? undefined
                             : {
-                                uid: p.linuxUserConfiguration?.uid,
-                                gid: p.linuxUserConfiguration?.gid,
+                                uid: p.linuxUserConfiguration?.["uid"],
+                                gid: p.linuxUserConfiguration?.["gid"],
                                 sshPrivateKey:
-                                  p.linuxUserConfiguration?.sshPrivateKey,
+                                  p.linuxUserConfiguration?.["sshPrivateKey"],
                               },
                           windowsUserConfiguration: !p.windowsUserConfiguration
                             ? undefined
                             : {
                                 loginMode:
-                                  p.windowsUserConfiguration?.loginMode,
+                                  p.windowsUserConfiguration?.["loginMode"],
                               },
                         })),
                         metadata: (
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.metadata ?? []
-                        ).map((p) => ({ name: p.name, value: p.value })),
+                            .autoPoolSpecification?.pool?.["metadata"] ?? []
+                        ).map((p) => ({ name: p["name"], value: p["value"] })),
                         mountConfiguration: (
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool?.mountConfiguration ??
-                          []
+                            .autoPoolSpecification?.pool?.[
+                            "mountConfiguration"
+                          ] ?? []
                         ).map((p) => ({
                           azureBlobFileSystemConfiguration:
                             !p.azureBlobFileSystemConfiguration
                               ? undefined
                               : {
                                   accountName:
-                                    p.azureBlobFileSystemConfiguration
-                                      ?.accountName,
+                                    p.azureBlobFileSystemConfiguration?.[
+                                      "accountName"
+                                    ],
                                   containerName:
-                                    p.azureBlobFileSystemConfiguration
-                                      ?.containerName,
+                                    p.azureBlobFileSystemConfiguration?.[
+                                      "containerName"
+                                    ],
                                   accountKey:
-                                    p.azureBlobFileSystemConfiguration
-                                      ?.accountKey,
+                                    p.azureBlobFileSystemConfiguration?.[
+                                      "accountKey"
+                                    ],
                                   sasKey:
-                                    p.azureBlobFileSystemConfiguration?.sasKey,
+                                    p.azureBlobFileSystemConfiguration?.[
+                                      "sasKey"
+                                    ],
                                   blobfuseOptions:
-                                    p.azureBlobFileSystemConfiguration
-                                      ?.blobfuseOptions,
+                                    p.azureBlobFileSystemConfiguration?.[
+                                      "blobfuseOptions"
+                                    ],
                                   relativeMountPath:
-                                    p.azureBlobFileSystemConfiguration
-                                      ?.relativeMountPath,
+                                    p.azureBlobFileSystemConfiguration?.[
+                                      "relativeMountPath"
+                                    ],
                                   identityReference: !p
                                     .azureBlobFileSystemConfiguration
                                     ?.identityReference
@@ -1206,91 +1306,108 @@ export async function getJobSchedule(
                                     : {
                                         resourceId:
                                           p.azureBlobFileSystemConfiguration
-                                            ?.identityReference?.resourceId,
+                                            ?.identityReference?.["resourceId"],
                                       },
                                 },
                           nfsMountConfiguration: !p.nfsMountConfiguration
                             ? undefined
                             : {
-                                source: p.nfsMountConfiguration?.source,
+                                source: p.nfsMountConfiguration?.["source"],
                                 relativeMountPath:
-                                  p.nfsMountConfiguration?.relativeMountPath,
+                                  p.nfsMountConfiguration?.[
+                                    "relativeMountPath"
+                                  ],
                                 mountOptions:
-                                  p.nfsMountConfiguration?.mountOptions,
+                                  p.nfsMountConfiguration?.["mountOptions"],
                               },
                           cifsMountConfiguration: !p.cifsMountConfiguration
                             ? undefined
                             : {
-                                username: p.cifsMountConfiguration?.username,
-                                source: p.cifsMountConfiguration?.source,
+                                username:
+                                  p.cifsMountConfiguration?.["username"],
+                                source: p.cifsMountConfiguration?.["source"],
                                 relativeMountPath:
-                                  p.cifsMountConfiguration?.relativeMountPath,
+                                  p.cifsMountConfiguration?.[
+                                    "relativeMountPath"
+                                  ],
                                 mountOptions:
-                                  p.cifsMountConfiguration?.mountOptions,
-                                password: p.cifsMountConfiguration?.password,
+                                  p.cifsMountConfiguration?.["mountOptions"],
+                                password:
+                                  p.cifsMountConfiguration?.["password"],
                               },
                           azureFileShareConfiguration:
                             !p.azureFileShareConfiguration
                               ? undefined
                               : {
                                   accountName:
-                                    p.azureFileShareConfiguration?.accountName,
+                                    p.azureFileShareConfiguration?.[
+                                      "accountName"
+                                    ],
                                   azureFileUrl:
-                                    p.azureFileShareConfiguration?.azureFileUrl,
+                                    p.azureFileShareConfiguration?.[
+                                      "azureFileUrl"
+                                    ],
                                   accountKey:
-                                    p.azureFileShareConfiguration?.accountKey,
+                                    p.azureFileShareConfiguration?.[
+                                      "accountKey"
+                                    ],
                                   relativeMountPath:
-                                    p.azureFileShareConfiguration
-                                      ?.relativeMountPath,
+                                    p.azureFileShareConfiguration?.[
+                                      "relativeMountPath"
+                                    ],
                                   mountOptions:
-                                    p.azureFileShareConfiguration?.mountOptions,
+                                    p.azureFileShareConfiguration?.[
+                                      "mountOptions"
+                                    ],
                                 },
                         })),
                         targetNodeCommunicationMode:
                           result.body.jobSpecification?.poolInfo
-                            .autoPoolSpecification?.pool
-                            ?.targetNodeCommunicationMode,
+                            .autoPoolSpecification?.pool?.[
+                            "targetNodeCommunicationMode"
+                          ],
                       },
                 },
           },
-          metadata: (result.body.jobSpecification?.metadata ?? []).map((p) => ({
-            name: p.name,
-            value: p.value,
-          })),
+          metadata: (result.body.jobSpecification?.["metadata"] ?? []).map(
+            (p) => ({ name: p["name"], value: p["value"] })
+          ),
         },
     executionInfo: !result.body.executionInfo
       ? undefined
       : {
-          nextRunTime: new Date(result.body.executionInfo?.nextRunTime ?? ""),
+          nextRunTime: new Date(
+            result.body.executionInfo?.["nextRunTime"] ?? ""
+          ),
           recentJob: !result.body.executionInfo?.recentJob
             ? undefined
             : {
-                id: result.body.executionInfo?.recentJob?.id,
-                url: result.body.executionInfo?.recentJob?.url,
+                id: result.body.executionInfo?.recentJob?.["id"],
+                url: result.body.executionInfo?.recentJob?.["url"],
               },
-          endTime: new Date(result.body.executionInfo?.endTime ?? ""),
+          endTime: new Date(result.body.executionInfo?.["endTime"] ?? ""),
         },
-    metadata: (result.body.metadata ?? []).map((p) => ({
-      name: p.name,
-      value: p.value,
+    metadata: (result.body["metadata"] ?? []).map((p) => ({
+      name: p["name"],
+      value: p["value"],
     })),
     stats: !result.body.stats
       ? undefined
       : {
-          url: result.body.stats?.url,
-          startTime: new Date(result.body.stats?.startTime ?? ""),
-          lastUpdateTime: new Date(result.body.stats?.lastUpdateTime ?? ""),
-          userCPUTime: result.body.stats?.userCPUTime,
-          kernelCPUTime: result.body.stats?.kernelCPUTime,
-          wallClockTime: result.body.stats?.wallClockTime,
-          readIOps: result.body.stats?.readIOps,
-          writeIOps: result.body.stats?.writeIOps,
-          readIOGiB: result.body.stats?.readIOGiB,
-          writeIOGiB: result.body.stats?.writeIOGiB,
-          numSucceededTasks: result.body.stats?.numSucceededTasks,
-          numFailedTasks: result.body.stats?.numFailedTasks,
-          numTaskRetries: result.body.stats?.numTaskRetries,
-          waitTime: result.body.stats?.waitTime,
+          url: result.body.stats?.["url"],
+          startTime: new Date(result.body.stats?.["startTime"] ?? ""),
+          lastUpdateTime: new Date(result.body.stats?.["lastUpdateTime"] ?? ""),
+          userCPUTime: result.body.stats?.["userCPUTime"],
+          kernelCPUTime: result.body.stats?.["kernelCPUTime"],
+          wallClockTime: result.body.stats?.["wallClockTime"],
+          readIOps: result.body.stats?.["readIOps"],
+          writeIOps: result.body.stats?.["writeIOps"],
+          readIOGiB: result.body.stats?.["readIOGiB"],
+          writeIOGiB: result.body.stats?.["writeIOGiB"],
+          numSucceededTasks: result.body.stats?.["numSucceededTasks"],
+          numFailedTasks: result.body.stats?.["numFailedTasks"],
+          numTaskRetries: result.body.stats?.["numTaskRetries"],
+          waitTime: result.body.stats?.["waitTime"],
         },
   };
 }
@@ -2060,79 +2177,84 @@ export async function listJobSchedules(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      id: p.id,
-      displayName: p.displayName,
-      url: p.url,
-      eTag: p.eTag,
-      lastModified: new Date(p.lastModified ?? ""),
-      creationTime: new Date(p.creationTime ?? ""),
-      state: p.state,
-      stateTransitionTime: new Date(p.stateTransitionTime ?? ""),
-      previousState: p.previousState,
+    value: (result.body["value"] ?? []).map((p) => ({
+      id: p["id"],
+      displayName: p["displayName"],
+      url: p["url"],
+      eTag: p["eTag"],
+      lastModified: new Date(p["lastModified"] ?? ""),
+      creationTime: new Date(p["creationTime"] ?? ""),
+      state: p["state"],
+      stateTransitionTime: new Date(p["stateTransitionTime"] ?? ""),
+      previousState: p["previousState"],
       previousStateTransitionTime: new Date(
-        p.previousStateTransitionTime ?? ""
+        p["previousStateTransitionTime"] ?? ""
       ),
       schedule: !p.schedule
         ? undefined
         : {
-            doNotRunUntil: new Date(p.schedule?.doNotRunUntil ?? ""),
-            doNotRunAfter: new Date(p.schedule?.doNotRunAfter ?? ""),
-            startWindow: p.schedule?.startWindow,
-            recurrenceInterval: p.schedule?.recurrenceInterval,
+            doNotRunUntil: new Date(p.schedule?.["doNotRunUntil"] ?? ""),
+            doNotRunAfter: new Date(p.schedule?.["doNotRunAfter"] ?? ""),
+            startWindow: p.schedule?.["startWindow"],
+            recurrenceInterval: p.schedule?.["recurrenceInterval"],
           },
       jobSpecification: !p.jobSpecification
         ? undefined
         : {
-            priority: p.jobSpecification?.priority,
-            allowTaskPreemption: p.jobSpecification?.allowTaskPreemption,
-            maxParallelTasks: p.jobSpecification?.maxParallelTasks,
-            displayName: p.jobSpecification?.displayName,
-            usesTaskDependencies: p.jobSpecification?.usesTaskDependencies,
-            onAllTasksComplete: p.jobSpecification?.onAllTasksComplete,
-            onTaskFailure: p.jobSpecification?.onTaskFailure,
+            priority: p.jobSpecification?.["priority"],
+            allowTaskPreemption: p.jobSpecification?.["allowTaskPreemption"],
+            maxParallelTasks: p.jobSpecification?.["maxParallelTasks"],
+            displayName: p.jobSpecification?.["displayName"],
+            usesTaskDependencies: p.jobSpecification?.["usesTaskDependencies"],
+            onAllTasksComplete: p.jobSpecification?.["onAllTasksComplete"],
+            onTaskFailure: p.jobSpecification?.["onTaskFailure"],
             networkConfiguration: !p.jobSpecification?.networkConfiguration
               ? undefined
               : {
-                  subnetId: p.jobSpecification?.networkConfiguration?.subnetId,
+                  subnetId:
+                    p.jobSpecification?.networkConfiguration?.["subnetId"],
                 },
             constraints: !p.jobSpecification?.constraints
               ? undefined
               : {
                   maxWallClockTime:
-                    p.jobSpecification?.constraints?.maxWallClockTime,
+                    p.jobSpecification?.constraints?.["maxWallClockTime"],
                   maxTaskRetryCount:
-                    p.jobSpecification?.constraints?.maxTaskRetryCount,
+                    p.jobSpecification?.constraints?.["maxTaskRetryCount"],
                 },
             jobManagerTask: !p.jobSpecification?.jobManagerTask
               ? undefined
               : {
-                  id: p.jobSpecification?.jobManagerTask?.id,
-                  displayName: p.jobSpecification?.jobManagerTask?.displayName,
-                  commandLine: p.jobSpecification?.jobManagerTask?.commandLine,
+                  id: p.jobSpecification?.jobManagerTask?.["id"],
+                  displayName:
+                    p.jobSpecification?.jobManagerTask?.["displayName"],
+                  commandLine:
+                    p.jobSpecification?.jobManagerTask?.["commandLine"],
                   containerSettings: !p.jobSpecification?.jobManagerTask
                     ?.containerSettings
                     ? undefined
                     : {
                         containerRunOptions:
-                          p.jobSpecification?.jobManagerTask?.containerSettings
-                            ?.containerRunOptions,
+                          p.jobSpecification?.jobManagerTask
+                            ?.containerSettings?.["containerRunOptions"],
                         imageName:
-                          p.jobSpecification?.jobManagerTask?.containerSettings
-                            ?.imageName,
+                          p.jobSpecification?.jobManagerTask
+                            ?.containerSettings?.["imageName"],
                         registry: !p.jobSpecification?.jobManagerTask
                           ?.containerSettings?.registry
                           ? undefined
                           : {
                               username:
                                 p.jobSpecification?.jobManagerTask
-                                  ?.containerSettings?.registry?.username,
+                                  ?.containerSettings?.registry?.["username"],
                               password:
                                 p.jobSpecification?.jobManagerTask
-                                  ?.containerSettings?.registry?.password,
+                                  ?.containerSettings?.registry?.["password"],
                               registryServer:
                                 p.jobSpecification?.jobManagerTask
-                                  ?.containerSettings?.registry?.registryServer,
+                                  ?.containerSettings?.registry?.[
+                                  "registryServer"
+                                ],
                               identityReference: !p.jobSpecification
                                 ?.jobManagerTask?.containerSettings?.registry
                                 ?.identityReference
@@ -2141,101 +2263,111 @@ export async function listJobSchedules(
                                     resourceId:
                                       p.jobSpecification?.jobManagerTask
                                         ?.containerSettings?.registry
-                                        ?.identityReference?.resourceId,
+                                        ?.identityReference?.["resourceId"],
                                   },
                             },
                         workingDirectory:
-                          p.jobSpecification?.jobManagerTask?.containerSettings
-                            ?.workingDirectory,
+                          p.jobSpecification?.jobManagerTask
+                            ?.containerSettings?.["workingDirectory"],
                       },
                   resourceFiles: (
-                    p.jobSpecification?.jobManagerTask?.resourceFiles ?? []
+                    p.jobSpecification?.jobManagerTask?.["resourceFiles"] ?? []
                   ).map((p) => ({
-                    autoStorageContainerName: p.autoStorageContainerName,
-                    storageContainerUrl: p.storageContainerUrl,
-                    httpUrl: p.httpUrl,
-                    blobPrefix: p.blobPrefix,
-                    filePath: p.filePath,
-                    fileMode: p.fileMode,
+                    autoStorageContainerName: p["autoStorageContainerName"],
+                    storageContainerUrl: p["storageContainerUrl"],
+                    httpUrl: p["httpUrl"],
+                    blobPrefix: p["blobPrefix"],
+                    filePath: p["filePath"],
+                    fileMode: p["fileMode"],
                     identityReference: !p.identityReference
                       ? undefined
-                      : { resourceId: p.identityReference?.resourceId },
+                      : { resourceId: p.identityReference?.["resourceId"] },
                   })),
                   outputFiles: (
-                    p.jobSpecification?.jobManagerTask?.outputFiles ?? []
+                    p.jobSpecification?.jobManagerTask?.["outputFiles"] ?? []
                   ).map((p) => ({
-                    filePattern: p.filePattern,
+                    filePattern: p["filePattern"],
                     destination: {
                       container: !p.destination.container
                         ? undefined
                         : {
-                            path: p.destination.container?.path,
-                            containerUrl: p.destination.container?.containerUrl,
+                            path: p.destination.container?.["path"],
+                            containerUrl:
+                              p.destination.container?.["containerUrl"],
                             identityReference: !p.destination.container
                               ?.identityReference
                               ? undefined
                               : {
                                   resourceId:
-                                    p.destination.container?.identityReference
-                                      ?.resourceId,
+                                    p.destination.container
+                                      ?.identityReference?.["resourceId"],
                                 },
                             uploadHeaders: (
-                              p.destination.container?.uploadHeaders ?? []
-                            ).map((p) => ({ name: p.name, value: p.value })),
+                              p.destination.container?.["uploadHeaders"] ?? []
+                            ).map((p) => ({
+                              name: p["name"],
+                              value: p["value"],
+                            })),
                           },
                     },
                     uploadOptions: {
-                      uploadCondition: p.uploadOptions.uploadCondition,
+                      uploadCondition: p.uploadOptions["uploadCondition"],
                     },
                   })),
                   environmentSettings: (
-                    p.jobSpecification?.jobManagerTask?.environmentSettings ??
-                    []
-                  ).map((p) => ({ name: p.name, value: p.value })),
+                    p.jobSpecification?.jobManagerTask?.[
+                      "environmentSettings"
+                    ] ?? []
+                  ).map((p) => ({ name: p["name"], value: p["value"] })),
                   constraints: !p.jobSpecification?.jobManagerTask?.constraints
                     ? undefined
                     : {
                         maxWallClockTime:
-                          p.jobSpecification?.jobManagerTask?.constraints
-                            ?.maxWallClockTime,
+                          p.jobSpecification?.jobManagerTask?.constraints?.[
+                            "maxWallClockTime"
+                          ],
                         retentionTime:
-                          p.jobSpecification?.jobManagerTask?.constraints
-                            ?.retentionTime,
+                          p.jobSpecification?.jobManagerTask?.constraints?.[
+                            "retentionTime"
+                          ],
                         maxTaskRetryCount:
-                          p.jobSpecification?.jobManagerTask?.constraints
-                            ?.maxTaskRetryCount,
+                          p.jobSpecification?.jobManagerTask?.constraints?.[
+                            "maxTaskRetryCount"
+                          ],
                       },
                   requiredSlots:
-                    p.jobSpecification?.jobManagerTask?.requiredSlots,
+                    p.jobSpecification?.jobManagerTask?.["requiredSlots"],
                   killJobOnCompletion:
-                    p.jobSpecification?.jobManagerTask?.killJobOnCompletion,
+                    p.jobSpecification?.jobManagerTask?.["killJobOnCompletion"],
                   userIdentity: !p.jobSpecification?.jobManagerTask
                     ?.userIdentity
                     ? undefined
                     : {
                         username:
-                          p.jobSpecification?.jobManagerTask?.userIdentity
-                            ?.username,
+                          p.jobSpecification?.jobManagerTask?.userIdentity?.[
+                            "username"
+                          ],
                         autoUser: !p.jobSpecification?.jobManagerTask
                           ?.userIdentity?.autoUser
                           ? undefined
                           : {
                               scope:
                                 p.jobSpecification?.jobManagerTask?.userIdentity
-                                  ?.autoUser?.scope,
+                                  ?.autoUser?.["scope"],
                               elevationLevel:
                                 p.jobSpecification?.jobManagerTask?.userIdentity
-                                  ?.autoUser?.elevationLevel,
+                                  ?.autoUser?.["elevationLevel"],
                             },
                       },
                   runExclusive:
-                    p.jobSpecification?.jobManagerTask?.runExclusive,
+                    p.jobSpecification?.jobManagerTask?.["runExclusive"],
                   applicationPackageReferences: (
-                    p.jobSpecification?.jobManagerTask
-                      ?.applicationPackageReferences ?? []
+                    p.jobSpecification?.jobManagerTask?.[
+                      "applicationPackageReferences"
+                    ] ?? []
                   ).map((p) => ({
-                    applicationId: p.applicationId,
-                    version: p.version,
+                    applicationId: p["applicationId"],
+                    version: p["version"],
                   })),
                   authenticationTokenSettings: !p.jobSpecification
                     ?.jobManagerTask?.authenticationTokenSettings
@@ -2243,40 +2375,44 @@ export async function listJobSchedules(
                     : {
                         access:
                           p.jobSpecification?.jobManagerTask
-                            ?.authenticationTokenSettings?.access,
+                            ?.authenticationTokenSettings?.["access"],
                       },
                   allowLowPriorityNode:
-                    p.jobSpecification?.jobManagerTask?.allowLowPriorityNode,
+                    p.jobSpecification?.jobManagerTask?.[
+                      "allowLowPriorityNode"
+                    ],
                 },
             jobPreparationTask: !p.jobSpecification?.jobPreparationTask
               ? undefined
               : {
-                  id: p.jobSpecification?.jobPreparationTask?.id,
+                  id: p.jobSpecification?.jobPreparationTask?.["id"],
                   commandLine:
-                    p.jobSpecification?.jobPreparationTask?.commandLine,
+                    p.jobSpecification?.jobPreparationTask?.["commandLine"],
                   containerSettings: !p.jobSpecification?.jobPreparationTask
                     ?.containerSettings
                     ? undefined
                     : {
                         containerRunOptions:
                           p.jobSpecification?.jobPreparationTask
-                            ?.containerSettings?.containerRunOptions,
+                            ?.containerSettings?.["containerRunOptions"],
                         imageName:
                           p.jobSpecification?.jobPreparationTask
-                            ?.containerSettings?.imageName,
+                            ?.containerSettings?.["imageName"],
                         registry: !p.jobSpecification?.jobPreparationTask
                           ?.containerSettings?.registry
                           ? undefined
                           : {
                               username:
                                 p.jobSpecification?.jobPreparationTask
-                                  ?.containerSettings?.registry?.username,
+                                  ?.containerSettings?.registry?.["username"],
                               password:
                                 p.jobSpecification?.jobPreparationTask
-                                  ?.containerSettings?.registry?.password,
+                                  ?.containerSettings?.registry?.["password"],
                               registryServer:
                                 p.jobSpecification?.jobPreparationTask
-                                  ?.containerSettings?.registry?.registryServer,
+                                  ?.containerSettings?.registry?.[
+                                  "registryServer"
+                                ],
                               identityReference: !p.jobSpecification
                                 ?.jobPreparationTask?.containerSettings
                                 ?.registry?.identityReference
@@ -2285,97 +2421,106 @@ export async function listJobSchedules(
                                     resourceId:
                                       p.jobSpecification?.jobPreparationTask
                                         ?.containerSettings?.registry
-                                        ?.identityReference?.resourceId,
+                                        ?.identityReference?.["resourceId"],
                                   },
                             },
                         workingDirectory:
                           p.jobSpecification?.jobPreparationTask
-                            ?.containerSettings?.workingDirectory,
+                            ?.containerSettings?.["workingDirectory"],
                       },
                   resourceFiles: (
-                    p.jobSpecification?.jobPreparationTask?.resourceFiles ?? []
+                    p.jobSpecification?.jobPreparationTask?.["resourceFiles"] ??
+                    []
                   ).map((p) => ({
-                    autoStorageContainerName: p.autoStorageContainerName,
-                    storageContainerUrl: p.storageContainerUrl,
-                    httpUrl: p.httpUrl,
-                    blobPrefix: p.blobPrefix,
-                    filePath: p.filePath,
-                    fileMode: p.fileMode,
+                    autoStorageContainerName: p["autoStorageContainerName"],
+                    storageContainerUrl: p["storageContainerUrl"],
+                    httpUrl: p["httpUrl"],
+                    blobPrefix: p["blobPrefix"],
+                    filePath: p["filePath"],
+                    fileMode: p["fileMode"],
                     identityReference: !p.identityReference
                       ? undefined
-                      : { resourceId: p.identityReference?.resourceId },
+                      : { resourceId: p.identityReference?.["resourceId"] },
                   })),
                   environmentSettings: (
-                    p.jobSpecification?.jobPreparationTask
-                      ?.environmentSettings ?? []
-                  ).map((p) => ({ name: p.name, value: p.value })),
+                    p.jobSpecification?.jobPreparationTask?.[
+                      "environmentSettings"
+                    ] ?? []
+                  ).map((p) => ({ name: p["name"], value: p["value"] })),
                   constraints: !p.jobSpecification?.jobPreparationTask
                     ?.constraints
                     ? undefined
                     : {
                         maxWallClockTime:
-                          p.jobSpecification?.jobPreparationTask?.constraints
-                            ?.maxWallClockTime,
+                          p.jobSpecification?.jobPreparationTask?.constraints?.[
+                            "maxWallClockTime"
+                          ],
                         retentionTime:
-                          p.jobSpecification?.jobPreparationTask?.constraints
-                            ?.retentionTime,
+                          p.jobSpecification?.jobPreparationTask?.constraints?.[
+                            "retentionTime"
+                          ],
                         maxTaskRetryCount:
-                          p.jobSpecification?.jobPreparationTask?.constraints
-                            ?.maxTaskRetryCount,
+                          p.jobSpecification?.jobPreparationTask?.constraints?.[
+                            "maxTaskRetryCount"
+                          ],
                       },
                   waitForSuccess:
-                    p.jobSpecification?.jobPreparationTask?.waitForSuccess,
+                    p.jobSpecification?.jobPreparationTask?.["waitForSuccess"],
                   userIdentity: !p.jobSpecification?.jobPreparationTask
                     ?.userIdentity
                     ? undefined
                     : {
                         username:
-                          p.jobSpecification?.jobPreparationTask?.userIdentity
-                            ?.username,
+                          p.jobSpecification?.jobPreparationTask
+                            ?.userIdentity?.["username"],
                         autoUser: !p.jobSpecification?.jobPreparationTask
                           ?.userIdentity?.autoUser
                           ? undefined
                           : {
                               scope:
                                 p.jobSpecification?.jobPreparationTask
-                                  ?.userIdentity?.autoUser?.scope,
+                                  ?.userIdentity?.autoUser?.["scope"],
                               elevationLevel:
                                 p.jobSpecification?.jobPreparationTask
-                                  ?.userIdentity?.autoUser?.elevationLevel,
+                                  ?.userIdentity?.autoUser?.["elevationLevel"],
                             },
                       },
                   rerunOnNodeRebootAfterSuccess:
-                    p.jobSpecification?.jobPreparationTask
-                      ?.rerunOnNodeRebootAfterSuccess,
+                    p.jobSpecification?.jobPreparationTask?.[
+                      "rerunOnNodeRebootAfterSuccess"
+                    ],
                 },
             jobReleaseTask: !p.jobSpecification?.jobReleaseTask
               ? undefined
               : {
-                  id: p.jobSpecification?.jobReleaseTask?.id,
-                  commandLine: p.jobSpecification?.jobReleaseTask?.commandLine,
+                  id: p.jobSpecification?.jobReleaseTask?.["id"],
+                  commandLine:
+                    p.jobSpecification?.jobReleaseTask?.["commandLine"],
                   containerSettings: !p.jobSpecification?.jobReleaseTask
                     ?.containerSettings
                     ? undefined
                     : {
                         containerRunOptions:
-                          p.jobSpecification?.jobReleaseTask?.containerSettings
-                            ?.containerRunOptions,
+                          p.jobSpecification?.jobReleaseTask
+                            ?.containerSettings?.["containerRunOptions"],
                         imageName:
-                          p.jobSpecification?.jobReleaseTask?.containerSettings
-                            ?.imageName,
+                          p.jobSpecification?.jobReleaseTask
+                            ?.containerSettings?.["imageName"],
                         registry: !p.jobSpecification?.jobReleaseTask
                           ?.containerSettings?.registry
                           ? undefined
                           : {
                               username:
                                 p.jobSpecification?.jobReleaseTask
-                                  ?.containerSettings?.registry?.username,
+                                  ?.containerSettings?.registry?.["username"],
                               password:
                                 p.jobSpecification?.jobReleaseTask
-                                  ?.containerSettings?.registry?.password,
+                                  ?.containerSettings?.registry?.["password"],
                               registryServer:
                                 p.jobSpecification?.jobReleaseTask
-                                  ?.containerSettings?.registry?.registryServer,
+                                  ?.containerSettings?.registry?.[
+                                  "registryServer"
+                                ],
                               identityReference: !p.jobSpecification
                                 ?.jobReleaseTask?.containerSettings?.registry
                                 ?.identityReference
@@ -2384,82 +2529,87 @@ export async function listJobSchedules(
                                     resourceId:
                                       p.jobSpecification?.jobReleaseTask
                                         ?.containerSettings?.registry
-                                        ?.identityReference?.resourceId,
+                                        ?.identityReference?.["resourceId"],
                                   },
                             },
                         workingDirectory:
-                          p.jobSpecification?.jobReleaseTask?.containerSettings
-                            ?.workingDirectory,
+                          p.jobSpecification?.jobReleaseTask
+                            ?.containerSettings?.["workingDirectory"],
                       },
                   resourceFiles: (
-                    p.jobSpecification?.jobReleaseTask?.resourceFiles ?? []
+                    p.jobSpecification?.jobReleaseTask?.["resourceFiles"] ?? []
                   ).map((p) => ({
-                    autoStorageContainerName: p.autoStorageContainerName,
-                    storageContainerUrl: p.storageContainerUrl,
-                    httpUrl: p.httpUrl,
-                    blobPrefix: p.blobPrefix,
-                    filePath: p.filePath,
-                    fileMode: p.fileMode,
+                    autoStorageContainerName: p["autoStorageContainerName"],
+                    storageContainerUrl: p["storageContainerUrl"],
+                    httpUrl: p["httpUrl"],
+                    blobPrefix: p["blobPrefix"],
+                    filePath: p["filePath"],
+                    fileMode: p["fileMode"],
                     identityReference: !p.identityReference
                       ? undefined
-                      : { resourceId: p.identityReference?.resourceId },
+                      : { resourceId: p.identityReference?.["resourceId"] },
                   })),
                   environmentSettings: (
-                    p.jobSpecification?.jobReleaseTask?.environmentSettings ??
-                    []
-                  ).map((p) => ({ name: p.name, value: p.value })),
+                    p.jobSpecification?.jobReleaseTask?.[
+                      "environmentSettings"
+                    ] ?? []
+                  ).map((p) => ({ name: p["name"], value: p["value"] })),
                   maxWallClockTime:
-                    p.jobSpecification?.jobReleaseTask?.maxWallClockTime,
+                    p.jobSpecification?.jobReleaseTask?.["maxWallClockTime"],
                   retentionTime:
-                    p.jobSpecification?.jobReleaseTask?.retentionTime,
+                    p.jobSpecification?.jobReleaseTask?.["retentionTime"],
                   userIdentity: !p.jobSpecification?.jobReleaseTask
                     ?.userIdentity
                     ? undefined
                     : {
                         username:
-                          p.jobSpecification?.jobReleaseTask?.userIdentity
-                            ?.username,
+                          p.jobSpecification?.jobReleaseTask?.userIdentity?.[
+                            "username"
+                          ],
                         autoUser: !p.jobSpecification?.jobReleaseTask
                           ?.userIdentity?.autoUser
                           ? undefined
                           : {
                               scope:
                                 p.jobSpecification?.jobReleaseTask?.userIdentity
-                                  ?.autoUser?.scope,
+                                  ?.autoUser?.["scope"],
                               elevationLevel:
                                 p.jobSpecification?.jobReleaseTask?.userIdentity
-                                  ?.autoUser?.elevationLevel,
+                                  ?.autoUser?.["elevationLevel"],
                             },
                       },
                 },
             commonEnvironmentSettings: (
-              p.jobSpecification?.commonEnvironmentSettings ?? []
-            ).map((p) => ({ name: p.name, value: p.value })),
+              p.jobSpecification?.["commonEnvironmentSettings"] ?? []
+            ).map((p) => ({ name: p["name"], value: p["value"] })),
             poolInfo: {
-              poolId: p.jobSpecification?.poolInfo.poolId,
+              poolId: p.jobSpecification?.poolInfo["poolId"],
               autoPoolSpecification: !p.jobSpecification?.poolInfo
                 .autoPoolSpecification
                 ? undefined
                 : {
                     autoPoolIdPrefix:
-                      p.jobSpecification?.poolInfo.autoPoolSpecification
-                        ?.autoPoolIdPrefix,
+                      p.jobSpecification?.poolInfo.autoPoolSpecification?.[
+                        "autoPoolIdPrefix"
+                      ],
                     poolLifetimeOption:
-                      p.jobSpecification?.poolInfo.autoPoolSpecification
-                        ?.poolLifetimeOption,
+                      p.jobSpecification?.poolInfo.autoPoolSpecification?.[
+                        "poolLifetimeOption"
+                      ],
                     keepAlive:
-                      p.jobSpecification?.poolInfo.autoPoolSpecification
-                        ?.keepAlive,
+                      p.jobSpecification?.poolInfo.autoPoolSpecification?.[
+                        "keepAlive"
+                      ],
                     pool: !p.jobSpecification?.poolInfo.autoPoolSpecification
                       ?.pool
                       ? undefined
                       : {
                           displayName:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.displayName,
+                              ?.pool?.["displayName"],
                           vmSize:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.vmSize,
+                              ?.pool?.["vmSize"],
                           cloudServiceConfiguration: !p.jobSpecification
                             ?.poolInfo.autoPoolSpecification?.pool
                             ?.cloudServiceConfiguration
@@ -2468,11 +2618,11 @@ export async function listJobSchedules(
                                 osFamily:
                                   p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
-                                    ?.cloudServiceConfiguration?.osFamily,
+                                    ?.cloudServiceConfiguration?.["osFamily"],
                                 osVersion:
                                   p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
-                                    ?.cloudServiceConfiguration?.osVersion,
+                                    ?.cloudServiceConfiguration?.["osVersion"],
                               },
                           virtualMachineConfiguration: !p.jobSpecification
                             ?.poolInfo.autoPoolSpecification?.pool
@@ -2484,37 +2634,38 @@ export async function listJobSchedules(
                                     p.jobSpecification?.poolInfo
                                       .autoPoolSpecification?.pool
                                       ?.virtualMachineConfiguration
-                                      ?.imageReference.publisher,
+                                      ?.imageReference["publisher"],
                                   offer:
                                     p.jobSpecification?.poolInfo
                                       .autoPoolSpecification?.pool
                                       ?.virtualMachineConfiguration
-                                      ?.imageReference.offer,
+                                      ?.imageReference["offer"],
                                   sku: p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
                                     ?.virtualMachineConfiguration
-                                    ?.imageReference.sku,
+                                    ?.imageReference["sku"],
                                   version:
                                     p.jobSpecification?.poolInfo
                                       .autoPoolSpecification?.pool
                                       ?.virtualMachineConfiguration
-                                      ?.imageReference.version,
+                                      ?.imageReference["version"],
                                   virtualMachineImageId:
                                     p.jobSpecification?.poolInfo
                                       .autoPoolSpecification?.pool
                                       ?.virtualMachineConfiguration
-                                      ?.imageReference.virtualMachineImageId,
+                                      ?.imageReference["virtualMachineImageId"],
                                   exactVersion:
                                     p.jobSpecification?.poolInfo
                                       .autoPoolSpecification?.pool
                                       ?.virtualMachineConfiguration
-                                      ?.imageReference.exactVersion,
+                                      ?.imageReference["exactVersion"],
                                 },
                                 nodeAgentSKUId:
                                   p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
-                                    ?.virtualMachineConfiguration
-                                    ?.nodeAgentSKUId,
+                                    ?.virtualMachineConfiguration?.[
+                                    "nodeAgentSKUId"
+                                  ],
                                 windowsConfiguration: !p.jobSpecification
                                   ?.poolInfo.autoPoolSpecification?.pool
                                   ?.virtualMachineConfiguration
@@ -2525,24 +2676,28 @@ export async function listJobSchedules(
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
                                           ?.virtualMachineConfiguration
-                                          ?.windowsConfiguration
-                                          ?.enableAutomaticUpdates,
+                                          ?.windowsConfiguration?.[
+                                          "enableAutomaticUpdates"
+                                        ],
                                     },
                                 dataDisks: (
                                   p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
-                                    ?.virtualMachineConfiguration?.dataDisks ??
-                                  []
+                                    ?.virtualMachineConfiguration?.[
+                                    "dataDisks"
+                                  ] ?? []
                                 ).map((p) => ({
-                                  lun: p.lun,
-                                  caching: p.caching,
-                                  diskSizeGB: p.diskSizeGB,
-                                  storageAccountType: p.storageAccountType,
+                                  lun: p["lun"],
+                                  caching: p["caching"],
+                                  diskSizeGB: p["diskSizeGB"],
+                                  storageAccountType: p["storageAccountType"],
                                 })),
                                 licenseType:
                                   p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
-                                    ?.virtualMachineConfiguration?.licenseType,
+                                    ?.virtualMachineConfiguration?.[
+                                    "licenseType"
+                                  ],
                                 containerConfiguration: !p.jobSpecification
                                   ?.poolInfo.autoPoolSpecification?.pool
                                   ?.virtualMachineConfiguration
@@ -2552,28 +2707,32 @@ export async function listJobSchedules(
                                       type: p.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool
                                         ?.virtualMachineConfiguration
-                                        ?.containerConfiguration?.type,
+                                        ?.containerConfiguration?.["type"],
                                       containerImageNames:
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
                                           ?.virtualMachineConfiguration
-                                          ?.containerConfiguration
-                                          ?.containerImageNames,
+                                          ?.containerConfiguration?.[
+                                          "containerImageNames"
+                                        ],
                                       containerRegistries: (
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
                                           ?.virtualMachineConfiguration
-                                          ?.containerConfiguration
-                                          ?.containerRegistries ?? []
+                                          ?.containerConfiguration?.[
+                                          "containerRegistries"
+                                        ] ?? []
                                       ).map((p) => ({
-                                        username: p.username,
-                                        password: p.password,
-                                        registryServer: p.registryServer,
+                                        username: p["username"],
+                                        password: p["password"],
+                                        registryServer: p["registryServer"],
                                         identityReference: !p.identityReference
                                           ? undefined
                                           : {
                                               resourceId:
-                                                p.identityReference?.resourceId,
+                                                p.identityReference?.[
+                                                  "resourceId"
+                                                ],
                                             },
                                       })),
                                     },
@@ -2587,8 +2746,9 @@ export async function listJobSchedules(
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
                                           ?.virtualMachineConfiguration
-                                          ?.diskEncryptionConfiguration
-                                          ?.targets,
+                                          ?.diskEncryptionConfiguration?.[
+                                          "targets"
+                                        ],
                                     },
                                 nodePlacementConfiguration: !p.jobSpecification
                                   ?.poolInfo.autoPoolSpecification?.pool
@@ -2600,26 +2760,29 @@ export async function listJobSchedules(
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
                                           ?.virtualMachineConfiguration
-                                          ?.nodePlacementConfiguration?.policy,
+                                          ?.nodePlacementConfiguration?.[
+                                          "policy"
+                                        ],
                                     },
                                 extensions: (
                                   p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
-                                    ?.virtualMachineConfiguration?.extensions ??
-                                  []
+                                    ?.virtualMachineConfiguration?.[
+                                    "extensions"
+                                  ] ?? []
                                 ).map((p) => ({
-                                  name: p.name,
-                                  publisher: p.publisher,
-                                  type: p.type,
-                                  typeHandlerVersion: p.typeHandlerVersion,
+                                  name: p["name"],
+                                  publisher: p["publisher"],
+                                  type: p["type"],
+                                  typeHandlerVersion: p["typeHandlerVersion"],
                                   autoUpgradeMinorVersion:
-                                    p.autoUpgradeMinorVersion,
+                                    p["autoUpgradeMinorVersion"],
                                   settings: !p.settings ? undefined : {},
                                   protectedSettings: !p.protectedSettings
                                     ? undefined
                                     : {},
                                   provisionAfterExtensions:
-                                    p.provisionAfterExtensions,
+                                    p["provisionAfterExtensions"],
                                 })),
                                 osDisk: !p.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool
@@ -2638,14 +2801,15 @@ export async function listJobSchedules(
                                                 .autoPoolSpecification?.pool
                                                 ?.virtualMachineConfiguration
                                                 ?.osDisk
-                                                ?.ephemeralOSDiskSettings
-                                                ?.placement,
+                                                ?.ephemeralOSDiskSettings?.[
+                                                "placement"
+                                              ],
                                           },
                                     },
                               },
                           taskSlotsPerNode:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.taskSlotsPerNode,
+                              ?.pool?.["taskSlotsPerNode"],
                           taskSchedulingPolicy: !p.jobSpecification?.poolInfo
                             .autoPoolSpecification?.pool?.taskSchedulingPolicy
                             ? undefined
@@ -2653,29 +2817,29 @@ export async function listJobSchedules(
                                 nodeFillType:
                                   p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
-                                    ?.taskSchedulingPolicy?.nodeFillType,
+                                    ?.taskSchedulingPolicy?.["nodeFillType"],
                               },
                           resizeTimeout:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.resizeTimeout,
+                              ?.pool?.["resizeTimeout"],
                           targetDedicatedNodes:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.targetDedicatedNodes,
+                              ?.pool?.["targetDedicatedNodes"],
                           targetLowPriorityNodes:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.targetLowPriorityNodes,
+                              ?.pool?.["targetLowPriorityNodes"],
                           enableAutoScale:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.enableAutoScale,
+                              ?.pool?.["enableAutoScale"],
                           autoScaleFormula:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.autoScaleFormula,
+                              ?.pool?.["autoScaleFormula"],
                           autoScaleEvaluationInterval:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.autoScaleEvaluationInterval,
+                              ?.pool?.["autoScaleEvaluationInterval"],
                           enableInterNodeCommunication:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.enableInterNodeCommunication,
+                              ?.pool?.["enableInterNodeCommunication"],
                           networkConfiguration: !p.jobSpecification?.poolInfo
                             .autoPoolSpecification?.pool?.networkConfiguration
                             ? undefined
@@ -2683,12 +2847,13 @@ export async function listJobSchedules(
                                 subnetId:
                                   p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
-                                    ?.networkConfiguration?.subnetId,
+                                    ?.networkConfiguration?.["subnetId"],
                                 dynamicVNetAssignmentScope:
                                   p.jobSpecification?.poolInfo
                                     .autoPoolSpecification?.pool
-                                    ?.networkConfiguration
-                                    ?.dynamicVNetAssignmentScope,
+                                    ?.networkConfiguration?.[
+                                    "dynamicVNetAssignmentScope"
+                                  ],
                                 endpointConfiguration: !p.jobSpecification
                                   ?.poolInfo.autoPoolSpecification?.pool
                                   ?.networkConfiguration?.endpointConfiguration
@@ -2698,24 +2863,26 @@ export async function listJobSchedules(
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
                                           ?.networkConfiguration
-                                          ?.endpointConfiguration
-                                          ?.inboundNATPools ?? []
+                                          ?.endpointConfiguration?.[
+                                          "inboundNATPools"
+                                        ] ?? []
                                       ).map((p) => ({
-                                        name: p.name,
-                                        protocol: p.protocol,
-                                        backendPort: p.backendPort,
+                                        name: p["name"],
+                                        protocol: p["protocol"],
+                                        backendPort: p["backendPort"],
                                         frontendPortRangeStart:
-                                          p.frontendPortRangeStart,
+                                          p["frontendPortRangeStart"],
                                         frontendPortRangeEnd:
-                                          p.frontendPortRangeEnd,
+                                          p["frontendPortRangeEnd"],
                                         networkSecurityGroupRules: (
-                                          p.networkSecurityGroupRules ?? []
+                                          p["networkSecurityGroupRules"] ?? []
                                         ).map((p) => ({
-                                          priority: p.priority,
-                                          access: p.access,
+                                          priority: p["priority"],
+                                          access: p["access"],
                                           sourceAddressPrefix:
-                                            p.sourceAddressPrefix,
-                                          sourcePortRanges: p.sourcePortRanges,
+                                            p["sourceAddressPrefix"],
+                                          sourcePortRanges:
+                                            p["sourcePortRanges"],
                                         })),
                                       })),
                                     },
@@ -2730,14 +2897,16 @@ export async function listJobSchedules(
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
                                           ?.networkConfiguration
-                                          ?.publicIPAddressConfiguration
-                                          ?.provision,
+                                          ?.publicIPAddressConfiguration?.[
+                                          "provision"
+                                        ],
                                       ipAddressIds:
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
                                           ?.networkConfiguration
-                                          ?.publicIPAddressConfiguration
-                                          ?.ipAddressIds,
+                                          ?.publicIPAddressConfiguration?.[
+                                          "ipAddressIds"
+                                        ],
                                     },
                               },
                           startTask: !p.jobSpecification?.poolInfo
@@ -2746,8 +2915,9 @@ export async function listJobSchedules(
                             : {
                                 commandLine:
                                   p.jobSpecification?.poolInfo
-                                    .autoPoolSpecification?.pool?.startTask
-                                    ?.commandLine,
+                                    .autoPoolSpecification?.pool?.startTask?.[
+                                    "commandLine"
+                                  ],
                                 containerSettings: !p.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool?.startTask
                                   ?.containerSettings
@@ -2756,13 +2926,15 @@ export async function listJobSchedules(
                                       containerRunOptions:
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
-                                          ?.startTask?.containerSettings
-                                          ?.containerRunOptions,
+                                          ?.startTask?.containerSettings?.[
+                                          "containerRunOptions"
+                                        ],
                                       imageName:
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
-                                          ?.startTask?.containerSettings
-                                          ?.imageName,
+                                          ?.startTask?.containerSettings?.[
+                                          "imageName"
+                                        ],
                                       registry: !p.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool?.startTask
                                         ?.containerSettings?.registry
@@ -2772,17 +2944,17 @@ export async function listJobSchedules(
                                               p.jobSpecification?.poolInfo
                                                 .autoPoolSpecification?.pool
                                                 ?.startTask?.containerSettings
-                                                ?.registry?.username,
+                                                ?.registry?.["username"],
                                             password:
                                               p.jobSpecification?.poolInfo
                                                 .autoPoolSpecification?.pool
                                                 ?.startTask?.containerSettings
-                                                ?.registry?.password,
+                                                ?.registry?.["password"],
                                             registryServer:
                                               p.jobSpecification?.poolInfo
                                                 .autoPoolSpecification?.pool
                                                 ?.startTask?.containerSettings
-                                                ?.registry?.registryServer,
+                                                ?.registry?.["registryServer"],
                                             identityReference: !p
                                               .jobSpecification?.poolInfo
                                               .autoPoolSpecification?.pool
@@ -2796,42 +2968,46 @@ export async function listJobSchedules(
                                                       ?.pool?.startTask
                                                       ?.containerSettings
                                                       ?.registry
-                                                      ?.identityReference
-                                                      ?.resourceId,
+                                                      ?.identityReference?.[
+                                                      "resourceId"
+                                                    ],
                                                 },
                                           },
                                       workingDirectory:
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
-                                          ?.startTask?.containerSettings
-                                          ?.workingDirectory,
+                                          ?.startTask?.containerSettings?.[
+                                          "workingDirectory"
+                                        ],
                                     },
                                 resourceFiles: (
                                   p.jobSpecification?.poolInfo
-                                    .autoPoolSpecification?.pool?.startTask
-                                    ?.resourceFiles ?? []
+                                    .autoPoolSpecification?.pool?.startTask?.[
+                                    "resourceFiles"
+                                  ] ?? []
                                 ).map((p) => ({
                                   autoStorageContainerName:
-                                    p.autoStorageContainerName,
-                                  storageContainerUrl: p.storageContainerUrl,
-                                  httpUrl: p.httpUrl,
-                                  blobPrefix: p.blobPrefix,
-                                  filePath: p.filePath,
-                                  fileMode: p.fileMode,
+                                    p["autoStorageContainerName"],
+                                  storageContainerUrl: p["storageContainerUrl"],
+                                  httpUrl: p["httpUrl"],
+                                  blobPrefix: p["blobPrefix"],
+                                  filePath: p["filePath"],
+                                  fileMode: p["fileMode"],
                                   identityReference: !p.identityReference
                                     ? undefined
                                     : {
                                         resourceId:
-                                          p.identityReference?.resourceId,
+                                          p.identityReference?.["resourceId"],
                                       },
                                 })),
                                 environmentSettings: (
                                   p.jobSpecification?.poolInfo
-                                    .autoPoolSpecification?.pool?.startTask
-                                    ?.environmentSettings ?? []
+                                    .autoPoolSpecification?.pool?.startTask?.[
+                                    "environmentSettings"
+                                  ] ?? []
                                 ).map((p) => ({
-                                  name: p.name,
-                                  value: p.value,
+                                  name: p["name"],
+                                  value: p["value"],
                                 })),
                                 userIdentity: !p.jobSpecification?.poolInfo
                                   .autoPoolSpecification?.pool?.startTask
@@ -2841,7 +3017,9 @@ export async function listJobSchedules(
                                       username:
                                         p.jobSpecification?.poolInfo
                                           .autoPoolSpecification?.pool
-                                          ?.startTask?.userIdentity?.username,
+                                          ?.startTask?.userIdentity?.[
+                                          "username"
+                                        ],
                                       autoUser: !p.jobSpecification?.poolInfo
                                         .autoPoolSpecification?.pool?.startTask
                                         ?.userIdentity?.autoUser
@@ -2851,96 +3029,107 @@ export async function listJobSchedules(
                                               p.jobSpecification?.poolInfo
                                                 .autoPoolSpecification?.pool
                                                 ?.startTask?.userIdentity
-                                                ?.autoUser?.scope,
+                                                ?.autoUser?.["scope"],
                                             elevationLevel:
                                               p.jobSpecification?.poolInfo
                                                 .autoPoolSpecification?.pool
                                                 ?.startTask?.userIdentity
-                                                ?.autoUser?.elevationLevel,
+                                                ?.autoUser?.["elevationLevel"],
                                           },
                                     },
                                 maxTaskRetryCount:
                                   p.jobSpecification?.poolInfo
-                                    .autoPoolSpecification?.pool?.startTask
-                                    ?.maxTaskRetryCount,
+                                    .autoPoolSpecification?.pool?.startTask?.[
+                                    "maxTaskRetryCount"
+                                  ],
                                 waitForSuccess:
                                   p.jobSpecification?.poolInfo
-                                    .autoPoolSpecification?.pool?.startTask
-                                    ?.waitForSuccess,
+                                    .autoPoolSpecification?.pool?.startTask?.[
+                                    "waitForSuccess"
+                                  ],
                               },
                           certificateReferences: (
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.certificateReferences ?? []
+                              ?.pool?.["certificateReferences"] ?? []
                           ).map((p) => ({
-                            thumbprint: p.thumbprint,
-                            thumbprintAlgorithm: p.thumbprintAlgorithm,
-                            storeLocation: p.storeLocation,
-                            storeName: p.storeName,
-                            visibility: p.visibility,
+                            thumbprint: p["thumbprint"],
+                            thumbprintAlgorithm: p["thumbprintAlgorithm"],
+                            storeLocation: p["storeLocation"],
+                            storeName: p["storeName"],
+                            visibility: p["visibility"],
                           })),
                           applicationPackageReferences: (
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.applicationPackageReferences ?? []
+                              ?.pool?.["applicationPackageReferences"] ?? []
                           ).map((p) => ({
-                            applicationId: p.applicationId,
-                            version: p.version,
+                            applicationId: p["applicationId"],
+                            version: p["version"],
                           })),
                           applicationLicenses:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.applicationLicenses,
+                              ?.pool?.["applicationLicenses"],
                           userAccounts: (
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.userAccounts ?? []
+                              ?.pool?.["userAccounts"] ?? []
                           ).map((p) => ({
-                            name: p.name,
-                            password: p.password,
-                            elevationLevel: p.elevationLevel,
+                            name: p["name"],
+                            password: p["password"],
+                            elevationLevel: p["elevationLevel"],
                             linuxUserConfiguration: !p.linuxUserConfiguration
                               ? undefined
                               : {
-                                  uid: p.linuxUserConfiguration?.uid,
-                                  gid: p.linuxUserConfiguration?.gid,
+                                  uid: p.linuxUserConfiguration?.["uid"],
+                                  gid: p.linuxUserConfiguration?.["gid"],
                                   sshPrivateKey:
-                                    p.linuxUserConfiguration?.sshPrivateKey,
+                                    p.linuxUserConfiguration?.["sshPrivateKey"],
                                 },
                             windowsUserConfiguration:
                               !p.windowsUserConfiguration
                                 ? undefined
                                 : {
                                     loginMode:
-                                      p.windowsUserConfiguration?.loginMode,
+                                      p.windowsUserConfiguration?.["loginMode"],
                                   },
                           })),
                           metadata: (
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.metadata ?? []
-                          ).map((p) => ({ name: p.name, value: p.value })),
+                              ?.pool?.["metadata"] ?? []
+                          ).map((p) => ({
+                            name: p["name"],
+                            value: p["value"],
+                          })),
                           mountConfiguration: (
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.mountConfiguration ?? []
+                              ?.pool?.["mountConfiguration"] ?? []
                           ).map((p) => ({
                             azureBlobFileSystemConfiguration:
                               !p.azureBlobFileSystemConfiguration
                                 ? undefined
                                 : {
                                     accountName:
-                                      p.azureBlobFileSystemConfiguration
-                                        ?.accountName,
+                                      p.azureBlobFileSystemConfiguration?.[
+                                        "accountName"
+                                      ],
                                     containerName:
-                                      p.azureBlobFileSystemConfiguration
-                                        ?.containerName,
+                                      p.azureBlobFileSystemConfiguration?.[
+                                        "containerName"
+                                      ],
                                     accountKey:
-                                      p.azureBlobFileSystemConfiguration
-                                        ?.accountKey,
+                                      p.azureBlobFileSystemConfiguration?.[
+                                        "accountKey"
+                                      ],
                                     sasKey:
-                                      p.azureBlobFileSystemConfiguration
-                                        ?.sasKey,
+                                      p.azureBlobFileSystemConfiguration?.[
+                                        "sasKey"
+                                      ],
                                     blobfuseOptions:
-                                      p.azureBlobFileSystemConfiguration
-                                        ?.blobfuseOptions,
+                                      p.azureBlobFileSystemConfiguration?.[
+                                        "blobfuseOptions"
+                                      ],
                                     relativeMountPath:
-                                      p.azureBlobFileSystemConfiguration
-                                        ?.relativeMountPath,
+                                      p.azureBlobFileSystemConfiguration?.[
+                                        "relativeMountPath"
+                                      ],
                                     identityReference: !p
                                       .azureBlobFileSystemConfiguration
                                       ?.identityReference
@@ -2948,95 +3137,109 @@ export async function listJobSchedules(
                                       : {
                                           resourceId:
                                             p.azureBlobFileSystemConfiguration
-                                              ?.identityReference?.resourceId,
+                                              ?.identityReference?.[
+                                              "resourceId"
+                                            ],
                                         },
                                   },
                             nfsMountConfiguration: !p.nfsMountConfiguration
                               ? undefined
                               : {
-                                  source: p.nfsMountConfiguration?.source,
+                                  source: p.nfsMountConfiguration?.["source"],
                                   relativeMountPath:
-                                    p.nfsMountConfiguration?.relativeMountPath,
+                                    p.nfsMountConfiguration?.[
+                                      "relativeMountPath"
+                                    ],
                                   mountOptions:
-                                    p.nfsMountConfiguration?.mountOptions,
+                                    p.nfsMountConfiguration?.["mountOptions"],
                                 },
                             cifsMountConfiguration: !p.cifsMountConfiguration
                               ? undefined
                               : {
-                                  username: p.cifsMountConfiguration?.username,
-                                  source: p.cifsMountConfiguration?.source,
+                                  username:
+                                    p.cifsMountConfiguration?.["username"],
+                                  source: p.cifsMountConfiguration?.["source"],
                                   relativeMountPath:
-                                    p.cifsMountConfiguration?.relativeMountPath,
+                                    p.cifsMountConfiguration?.[
+                                      "relativeMountPath"
+                                    ],
                                   mountOptions:
-                                    p.cifsMountConfiguration?.mountOptions,
-                                  password: p.cifsMountConfiguration?.password,
+                                    p.cifsMountConfiguration?.["mountOptions"],
+                                  password:
+                                    p.cifsMountConfiguration?.["password"],
                                 },
                             azureFileShareConfiguration:
                               !p.azureFileShareConfiguration
                                 ? undefined
                                 : {
                                     accountName:
-                                      p.azureFileShareConfiguration
-                                        ?.accountName,
+                                      p.azureFileShareConfiguration?.[
+                                        "accountName"
+                                      ],
                                     azureFileUrl:
-                                      p.azureFileShareConfiguration
-                                        ?.azureFileUrl,
+                                      p.azureFileShareConfiguration?.[
+                                        "azureFileUrl"
+                                      ],
                                     accountKey:
-                                      p.azureFileShareConfiguration?.accountKey,
+                                      p.azureFileShareConfiguration?.[
+                                        "accountKey"
+                                      ],
                                     relativeMountPath:
-                                      p.azureFileShareConfiguration
-                                        ?.relativeMountPath,
+                                      p.azureFileShareConfiguration?.[
+                                        "relativeMountPath"
+                                      ],
                                     mountOptions:
-                                      p.azureFileShareConfiguration
-                                        ?.mountOptions,
+                                      p.azureFileShareConfiguration?.[
+                                        "mountOptions"
+                                      ],
                                   },
                           })),
                           targetNodeCommunicationMode:
                             p.jobSpecification?.poolInfo.autoPoolSpecification
-                              ?.pool?.targetNodeCommunicationMode,
+                              ?.pool?.["targetNodeCommunicationMode"],
                         },
                   },
             },
-            metadata: (p.jobSpecification?.metadata ?? []).map((p) => ({
-              name: p.name,
-              value: p.value,
+            metadata: (p.jobSpecification?.["metadata"] ?? []).map((p) => ({
+              name: p["name"],
+              value: p["value"],
             })),
           },
       executionInfo: !p.executionInfo
         ? undefined
         : {
-            nextRunTime: new Date(p.executionInfo?.nextRunTime ?? ""),
+            nextRunTime: new Date(p.executionInfo?.["nextRunTime"] ?? ""),
             recentJob: !p.executionInfo?.recentJob
               ? undefined
               : {
-                  id: p.executionInfo?.recentJob?.id,
-                  url: p.executionInfo?.recentJob?.url,
+                  id: p.executionInfo?.recentJob?.["id"],
+                  url: p.executionInfo?.recentJob?.["url"],
                 },
-            endTime: new Date(p.executionInfo?.endTime ?? ""),
+            endTime: new Date(p.executionInfo?.["endTime"] ?? ""),
           },
-      metadata: (p.metadata ?? []).map((p) => ({
-        name: p.name,
-        value: p.value,
+      metadata: (p["metadata"] ?? []).map((p) => ({
+        name: p["name"],
+        value: p["value"],
       })),
       stats: !p.stats
         ? undefined
         : {
-            url: p.stats?.url,
-            startTime: new Date(p.stats?.startTime ?? ""),
-            lastUpdateTime: new Date(p.stats?.lastUpdateTime ?? ""),
-            userCPUTime: p.stats?.userCPUTime,
-            kernelCPUTime: p.stats?.kernelCPUTime,
-            wallClockTime: p.stats?.wallClockTime,
-            readIOps: p.stats?.readIOps,
-            writeIOps: p.stats?.writeIOps,
-            readIOGiB: p.stats?.readIOGiB,
-            writeIOGiB: p.stats?.writeIOGiB,
-            numSucceededTasks: p.stats?.numSucceededTasks,
-            numFailedTasks: p.stats?.numFailedTasks,
-            numTaskRetries: p.stats?.numTaskRetries,
-            waitTime: p.stats?.waitTime,
+            url: p.stats?.["url"],
+            startTime: new Date(p.stats?.["startTime"] ?? ""),
+            lastUpdateTime: new Date(p.stats?.["lastUpdateTime"] ?? ""),
+            userCPUTime: p.stats?.["userCPUTime"],
+            kernelCPUTime: p.stats?.["kernelCPUTime"],
+            wallClockTime: p.stats?.["wallClockTime"],
+            readIOps: p.stats?.["readIOps"],
+            writeIOps: p.stats?.["writeIOps"],
+            readIOGiB: p.stats?.["readIOGiB"],
+            writeIOGiB: p.stats?.["writeIOGiB"],
+            numSucceededTasks: p.stats?.["numSucceededTasks"],
+            numFailedTasks: p.stats?.["numFailedTasks"],
+            numTaskRetries: p.stats?.["numTaskRetries"],
+            waitTime: p.stats?.["waitTime"],
           },
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }

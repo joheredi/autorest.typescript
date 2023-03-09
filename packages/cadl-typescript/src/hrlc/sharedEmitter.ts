@@ -1331,7 +1331,7 @@ function emitGlobalParameters(
 function getApiVersionParameter(program: Program): Parameter | void {
   const version = getDefaultApiVersion(program, getServiceNamespace(program));
   if (apiVersionParam) {
-    return apiVersionParam;
+    return { ...apiVersionParam, isApiVersion: true };
   } else if (version !== undefined) {
     return {
       clientName: "api_version",

@@ -72,12 +72,12 @@ export async function listApplications(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      id: p.id,
-      displayName: p.displayName,
-      versions: p.versions,
+    value: (result.body["value"] ?? []).map((p) => ({
+      id: p["id"],
+      displayName: p["displayName"],
+      versions: p["versions"],
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }
 
@@ -117,8 +117,8 @@ export async function getApplication(
   }
 
   return {
-    id: result.body.id,
-    displayName: result.body.displayName,
-    versions: result.body.versions,
+    id: result.body["id"],
+    displayName: result.body["displayName"],
+    versions: result.body["versions"],
   };
 }

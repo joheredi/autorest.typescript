@@ -320,232 +320,243 @@ export async function listTasks(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      id: p.id,
-      displayName: p.displayName,
-      url: p.url,
-      eTag: p.eTag,
-      lastModified: new Date(p.lastModified ?? ""),
-      creationTime: new Date(p.creationTime ?? ""),
+    value: (result.body["value"] ?? []).map((p) => ({
+      id: p["id"],
+      displayName: p["displayName"],
+      url: p["url"],
+      eTag: p["eTag"],
+      lastModified: new Date(p["lastModified"] ?? ""),
+      creationTime: new Date(p["creationTime"] ?? ""),
       exitConditions: !p.exitConditions
         ? undefined
         : {
-            exitCodes: (p.exitConditions?.exitCodes ?? []).map((p) => ({
-              code: p.code,
+            exitCodes: (p.exitConditions?.["exitCodes"] ?? []).map((p) => ({
+              code: p["code"],
               exitOptions: {
-                jobAction: p.exitOptions.jobAction,
-                dependencyAction: p.exitOptions.dependencyAction,
+                jobAction: p.exitOptions["jobAction"],
+                dependencyAction: p.exitOptions["dependencyAction"],
               },
             })),
-            exitCodeRanges: (p.exitConditions?.exitCodeRanges ?? []).map(
+            exitCodeRanges: (p.exitConditions?.["exitCodeRanges"] ?? []).map(
               (p) => ({
-                start: p.start,
-                end: p.end,
+                start: p["start"],
+                end: p["end"],
                 exitOptions: {
-                  jobAction: p.exitOptions.jobAction,
-                  dependencyAction: p.exitOptions.dependencyAction,
+                  jobAction: p.exitOptions["jobAction"],
+                  dependencyAction: p.exitOptions["dependencyAction"],
                 },
               })
             ),
             preProcessingError: !p.exitConditions?.preProcessingError
               ? undefined
               : {
-                  jobAction: p.exitConditions?.preProcessingError?.jobAction,
+                  jobAction:
+                    p.exitConditions?.preProcessingError?.["jobAction"],
                   dependencyAction:
-                    p.exitConditions?.preProcessingError?.dependencyAction,
+                    p.exitConditions?.preProcessingError?.["dependencyAction"],
                 },
             fileUploadError: !p.exitConditions?.fileUploadError
               ? undefined
               : {
-                  jobAction: p.exitConditions?.fileUploadError?.jobAction,
+                  jobAction: p.exitConditions?.fileUploadError?.["jobAction"],
                   dependencyAction:
-                    p.exitConditions?.fileUploadError?.dependencyAction,
+                    p.exitConditions?.fileUploadError?.["dependencyAction"],
                 },
             default: !p.exitConditions?.default
               ? undefined
               : {
-                  jobAction: p.exitConditions?.default?.jobAction,
-                  dependencyAction: p.exitConditions?.default?.dependencyAction,
+                  jobAction: p.exitConditions?.default?.["jobAction"],
+                  dependencyAction:
+                    p.exitConditions?.default?.["dependencyAction"],
                 },
           },
-      state: p.state,
-      stateTransitionTime: new Date(p.stateTransitionTime ?? ""),
-      previousState: p.previousState,
+      state: p["state"],
+      stateTransitionTime: new Date(p["stateTransitionTime"] ?? ""),
+      previousState: p["previousState"],
       previousStateTransitionTime: new Date(
-        p.previousStateTransitionTime ?? ""
+        p["previousStateTransitionTime"] ?? ""
       ),
-      commandLine: p.commandLine,
+      commandLine: p["commandLine"],
       containerSettings: !p.containerSettings
         ? undefined
         : {
-            containerRunOptions: p.containerSettings?.containerRunOptions,
-            imageName: p.containerSettings?.imageName,
+            containerRunOptions: p.containerSettings?.["containerRunOptions"],
+            imageName: p.containerSettings?.["imageName"],
             registry: !p.containerSettings?.registry
               ? undefined
               : {
-                  username: p.containerSettings?.registry?.username,
-                  password: p.containerSettings?.registry?.password,
-                  registryServer: p.containerSettings?.registry?.registryServer,
+                  username: p.containerSettings?.registry?.["username"],
+                  password: p.containerSettings?.registry?.["password"],
+                  registryServer:
+                    p.containerSettings?.registry?.["registryServer"],
                   identityReference: !p.containerSettings?.registry
                     ?.identityReference
                     ? undefined
                     : {
                         resourceId:
-                          p.containerSettings?.registry?.identityReference
-                            ?.resourceId,
+                          p.containerSettings?.registry?.identityReference?.[
+                            "resourceId"
+                          ],
                       },
                 },
-            workingDirectory: p.containerSettings?.workingDirectory,
+            workingDirectory: p.containerSettings?.["workingDirectory"],
           },
-      resourceFiles: (p.resourceFiles ?? []).map((p) => ({
-        autoStorageContainerName: p.autoStorageContainerName,
-        storageContainerUrl: p.storageContainerUrl,
-        httpUrl: p.httpUrl,
-        blobPrefix: p.blobPrefix,
-        filePath: p.filePath,
-        fileMode: p.fileMode,
+      resourceFiles: (p["resourceFiles"] ?? []).map((p) => ({
+        autoStorageContainerName: p["autoStorageContainerName"],
+        storageContainerUrl: p["storageContainerUrl"],
+        httpUrl: p["httpUrl"],
+        blobPrefix: p["blobPrefix"],
+        filePath: p["filePath"],
+        fileMode: p["fileMode"],
         identityReference: !p.identityReference
           ? undefined
-          : { resourceId: p.identityReference?.resourceId },
+          : { resourceId: p.identityReference?.["resourceId"] },
       })),
-      outputFiles: (p.outputFiles ?? []).map((p) => ({
-        filePattern: p.filePattern,
+      outputFiles: (p["outputFiles"] ?? []).map((p) => ({
+        filePattern: p["filePattern"],
         destination: {
           container: !p.destination.container
             ? undefined
             : {
-                path: p.destination.container?.path,
-                containerUrl: p.destination.container?.containerUrl,
+                path: p.destination.container?.["path"],
+                containerUrl: p.destination.container?.["containerUrl"],
                 identityReference: !p.destination.container?.identityReference
                   ? undefined
                   : {
                       resourceId:
-                        p.destination.container?.identityReference?.resourceId,
+                        p.destination.container?.identityReference?.[
+                          "resourceId"
+                        ],
                     },
                 uploadHeaders: (
-                  p.destination.container?.uploadHeaders ?? []
-                ).map((p) => ({ name: p.name, value: p.value })),
+                  p.destination.container?.["uploadHeaders"] ?? []
+                ).map((p) => ({ name: p["name"], value: p["value"] })),
               },
         },
-        uploadOptions: { uploadCondition: p.uploadOptions.uploadCondition },
+        uploadOptions: { uploadCondition: p.uploadOptions["uploadCondition"] },
       })),
-      environmentSettings: (p.environmentSettings ?? []).map((p) => ({
-        name: p.name,
-        value: p.value,
+      environmentSettings: (p["environmentSettings"] ?? []).map((p) => ({
+        name: p["name"],
+        value: p["value"],
       })),
       affinityInfo: !p.affinityInfo
         ? undefined
-        : { affinityId: p.affinityInfo?.affinityId },
+        : { affinityId: p.affinityInfo?.["affinityId"] },
       constraints: !p.constraints
         ? undefined
         : {
-            maxWallClockTime: p.constraints?.maxWallClockTime,
-            retentionTime: p.constraints?.retentionTime,
-            maxTaskRetryCount: p.constraints?.maxTaskRetryCount,
+            maxWallClockTime: p.constraints?.["maxWallClockTime"],
+            retentionTime: p.constraints?.["retentionTime"],
+            maxTaskRetryCount: p.constraints?.["maxTaskRetryCount"],
           },
-      requiredSlots: p.requiredSlots,
+      requiredSlots: p["requiredSlots"],
       userIdentity: !p.userIdentity
         ? undefined
         : {
-            username: p.userIdentity?.username,
+            username: p.userIdentity?.["username"],
             autoUser: !p.userIdentity?.autoUser
               ? undefined
               : {
-                  scope: p.userIdentity?.autoUser?.scope,
-                  elevationLevel: p.userIdentity?.autoUser?.elevationLevel,
+                  scope: p.userIdentity?.autoUser?.["scope"],
+                  elevationLevel: p.userIdentity?.autoUser?.["elevationLevel"],
                 },
           },
       executionInfo: !p.executionInfo
         ? undefined
         : {
-            startTime: new Date(p.executionInfo?.startTime ?? ""),
-            endTime: new Date(p.executionInfo?.endTime ?? ""),
-            exitCode: p.executionInfo?.exitCode,
+            startTime: new Date(p.executionInfo?.["startTime"] ?? ""),
+            endTime: new Date(p.executionInfo?.["endTime"] ?? ""),
+            exitCode: p.executionInfo?.["exitCode"],
             containerInfo: !p.executionInfo?.containerInfo
               ? undefined
               : {
-                  containerId: p.executionInfo?.containerInfo?.containerId,
-                  state: p.executionInfo?.containerInfo?.state,
-                  error: p.executionInfo?.containerInfo?.error,
+                  containerId: p.executionInfo?.containerInfo?.["containerId"],
+                  state: p.executionInfo?.containerInfo?.["state"],
+                  error: p.executionInfo?.containerInfo?.["error"],
                 },
             failureInfo: !p.executionInfo?.failureInfo
               ? undefined
               : {
-                  category: p.executionInfo?.failureInfo?.category,
-                  code: p.executionInfo?.failureInfo?.code,
-                  message: p.executionInfo?.failureInfo?.message,
-                  details: (p.executionInfo?.failureInfo?.details ?? []).map(
-                    (p) => ({ name: p.name, value: p.value })
-                  ),
+                  category: p.executionInfo?.failureInfo?.["category"],
+                  code: p.executionInfo?.failureInfo?.["code"],
+                  message: p.executionInfo?.failureInfo?.["message"],
+                  details: (
+                    p.executionInfo?.failureInfo?.["details"] ?? []
+                  ).map((p) => ({ name: p["name"], value: p["value"] })),
                 },
-            retryCount: p.executionInfo?.retryCount,
-            lastRetryTime: new Date(p.executionInfo?.lastRetryTime ?? ""),
-            requeueCount: p.executionInfo?.requeueCount,
-            lastRequeueTime: new Date(p.executionInfo?.lastRequeueTime ?? ""),
-            result: p.executionInfo?.result,
+            retryCount: p.executionInfo?.["retryCount"],
+            lastRetryTime: new Date(p.executionInfo?.["lastRetryTime"] ?? ""),
+            requeueCount: p.executionInfo?.["requeueCount"],
+            lastRequeueTime: new Date(
+              p.executionInfo?.["lastRequeueTime"] ?? ""
+            ),
+            result: p.executionInfo?.["result"],
           },
       nodeInfo: !p.nodeInfo
         ? undefined
         : {
-            affinityId: p.nodeInfo?.affinityId,
-            nodeUrl: p.nodeInfo?.nodeUrl,
-            poolId: p.nodeInfo?.poolId,
-            nodeId: p.nodeInfo?.nodeId,
-            taskRootDirectory: p.nodeInfo?.taskRootDirectory,
-            taskRootDirectoryUrl: p.nodeInfo?.taskRootDirectoryUrl,
+            affinityId: p.nodeInfo?.["affinityId"],
+            nodeUrl: p.nodeInfo?.["nodeUrl"],
+            poolId: p.nodeInfo?.["poolId"],
+            nodeId: p.nodeInfo?.["nodeId"],
+            taskRootDirectory: p.nodeInfo?.["taskRootDirectory"],
+            taskRootDirectoryUrl: p.nodeInfo?.["taskRootDirectoryUrl"],
           },
       multiInstanceSettings: !p.multiInstanceSettings
         ? undefined
         : {
-            numberOfInstances: p.multiInstanceSettings?.numberOfInstances,
+            numberOfInstances: p.multiInstanceSettings?.["numberOfInstances"],
             coordinationCommandLine:
-              p.multiInstanceSettings?.coordinationCommandLine,
+              p.multiInstanceSettings?.["coordinationCommandLine"],
             commonResourceFiles: (
-              p.multiInstanceSettings?.commonResourceFiles ?? []
+              p.multiInstanceSettings?.["commonResourceFiles"] ?? []
             ).map((p) => ({
-              autoStorageContainerName: p.autoStorageContainerName,
-              storageContainerUrl: p.storageContainerUrl,
-              httpUrl: p.httpUrl,
-              blobPrefix: p.blobPrefix,
-              filePath: p.filePath,
-              fileMode: p.fileMode,
+              autoStorageContainerName: p["autoStorageContainerName"],
+              storageContainerUrl: p["storageContainerUrl"],
+              httpUrl: p["httpUrl"],
+              blobPrefix: p["blobPrefix"],
+              filePath: p["filePath"],
+              fileMode: p["fileMode"],
               identityReference: !p.identityReference
                 ? undefined
-                : { resourceId: p.identityReference?.resourceId },
+                : { resourceId: p.identityReference?.["resourceId"] },
             })),
           },
       stats: !p.stats
         ? undefined
         : {
-            url: p.stats?.url,
-            startTime: new Date(p.stats?.startTime ?? ""),
-            lastUpdateTime: new Date(p.stats?.lastUpdateTime ?? ""),
-            userCPUTime: p.stats?.userCPUTime,
-            kernelCPUTime: p.stats?.kernelCPUTime,
-            wallClockTime: p.stats?.wallClockTime,
-            readIOps: p.stats?.readIOps,
-            writeIOps: p.stats?.writeIOps,
-            readIOGiB: p.stats?.readIOGiB,
-            writeIOGiB: p.stats?.writeIOGiB,
-            waitTime: p.stats?.waitTime,
+            url: p.stats?.["url"],
+            startTime: new Date(p.stats?.["startTime"] ?? ""),
+            lastUpdateTime: new Date(p.stats?.["lastUpdateTime"] ?? ""),
+            userCPUTime: p.stats?.["userCPUTime"],
+            kernelCPUTime: p.stats?.["kernelCPUTime"],
+            wallClockTime: p.stats?.["wallClockTime"],
+            readIOps: p.stats?.["readIOps"],
+            writeIOps: p.stats?.["writeIOps"],
+            readIOGiB: p.stats?.["readIOGiB"],
+            writeIOGiB: p.stats?.["writeIOGiB"],
+            waitTime: p.stats?.["waitTime"],
           },
       dependsOn: !p.dependsOn
         ? undefined
         : {
-            taskIds: p.dependsOn?.taskIds,
-            taskIdRanges: (p.dependsOn?.taskIdRanges ?? []).map((p) => ({
-              start: p.start,
-              end: p.end,
+            taskIds: p.dependsOn?.["taskIds"],
+            taskIdRanges: (p.dependsOn?.["taskIdRanges"] ?? []).map((p) => ({
+              start: p["start"],
+              end: p["end"],
             })),
           },
-      applicationPackageReferences: (p.applicationPackageReferences ?? []).map(
-        (p) => ({ applicationId: p.applicationId, version: p.version })
-      ),
+      applicationPackageReferences: (
+        p["applicationPackageReferences"] ?? []
+      ).map((p) => ({
+        applicationId: p["applicationId"],
+        version: p["version"],
+      })),
       authenticationTokenSettings: !p.authenticationTokenSettings
         ? undefined
-        : { access: p.authenticationTokenSettings?.access },
+        : { access: p.authenticationTokenSettings?.["access"] },
     })),
-    nextLink: result.body.odata.nextLink,
+    "odata.nextLink": result.body["odata.nextLink"],
   };
 }
 
@@ -625,25 +636,25 @@ export async function addCollection(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      status: p.status,
-      taskId: p.taskId,
-      eTag: p.eTag,
-      lastModified: new Date(p.lastModified ?? ""),
-      location: p.location,
+    value: (result.body["value"] ?? []).map((p) => ({
+      status: p["status"],
+      taskId: p["taskId"],
+      eTag: p["eTag"],
+      lastModified: new Date(p["lastModified"] ?? ""),
+      location: p["location"],
       error: !p.error
         ? undefined
         : {
-            code: p.error?.code,
+            code: p.error?.["code"],
             message: !p.error?.message
               ? undefined
               : {
-                  lang: p.error?.message?.lang,
-                  value: p.error?.message?.value,
+                  lang: p.error?.message?.["lang"],
+                  value: p.error?.message?.["value"],
                 },
-            values: (p.error?.values ?? []).map((p) => ({
-              key: p.key,
-              value: p.value,
+            values: (p.error?.["values"] ?? []).map((p) => ({
+              key: p["key"],
+              value: p["value"],
             })),
           },
     })),
@@ -847,241 +858,250 @@ export async function getTask(
   }
 
   return {
-    id: result.body.id,
-    displayName: result.body.displayName,
-    url: result.body.url,
-    eTag: result.body.eTag,
-    lastModified: new Date(result.body.lastModified ?? ""),
-    creationTime: new Date(result.body.creationTime ?? ""),
+    id: result.body["id"],
+    displayName: result.body["displayName"],
+    url: result.body["url"],
+    eTag: result.body["eTag"],
+    lastModified: new Date(result.body["lastModified"] ?? ""),
+    creationTime: new Date(result.body["creationTime"] ?? ""),
     exitConditions: !result.body.exitConditions
       ? undefined
       : {
-          exitCodes: (result.body.exitConditions?.exitCodes ?? []).map((p) => ({
-            code: p.code,
-            exitOptions: {
-              jobAction: p.exitOptions.jobAction,
-              dependencyAction: p.exitOptions.dependencyAction,
-            },
-          })),
+          exitCodes: (result.body.exitConditions?.["exitCodes"] ?? []).map(
+            (p) => ({
+              code: p["code"],
+              exitOptions: {
+                jobAction: p.exitOptions["jobAction"],
+                dependencyAction: p.exitOptions["dependencyAction"],
+              },
+            })
+          ),
           exitCodeRanges: (
-            result.body.exitConditions?.exitCodeRanges ?? []
+            result.body.exitConditions?.["exitCodeRanges"] ?? []
           ).map((p) => ({
-            start: p.start,
-            end: p.end,
+            start: p["start"],
+            end: p["end"],
             exitOptions: {
-              jobAction: p.exitOptions.jobAction,
-              dependencyAction: p.exitOptions.dependencyAction,
+              jobAction: p.exitOptions["jobAction"],
+              dependencyAction: p.exitOptions["dependencyAction"],
             },
           })),
           preProcessingError: !result.body.exitConditions?.preProcessingError
             ? undefined
             : {
                 jobAction:
-                  result.body.exitConditions?.preProcessingError?.jobAction,
+                  result.body.exitConditions?.preProcessingError?.["jobAction"],
                 dependencyAction:
-                  result.body.exitConditions?.preProcessingError
-                    ?.dependencyAction,
+                  result.body.exitConditions?.preProcessingError?.[
+                    "dependencyAction"
+                  ],
               },
           fileUploadError: !result.body.exitConditions?.fileUploadError
             ? undefined
             : {
                 jobAction:
-                  result.body.exitConditions?.fileUploadError?.jobAction,
+                  result.body.exitConditions?.fileUploadError?.["jobAction"],
                 dependencyAction:
-                  result.body.exitConditions?.fileUploadError?.dependencyAction,
+                  result.body.exitConditions?.fileUploadError?.[
+                    "dependencyAction"
+                  ],
               },
           default: !result.body.exitConditions?.default
             ? undefined
             : {
-                jobAction: result.body.exitConditions?.default?.jobAction,
+                jobAction: result.body.exitConditions?.default?.["jobAction"],
                 dependencyAction:
-                  result.body.exitConditions?.default?.dependencyAction,
+                  result.body.exitConditions?.default?.["dependencyAction"],
               },
         },
-    state: result.body.state,
-    stateTransitionTime: new Date(result.body.stateTransitionTime ?? ""),
-    previousState: result.body.previousState,
+    state: result.body["state"],
+    stateTransitionTime: new Date(result.body["stateTransitionTime"] ?? ""),
+    previousState: result.body["previousState"],
     previousStateTransitionTime: new Date(
-      result.body.previousStateTransitionTime ?? ""
+      result.body["previousStateTransitionTime"] ?? ""
     ),
-    commandLine: result.body.commandLine,
+    commandLine: result.body["commandLine"],
     containerSettings: !result.body.containerSettings
       ? undefined
       : {
           containerRunOptions:
-            result.body.containerSettings?.containerRunOptions,
-          imageName: result.body.containerSettings?.imageName,
+            result.body.containerSettings?.["containerRunOptions"],
+          imageName: result.body.containerSettings?.["imageName"],
           registry: !result.body.containerSettings?.registry
             ? undefined
             : {
-                username: result.body.containerSettings?.registry?.username,
-                password: result.body.containerSettings?.registry?.password,
+                username: result.body.containerSettings?.registry?.["username"],
+                password: result.body.containerSettings?.registry?.["password"],
                 registryServer:
-                  result.body.containerSettings?.registry?.registryServer,
+                  result.body.containerSettings?.registry?.["registryServer"],
                 identityReference: !result.body.containerSettings?.registry
                   ?.identityReference
                   ? undefined
                   : {
                       resourceId:
                         result.body.containerSettings?.registry
-                          ?.identityReference?.resourceId,
+                          ?.identityReference?.["resourceId"],
                     },
               },
-          workingDirectory: result.body.containerSettings?.workingDirectory,
+          workingDirectory: result.body.containerSettings?.["workingDirectory"],
         },
-    resourceFiles: (result.body.resourceFiles ?? []).map((p) => ({
-      autoStorageContainerName: p.autoStorageContainerName,
-      storageContainerUrl: p.storageContainerUrl,
-      httpUrl: p.httpUrl,
-      blobPrefix: p.blobPrefix,
-      filePath: p.filePath,
-      fileMode: p.fileMode,
+    resourceFiles: (result.body["resourceFiles"] ?? []).map((p) => ({
+      autoStorageContainerName: p["autoStorageContainerName"],
+      storageContainerUrl: p["storageContainerUrl"],
+      httpUrl: p["httpUrl"],
+      blobPrefix: p["blobPrefix"],
+      filePath: p["filePath"],
+      fileMode: p["fileMode"],
       identityReference: !p.identityReference
         ? undefined
-        : { resourceId: p.identityReference?.resourceId },
+        : { resourceId: p.identityReference?.["resourceId"] },
     })),
-    outputFiles: (result.body.outputFiles ?? []).map((p) => ({
-      filePattern: p.filePattern,
+    outputFiles: (result.body["outputFiles"] ?? []).map((p) => ({
+      filePattern: p["filePattern"],
       destination: {
         container: !p.destination.container
           ? undefined
           : {
-              path: p.destination.container?.path,
-              containerUrl: p.destination.container?.containerUrl,
+              path: p.destination.container?.["path"],
+              containerUrl: p.destination.container?.["containerUrl"],
               identityReference: !p.destination.container?.identityReference
                 ? undefined
                 : {
                     resourceId:
-                      p.destination.container?.identityReference?.resourceId,
+                      p.destination.container?.identityReference?.[
+                        "resourceId"
+                      ],
                   },
-              uploadHeaders: (p.destination.container?.uploadHeaders ?? []).map(
-                (p) => ({ name: p.name, value: p.value })
-              ),
+              uploadHeaders: (
+                p.destination.container?.["uploadHeaders"] ?? []
+              ).map((p) => ({ name: p["name"], value: p["value"] })),
             },
       },
-      uploadOptions: { uploadCondition: p.uploadOptions.uploadCondition },
+      uploadOptions: { uploadCondition: p.uploadOptions["uploadCondition"] },
     })),
-    environmentSettings: (result.body.environmentSettings ?? []).map((p) => ({
-      name: p.name,
-      value: p.value,
-    })),
+    environmentSettings: (result.body["environmentSettings"] ?? []).map(
+      (p) => ({ name: p["name"], value: p["value"] })
+    ),
     affinityInfo: !result.body.affinityInfo
       ? undefined
-      : { affinityId: result.body.affinityInfo?.affinityId },
+      : { affinityId: result.body.affinityInfo?.["affinityId"] },
     constraints: !result.body.constraints
       ? undefined
       : {
-          maxWallClockTime: result.body.constraints?.maxWallClockTime,
-          retentionTime: result.body.constraints?.retentionTime,
-          maxTaskRetryCount: result.body.constraints?.maxTaskRetryCount,
+          maxWallClockTime: result.body.constraints?.["maxWallClockTime"],
+          retentionTime: result.body.constraints?.["retentionTime"],
+          maxTaskRetryCount: result.body.constraints?.["maxTaskRetryCount"],
         },
-    requiredSlots: result.body.requiredSlots,
+    requiredSlots: result.body["requiredSlots"],
     userIdentity: !result.body.userIdentity
       ? undefined
       : {
-          username: result.body.userIdentity?.username,
+          username: result.body.userIdentity?.["username"],
           autoUser: !result.body.userIdentity?.autoUser
             ? undefined
             : {
-                scope: result.body.userIdentity?.autoUser?.scope,
+                scope: result.body.userIdentity?.autoUser?.["scope"],
                 elevationLevel:
-                  result.body.userIdentity?.autoUser?.elevationLevel,
+                  result.body.userIdentity?.autoUser?.["elevationLevel"],
               },
         },
     executionInfo: !result.body.executionInfo
       ? undefined
       : {
-          startTime: new Date(result.body.executionInfo?.startTime ?? ""),
-          endTime: new Date(result.body.executionInfo?.endTime ?? ""),
-          exitCode: result.body.executionInfo?.exitCode,
+          startTime: new Date(result.body.executionInfo?.["startTime"] ?? ""),
+          endTime: new Date(result.body.executionInfo?.["endTime"] ?? ""),
+          exitCode: result.body.executionInfo?.["exitCode"],
           containerInfo: !result.body.executionInfo?.containerInfo
             ? undefined
             : {
                 containerId:
-                  result.body.executionInfo?.containerInfo?.containerId,
-                state: result.body.executionInfo?.containerInfo?.state,
-                error: result.body.executionInfo?.containerInfo?.error,
+                  result.body.executionInfo?.containerInfo?.["containerId"],
+                state: result.body.executionInfo?.containerInfo?.["state"],
+                error: result.body.executionInfo?.containerInfo?.["error"],
               },
           failureInfo: !result.body.executionInfo?.failureInfo
             ? undefined
             : {
-                category: result.body.executionInfo?.failureInfo?.category,
-                code: result.body.executionInfo?.failureInfo?.code,
-                message: result.body.executionInfo?.failureInfo?.message,
+                category: result.body.executionInfo?.failureInfo?.["category"],
+                code: result.body.executionInfo?.failureInfo?.["code"],
+                message: result.body.executionInfo?.failureInfo?.["message"],
                 details: (
-                  result.body.executionInfo?.failureInfo?.details ?? []
-                ).map((p) => ({ name: p.name, value: p.value })),
+                  result.body.executionInfo?.failureInfo?.["details"] ?? []
+                ).map((p) => ({ name: p["name"], value: p["value"] })),
               },
-          retryCount: result.body.executionInfo?.retryCount,
+          retryCount: result.body.executionInfo?.["retryCount"],
           lastRetryTime: new Date(
-            result.body.executionInfo?.lastRetryTime ?? ""
+            result.body.executionInfo?.["lastRetryTime"] ?? ""
           ),
-          requeueCount: result.body.executionInfo?.requeueCount,
+          requeueCount: result.body.executionInfo?.["requeueCount"],
           lastRequeueTime: new Date(
-            result.body.executionInfo?.lastRequeueTime ?? ""
+            result.body.executionInfo?.["lastRequeueTime"] ?? ""
           ),
-          result: result.body.executionInfo?.result,
+          result: result.body.executionInfo?.["result"],
         },
     nodeInfo: !result.body.nodeInfo
       ? undefined
       : {
-          affinityId: result.body.nodeInfo?.affinityId,
-          nodeUrl: result.body.nodeInfo?.nodeUrl,
-          poolId: result.body.nodeInfo?.poolId,
-          nodeId: result.body.nodeInfo?.nodeId,
-          taskRootDirectory: result.body.nodeInfo?.taskRootDirectory,
-          taskRootDirectoryUrl: result.body.nodeInfo?.taskRootDirectoryUrl,
+          affinityId: result.body.nodeInfo?.["affinityId"],
+          nodeUrl: result.body.nodeInfo?.["nodeUrl"],
+          poolId: result.body.nodeInfo?.["poolId"],
+          nodeId: result.body.nodeInfo?.["nodeId"],
+          taskRootDirectory: result.body.nodeInfo?.["taskRootDirectory"],
+          taskRootDirectoryUrl: result.body.nodeInfo?.["taskRootDirectoryUrl"],
         },
     multiInstanceSettings: !result.body.multiInstanceSettings
       ? undefined
       : {
           numberOfInstances:
-            result.body.multiInstanceSettings?.numberOfInstances,
+            result.body.multiInstanceSettings?.["numberOfInstances"],
           coordinationCommandLine:
-            result.body.multiInstanceSettings?.coordinationCommandLine,
+            result.body.multiInstanceSettings?.["coordinationCommandLine"],
           commonResourceFiles: (
-            result.body.multiInstanceSettings?.commonResourceFiles ?? []
+            result.body.multiInstanceSettings?.["commonResourceFiles"] ?? []
           ).map((p) => ({
-            autoStorageContainerName: p.autoStorageContainerName,
-            storageContainerUrl: p.storageContainerUrl,
-            httpUrl: p.httpUrl,
-            blobPrefix: p.blobPrefix,
-            filePath: p.filePath,
-            fileMode: p.fileMode,
+            autoStorageContainerName: p["autoStorageContainerName"],
+            storageContainerUrl: p["storageContainerUrl"],
+            httpUrl: p["httpUrl"],
+            blobPrefix: p["blobPrefix"],
+            filePath: p["filePath"],
+            fileMode: p["fileMode"],
             identityReference: !p.identityReference
               ? undefined
-              : { resourceId: p.identityReference?.resourceId },
+              : { resourceId: p.identityReference?.["resourceId"] },
           })),
         },
     stats: !result.body.stats
       ? undefined
       : {
-          url: result.body.stats?.url,
-          startTime: new Date(result.body.stats?.startTime ?? ""),
-          lastUpdateTime: new Date(result.body.stats?.lastUpdateTime ?? ""),
-          userCPUTime: result.body.stats?.userCPUTime,
-          kernelCPUTime: result.body.stats?.kernelCPUTime,
-          wallClockTime: result.body.stats?.wallClockTime,
-          readIOps: result.body.stats?.readIOps,
-          writeIOps: result.body.stats?.writeIOps,
-          readIOGiB: result.body.stats?.readIOGiB,
-          writeIOGiB: result.body.stats?.writeIOGiB,
-          waitTime: result.body.stats?.waitTime,
+          url: result.body.stats?.["url"],
+          startTime: new Date(result.body.stats?.["startTime"] ?? ""),
+          lastUpdateTime: new Date(result.body.stats?.["lastUpdateTime"] ?? ""),
+          userCPUTime: result.body.stats?.["userCPUTime"],
+          kernelCPUTime: result.body.stats?.["kernelCPUTime"],
+          wallClockTime: result.body.stats?.["wallClockTime"],
+          readIOps: result.body.stats?.["readIOps"],
+          writeIOps: result.body.stats?.["writeIOps"],
+          readIOGiB: result.body.stats?.["readIOGiB"],
+          writeIOGiB: result.body.stats?.["writeIOGiB"],
+          waitTime: result.body.stats?.["waitTime"],
         },
     dependsOn: !result.body.dependsOn
       ? undefined
       : {
-          taskIds: result.body.dependsOn?.taskIds,
-          taskIdRanges: (result.body.dependsOn?.taskIdRanges ?? []).map(
-            (p) => ({ start: p.start, end: p.end })
+          taskIds: result.body.dependsOn?.["taskIds"],
+          taskIdRanges: (result.body.dependsOn?.["taskIdRanges"] ?? []).map(
+            (p) => ({ start: p["start"], end: p["end"] })
           ),
         },
     applicationPackageReferences: (
-      result.body.applicationPackageReferences ?? []
-    ).map((p) => ({ applicationId: p.applicationId, version: p.version })),
+      result.body["applicationPackageReferences"] ?? []
+    ).map((p) => ({
+      applicationId: p["applicationId"],
+      version: p["version"],
+    })),
     authenticationTokenSettings: !result.body.authenticationTokenSettings
       ? undefined
-      : { access: result.body.authenticationTokenSettings?.access },
+      : { access: result.body.authenticationTokenSettings?.["access"] },
   };
 }
 
@@ -1397,46 +1417,46 @@ export async function listSubtasks(
   }
 
   return {
-    value: (result.body.value ?? []).map((p) => ({
-      id: p.id,
+    value: (result.body["value"] ?? []).map((p) => ({
+      id: p["id"],
       nodeInfo: !p.nodeInfo
         ? undefined
         : {
-            affinityId: p.nodeInfo?.affinityId,
-            nodeUrl: p.nodeInfo?.nodeUrl,
-            poolId: p.nodeInfo?.poolId,
-            nodeId: p.nodeInfo?.nodeId,
-            taskRootDirectory: p.nodeInfo?.taskRootDirectory,
-            taskRootDirectoryUrl: p.nodeInfo?.taskRootDirectoryUrl,
+            affinityId: p.nodeInfo?.["affinityId"],
+            nodeUrl: p.nodeInfo?.["nodeUrl"],
+            poolId: p.nodeInfo?.["poolId"],
+            nodeId: p.nodeInfo?.["nodeId"],
+            taskRootDirectory: p.nodeInfo?.["taskRootDirectory"],
+            taskRootDirectoryUrl: p.nodeInfo?.["taskRootDirectoryUrl"],
           },
-      startTime: new Date(p.startTime ?? ""),
-      endTime: new Date(p.endTime ?? ""),
-      exitCode: p.exitCode,
+      startTime: new Date(p["startTime"] ?? ""),
+      endTime: new Date(p["endTime"] ?? ""),
+      exitCode: p["exitCode"],
       containerInfo: !p.containerInfo
         ? undefined
         : {
-            containerId: p.containerInfo?.containerId,
-            state: p.containerInfo?.state,
-            error: p.containerInfo?.error,
+            containerId: p.containerInfo?.["containerId"],
+            state: p.containerInfo?.["state"],
+            error: p.containerInfo?.["error"],
           },
       failureInfo: !p.failureInfo
         ? undefined
         : {
-            category: p.failureInfo?.category,
-            code: p.failureInfo?.code,
-            message: p.failureInfo?.message,
-            details: (p.failureInfo?.details ?? []).map((p) => ({
-              name: p.name,
-              value: p.value,
+            category: p.failureInfo?.["category"],
+            code: p.failureInfo?.["code"],
+            message: p.failureInfo?.["message"],
+            details: (p.failureInfo?.["details"] ?? []).map((p) => ({
+              name: p["name"],
+              value: p["value"],
             })),
           },
-      state: p.state,
-      stateTransitionTime: new Date(p.stateTransitionTime ?? ""),
-      previousState: p.previousState,
+      state: p["state"],
+      stateTransitionTime: new Date(p["stateTransitionTime"] ?? ""),
+      previousState: p["previousState"],
       previousStateTransitionTime: new Date(
-        p.previousStateTransitionTime ?? ""
+        p["previousStateTransitionTime"] ?? ""
       ),
-      result: p.result,
+      result: p["result"],
     })),
   };
 }
