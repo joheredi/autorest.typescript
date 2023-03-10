@@ -347,7 +347,7 @@ export interface GetSupportedLanguages {
 // @public
 export interface GetSupportedLanguages200Response extends HttpResponse {
     // (undocumented)
-    body: PagedSupportedLanguageOutput;
+    body: SupportedLanguagesOutput;
     // (undocumented)
     status: "200";
 }
@@ -545,7 +545,7 @@ export interface ListTrainingConfigVersions {
 // @public
 export interface ListTrainingConfigVersions200Response extends HttpResponse {
     // (undocumented)
-    body: PagedTrainingConfigVersionOutput;
+    body: TrainingConfigVersionsOutput;
     // (undocumented)
     status: "200";
 }
@@ -584,18 +584,6 @@ export interface OperationStatusOutput {
     error?: ErrorModelOutput;
     id: string;
     status: string;
-}
-
-// @public
-export interface PagedSupportedLanguageOutput {
-    nextLink?: string;
-    value: Array<SupportedLanguageOutput>;
-}
-
-// @public
-export interface PagedTrainingConfigVersionOutput {
-    nextLink?: string;
-    value: Array<TrainingConfigVersionOutput>;
 }
 
 // @public
@@ -671,6 +659,12 @@ export interface StandardListQueryParametersOutput {
 export interface SupportedLanguageOutput {
     languageCode: string;
     languageName: string;
+}
+
+// @public
+export interface SupportedLanguagesOutput {
+    nextLink?: string;
+    value: Array<SupportedLanguageOutput>;
 }
 
 // @public (undocumented)
@@ -760,6 +754,12 @@ export interface TrainDefaultResponse extends HttpResponse {
 export interface TrainingConfigVersionOutput {
     modelExpirationDate: string;
     trainingConfigVersion: string;
+}
+
+// @public
+export interface TrainingConfigVersionsOutput {
+    nextLink?: string;
+    value: Array<TrainingConfigVersionOutput>;
 }
 
 // @public

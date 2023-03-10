@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import createBatchServiceClient, { BatchServiceClient } from "./rest/index.js";
-import { ClientOptions } from "@azure-rest/core-client";
-import { TokenCredential } from "@azure/core-auth";
 import {
   AccountlistSupportedImagesOptions,
   listSupportedImages,
@@ -212,6 +209,9 @@ import {
   TaskreactivateTaskOptions,
   reactivateTask,
 } from "./api/Task.js";
+import { ClientOptions } from "./common/interfaces.js";
+import createBatchServiceClient, { BatchServiceClient } from "./rest/index.js";
+import { TokenCredential } from "@azure/core-auth";
 
 export class BatchServiceClientClient {
   private _client: BatchServiceClient;

@@ -1356,12 +1356,13 @@ function emitClients(context: DpgContext, namespace: string): HrlcClient[] {
   const clients = listClients(program);
   const retval: HrlcClient[] = [];
   for (const client of clients) {
+    const clientName = client.name.replace("Client", "");
     if (getNamespace(context, client.name) !== namespace) {
       continue;
     }
     const server = getServerHelper(program, client.service);
     const emittedClient: HrlcClient = {
-      name: client.name.split(".").at(-1) ?? "",
+      name: clientName.split(".").at(-1) ?? "",
       description: getDocStr(program, client.type),
       parameters: emitGlobalParameters(program, client.service),
       operationGroups: emitOperationGroups(program, client),

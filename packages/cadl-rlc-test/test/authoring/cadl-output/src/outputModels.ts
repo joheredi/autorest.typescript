@@ -160,7 +160,7 @@ export interface SwapDeploymentsJobOutput {
 }
 
 /** A collection of SupportedLanguage resources. */
-export interface PagedSupportedLanguageOutput {
+export interface SupportedLanguagesOutput {
   /** The SupportedLanguage items on this page */
   value: Array<SupportedLanguageOutput>;
   /** The link to the next page of items */
@@ -176,7 +176,7 @@ export interface SupportedLanguageOutput {
 }
 
 /** A collection of TrainingConfigVersion resources. */
-export interface PagedTrainingConfigVersionOutput {
+export interface TrainingConfigVersionsOutput {
   /** The TrainingConfigVersion items on this page */
   value: Array<TrainingConfigVersionOutput>;
   /** The link to the next page of items */

@@ -12,8 +12,8 @@ import {
   DeploymentListOutput,
   DeploymentJobOutput,
   SwapDeploymentsJobOutput,
-  PagedSupportedLanguageOutput,
-  PagedTrainingConfigVersionOutput,
+  SupportedLanguagesOutput,
+  TrainingConfigVersionsOutput,
 } from "./outputModels";
 
 export interface CreateOrUpdate200Headers {
@@ -241,7 +241,7 @@ export interface GetSwapDeploymentsStatusDefaultResponse extends HttpResponse {
 /** The request has succeeded. */
 export interface GetSupportedLanguages200Response extends HttpResponse {
   status: "200";
-  body: PagedSupportedLanguageOutput;
+  body: SupportedLanguagesOutput;
 }
 
 export interface GetSupportedLanguagesDefaultResponse extends HttpResponse {
@@ -252,7 +252,7 @@ export interface GetSupportedLanguagesDefaultResponse extends HttpResponse {
 /** The request has succeeded. */
 export interface ListTrainingConfigVersions200Response extends HttpResponse {
   status: "200";
-  body: PagedTrainingConfigVersionOutput;
+  body: TrainingConfigVersionsOutput;
 }
 
 export interface ListTrainingConfigVersionsDefaultResponse

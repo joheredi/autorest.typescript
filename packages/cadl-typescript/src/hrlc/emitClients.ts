@@ -12,6 +12,7 @@ import {
   emitClientOperationGroups,
   emitOperationGroups
 } from "./emitOperations.js";
+import { emitSharedTypes } from "./emitSharedTypes.js";
 // import { emitPackage } from "./emitPackageFile.js";
 // import { emitTsConfig } from "./emitTsConfig.js";
 import { Client, HrlcCodeModel, Parameter } from "./hrlcCodeModel.js";
@@ -26,9 +27,8 @@ export function emitClients(
   srcPath: string = "src"
 ) {
   const project: Project = new Project();
-  const coreClientImports: string[] = [];
+  emitSharedTypes(project, srcPath);
   const importedModels: string[] = [];
-  let files: ClientSourceFile[] = [];
   for (const client of codeModel.clients) {
     const { name, description, parameters } = client;
     let optionsParam = {
@@ -46,9 +46,6 @@ export function emitClients(
         type: `ClientOptions`,
         initializer: "{}"
       };
-      coreClientImports.push("ClientOptions");
-    } else {
-      importedModels.push(`${name}Options`);
     }
     const params: OptionalKind<ParameterDeclarationStructure>[] = [
       ...parameters
@@ -64,9 +61,7 @@ export function emitClients(
     const clientContextFile = project.createSourceFile(
       `${srcPath}/src/api/${name}.ts`
     );
-    const clientFile = project.createSourceFile(
-      `${srcPath}/src/${name}Client.ts`
-    );
+    const clientFile = project.createSourceFile(`${srcPath}/src/${name}.ts`);
 
     let baseUrlParam: Parameter | undefined = parameters.find(
       (p) => p.location === "endpointPath"
@@ -95,22 +90,12 @@ export function emitClients(
       },
       clientContextFile,
       exports,
-      coreClientImports,
       importedModels
     );
 
-    const operationFiles = emitOperationGroups(
-      client,
-      project,
-      exports,
-      srcPath
-    );
-    const modelFiles = emitModels(codeModel, project, exports, srcPath);
+    emitOperationGroups(client, project, exports, "module", srcPath);
+    emitModels(codeModel, project, exports, srcPath);
 
-    files.push({
-      path: `${srcPath}/src/api/${name}.ts`,
-      content: clientContextFile.getFullText()
-    });
     emitClient(
       codeModel,
       client,
@@ -122,23 +107,16 @@ export function emitClients(
         credentialsParam
       },
       clientFile,
-      exports,
-      coreClientImports
+      exports
     );
-    clientFile.fixMissingImports();
-    emitRootIndexFile(clientFile, srcPath, files);
-    emitApiIndexFile(project, srcPath, files);
+    clientFile.fixMissingImports({}, {importModuleSpecifierEnding: "js"});
+    emitRootIndexFile(clientFile, srcPath);
+    emitApiIndexFile(project, srcPath);
     // emitTsConfig(project, srcPath,  codeModel, files);
     // emitPackage(project, srcPath, codeModel, files);
-    files.push({
-      path: `${srcPath}/src/${name}Client.ts`,
-      content: clientFile.getFullText()
-    });
-
-    files = [...files, ...operationFiles, ...modelFiles];
   }
 
-  return files;
+  return project;
 }
 
 function addExports(
@@ -156,37 +134,20 @@ function addExports(
   }
 }
 
-function emitApiIndexFile(
-  project: Project,
-  srcPath: string,
-  files: ClientSourceFile[]
-) {
+function emitApiIndexFile(project: Project, srcPath: string) {
   const apiFiles = project.getSourceFiles("./src/api/**");
   const indexFile = project.createSourceFile(`${srcPath}/src/api/index.ts`);
   for (const file of apiFiles) {
     const imports = file.getImportDeclarations();
     addExports(imports, indexFile);
   }
-
-  files.push({
-    path: `${srcPath}/src/api/index.ts`,
-    content: indexFile.getFullText()
-  });
 }
 
-function emitRootIndexFile(
-  clientFile: SourceFile,
-  srcPath: string,
-  files: ClientSourceFile[]
-) {
+function emitRootIndexFile(clientFile: SourceFile, srcPath: string) {
   const project = clientFile.getProject();
   const indexFile = project.createSourceFile(`${srcPath}/src/index.ts`);
   const clientImports = clientFile.getImportDeclarations();
   addExports(clientImports, indexFile);
-  files.push({
-    path: `${srcPath}/src/index.ts`,
-    content: indexFile.getFullText()
-  });
 }
 
 interface ClientDetails {
@@ -202,14 +163,13 @@ function emitClientContexts(
   clientDetails: ClientDetails,
   clientContextFile: SourceFile,
   exports: string[],
-  coreClientImports: string[],
   importedModels: string[]
 ) {
   exports.push(`${clientDetails.name}.js`);
   const factoryFunction = clientContextFile.addFunction({
     docs: [clientDetails.description],
     name: `create${clientDetails.name}`,
-    returnType: `${clientDetails.name}`,
+    returnType: `${clientDetails.name}Context`,
     parameters: clientDetails.params,
     isExported: true
   });
@@ -232,16 +192,11 @@ function emitClientContexts(
     {
       moduleSpecifier: "../rest/index.js",
       defaultImport: "getClient",
-      namedImports: [
-        clientDetails.name,
-        ...importedModels.map((im) => `${im}Options`)
-      ]
-    },
-    {
-      moduleSpecifier: "@azure-rest/core-client",
-      namedImports: coreClientImports
+      namedImports: [...importedModels.map((im) => `${im}Options`)]
     }
   ]);
+
+  clientContextFile.fixMissingImports({}, {importModuleSpecifierEnding: "js"});
 }
 
 function importCredential(
@@ -275,18 +230,17 @@ function emitClient(
   client: Client,
   clientDetails: ClientDetails,
   clientFile: SourceFile,
-  exports: string[],
-  coreClientImports: string[]
+  exports: string[]
 ) {
   exports.push(`${clientDetails.name}.js`);
   const clientClass = clientFile.addClass({
     isExported: true,
-    name: `${clientDetails.name}Client`
+    name: `${clientDetails.name}`
   });
 
   clientClass.addProperty({
     name: "_client",
-    type: clientDetails.name,
+    type: `${clientDetails.name}Context`,
     scope: Scope.Private
   });
   const constructor = clientClass.addConstructor({
@@ -299,17 +253,12 @@ function emitClient(
       .join(",")})`
   ]);
 
-  emitClientOperationGroups(client, clientClass, clientFile);
-
+  emitClientOperationGroups(client, clientClass, "client", clientFile);
+  clientFile.fixMissingImports({}, {importModuleSpecifierEnding: "js"});
   clientFile.addImportDeclarations([
     {
       moduleSpecifier: "./rest/index.js",
-      namedImports: [`${clientDetails.name}`],
       defaultImport: `create${clientDetails.name}`
-    },
-    {
-      moduleSpecifier: "@azure-rest/core-client",
-      namedImports: coreClientImports
     }
   ]);
 
@@ -327,7 +276,7 @@ function addCredentialOptionsStatement(
         throw new Error(`Key credential does not define a header name`);
       }
       factoryFunction.addStatements(
-        `options.credentials = {...options.requestOptions?.credentials, apiKeyHeaderName: "${credential.type.policy.key}"}`
+        `options.credentials = {...options.credentials, apiKeyHeaderName: "${credential.type.policy.key}"}`
       );
       return;
     default:

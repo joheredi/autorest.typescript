@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-export { BatchServiceClient } from "./rest/index.js";
-export { ClientOptions } from "@azure-rest/core-client";
-export { TokenCredential } from "@azure/core-auth";
 export {
   AccountlistSupportedImagesOptions,
   listSupportedImages,
@@ -212,3 +209,6 @@ export {
   TaskreactivateTaskOptions,
   reactivateTask,
 } from "./api/Task.js";
+export { ClientOptions } from "./common/interfaces.js";
+export { BatchServiceClient } from "./rest/index.js";
+export { TokenCredential } from "@azure/core-auth";

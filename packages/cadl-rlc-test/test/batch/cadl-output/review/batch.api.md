@@ -5,7 +5,7 @@
 ```ts
 
 import { Client } from '@azure-rest/core-client';
-import { ClientOptions } from '@azure-rest/core-client';
+import { ClientOptions as ClientOptions_2 } from '@azure-rest/core-client';
 import { HttpResponse } from '@azure-rest/core-client';
 import { RawHttpHeaders } from '@azure/core-rest-pipeline';
 import { RawHttpHeadersInput } from '@azure/core-rest-pipeline';
@@ -395,7 +395,9 @@ export interface CertificateslistCertificatesOptions extends RequestParametersCo
     timeOut?: number;
 }
 
-export { ClientOptions }
+// @public (undocumented)
+export interface ClientOptions extends ClientOptions_2 {
+}
 
 // @public (undocumented)
 export interface ComputeNode {

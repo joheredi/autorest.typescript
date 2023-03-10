@@ -42,25 +42,6 @@ export async function $onEmit(context: EmitContext) {
   clearSrcFolder(context.emitterOutputDir);
   const clients = listClients(program);
 
-  if (options.isHrlc) {
-    const hrlcExports: string[] = [];
-    const hrlc = emitCodeModel(context, { casing: "camel" });
-    const hrlcClients = emitClients(
-      hrlc,
-      hrlcExports,
-      context.emitterOutputDir
-    );
-    for (const hrlcClient of hrlcClients) {
-      emitContentByBuilder(program, () => hrlcClient, hrlc as any);
-      // emitFile(program, { content: hrlcClient.content, path: hrlcClient.path });
-    }
-    emitContentByBuilder(
-      program,
-      () => emitApiIndex(hrlcExports, context.emitterOutputDir),
-      hrlc as any
-    );
-  }
-
   for (const client of clients) {
     const rlcModels = await transformRLCModel(
       program,
@@ -108,6 +89,31 @@ export async function $onEmit(context: EmitContext) {
       context.emitterOutputDir
     );
   }
+
+  if (options.isHrlc) {
+    const hrlcExports: string[] = [];
+    const hrlc = emitCodeModel(context, { casing: "camel" });
+    const hrlcProject = emitClients(
+      hrlc,
+      hrlcExports,
+      context.emitterOutputDir
+    );
+    for (let file of hrlcProject.getSourceFiles()) {
+      file = file.fixMissingImports();
+      emitContentByBuilder(
+        program,
+        () => ({ content: file.getFullText(), path: file.getFilePath() }),
+        hrlc as any
+      );
+      // emitFile(program, { content: hrlcClient.content, path: hrlcClient.path });
+    }
+    emitContentByBuilder(
+      program,
+      () => emitApiIndex(hrlcExports, context.emitterOutputDir),
+      hrlc as any
+    );
+  }
+
 }
 
 function clearSrcFolder(srcPath: string) {

@@ -3,13 +3,18 @@ import { Type } from "./hrlcCodeModel.js";
 export interface TypeMetadata {
   name: string;
   originModule?: string;
+  isRelative?: boolean;
   modifier?: "Array";
 }
 
 export function getType(type: Type): TypeMetadata {
   switch (type.type) {
     case "Key":
-      return { name: "AzureKeyCredential", originModule: "@azure/core-auth" };
+      return {
+        name: "AzureKeyCredential",
+        originModule: "@azure/core-auth",
+        isRelative: false
+      };
     case "boolean":
       return { name: "boolean" };
     case "constant":
@@ -24,7 +29,7 @@ export function getType(type: Type): TypeMetadata {
       if (!type.name) {
         throw new Error("Unable to process enum without name");
       }
-      return { name: type.name, originModule: "./models.js" };
+      return { name: type.name, originModule: "models.js" };
     case "float":
     case "integer":
       return { name: "number" };
@@ -36,13 +41,13 @@ export function getType(type: Type): TypeMetadata {
         name: getType(type.elementType).name,
         modifier: "Array",
         originModule:
-          type.elementType?.type === "model" ? "./models.js" : undefined
+          type.elementType?.type === "model" ? "models.js" : undefined
       };
     case "model":
       if (!type.name) {
         throw new Error("Unable to process model without name");
       }
-      return { name: type.name, originModule: "./models.js" };
+      return { name: type.name, originModule: "models.js" };
     case "string":
     case "duration":
       return { name: "string" };

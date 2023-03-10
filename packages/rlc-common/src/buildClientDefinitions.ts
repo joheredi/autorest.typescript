@@ -69,7 +69,7 @@ export function buildClientDefinitions(model: RLCModel) {
 
   const clientInterfaceName = clientName.endsWith("Client")
     ? `${clientName}`
-    : `${clientName}Client`;
+    : `${clientName}${model.options?.isHrlc ? "Context" : "Client"}`;
 
   clientDefinitionsFile.addTypeAlias({
     isExported: true,

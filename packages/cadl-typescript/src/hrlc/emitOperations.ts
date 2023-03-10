@@ -2,10 +2,12 @@ import { File } from "@azure-tools/rlc-common";
 import {
   ClassDeclaration,
   FunctionDeclarationStructure,
+  MethodDeclarationStructure,
   OptionalKind,
   ParameterDeclarationStructure,
   Project,
-  SourceFile
+  SourceFile,
+  StructureKind
 } from "ts-morph";
 import { toCamelCase } from "../casingUtils.js";
 import { getType } from "./getType.js";
@@ -16,10 +18,12 @@ import {
   Type,
   Client
 } from "./hrlcCodeModel.js";
+import { getModuleFullName } from "./importsHelper.js";
 
 export function emitClientOperationGroups(
   client: Client,
   clientClass: ClassDeclaration,
+  scope: "client" | "module",
   _clientFile: SourceFile
 ) {
   for (const operationGroup of client.operationGroups) {
@@ -27,15 +31,16 @@ export function emitClientOperationGroups(
     const operationGroupName = toCamelCase(operationGroup.propertyName);
     const operationDeclarations: OptionalKind<FunctionDeclarationStructure>[] =
       operationGroup.operations.map((operation) =>
-        emitOperation(operation, imports)
+        emitOperation(operation, imports, scope)
       );
     const tempfile = new Project().createSourceFile("temp.ts");
 
     const declarations = tempfile.addFunctions(operationDeclarations);
 
-    clientClass.addProperty({
-      name: operationGroupName,
-      initializer: `
+    if (operationGroupName) {
+      clientClass.addProperty({
+        name: operationGroupName,
+        initializer: `
       {
         ${declarations.map((d) => {
           return `${d.getName()}: (${d
@@ -53,7 +58,30 @@ export function emitClientOperationGroups(
         })}
       }
       `
-    });
+      });
+    } else {
+      clientClass.addMethods(
+        declarations.map((d) => {
+          const method: MethodDeclarationStructure = {
+            name: d.getName() ?? "FIXME",
+            kind: StructureKind.Method,
+            returnType: d.getReturnType().getText(),
+            parameters: d
+              .getParameters()
+              .filter((p) => p.getName() !== "context")
+              .map((d) => d.getStructure()),
+            statements: `return ${d.getName()}(${[
+              "this._client",
+              ...d.getParameters().map((p) => p.getName())
+            ]
+              .filter((p) => p !== "context")
+              .join(",")})`
+          };
+
+          return method;
+        })
+      );
+    }
   }
 }
 
@@ -61,6 +89,7 @@ export function emitOperationGroups(
   client: Client,
   project: Project,
   exports: string[],
+  scope: "client" | "module",
   srcPath: string = "src"
 ): File[] {
   const files: File[] = [];
@@ -75,21 +104,21 @@ export function emitOperationGroups(
     );
     exports.push(`${fileName}.js`);
     operationGroup.operations.forEach((o) => {
-      emitOptionsInterface(o, imports, operationGroupFile);
-      const operationDeclaration = emitOperation(o, imports);
+      emitOptionsInterface(o, imports, scope, operationGroupFile);
+      const operationDeclaration = emitOperation(o, imports, scope);
       operationGroupFile.addFunction(operationDeclaration);
     });
 
     for (const module in imports) {
       operationGroupFile.addImportDeclaration({
-        moduleSpecifier: module,
+        moduleSpecifier: `./${module}`,
         namedImports: [...imports[module]!]
       });
     }
     operationGroupFile.addImportDeclarations([
       {
         moduleSpecifier: "../rest/index.js",
-        namedImports: [`${client.name} as Client`, "isUnexpected"]
+        namedImports: [`${client.name}Context as Client`, "isUnexpected"]
       }
     ]);
     files.push({
@@ -103,13 +132,14 @@ export function emitOperationGroups(
 
 export function emitOperation(
   operation: Operation,
-  imports: Record<string, Set<string>>
+  imports: Record<string, Set<string>>,
+  scope: "client" | "module"
 ): OptionalKind<FunctionDeclarationStructure> {
   let parameters: OptionalKind<ParameterDeclarationStructure>[] = (
     operation.bodyParameter?.type.properties ?? []
   )
     .filter((p) => !p.optional)
-    .map((p) => buildParameterType(p.clientName, p.type, imports));
+    .map((p) => buildParameterType(p.clientName, p.type, imports, scope));
 
   parameters = parameters.concat(
     operation.parameters
@@ -119,10 +149,10 @@ export function emitOperation(
           p.type.type !== "constant" &&
           !p.optional
       )
-      .map((p) => buildParameterType(p.clientName, p.type, imports))
+      .map((p) => buildParameterType(p.clientName, p.type, imports, scope))
   );
 
-  const optionsType = emitOptionsInterface(operation, imports);
+  const optionsType = emitOptionsInterface(operation, imports, scope);
   parameters.unshift({ name: "context", type: "Client" });
   parameters.push({
     name: "options",
@@ -134,7 +164,7 @@ export function emitOperation(
   const response = operation.responses[0]!;
   const returnType =
     response?.type?.type === "model"
-      ? buildParameterType(response.type.name!, response.type!, imports)
+      ? buildParameterType(response.type.name!, response.type!, imports, scope)
       : { name: "", type: "void" };
 
   const functionStatement: OptionalKind<FunctionDeclarationStructure> = {
@@ -166,7 +196,6 @@ export function emitOperation(
       `}`
     );
   }
-
   return {
     ...functionStatement,
     statements
@@ -382,6 +411,7 @@ function getParameterMap(param: Parameter | Property) {
 function emitOptionsInterface(
   operation: Operation,
   imports: Record<string, Set<string>>,
+  scope: "client" | "module",
   sourceFile?: SourceFile
 ): string {
   const optionalParameters = operation.parameters.filter((p) => p.optional);
@@ -414,7 +444,7 @@ function emitOptionsInterface(
       return {
         docs: [p.description],
         hasQuestionToken: true,
-        ...buildParameterType(p.clientName, p.type, imports)
+        ...buildParameterType(p.clientName, p.type, imports, scope)
       };
     })
   });
@@ -429,7 +459,8 @@ function toPascalCase(name: string): string {
 function buildParameterType(
   clientName: string,
   type: Type,
-  imports: Record<string, Set<string>>
+  imports: Record<string, Set<string>>,
+  scope: "client" | "module"
 ) {
   let typeMetadata = getType(type);
   let typeName = typeMetadata.name;
@@ -437,11 +468,17 @@ function buildParameterType(
     typeName = `${typeName}[]`;
   }
   if (typeMetadata.originModule) {
-    if (!imports[typeMetadata.originModule!]) {
-      imports[typeMetadata.originModule] = new Set();
+    const moduleNameFullName = getModuleFullName(
+      typeMetadata.originModule!,
+      typeMetadata.isRelative,
+      scope
+    );
+    if (!imports[moduleNameFullName]) {
+      imports[moduleNameFullName] = new Set();
     }
 
-    imports[typeMetadata.originModule]!.add(typeMetadata.name);
+    imports[moduleNameFullName]!.add(typeMetadata.name);
   }
   return { name: clientName, type: typeName };
 }
+

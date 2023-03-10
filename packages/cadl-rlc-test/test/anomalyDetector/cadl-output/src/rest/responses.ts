@@ -13,7 +13,7 @@ import {
   AnomalyDetectionModelOutput,
   ModelListOutput,
   MultivariateLastDetectionResultOutput,
-} from "./outputModels";
+} from "./outputModels.js";
 
 /** The request has succeeded. */
 export interface DetectUnivariateEntireSeries200Response extends HttpResponse {

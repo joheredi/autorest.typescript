@@ -12,7 +12,7 @@ import {
   GetMultivariateModelParameters,
   DetectMultivariateBatchAnomalyParameters,
   DetectMultivariateLastAnomalyParameters,
-} from "./parameters";
+} from "./parameters.js";
 import {
   DetectUnivariateEntireSeries200Response,
   DetectUnivariateEntireSeriesDefaultResponse,
@@ -34,7 +34,7 @@ import {
   DetectMultivariateBatchAnomalyDefaultResponse,
   DetectMultivariateLastAnomaly200Response,
   DetectMultivariateLastAnomalyDefaultResponse,
-} from "./responses";
+} from "./responses.js";
 import { Client, StreamableMethod } from "@azure-rest/core-client";
 
 export interface DetectUnivariateEntireSeries {
@@ -192,6 +192,6 @@ export interface Routes {
   ): DetectMultivariateLastAnomaly;
 }
 
-export type AnomalyDetectorClient = Client & {
+export type AnomalyDetectorContext = Client & {
   path: Routes;
 };
