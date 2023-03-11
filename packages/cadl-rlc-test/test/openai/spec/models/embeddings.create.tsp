@@ -1,4 +1,5 @@
 import "@typespec/rest";
+import "@typespec/http";
 
 using TypeSpec.Rest;
 using TypeSpec.Http;

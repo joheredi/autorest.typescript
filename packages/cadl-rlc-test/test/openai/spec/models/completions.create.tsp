@@ -1,4 +1,5 @@
 import "@typespec/rest";
+import "@typespec/http";
 
 using TypeSpec.Rest;
 using TypeSpec.Http;
@@ -83,7 +84,7 @@ have logprobs returned. Minimum of 0 and maximum of 100 allowed.
     logprobs?: int32;
 
     @doc("The name of the model to use")
-    "model": string;
+    "model"?: string;
 
     @doc("Echo back the prompt in addition to the completion")
     echo?: boolean;
@@ -162,10 +163,13 @@ model CompletionsLogProbs {
     text_offset?: int32[];
 }
 
-@doc("Measurment of the amount of tokens used in this request and response")
+@doc("""
+Representation of the token counts processed for a completions request.
+Counts consider all tokens across prompts, choices, choice alternates, best_of generations, and other consumers.
+""")
 model CompletionsUsage {
     @doc("Number of tokens received in the completion")
-    completion_token: int32,
+    completion_tokens: int32,
     @doc("Number of tokens sent in the original request")
     prompt_tokens: int32,
     @doc("Total number of tokens transacted in this request/response")

@@ -1,4 +1,6 @@
 import "@typespec/rest";
+import "@typespec/http";
+import "@azure-tools/typespec-azure-core";
 import "@typespec/versioning";
 
 import "./routes.tsp";
@@ -29,14 +31,19 @@ https://westus.api.cognitive.microsoft.com).
     endpoint: string,
   }
 )
-
 @versioned(ServiceApiVersions)
+@versionedDependency(
+  [
+    [
+      ServiceApiVersions.v2022_12_01,
+      Azure.Core.Versions.v1_0_Preview_1
+    ]
+  ]
+)
 @doc("Azure OpenAI APIs for completions and search")
 namespace Azure.OpenAI;
 
-
 enum ServiceApiVersions {
-  @useDependency(Azure.Core.Versions.v1_0_Preview_2)
   v2022_12_01: "2022-12-01",
 }
 
@@ -44,8 +51,8 @@ enum ServiceApiVersions {
 @doc("A specific deployment")
 @TypeSpec.Rest.resource("deployments")
 model Deployment {
-  @doc("deployment id of the deployed model")
   @visibility("read")
+  @doc("deployment id of the deployed model")
   @key
   deploymentId: string;
 }
