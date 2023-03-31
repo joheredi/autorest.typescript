@@ -58,6 +58,7 @@ export interface Type {
     | "string"
     | "Key"
     | "OAuth2"
+    | "byte-array"
     | "constant"
     | "model"
     | "list"

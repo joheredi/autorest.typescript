@@ -63,6 +63,8 @@ export function getType(type: Type): TypeMetadata {
         })
         .join(" | ");
       return { name };
+    case "byte-array":
+      return { name: "Uint8Array" };
     case "dict":
       if (!type.elementType) {
         throw new Error("Unable to process dict without elemetType info");

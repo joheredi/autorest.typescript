@@ -106,15 +106,27 @@ function getRequestParameters(operation: Operation): string {
   );
 
   const parametersImplementation: Record<
-    "header" | "query" | "body",
+    "header" | "query" | "body" | "contentType",
     string[]
   > = {
     header: [],
     query: [],
-    body: []
+    body: [],
+    contentType: []
   };
 
   for (const param of operationParameters) {
+    if (
+      param.location === "header" &&
+      param.restApiName.toLowerCase() === "content-type"
+    ) {
+      const defaultValue =
+        param.clientDefaultValue ?? param.type.clientDefaultValue;
+      if (defaultValue) {
+        parametersImplementation.contentType = [defaultValue];
+      }
+    }
+
     if (param.location === "header" || param.location === "query") {
       parametersImplementation[param.location].push(getParameterMap(param));
     }
@@ -132,6 +144,12 @@ function getRequestParameters(operation: Operation): string {
     paramStr = `${paramStr}\nheaders: {${parametersImplementation.header.join(
       "\n"
     )}...options.requestOptions?.headers},`;
+  }
+
+  if (parametersImplementation.contentType.length) {
+    paramStr = `${paramStr}\ncontentType: "${parametersImplementation.contentType.join(
+      ","
+    )}",`;
   }
 
   if (parametersImplementation.query.length) {
