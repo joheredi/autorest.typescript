@@ -905,7 +905,7 @@ function serializeRequestValue(
         coreUtilSet.add("uint8ArrayToString");
       }
       return required
-        ? `uint8ArrayToString(${clientValue}, "${format ?? "base64"}")`
+        ? `uint8ArrayToString(${clientValue}, "${getEncodingType(format)}")`
         : `${clientValue} !== undefined ? uint8ArrayToString(${clientValue}, "${
             format ?? "base64"
           }"): undefined`;
@@ -921,6 +921,18 @@ function needsDeserialize(type?: Type) {
     type?.type === "list" ||
     type?.type === "byte-array"
   );
+}
+
+function getEncodingType(format: string = "") {
+  const knownEncodings = ["utf-8", "base64", "base64url"];
+
+  const inputFormat = format.toLowerCase();
+  if (knownEncodings.includes(inputFormat)) {
+    return inputFormat;
+  }
+
+  // TODO: Handle formats
+  return "base64";
 }
 
 export function hasLROOperation(codeModel: ModularCodeModel) {

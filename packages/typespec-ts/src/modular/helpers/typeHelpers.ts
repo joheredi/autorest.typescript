@@ -1,5 +1,5 @@
+import { pascalCase } from "@azure-tools/rlc-common";
 import { EnumValue, Type } from "../modularCodeModel.js";
-
 export interface TypeMetadata {
   name: string;
   originModule?: string;
@@ -21,7 +21,10 @@ function getAnonymousEnumName(values: EnumValue[]): string {
     .join(" | ");
 }
 
-export function getType(type: Type, format?: string): TypeMetadata {
+export function getType(
+  type: Type,
+  options: { propertyName?: string; format?: string }
+): TypeMetadata {
   switch (type.type) {
     case "Key":
       return {
@@ -72,7 +75,10 @@ export function getType(type: Type, format?: string): TypeMetadata {
       }
       return {
         name: getNullableType(
-          getType(type.elementType, type.elementType.format).name,
+          getType(type.elementType, {
+            format: type.elementType.format,
+            propertyName: options.propertyName
+          }).name,
           type
         ),
         modifier: "Array",
@@ -81,7 +87,10 @@ export function getType(type: Type, format?: string): TypeMetadata {
       };
     case "model":
       if (!type.name) {
-        throw new Error("Unable to process model without name");
+        // throw new Error("Unable to process model without name");
+        type.name = `${pascalCase(options.propertyName ?? "")}${pascalCase(
+          type.type
+        )}`;
       }
       return {
         name: getNullableType(type.name, type),
@@ -89,7 +98,7 @@ export function getType(type: Type, format?: string): TypeMetadata {
       };
     case "string":
     case "duration":
-      switch (format) {
+      switch (options?.format) {
         case "seconds":
           return { name: getNullableType("number", type) };
         case "ISO8601":
@@ -102,7 +111,9 @@ export function getType(type: Type, format?: string): TypeMetadata {
       }
       const name = type.types
         .map((t) => {
-          const sdkType = getTypeName(getType(t, t.format));
+          const sdkType = getTypeName(
+            getType(t, { format: t.format, propertyName: options.propertyName })
+          );
           return `${sdkType}`;
         })
         .join(" | ");
@@ -114,7 +125,10 @@ export function getType(type: Type, format?: string): TypeMetadata {
       }
       return {
         name: `Record<string, ${getTypeName(
-          getType(type.elementType, type.elementType.format)
+          getType(type.elementType, {
+            format: type.elementType.format,
+            propertyName: options.propertyName
+          })
         )}>`
       };
     case "any":
@@ -149,7 +163,7 @@ export function buildType(
     throw new Error("Type should be defined");
   }
 
-  const typeMetadata = getType(type, format);
+  const typeMetadata = getType(type, { format });
   let typeName = typeMetadata.name;
   if (typeMetadata.modifier === "Array") {
     typeName = `${typeName}[]`;

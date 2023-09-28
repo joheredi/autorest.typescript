@@ -1,4 +1,5 @@
 import { getPagedResult, isFixed } from "@azure-tools/typespec-azure-core";
+import { getOperationId } from "@typespec/openapi";
 import {
   EnumMember,
   Enum,
@@ -810,7 +811,9 @@ function emitBasicOperation(
       }
     }
   }
-  const name = applyCasing(operation.name, { casing: CASING });
+  const operationName =
+    getOperationId(context.program, operation) ?? operation.name;
+  const name = applyCasing(operationName, { casing: CASING });
   return {
     name: name,
     description: getDocStr(context.program, operation),

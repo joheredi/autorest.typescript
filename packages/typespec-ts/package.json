@@ -67,11 +67,13 @@
   },
   "peerDependencies": {
     "@azure-tools/typespec-azure-core": ">=0.34.0 <1.0.0",
-    "@azure-tools/typespec-client-generator-core": "0.35.0-dev.9",
+    "@azure-tools/typespec-client-generator-core": "/home/jmanuelh/microsoft/typespec-azure/packages/typespec-client-generator-core",
     "@typespec/compiler": ">=0.48.0 <1.0.0",
     "@typespec/http": ">=0.48.0 <1.0.0",
     "@typespec/rest": ">=0.48.0 <1.0.0",
-    "@typespec/versioning": ">=0.48.0 <1.0.0"
+    "@typespec/versioning": ">=0.48.0 <1.0.0",
+    "@typespec/openapi": "^0.49.0-dev.4",
+    "@typespec/openapi3": "^0.49.0-dev.10"
   },
   "dependencies": {
     "prettier": "^2.6.1",

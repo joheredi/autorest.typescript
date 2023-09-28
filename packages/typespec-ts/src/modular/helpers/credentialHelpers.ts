@@ -33,8 +33,10 @@ export function importCredential(
       }
       break;
     default:
-      throw new Error(
-        `Credential of type ${credential.type} is not yet supported`
-      );
+      clientSourceFile.addImportDeclaration({
+        moduleSpecifier: "@azure/core-auth",
+        namedImports: ["TokenCredential"]
+      });
+      return;
   }
 }

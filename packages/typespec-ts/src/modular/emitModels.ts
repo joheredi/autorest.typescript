@@ -40,7 +40,7 @@ export function buildModels(
 
   for (const model of models) {
     const properties = model.properties ?? [];
-    const typeMetadata = getType(model, model.format);
+    const typeMetadata = getType(model, { format: model.format });
     let typeName = typeMetadata.name;
     if (typeMetadata.modifier === "Array") {
       typeName = `${typeName}[]`;
@@ -78,7 +78,10 @@ export function buildModels(
         docs: getDocsFromDescription(model.description),
         extends: [] as string[],
         properties: properties.map((p) => {
-          const propertyMetadata = getType(p.type, p.format);
+          const propertyMetadata = getType(p.type, {
+            format: p.format,
+            propertyName: p.clientName
+          });
           let propertyTypeName = propertyMetadata.name;
           if (isAzureCoreErrorSdkType(p.type)) {
             propertyTypeName = isAzureCoreErrorSdkType(p.type)
@@ -99,7 +102,7 @@ export function buildModels(
       };
       model.type === "model"
         ? model.parents?.forEach((p) =>
-            modelInterface.extends.push(getType(p, p.format).name)
+            modelInterface.extends.push(getType(p, { format: p.format }).name)
           )
         : undefined;
       modelsFile.addInterface(modelInterface);
