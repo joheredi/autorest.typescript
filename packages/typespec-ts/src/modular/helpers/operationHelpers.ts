@@ -29,7 +29,6 @@ import {
   getCollectionFormatHelper,
   hasCollectionFormatInfo
 } from "../../utils/operationUtil.js";
-
 function getRLCResponseType(rlcResponse?: OperationResponse) {
   if (!rlcResponse?.responses) {
     return;
@@ -396,16 +395,32 @@ function buildBodyParameter(
     }
     return bodyParameter.optional
       ? `body: typeof ${bodyParameter.clientName} === 'string'
-    ? uint8ArrayToString(${bodyParameter.clientName}, "${
-          bodyParameter.type.format ?? "base64"
-        }")
+    ? uint8ArrayToString(${bodyParameter.clientName}, "${getEncodingFormat(
+          bodyParameter.type
+        )}")
     : ${bodyParameter.clientName}`
-      : `body: uint8ArrayToString(${bodyParameter.clientName}, "${
-          bodyParameter.type.format ?? "base64"
-        }")`;
+      : `body: uint8ArrayToString(${
+          bodyParameter.clientName
+        }, "${getEncodingFormat(bodyParameter.type)}")`;
   }
 
   return "";
+}
+
+function getEncodingFormat(type: Type | undefined) {
+  if (!type) {
+    return "base64";
+  }
+
+  const allowedFormats = ["utf-8", "base64", "base64url"];
+  if (!allowedFormats.includes(type.format ?? "")) {
+    console.warn(
+      `Encoding format ${type.format} is not supported. Falling back to base64`
+    );
+    return "base64";
+  }
+
+  return type.format;
 }
 
 /**
@@ -811,9 +826,17 @@ function deserializeResponseValue(
   const coreUtilSet = importSet.get("@azure/core-util");
   switch (type.type) {
     case "datetime":
-      return required
-        ? `new Date(${restValue})`
-        : `${restValue} !== undefined? new Date(${restValue}): undefined`;
+      let foo = `new Date(${restValue})`;
+
+      if (type.nullable) {
+        foo = `${restValue} !== null? ${foo}: null`;
+      }
+
+      if (!required) {
+        foo = `${restValue} !== undefined? ${foo}: undefined`;
+      }
+
+      return foo;
     case "combined":
       return `${restValue} as any`;
     case "list":
@@ -908,10 +931,12 @@ function serializeRequestValue(
         coreUtilSet.add("uint8ArrayToString");
       }
       return required
-        ? `uint8ArrayToString(${clientValue}, "${format ?? "base64"}")`
-        : `${clientValue} !== undefined ? uint8ArrayToString(${clientValue}, "${
-            format ?? "base64"
-          }"): undefined`;
+        ? `uint8ArrayToString(${clientValue}, "${getEncodingFormat(
+            type.elementType!
+          )}")`
+        : `${clientValue} !== undefined ? uint8ArrayToString(${clientValue}, "${getEncodingFormat(
+            type.elementType!
+          )}"): undefined`;
     default:
       return clientValue;
   }

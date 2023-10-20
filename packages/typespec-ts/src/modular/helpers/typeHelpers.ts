@@ -5,14 +5,7 @@ export interface TypeMetadata {
   originModule?: string;
   isRelative?: boolean;
   modifier?: "Array";
-}
-
-function getNullableType(name: string, type: Type): string {
-  if (type.nullable) {
-    return `(${name} | null)`;
-  }
-
-  return name;
+  isNullable?: boolean;
 }
 
 function getAnonymousEnumName(values: EnumValue[]): string {
@@ -36,16 +29,16 @@ export function getType(type: Type, format?: string): TypeMetadata {
         isRelative: false
       };
     case "boolean":
-      return { name: getNullableType(type.type, type) };
+      return { name: type.type, isNullable: type.nullable };
     case "constant": {
       let typeName: string = type.value?.toString() ?? "undefined";
       if (type.valueType?.type === "string") {
         typeName = type.value ? `"${type.value}"` : "undefined";
       }
-      return { name: getNullableType(typeName, type) };
+      return { name: typeName, isNullable: type.nullable };
     }
     case "datetime":
-      return { name: getNullableType("Date", type) };
+      return { name: "Date", isNullable: type.nullable };
     case "enum":
       if (
         !type.name &&
@@ -55,43 +48,40 @@ export function getType(type: Type, format?: string): TypeMetadata {
         throw new Error("Unable to process enum without name");
       }
       return {
-        name: getNullableType(
-          type.name ?? getAnonymousEnumName(type.values ?? []),
-          type
-        ),
+        name: type.name ?? getAnonymousEnumName(type.values ?? []),
+        isNullable: type.nullable,
         originModule: "models.js"
       };
     case "float":
     case "integer":
-      return { name: getNullableType("number", type) };
+      return { name: "number", isNullable: type.nullable };
     case "byte-array":
-      return { name: getNullableType("Uint8Array", type) };
+      return { name: "Uint8Array", isNullable: type.nullable };
     case "list":
       if (!type.elementType) {
         throw new Error("Unable to process Array with no elementType");
       }
       return {
-        name: getNullableType(
-          getType(type.elementType, type.elementType.format).name,
-          type
-        ),
+        name: getType(type.elementType, type.elementType.format).name,
+        isNullable: type.nullable,
         modifier: "Array",
         originModule:
           type.elementType?.type === "model" ? "models.js" : undefined
       };
     case "model":
       return {
-        name: getNullableType(type.name!, type),
+        name: type.name!,
+        isNullable: type.nullable,
         originModule: "models.js"
       };
     case "string":
     case "duration":
       switch (format) {
         case "seconds":
-          return { name: getNullableType("number", type) };
+          return { name: "number", isNullable: type.nullable };
         case "ISO8601":
         default:
-          return { name: getNullableType("string", type) };
+          return { name: "string", isNullable: type.nullable };
       }
     case "combined": {
       if (!type.types) {
@@ -103,7 +93,7 @@ export function getType(type: Type, format?: string): TypeMetadata {
           return `${sdkType}`;
         })
         .join(" | ");
-      return { name: getNullableType(name, type) };
+      return { name, isNullable: type.nullable };
     }
     case "dict":
       if (!type.elementType) {
@@ -128,6 +118,11 @@ export function getType(type: Type, format?: string): TypeMetadata {
 
 function getTypeName(typeMetadata: TypeMetadata) {
   let typeName = typeMetadata.name;
+  if (!typeName) {
+    // TODO: Implement anonymoyus models Issue#2067
+    console.warn("Anonymous models are not yet implemented");
+    typeName = "// Anonymous models are not yet implemented\n any";
+  }
   if (typeMetadata.modifier === "Array") {
     typeName = `${typeName}[]`;
   }
@@ -148,8 +143,18 @@ export function buildType(
 
   const typeMetadata = getType(type, format);
   let typeName = typeMetadata.name;
+  if (!typeName) {
+    // TODO: Implement anonymoyus models Issue#2067
+    console.warn("Anonymous models are not yet implemented");
+    typeName = "// Anonymous models are not yet implemented\n any";
+  }
+
   if (typeMetadata.modifier === "Array") {
     typeName = `${typeName}[]`;
+  }
+
+  if (type.nullable) {
+    typeName = `${typeName} | null`;
   }
   return { name: clientName ?? "", type: typeName };
 }

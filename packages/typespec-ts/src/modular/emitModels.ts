@@ -42,6 +42,13 @@ export function buildModels(
     const properties = model.properties ?? [];
     const typeMetadata = getType(model, model.format);
     let typeName = typeMetadata.name;
+
+    if (!typeName) {
+      // TODO: Implement anonymoyus models Issue#2067
+      console.warn("Anonymous models are not yet implemented");
+      typeName = "// Anonymous models are not yet implemented\n any";
+    }
+
     if (typeMetadata.modifier === "Array") {
       typeName = `${typeName}[]`;
     }
@@ -80,6 +87,12 @@ export function buildModels(
         properties: properties.map((p) => {
           const propertyMetadata = getType(p.type, p.format);
           let propertyTypeName = propertyMetadata.name;
+          if (!propertyTypeName) {
+            // TODO: Implement anonymoyus models Issue#2067
+            console.warn("Anonymous models are not yet implemented");
+            propertyTypeName =
+              "// Anonymous models are not yet implemented\n any";
+          }
           if (isAzureCoreErrorSdkType(p.type)) {
             propertyTypeName = isAzureCoreErrorSdkType(p.type)
               ? getCoreClientErrorType(propertyTypeName)
@@ -87,6 +100,10 @@ export function buildModels(
           }
           if (propertyMetadata.modifier === "Array") {
             propertyTypeName = `${propertyTypeName}[]`;
+          }
+
+          if (propertyMetadata.isNullable) {
+            propertyTypeName = `${propertyTypeName} | null`;
           }
           return {
             name: `"${p.clientName}"`,
@@ -98,9 +115,13 @@ export function buildModels(
         })
       };
       model.type === "model"
-        ? model.parents?.forEach((p) =>
-            modelInterface.extends.push(getType(p, p.format).name)
-          )
+        ? model.parents?.forEach((p) => {
+            let typeName = getType(p, p.format).name;
+            if (model.nullable) {
+              typeName = `${typeName} | null`;
+            }
+            return modelInterface.extends.push(typeName);
+          })
         : undefined;
       modelsFile.addInterface(modelInterface);
     }

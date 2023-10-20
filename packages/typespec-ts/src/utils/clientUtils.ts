@@ -7,6 +7,7 @@ export function getRLCClients(dpgContext: SdkContext): SdkClient[] {
 
   return services.map((service) => {
     return {
+      crossLanguageDefinitionId:"",
       kind: "SdkClient",
       name: service.type.name + "Client",
       service: service.type,

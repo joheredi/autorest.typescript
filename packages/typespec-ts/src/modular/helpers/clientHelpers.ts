@@ -26,9 +26,13 @@ export function getClientParameters(
           (p.clientDefaultValue === null || p.clientDefaultValue === undefined)
       )
       .map<OptionalKind<ParameterDeclarationStructure>>((p) => {
+        let typeName = getType(p.type, p.format).name;
+        if (p.type.nullable) {
+          typeName = `${typeName} | null`;
+        }
         return {
           name: p.clientName,
-          type: getType(p.type, p.format).name
+          type: typeName
         };
       }),
     optionsParam
