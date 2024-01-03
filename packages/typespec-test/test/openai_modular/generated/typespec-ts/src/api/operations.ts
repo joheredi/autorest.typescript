@@ -41,6 +41,7 @@ import {
   GetAzureBatchImageGenerationOperationStatusOptions,
   BeginAzureBatchImageGenerationOptions,
 } from "../models/options.js";
+import { log } from "console";
 
 export function _getEmbeddingsSend(
   context: Client,
@@ -65,15 +66,12 @@ export async function _getEmbeddingsDeserialize(
 
   let deserializedResponse: any = result.body;
 
-  // Rename
-  deserializedResponse.usage.promptTokens =
-    deserializedResponse.usage.promptTokens;
-  delete deserializedResponse.usage.prompt_tokens;
+  const usage = deserializedResponse.usage;
+  usage.promptTokens = usage.prompt_tokens;
+  delete usage.prompt_tokens;
 
-  // Rename
-  deserializedResponse.usage.totalTokens =
-    deserializedResponse.usage.totalTokens;
-  delete deserializedResponse.usage.total_tokens;
+  usage.totalTokens = usage.total_tokens;
+  delete usage.total_tokens;
 
   return deserializedResponse as Embeddings;
 }
@@ -134,46 +132,50 @@ export async function _getCompletionsDeserialize(
     deserializedResponse.prompt_annotations;
   delete deserializedResponse.prompt_annotations;
 
+  const promptFilterResults = deserializedResponse.promptFilterResults;
+
   // Rename items in array
-  deserializedResponse.promptFilterResults.forEach((prompt: any) => {
+  promptFilterResults.forEach((prompt: any) => {
     // Rename
     prompt.contentFilterResults = prompt.prompt_index;
     delete prompt.prompt_index;
   });
 
+  const choices = deserializedResponse.choices;
+
   // Rename items in array
-  deserializedResponse.choices.forEach((choice: any) => {
+  choices.forEach((choice: any) => {
     choice.finishReason = choice.finish_reason;
     delete choice.finish_reason;
 
     choice.contentFilterResults = choice.content_filter_results;
     delete choice.content_filter_results;
 
-    choice.contentFilterResults.selfHarm =
-      choice.contentFilterResults.self_harm;
-    delete choice.contentFilterResults.self_harm;
+    const contentFilterResults = choice.contentFilterResults;
+    contentFilterResults.selfHarm = contentFilterResults.self_harm;
+    delete contentFilterResults.self_harm;
 
-    choice.tokenLogprobs = choice.logprobs.token_logprobs;
-    delete choice.logprobs.token_logprobs;
+    const logprobs = choice.logprobs;
+    logprobs.tokenLogprobs = logprobs.token_logprobs;
+    delete logprobs.token_logprobs;
 
-    choice.topLogprobs = choice.logprobs.top_logprobs;
-    delete choice.logprobs.top_logprobs;
+    logprobs.topLogprobs = logprobs.top_logprobs;
+    delete logprobs.top_logprobs;
 
-    choice.textOffset = choice.logprobs.text_offset;
-    delete choice.logprobs.text_offset;
+    logprobs.textOffset = logprobs.text_offset;
+    delete logprobs.text_offset;
   });
 
-  deserializedResponse.usage.promptTokens =
-    deserializedResponse.usage.promptTokens;
-  delete deserializedResponse.usage.prompt_tokens;
+  const usage = deserializedResponse.usage;
 
-  deserializedResponse.usage.completionTokens =
-    deserializedResponse.usage.completion_tokens;
-  delete deserializedResponse.usage.completion_tokens;
+  usage.promptTokens = usage.prompt_tokens;
+  delete usage.prompt_tokens;
 
-  deserializedResponse.usage.totalTokens =
-    deserializedResponse.usage.total_tokens;
-  delete deserializedResponse.usage.total_tokens;
+  usage.completionTokens = usage.completion_tokens;
+  delete usage.completion_tokens;
+
+  usage.totalTokens = usage.total_tokens;
+  delete usage.total_tokens;
 
   return deserializedResponse as Completions;
 }
@@ -252,35 +254,40 @@ export async function _getChatCompletionsDeserialize(
 
   deserializedResponse.created = new Date(deserializedResponse.created);
 
-  deserializedResponse.choices.forEach((choice: any) => {
+  const choices = deserializedResponse.choices;
+  choices.forEach((choice: any) => {
     choice.finishReason = choice.finish_reason;
     delete choice.finish_reason;
 
     choice.contentFilterResults = choice.content_filter_results;
     delete choice.content_filter_results;
 
-    choice.contentFilterResults.selfHarm =
-      choice.contentFilterResults.self_harm;
-    delete choice.contentFilterResults.self_harm;
+    const contentFilterResults = choice.contentFilterResults;
+    contentFilterResults.selfHarm = contentFilterResults.self_harm;
+    delete contentFilterResults.self_harm;
 
-    choice.tokenLogprobs = choice.logprobs.token_logprobs;
-    delete choice.logprobs.token_logprobs;
+    const logprobs = choice.logprobs;
+    logprobs.tokenLogprobs = logprobs.token_logprobs;
+    delete logprobs.token_logprobs;
 
-    choice.topLogprobs = choice.logprobs.top_logprobs;
-    delete choice.logprobs.top_logprobs;
+    logprobs.topLogprobs = logprobs.top_logprobs;
+    delete logprobs.top_logprobs;
 
-    choice.textOffset = choice.logprobs.text_offset;
-    delete choice.logprobs.text_offset;
+    logprobs.textOffset = logprobs.text_offset;
+    delete logprobs.text_offset;
 
-    choice.message.functionCall = choice.message.function_call;
-    delete choice.message.function_call;
+    const message = choice.message;
+    message.functionCall = message.function_call;
+    delete message.function_call;
   });
 
   deserializedResponse.promptFilterResults =
     deserializedResponse.prompt_annotations;
   delete deserializedResponse.prompt_annotations;
 
-  deserializedResponse.promptFilterResults.forEach((prompt: any) => {
+  const promptFilterResults = deserializedResponse.promptFilterResults;
+
+  promptFilterResults.forEach((prompt: any) => {
     prompt.promptIndex = prompt.prompt_index;
     delete prompt.prompt_index;
 
@@ -288,18 +295,15 @@ export async function _getChatCompletionsDeserialize(
     delete prompt.content_filter_results;
   });
 
-  deserializedResponse.usage.promptTokens =
-    deserializedResponse.usage.promptTokens;
+  const usage = deserializedResponse.usage;
+  usage.promptTokens = usage.prompt_tokens;
+  delete usage.prompt_tokens;
 
-  delete deserializedResponse.usage.prompt_tokens;
+  usage.completionTokens = usage.completion_tokens;
+  delete usage.completion_tokens;
 
-  deserializedResponse.usage.completionTokens =
-    deserializedResponse.usage.completion_tokens;
-  delete deserializedResponse.usage.completion_tokens;
-
-  deserializedResponse.usage.totalTokens =
-    deserializedResponse.usage.total_tokens;
-  delete deserializedResponse.usage.total_tokens;
+  usage.totalTokens = usage.total_tokens;
+  delete usage.total_tokens;
 
   return deserializedResponse as ChatCompletions;
 }
@@ -382,24 +386,30 @@ export async function _getChatCompletionsWithAzureExtensionsDeserialize(
 
   let deserializedResponse: any = result.body;
   deserializedResponse.created = new Date(deserializedResponse.created);
-  deserializedResponse.choices.forEach((choice: any) => {
+
+  const choices = deserializedResponse.choices;
+  choices.forEach((choice: any) => {
     choice.finishReason = choice.finish_reason;
     delete choice.finish_reason;
 
     choice.contentFilterResults = choice.content_filter_results;
     delete choice.content_filter_results;
 
-    choice.contentFilterResults.selfHarm =
-      choice.contentFilterResults.self_harm;
-    delete choice.contentFilterResults.self_harm;
+    const contentFilterResults = choice.contentFilterResults;
 
-    choice.message.functionCall = choice.message.function_call;
-    delete choice.message.function_call;
+    contentFilterResults.selfHarm = contentFilterResults.self_harm;
+    delete contentFilterResults.self_harm;
+
+    const message = choice.message;
+    message.functionCall = message.function_call;
+    delete message.function_call;
 
     choice.promptFilterResults = choice.prompt_annotations;
     delete choice.prompt_annotations;
 
-    choice.promptFilterResults.forEach((prompt: any) => {
+    const promptFilterResults = choice.promptFilterResults;
+
+    promptFilterResults.forEach((prompt: any) => {
       prompt.promptIndex = prompt.prompt_index;
       delete prompt.prompt_index;
 
