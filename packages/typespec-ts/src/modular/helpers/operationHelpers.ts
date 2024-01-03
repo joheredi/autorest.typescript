@@ -189,13 +189,16 @@ function reshapeResponse(operation: Operation, resultType: string) {
   const response = operation.responses[0]!;
 
   const responseProperties = getAllProperties(response.type);
-  const statements: string[] = [];
+  let statements: string[] = [];
   const visitedTypes = new Set<string>(); // Set to track visited types
 
-  statements.push(`let deserializedResponse: unknown = result.body;`);
-
+  statements.push(`let deserializedResponse: any = result.body;`);
   deserialize(responseProperties, statements, visitedTypes);
   statements.push(`return deserializedResponse as ${resultType};`);
+
+  if (statements.length === 2) {
+    statements = [`return result.body`];
+  }
 
   return statements;
 }
@@ -208,12 +211,16 @@ function deserialize(
 ) {
   for (const property of properties) {
     if (property.clientName !== property.restApiName) {
-      const propPath = Boolean(objectPath)
+      const originalPropPath = Boolean(objectPath)
         ? `${objectPath}.${property.restApiName}`
         : property.restApiName;
+      const renamedPropPath = Boolean(objectPath)
+        ? `${objectPath}.${property.clientName}`
+        : property.clientName;
       statements.push(
-        `deserializedResponse = reshape(deserializedResponse, "${propPath}", "${property.clientName}");`
+        `deserializedResponse.${renamedPropPath} = deserializedResponse.${originalPropPath};`
       );
+      statements.push(`delete deserializedResponse.${originalPropPath};`);
     }
 
     if (property.type.type === "model") {
@@ -227,32 +234,32 @@ function deserialize(
       }
     }
 
-    if (
-      property.type.type === "list" &&
-      property.type.elementType?.type === "model"
-    ) {
-      if (
-        property.type.elementType.name &&
-        !visitedTypes.has(property.type.elementType.name)
-      ) {
-        visitedTypes.add(property.type.elementType.name);
-        const propPath = Boolean(objectPath)
-          ? `${objectPath}.${property.restApiName}`
-          : property.restApiName;
-        const properties = getAllProperties(property.type.elementType);
-        deserialize(properties, statements, visitedTypes, `${propPath}[]`);
-      }
-    }
+    // if (
+    //   property.type.type === "list" &&
+    //   property.type.elementType?.type === "model"
+    // ) {
+    //   if (
+    //     property.type.elementType.name &&
+    //     !visitedTypes.has(property.type.elementType.name)
+    //   ) {
+    //     visitedTypes.add(property.type.elementType.name);
+    //     const propPath = Boolean(objectPath)
+    //       ? `${objectPath}.${property.restApiName}`
+    //       : property.restApiName;
+    //     const properties = getAllProperties(property.type.elementType);
+    //     deserialize(properties, statements, visitedTypes, `${propPath}[]`);
+    //   }
+    // }
 
-    const transformation = reshapeValue(property.type);
-    if (transformation) {
-      const propPath = Boolean(objectPath)
-        ? `${objectPath}.${property.restApiName}`
-        : property.restApiName;
-      statements.push(
-        `deserializedResponse = reshape(deserializedResponse, "${propPath}", ${transformation});`
-      );
-    }
+    // const transformation = reshapeValue(property.type);
+    // if (transformation) {
+    //   const propPath = Boolean(objectPath)
+    //     ? `${objectPath}.${property.restApiName}`
+    //     : property.restApiName;
+    //   statements.push(
+    //     `deserializedResponse = reshape(deserializedResponse, "${propPath}", ${transformation});`
+    //   );
+    // }
   }
 }
 
@@ -957,14 +964,14 @@ export function getResponseMapping(
   return props;
 }
 
-function reshapeValue(type: Type) {
-  switch (type.type) {
-    case "datetime":
-      return "(value) => new Date(value as string)";
-    default:
-      return undefined;
-  }
-}
+// function reshapeValue(type: Type) {
+//   switch (type.type) {
+//     case "datetime":
+//       return "(value) => new Date(value as string)";
+//     default:
+//       return undefined;
+//   }
+// }
 
 /**
  * This function helps converting strings into JS complex types recursively.

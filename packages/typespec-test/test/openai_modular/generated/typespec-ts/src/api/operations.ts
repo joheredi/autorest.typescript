@@ -33,7 +33,6 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
-import { reshape } from "@azure/core-util";
 import {
   GetEmbeddingsOptions,
   GetCompletionsOptions,
@@ -64,17 +63,18 @@ export async function _getEmbeddingsDeserialize(
     throw createRestError(result);
   }
 
-  let deserializedResponse: unknown = result.body;
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.prompt_tokens",
-    "promptTokens"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.total_tokens",
-    "totalTokens"
-  );
+  let deserializedResponse: any = result.body;
+
+  // Rename
+  deserializedResponse.usage.promptTokens =
+    deserializedResponse.usage.promptTokens;
+  delete deserializedResponse.usage.prompt_tokens;
+
+  // Rename
+  deserializedResponse.usage.totalTokens =
+    deserializedResponse.usage.totalTokens;
+  delete deserializedResponse.usage.total_tokens;
+
   return deserializedResponse as Embeddings;
 }
 
@@ -126,72 +126,55 @@ export async function _getCompletionsDeserialize(
     throw createRestError(result);
   }
 
-  let deserializedResponse: unknown = result.body;
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "created",
-    (value) => new Date(value as string)
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations",
-    "promptFilterResults"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations[].prompt_index",
-    "promptIndex"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations[].content_filter_results",
-    "contentFilterResults"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations[].content_filter_results.self_harm",
-    "selfHarm"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].content_filter_results",
-    "contentFilterResults"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].logprobs.token_logprobs",
-    "tokenLogprobs"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].logprobs.top_logprobs",
-    "topLogprobs"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].logprobs.text_offset",
-    "textOffset"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].finish_reason",
-    "finishReason"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.completion_tokens",
-    "completionTokens"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.prompt_tokens",
-    "promptTokens"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.total_tokens",
-    "totalTokens"
-  );
+  let deserializedResponse: any = result.body;
+  deserializedResponse.created = new Date(deserializedResponse.created);
+
+  // Rename
+  deserializedResponse.promptFilterResults =
+    deserializedResponse.prompt_annotations;
+  delete deserializedResponse.prompt_annotations;
+
+  // Rename items in array
+  deserializedResponse.promptFilterResults.forEach((prompt: any) => {
+    // Rename
+    prompt.contentFilterResults = prompt.prompt_index;
+    delete prompt.prompt_index;
+  });
+
+  // Rename items in array
+  deserializedResponse.choices.forEach((choice: any) => {
+    choice.finishReason = choice.finish_reason;
+    delete choice.finish_reason;
+
+    choice.contentFilterResults = choice.content_filter_results;
+    delete choice.content_filter_results;
+
+    choice.contentFilterResults.selfHarm =
+      choice.contentFilterResults.self_harm;
+    delete choice.contentFilterResults.self_harm;
+
+    choice.tokenLogprobs = choice.logprobs.token_logprobs;
+    delete choice.logprobs.token_logprobs;
+
+    choice.topLogprobs = choice.logprobs.top_logprobs;
+    delete choice.logprobs.top_logprobs;
+
+    choice.textOffset = choice.logprobs.text_offset;
+    delete choice.logprobs.text_offset;
+  });
+
+  deserializedResponse.usage.promptTokens =
+    deserializedResponse.usage.promptTokens;
+  delete deserializedResponse.usage.prompt_tokens;
+
+  deserializedResponse.usage.completionTokens =
+    deserializedResponse.usage.completion_tokens;
+  delete deserializedResponse.usage.completion_tokens;
+
+  deserializedResponse.usage.totalTokens =
+    deserializedResponse.usage.total_tokens;
+  delete deserializedResponse.usage.total_tokens;
+
   return deserializedResponse as Completions;
 }
 
@@ -265,62 +248,59 @@ export async function _getChatCompletionsDeserialize(
     throw createRestError(result);
   }
 
-  let deserializedResponse: unknown = result.body;
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "created",
-    (value) => new Date(value as string)
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].message.function_call",
-    "functionCall"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].finish_reason",
-    "finishReason"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].content_filter_results",
-    "contentFilterResults"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].content_filter_results.self_harm",
-    "selfHarm"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations",
-    "promptFilterResults"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations[].prompt_index",
-    "promptIndex"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations[].content_filter_results",
-    "contentFilterResults"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.completion_tokens",
-    "completionTokens"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.prompt_tokens",
-    "promptTokens"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.total_tokens",
-    "totalTokens"
-  );
+  let deserializedResponse: any = result.body;
+
+  deserializedResponse.created = new Date(deserializedResponse.created);
+
+  deserializedResponse.choices.forEach((choice: any) => {
+    choice.finishReason = choice.finish_reason;
+    delete choice.finish_reason;
+
+    choice.contentFilterResults = choice.content_filter_results;
+    delete choice.content_filter_results;
+
+    choice.contentFilterResults.selfHarm =
+      choice.contentFilterResults.self_harm;
+    delete choice.contentFilterResults.self_harm;
+
+    choice.tokenLogprobs = choice.logprobs.token_logprobs;
+    delete choice.logprobs.token_logprobs;
+
+    choice.topLogprobs = choice.logprobs.top_logprobs;
+    delete choice.logprobs.top_logprobs;
+
+    choice.textOffset = choice.logprobs.text_offset;
+    delete choice.logprobs.text_offset;
+
+    choice.message.functionCall = choice.message.function_call;
+    delete choice.message.function_call;
+  });
+
+  deserializedResponse.promptFilterResults =
+    deserializedResponse.prompt_annotations;
+  delete deserializedResponse.prompt_annotations;
+
+  deserializedResponse.promptFilterResults.forEach((prompt: any) => {
+    prompt.promptIndex = prompt.prompt_index;
+    delete prompt.prompt_index;
+
+    prompt.contentFilterResults = prompt.content_filter_results;
+    delete prompt.content_filter_results;
+  });
+
+  deserializedResponse.usage.promptTokens =
+    deserializedResponse.usage.promptTokens;
+
+  delete deserializedResponse.usage.prompt_tokens;
+
+  deserializedResponse.usage.completionTokens =
+    deserializedResponse.usage.completion_tokens;
+  delete deserializedResponse.usage.completion_tokens;
+
+  deserializedResponse.usage.totalTokens =
+    deserializedResponse.usage.total_tokens;
+  delete deserializedResponse.usage.total_tokens;
+
   return deserializedResponse as ChatCompletions;
 }
 
@@ -400,62 +380,42 @@ export async function _getChatCompletionsWithAzureExtensionsDeserialize(
     throw createRestError(result);
   }
 
-  let deserializedResponse: unknown = result.body;
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "created",
-    (value) => new Date(value as string)
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].message.function_call",
-    "functionCall"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].finish_reason",
-    "finishReason"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].content_filter_results",
-    "contentFilterResults"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "choices[].content_filter_results.self_harm",
-    "selfHarm"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations",
-    "promptFilterResults"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations[].prompt_index",
-    "promptIndex"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "prompt_annotations[].content_filter_results",
-    "contentFilterResults"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.completion_tokens",
-    "completionTokens"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.prompt_tokens",
-    "promptTokens"
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "usage.total_tokens",
-    "totalTokens"
-  );
+  let deserializedResponse: any = result.body;
+  deserializedResponse.created = new Date(deserializedResponse.created);
+  deserializedResponse.choices.forEach((choice: any) => {
+    choice.finishReason = choice.finish_reason;
+    delete choice.finish_reason;
+
+    choice.contentFilterResults = choice.content_filter_results;
+    delete choice.content_filter_results;
+
+    choice.contentFilterResults.selfHarm =
+      choice.contentFilterResults.self_harm;
+    delete choice.contentFilterResults.self_harm;
+
+    choice.message.functionCall = choice.message.function_call;
+    delete choice.message.function_call;
+
+    choice.promptFilterResults = choice.prompt_annotations;
+    delete choice.prompt_annotations;
+
+    choice.promptFilterResults.forEach((prompt: any) => {
+      prompt.promptIndex = prompt.prompt_index;
+      delete prompt.prompt_index;
+
+      prompt.contentFilterResults = prompt.content_filter_results;
+      delete prompt.content_filter_results;
+    });
+
+    choice.completionTokens = choice.completion_tokens;
+    delete choice.completion_tokens;
+
+    choice.promptTokens = choice.prompt_tokens;
+    delete choice.prompt_tokens;
+
+    choice.totalTokens = choice.total_tokens;
+    delete choice.total_tokens;
+  });
   return deserializedResponse as ChatCompletions;
 }
 
@@ -503,16 +463,12 @@ export async function _getAzureBatchImageGenerationOperationStatusDeserialize(
     throw createRestError(result);
   }
 
-  let deserializedResponse: unknown = result.body;
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "created",
-    (value) => new Date(value as string)
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "result.created",
-    (value) => new Date(value as string)
+  let deserializedResponse: any = result.body;
+
+  deserializedResponse.created = new Date(deserializedResponse.created);
+
+  deserializedResponse.result.created = new Date(
+    deserializedResponse.result.created
   );
   return deserializedResponse as BatchImageGenerationOperationResponse;
 }
@@ -542,18 +498,16 @@ export function _beginAzureBatchImageGenerationSend(
   | BeginAzureBatchImageGenerationDefaultResponse
   | BeginAzureBatchImageGenerationLogicalResponse
 > {
-  return context
-    .path("/images/generations:submit")
-    .post({
-      ...operationOptionsToRequestParameters(options),
-      body: {
-        prompt: body["prompt"],
-        n: body["n"],
-        size: body["size"],
-        response_format: body["responseFormat"],
-        user: body["user"],
-      },
-    });
+  return context.path("/images/generations:submit").post({
+    ...operationOptionsToRequestParameters(options),
+    body: {
+      prompt: body["prompt"],
+      n: body["n"],
+      size: body["size"],
+      response_format: body["responseFormat"],
+      user: body["user"],
+    },
+  });
 }
 
 export async function _beginAzureBatchImageGenerationDeserialize(
@@ -566,16 +520,11 @@ export async function _beginAzureBatchImageGenerationDeserialize(
     throw createRestError(result);
   }
 
-  let deserializedResponse: unknown = result.body;
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "created",
-    (value) => new Date(value as string)
-  );
-  deserializedResponse = reshape(
-    deserializedResponse,
-    "result.created",
-    (value) => new Date(value as string)
+  let deserializedResponse: any = result.body;
+  deserializedResponse.created = new Date(deserializedResponse.created);
+
+  deserializedResponse.result.created = new Date(
+    deserializedResponse.result.created
   );
   return deserializedResponse as BatchImageGenerationOperationResponse;
 }
