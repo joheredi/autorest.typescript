@@ -120,7 +120,7 @@ export function getImportModuleName(name: ModuleName, codeModel: RLCModel) {
     return name.esModulesName;
   }
 
-  return name.cjsName;
+  return name.esModulesName;
 }
 
 export function getClientName(model: RLCModel) {
