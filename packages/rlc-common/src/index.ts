@@ -18,6 +18,8 @@ export * from "./buildTopLevelIndexFile.js";
 export * from "./buildIndexFile.js";
 export * from "./buildPaginateHelper.js";
 export * from "./buildPollingHelper.js";
+export * from "./metadata/buildTshyConfigs.js";
+export * from "./metadata/buildVitestConfig.js";
 export * from "./test/buildKarmaConfig.js";
 export * from "./test/buildEnvFile.js";
 export * from "./test/buildRecordedClient.js";

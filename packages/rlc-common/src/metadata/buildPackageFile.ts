@@ -85,23 +85,42 @@ function restLevelPackage(model: RLCModel) {
       `A generated SDK for ${model.libraryName}.`,
     keywords: ["node", "azure", "cloud", "typescript", "browser", "isomorphic"],
     license: "MIT",
-    main: "dist/index.js",
-    module: generateTest ? "./dist-esm/src/index.js" : "./dist-esm/index.js",
-    types: `./types/${
-      packageDetails.nameWithoutScope ?? packageDetails.name
-    }.d.ts`,
+    main: "./dist/commonjs/index.js",
+    types: "./dist/commonjs/index.d.ts",
+    exports: {
+      "./package.json": "./package.json",
+      ".": {
+        browser: {
+          types: "./dist/browser/index.d.ts",
+          default: "./dist/browser/index.js"
+        },
+        "react-native": {
+          types: "./dist/react-native/index.d.ts",
+          default: "./dist/react-native/index.js"
+        },
+        import: {
+          types: "./dist/esm/index.d.ts",
+          default: "./dist/esm/index.js"
+        },
+        require: {
+          types: "./dist/commonjs/index.d.ts",
+          default: "./dist/commonjs/index.js"
+        }
+      }
+    },
+    tshy: {
+      exports: {
+        "./package.json": "./package.json",
+        ".": "./src/index.ts"
+      },
+      dialects: ["esm", "commonjs"],
+      esmDialects: ["browser", "react-native"]
+    },
     repository: "github:Azure/azure-sdk-for-js",
     bugs: {
       url: "https://github.com/Azure/azure-sdk-for-js/issues"
     },
-    files: [
-      "dist/",
-      generateTest ? "dist-esm/src/" : "dist-esm/",
-      `types/${packageDetails.nameWithoutScope ?? packageDetails.name}.d.ts`,
-      "README.md",
-      "LICENSE",
-      "review/*"
-    ],
+    files: ["dist/", "README.md", "LICENSE", "review/*"],
     engines: {
       node: ">=18.0.0"
     },
@@ -152,7 +171,7 @@ function restLevelPackage(model: RLCModel) {
       "@azure-rest/core-client": "^1.2.0",
       "@azure/core-rest-pipeline": "^1.14.0",
       "@azure/logger": "^1.0.0",
-      tslib: "^2.2.0",
+      tslib: "^2.6.0",
       ...(hasPaging && {
         "@azure/core-paging": "^1.5.0"
       }),
@@ -171,10 +190,11 @@ function restLevelPackage(model: RLCModel) {
       dotenv: "^16.0.0",
       eslint: "^8.0.0",
       mkdirp: "^2.1.2",
-      prettier: "^3.1.0",
-      rimraf: "^5.0.0",
+      prettier: "^3.2.5",
+      rimraf: "^5.0.5",
       "source-map-support": "^0.5.9",
-      typescript: "~5.3.3"
+      typescript: "~5.3.3",
+      tshy: "^1.11.1"
     }
   };
 
@@ -200,11 +220,7 @@ function restLevelPackage(model: RLCModel) {
       });
     }
     packageInfo.scripts["build"] =
-      "npm run clean && tsc -p . && dev-tool run bundle && mkdirp ./review && api-extractor run --local";
-    packageInfo.scripts["build:debug"] =
-      "tsc -p . && dev-tool run bundle && api-extractor run --local";
-    packageInfo.scripts["build:browser"] = "tsc -p . && dev-tool run bundle";
-    packageInfo.scripts["build:node"] = "tsc -p . && dev-tool run bundle";
+      "npm run clean && tshy && npm run extract-api";
     packageInfo.devDependencies["@azure/dev-tool"] = "^1.0.0";
     packageInfo.devDependencies["@azure/eslint-plugin-azure-sdk"] = "^3.0.0";
     // azsdkjs repo use dev-tool to run vendored prettier
@@ -216,16 +232,16 @@ function restLevelPackage(model: RLCModel) {
     delete packageInfo.devDependencies.prettier;
   } else {
     packageInfo.scripts["build"] =
-      "npm run clean && tsc && rollup -c 2>&1 && npm run minify && mkdirp ./review && npm run extract-api";
-    packageInfo.scripts["minify"] =
-      `uglifyjs -c -m --comments --source-map "content='./dist/index.js.map'" -o ./dist/index.min.js ./dist/index.js`;
-    packageInfo.devDependencies["@rollup/plugin-commonjs"] = "^24.0.0";
-    packageInfo.devDependencies["@rollup/plugin-json"] = "^6.0.0";
-    packageInfo.devDependencies["@rollup/plugin-multi-entry"] = "^6.0.0";
-    packageInfo.devDependencies["@rollup/plugin-node-resolve"] = "^13.1.3";
-    packageInfo.devDependencies["rollup"] = "^2.66.1";
-    packageInfo.devDependencies["rollup-plugin-sourcemaps"] = "^0.6.3";
-    packageInfo.devDependencies["uglify-js"] = "^3.4.9";
+      "npm run clean && tshy &&  npm run extract-api";
+    packageInfo.devDependencies["@rollup/plugin-commonjs"] = "^25.0.7";
+    packageInfo.devDependencies["@rollup/plugin-json"] = "^6.0.1";
+    packageInfo.devDependencies["@rollup/plugin-multi-entry"] = "^6.0.1";
+    packageInfo.devDependencies["@rollup/plugin-inject"] = "^5.0.5";
+    packageInfo.devDependencies["@rollup/plugin-node-resolve"] = "^15.2.3";
+    packageInfo.devDependencies["rollup"] = "^4.0.0";
+    packageInfo.devDependencies["rollup-plugin-polyfill-node"] = "^0.13.0";
+    packageInfo.devDependencies["rollup-plugin-visualizer"] = "^5.9.3";
+    packageInfo.devDependencies["@types/yargs"] = "^17.0.32";
   }
 
   if (isTypeSpecTest) {
@@ -237,23 +253,9 @@ function restLevelPackage(model: RLCModel) {
     packageInfo.devDependencies["@azure-tools/test-credential"] = "^1.0.0";
     packageInfo.devDependencies["@azure/identity"] = "^4.0.1";
     packageInfo.devDependencies["@azure-tools/test-recorder"] = "^3.0.0";
-    packageInfo.devDependencies["mocha"] = "^10.0.0";
-    packageInfo.devDependencies["esm"] = "^3.2.18";
-    packageInfo.devDependencies["@types/mocha"] = "^10.0.0";
     packageInfo.devDependencies["cross-env"] = "^7.0.2";
     packageInfo.devDependencies["@types/chai"] = "^4.2.8";
-    packageInfo.devDependencies["chai"] = "^4.2.0";
     packageInfo.devDependencies["cross-env"] = "^7.0.2";
-    packageInfo.devDependencies["karma-chrome-launcher"] = "^3.0.0";
-    packageInfo.devDependencies["karma-coverage"] = "^2.0.0";
-    packageInfo.devDependencies["karma-env-preprocessor"] = "^0.1.1";
-    packageInfo.devDependencies["karma-firefox-launcher"] = "^2.1.2";
-    packageInfo.devDependencies["karma-junit-reporter"] = "^2.0.1";
-    packageInfo.devDependencies["karma-mocha-reporter"] = "^2.2.5";
-    packageInfo.devDependencies["karma-mocha"] = "^2.0.1";
-    packageInfo.devDependencies["karma-source-map-support"] = "~1.4.0";
-    packageInfo.devDependencies["karma-sourcemap-loader"] = "^0.4.0";
-    packageInfo.devDependencies["karma"] = "^6.2.0";
     packageInfo.devDependencies["c8"] = "^8.0.0";
     packageInfo.devDependencies["source-map-support"] = "^0.5.9";
     packageInfo.devDependencies["ts-node"] = "^10.0.0";
@@ -282,27 +284,16 @@ function restLevelPackage(model: RLCModel) {
       "npm run integration-test:node && npm run integration-test:browser";
 
     if (azureSdkForJs) {
-      packageInfo.scripts["build:test"] = "tsc -p . && dev-tool run bundle";
+      packageInfo.scripts["build:test"] =
+        "npm run clean && tshy && dev-tool run build-test";
       packageInfo.scripts["integration-test:browser"] =
-        "dev-tool run test:browser";
-      packageInfo.scripts["unit-test:browser"] = "dev-tool run test:browser";
+        "npm run build:test && dev-tool run test:vitest --no-test-proxy --browser";
+      packageInfo.scripts["unit-test:browser"] =
+        "npm run build:test && dev-tool run test:vitest --no-test-proxy --browser";
       packageInfo.scripts["unit-test:node"] =
-        "dev-tool run test:node-ts-input -- --timeout 1200000 --exclude 'test/**/browser/*.spec.ts' 'test/**/*.spec.ts'";
+        "dev-tool run test:vitest --no-test-proxy";
       packageInfo.scripts["integration-test:node"] =
-        "dev-tool run test:node-js-input -- --timeout 5000000 'dist-esm/test/**/*.spec.js'";
-    }
-
-    if (isTypeSpecTest) {
-      // for ESM packages we use ts-node/esm loader and don't need '-r esm --require ts-node/register'
-      packageInfo["mocha"] = {
-        extension: ["ts"],
-        timeout: "1200000",
-        loader: "ts-node/esm"
-      };
-      packageInfo.scripts["unit-test:node"] =
-        'mocha --full-trace "test/{,!(browser)/**/}*.spec.ts"';
-      packageInfo.scripts["integration-test:node"] =
-        'nyc mocha --require source-map-support/register --timeout 5000000 --full-trace "dist-esm/test/{,!(browser)/**/}*.spec.js"';
+        "dev-tool run test:vitest --no-test-proxy";
     }
 
     packageInfo["browser"] = {

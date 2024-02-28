@@ -20,6 +20,7 @@ import {
   buildResponseTypes,
   buildRollupConfig,
   buildTsConfig,
+  buildTsConfigBrowser,
   buildClient,
   buildPaginateHelper,
   buildPollingHelper,
@@ -33,7 +34,14 @@ import {
   buildReadmeFile,
   buildSerializeHelper,
   buildLogger,
-  buildSamples
+  buildSamples,
+  buildTshyBrowser,
+  buildTshyBuild,
+  buildTshyCommonjs,
+  buildTshyEsm,
+  buildTshyReactNative,
+  buildVitestBrowserConfig,
+  buildVitestConfig
 } from "@azure-tools/rlc-common";
 import {
   generateFileByBuilder,
@@ -47,12 +55,8 @@ import {
 export async function generateRestLevelClient() {
   const host = getHost();
   const { model } = getSession();
-  const {
-    outputPath,
-    srcPath,
-    generateTest,
-    generateMetadata
-  } = getAutorestOptions();
+  const { outputPath, srcPath, generateTest, generateMetadata } =
+    getAutorestOptions();
 
   const project = new Project({
     useInMemoryFileSystem: true,
@@ -127,7 +131,18 @@ export async function generateRestLevelClient() {
     generateFileByBuilder(project, buildPackageFile, rlcModels);
     // buildTsConfig
     generateFileByBuilder(project, buildTsConfig, rlcModels);
+    generateFileByBuilder(project, buildTsConfigBrowser, rlcModels);
   }
+
+  generateFileByBuilder(project, buildTsConfigBrowser, rlcModels);
+  generateFileByBuilder(project, buildTshyBrowser, rlcModels);
+  generateFileByBuilder(project, buildTshyBuild, rlcModels);
+  generateFileByBuilder(project, buildTshyCommonjs, rlcModels);
+  generateFileByBuilder(project, buildTshyEsm, rlcModels);
+  generateFileByBuilder(project, buildTshyReactNative, rlcModels);
+
+  generateFileByBuilder(project, buildVitestConfig, rlcModels);
+  generateFileByBuilder(project, buildVitestBrowserConfig, rlcModels);
 
   // Save the source files to the virtual filesystem
   project.saveSync();

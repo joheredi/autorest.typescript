@@ -11,9 +11,7 @@ export function buildApiExtractorConfig(model: RLCModel) {
   const config = {
     $schema:
       "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
-    mainEntryPointFilePath: `./types${
-      generateTest || isModularLibrary ? "/src" : ""
-    }/index.d.ts`,
+    mainEntryPointFilePath: "dist/esm/index.d.ts",
     docModel: {
       enabled: true
     },

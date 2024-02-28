@@ -14,6 +14,7 @@ import {
   buildTopLevelIndex,
   buildRollupConfig,
   buildTsConfig,
+  buildTsConfigBrowser,
   buildApiExtractorConfig,
   buildPackageFile,
   buildPollingHelper,
@@ -30,7 +31,14 @@ import {
   RLCOptions,
   hasUnexpectedHelper,
   RLCModel,
-  buildSamples
+  buildSamples,
+  buildTshyBrowser,
+  buildTshyBuild,
+  buildTshyCommonjs,
+  buildTshyEsm,
+  buildTshyReactNative,
+  buildVitestConfig,
+  buildVitestBrowserConfig
 } from "@azure-tools/rlc-common";
 import { transformRLCModel } from "./transform/transform.js";
 import { emitContentByBuilder, emitModels } from "./utils/emitUtil.js";
@@ -98,9 +106,7 @@ export async function $onEmit(context: EmitContext) {
     );
     options.generateTest =
       options.generateTest === true ||
-      (options.generateTest === undefined &&
-        !hasTestFolder &&
-        options.branded);
+      (options.generateTest === undefined && !hasTestFolder && options.branded);
     dpgContext.rlcOptions = options;
   }
 
@@ -269,6 +275,17 @@ export async function $onEmit(context: EmitContext) {
         commonBuilders.push(buildPackageFile);
         commonBuilders.push(buildTsConfig);
       }
+
+      commonBuilders.push(buildTsConfigBrowser);
+      commonBuilders.push(buildTshyBrowser);
+      commonBuilders.push(buildTshyBuild);
+      commonBuilders.push(buildTshyCommonjs);
+      commonBuilders.push(buildTshyEsm);
+      commonBuilders.push(buildTshyReactNative);
+
+      commonBuilders.push(buildVitestConfig);
+      commonBuilders.push(buildVitestBrowserConfig);
+
       // build metadata relevant files
       await emitContentByBuilder(
         program,

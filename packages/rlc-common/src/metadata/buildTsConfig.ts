@@ -7,16 +7,17 @@ import { RLCModel } from "../interfaces.js";
 const restLevelTsConfigInAzureSdkForJs: Record<string, any> = {
   extends: "../../../tsconfig.package",
   compilerOptions: {
-    outDir: "./dist-esm",
-    declarationDir: "./types"
+    module: "NodeNext",
+    moduleResolution: "NodeNext",
+    rootDir: "."
   },
-  include: ["src/**/*.ts"]
+  include: ["./src/**/*.ts", "./src/**/*.mts", "./test/**/*.ts"]
 };
 
 const restLevelTsConfigNotInAzureSdkForJs: Record<string, any> = {
   compilerOptions: {
     target: "ES2017",
-    module: "es6",
+    module: "NodeNext",
     lib: [],
     declaration: true,
     declarationMap: true,
@@ -30,14 +31,41 @@ const restLevelTsConfigNotInAzureSdkForJs: Record<string, any> = {
     noImplicitReturns: true,
     noFallthroughCasesInSwitch: true,
     forceConsistentCasingInFileNames: true,
-    moduleResolution: "node",
+    moduleResolution: "NodeNext",
     allowSyntheticDefaultImports: true,
     esModuleInterop: true,
-    outDir: "./dist-esm",
-    declarationDir: "./types"
+    rootDir: "."
   },
-  include: ["./src/**/*.ts"]
+  include: ["./src/**/*.ts", "./src/**/*.mts", "./test/**/*.ts"]
 };
+
+export function buildTsConfigBrowser(model: RLCModel) {
+  const project = new Project();
+  const filePath = "tsconfig.browser.config.json";
+
+  const config = {
+    extends: "./.tshy/build.json",
+    include: ["./src/**/*.ts", "./src/**/*.mts", "./test/**/*.spec.ts"],
+    exclude: ["./test/**/node/**/*.ts"],
+    compilerOptions: {
+      outDir: "./dist-test/browser",
+      rootDir: ".",
+      skipLibCheck: true
+    }
+  };
+
+  const configFile = project.createSourceFile(
+    filePath,
+    JSON.stringify(config),
+    {
+      overwrite: true
+    }
+  );
+  return {
+    path: filePath,
+    content: configFile.getFullText()
+  };
+}
 
 export function buildTsConfig(model: RLCModel) {
   const { packageDetails, azureSdkForJs } = model.options || {};
@@ -57,7 +85,7 @@ export function buildTsConfig(model: RLCModel) {
     restLevelTsConfig.include.push("samples-dev/**/*.ts");
     restLevelTsConfig.compilerOptions["paths"] = {};
     restLevelTsConfig.compilerOptions["paths"][clientPackageName] = [
-      "./src/index"
+      "./src/index.ts"
     ];
   }
 
