@@ -78,7 +78,12 @@ export function buildVitestBrowserConfig() {
         headless: true,
         name: "chromium",
         provider: "playwright",
-        slowHijackESM: false
+        slowHijackESM: false,
+        providerOptions: {
+          launch: {
+            args: ["--disable-web-security"]
+          }
+        }
       },
       fakeTimers: {
         toFake: ["setTimeout", "Date"]

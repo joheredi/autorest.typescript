@@ -26,7 +26,7 @@ import {
   {{#each importedResponses}}
   {{this}},
   {{/each}}
-} from "./responses{{#if isModularLibrary}}.js{{/if}}";
+} from "./responses.js";
 {{/if}}
 {{/if}}
 /**

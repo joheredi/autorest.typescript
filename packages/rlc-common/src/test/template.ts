@@ -139,49 +139,48 @@ module.exports = function (config) {
 `;
 
 export const recordedClientContent = `
-import { Context } from "mocha";
-import { Recorder, RecorderStartOptions } from "@azure-tools/test-recorder";
-import "./env";
+// import { TaskContext } from "vitest";
+// import { Recorder, RecorderStartOptions } from "@azure-tools/test-recorder";
+// import "./env";
 
-const envSetupForPlayback: Record<string, string> = {
-  ENDPOINT: "https://endpoint",
-  AZURE_CLIENT_ID: "azure_client_id",
-  AZURE_CLIENT_SECRET: "azure_client_secret",
-  AZURE_TENANT_ID: "88888888-8888-8888-8888-888888888888",
-  SUBSCRIPTION_ID: "azure_subscription_id"
-};
+// const envSetupForPlayback: Record<string, string> = {
+//   ENDPOINT: "https://endpoint",
+//   AZURE_CLIENT_ID: "azure_client_id",
+//   AZURE_CLIENT_SECRET: "azure_client_secret",
+//   AZURE_TENANT_ID: "88888888-8888-8888-8888-888888888888",
+//   SUBSCRIPTION_ID: "azure_subscription_id"
+// };
 
-const recorderEnvSetup: RecorderStartOptions = {
-  envSetupForPlayback
-};
+// const recorderEnvSetup: RecorderStartOptions = {
+//   envSetupForPlayback
+// };
 
 /**
 * creates the recorder and reads the environment variables from the \`.env\` file.
 * Should be called first in the test suite to make sure environment variables are
 * read before they are being used.
 */
-export async function createRecorder(context: Context): Promise<Recorder> {
-  const recorder = new Recorder(context.currentTest);
-  await recorder.start(recorderEnvSetup);
-  return recorder;
-}
+// export async function createRecorder(context: TaskContext): Promise<Recorder> {
+//   const recorder = new Recorder(context);
+//   await recorder.start(recorderEnvSetup);
+//   return recorder;
+// }
 `;
 
 export const sampleTestContent = `
-import { Recorder } from "@azure-tools/test-recorder";
-import { assert } from "chai";
-import { createRecorder } from "./utils/recordedClient{{#if isModularLibrary}}.js{{/if}}";
-import { Context } from "mocha";
+// import { Recorder } from "@azure-tools/test-recorder";
+import { assert, describe, it, beforeEach, TaskContext } from "vitest";
+// import { createRecorder } from "./utils/recordedClient.js";
 
 describe("My test", () => {
-  let recorder: Recorder;
+  // let recorder: Recorder;
 
-  beforeEach(async function(this: Context) {
-    recorder = await createRecorder(this);
+  beforeEach(async function(this: TaskContext) {
+    // recorder = await createRecorder(this);
   });
 
   afterEach(async function() {
-    await recorder.stop();
+    // await recorder.stop();
   });
 
   it("sample test", async function() {

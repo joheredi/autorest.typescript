@@ -188,13 +188,16 @@ function restLevelPackage(model: RLCModel) {
       autorest: "latest",
       "@types/node": "^18.0.0",
       dotenv: "^16.0.0",
-      eslint: "^8.0.0",
+      eslint: "^8.56.0",
       mkdirp: "^2.1.2",
       prettier: "^3.2.5",
       rimraf: "^5.0.5",
       "source-map-support": "^0.5.9",
       typescript: "~5.3.3",
-      tshy: "^1.11.1"
+      tshy: "^1.11.1",
+      vitest: "^1.3.1",
+      "@vitest/browser": "^1.3.1",
+      playwright: "^1.41.2"
     }
   };
 
@@ -254,7 +257,6 @@ function restLevelPackage(model: RLCModel) {
     packageInfo.devDependencies["@azure/identity"] = "^4.0.1";
     packageInfo.devDependencies["@azure-tools/test-recorder"] = "^3.0.0";
     packageInfo.devDependencies["cross-env"] = "^7.0.2";
-    packageInfo.devDependencies["@types/chai"] = "^4.2.8";
     packageInfo.devDependencies["cross-env"] = "^7.0.2";
     packageInfo.devDependencies["c8"] = "^8.0.0";
     packageInfo.devDependencies["source-map-support"] = "^0.5.9";
@@ -274,12 +276,12 @@ function restLevelPackage(model: RLCModel) {
       "npm run unit-test:node && npm run unit-test:browser";
     packageInfo.scripts["unit-test:node"] =
       // eslint-disable-next-line no-useless-escape
-      `cross-env TS_NODE_COMPILER_OPTIONS="{\\\"module\\\":\\\"commonjs\\\"}" mocha -r esm --require ts-node/register --timeout 1200000 --full-trace "test/{,!(browser)/**/}*.spec.ts"`;
-    packageInfo.scripts["unit-test:browser"] = "karma start --single-run";
+      `vitest -c vitest.config.ts`;
+    packageInfo.scripts["unit-test:browser"] =
+      "vitest -c vitest.browser.config.ts";
     packageInfo.scripts["integration-test:browser"] =
-      "karma start --single-run";
-    packageInfo.scripts["integration-test:node"] =
-      'nyc mocha -r esm --require source-map-support/register --timeout 5000000 --full-trace "dist-esm/test/{,!(browser)/**/}*.spec.js"';
+      "vitest -c vitest.browser.config.ts";
+    packageInfo.scripts["integration-test:node"] = "vitest -c vitest.config.ts";
     packageInfo.scripts["integration-test"] =
       "npm run integration-test:node && npm run integration-test:browser";
 
