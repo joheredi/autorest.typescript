@@ -20,7 +20,8 @@ import {
   OperationResponse,
   getResponseBaseName,
   getResponseTypeName,
-  normalizeName
+  normalizeName,
+  buildPackageFile
 } from "@azure-tools/rlc-common";
 import { getClassicalLayerPrefix, getOperationName } from "./namingHelpers.js";
 import {
@@ -43,7 +44,7 @@ import { Program, NoTarget } from "@typespec/compiler";
 import { reportDiagnostic } from "../../lib.js";
 import { addImportToSpecifier } from "@azure-tools/rlc-common";
 
-function getRLCResponseType(rlcResponse?: OperationResponse) {
+export function getRLCResponseType(rlcResponse?: OperationResponse) {
   if (!rlcResponse?.responses) {
     return;
   }
@@ -200,7 +201,7 @@ export function getDeserializePrivateFunction(
   };
 }
 
-function getOperationSignatureParameters(
+export function getOperationSignatureParameters(
   operation: Operation,
   clientType: string
 ): OptionalKind<ParameterDeclarationStructure>[] {
@@ -317,7 +318,10 @@ export function getOperationFunction(
   };
 }
 
-function extractPagingType(type: Type, itemName?: string): Type | undefined {
+export function extractPagingType(
+  type: Type,
+  itemName?: string
+): Type | undefined {
   if (!itemName) {
     return undefined;
   }
@@ -424,7 +428,7 @@ function getRequestParameters(
 }
 
 // Specially handle the type for headers because we only allow string/number/boolean values
-function buildHeaderParameter(
+export function buildHeaderParameter(
   program: Program,
   paramMap: string,
   param: Parameter
@@ -448,7 +452,7 @@ function buildHeaderParameter(
     : paramMap;
 }
 
-function buildBodyParameter(
+export function buildBodyParameter(
   bodyParameter: BodyParameter | undefined,
   runtimeImports: RuntimeImports
 ) {
@@ -497,22 +501,13 @@ function buildBodyParameter(
     return `\nbody: ${bodyParameter.clientName},`;
   }
 
-  if (
-    bodyParameter.type.type === "byte-array" &&
-    !bodyParameter.isBinaryPayload
-  ) {
-    addImportToSpecifier("coreUtil", runtimeImports, "uint8ArrayToString");
-    return bodyParameter.optional
-      ? `body: typeof ${bodyParameter.clientName} === 'string'
-    ? uint8ArrayToString(${bodyParameter.clientName}, "${getEncodingFormat(
-      bodyParameter.type
-    )}")
-    : ${bodyParameter.clientName}`
-      : `body: uint8ArrayToString(${
-          bodyParameter.clientName
-        }, "${getEncodingFormat(bodyParameter.type)}")`;
-  } else if (bodyParameter.isBinaryPayload) {
-    return `\nbody: ${bodyParameter.clientName},`;
+  const byteArrayMapping = modularToRlcMappingByteArray(
+    bodyParameter,
+    runtimeImports
+  );
+
+  if (byteArrayMapping) {
+    return byteArrayMapping;
   }
 
   if (bodyParameter) {
@@ -522,7 +517,32 @@ function buildBodyParameter(
   return "";
 }
 
-function getEncodingFormat(type: { format?: string }) {
+function modularToRlcMappingByteArray(
+  bodyParameter: BodyParameter | undefined,
+  runtimeImports: RuntimeImports
+) {
+  if (!bodyParameter) return undefined;
+
+  const { type, clientName, isBinaryPayload, optional } = bodyParameter;
+
+  if (type.type === "byte-array") {
+    if (!isBinaryPayload) {
+      addImportToSpecifier("coreUtil", runtimeImports, "uint8ArrayToString");
+      const encoding = getEncodingFormat(type);
+      return `body: ${
+        optional
+          ? `typeof ${clientName} === 'string' ? uint8ArrayToString(${clientName}, "${encoding}") : ${clientName}`
+          : `uint8ArrayToString(${clientName}, "${encoding}")`
+      }`;
+    }
+
+    return `body: ${clientName},`;
+  }
+
+  return undefined;
+}
+
+export function getEncodingFormat(type: { format?: string }) {
   const supportedFormats = ["base64url", "base64", "byte"];
 
   if (!supportedFormats.includes(type.format ?? "")) {
@@ -549,7 +569,7 @@ export function getParameterMap(
 
   // if the parameter or property is optional, we don't need to handle the default value
   if (isOptional(param)) {
-    return getOptional(param, runtimeImports);
+    return getOptionalModularToRlcMapping(param, runtimeImports);
   }
 
   if (isRequired(param)) {
@@ -559,7 +579,10 @@ export function getParameterMap(
   throw new Error(`Parameter ${param.clientName} is not supported`);
 }
 
-function getCollectionFormat(param: Parameter, runtimeImports: RuntimeImports) {
+export function getCollectionFormat(
+  param: Parameter,
+  runtimeImports: RuntimeImports
+) {
   const collectionInfo = getCollectionFormatHelper(
     param.location,
     param.format ?? ""
@@ -648,7 +671,7 @@ type ConstantType = (Parameter | Property) & {
   type: { type: "constant"; value: string };
 };
 
-function getConstantValue(param: ConstantType) {
+export function getConstantValue(param: ConstantType) {
   const defaultValue =
     param.clientDefaultValue ?? param.type.clientDefaultValue;
 
@@ -667,7 +690,7 @@ function isConstant(param: Parameter | Property): param is ConstantType {
   );
 }
 
-type OptionalType = (Parameter | Property) & {
+export type OptionalType = (Parameter | Property) & {
   type: { optional: true };
 };
 
@@ -675,7 +698,10 @@ function isOptional(param: Parameter | Property): param is OptionalType {
   return Boolean(param.optional);
 }
 
-function getOptional(param: OptionalType, runtimeImports: RuntimeImports) {
+export function getOptionalModularToRlcMapping(
+  param: OptionalType,
+  runtimeImports: RuntimeImports
+) {
   if (param.type.type === "model") {
     return `"${param.restApiName}": {${getRequestModelMapping(
       param.type,
@@ -1154,7 +1180,7 @@ export function serializeRequestValue(
   }
 }
 
-function needsDeserialize(type?: Type) {
+export function needsDeserialize(type?: Type) {
   return (
     type?.type === "datetime" ||
     type?.type === "model" ||
@@ -1208,6 +1234,9 @@ export function isPagingOperation(op: Operation): boolean {
   return op.discriminator === "paging" || op.discriminator === "lropaging";
 }
 
+/**
+ * This function gets all the properties of the model plus the properties of all the parents
+ */
 export function getAllProperties(type: Type, parents?: Type[]): Property[] {
   const propertiesMap: Map<string, Property> = new Map();
   if (!type) {
