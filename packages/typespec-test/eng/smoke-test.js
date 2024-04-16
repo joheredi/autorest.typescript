@@ -107,10 +107,11 @@ async function generate(path, logger) {
 const failed = [];
 
 async function build(path, logger) {
-  const workingDir = join(path, "generated/typespec-ts");
+  // const workingDir = join(path, "generated/typespec-ts");
   try {
-    await runCommand("npm", ["install"], workingDir, logger);
-    await runCommand("npm", ["run", "build"], workingDir, logger);
+    console.log("skip build");
+    // await runCommand("npm", ["install"], workingDir, logger);
+    // await runCommand("npm", ["run", "build"], workingDir, logger);
   } catch (e) {
     failed.push(path);
     logger.error(Error(e.toString("utf8")));

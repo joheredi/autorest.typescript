@@ -1,10 +1,10 @@
-import { spawn, ChildProcess } from "child_process";
+import { spawn } from "child_process";
 
 const onExit = (childProcess) => {
   let messages = [];
   return new Promise((resolve, reject) => {
     if (childProcess.stdout) {
-      childProcess.stdout.on("data", message => messages.push(message));
+      childProcess.stdout.on("data", (message) => messages.push(message));
     }
     childProcess.once("exit", (code, signal) => {
       if (code === 0) {
@@ -22,7 +22,7 @@ const onExit = (childProcess) => {
 async function check_tree() {
   await onExit(
     spawn("git", ["add", "-A"], {
-      stdio: [process.stdin, process.stdout, process.stderr]
+      stdio: [process.stdin, process.stdout, process.stderr],
     })
   );
 
@@ -39,7 +39,7 @@ async function check_tree() {
     // a readable hint to the user
     await onExit(
       spawn("git", ["diff", "--staged", "--compact-summary"], {
-        stdio: [process.stdin, process.stdout, process.stderr]
+        stdio: [process.stdin, process.stdout, process.stderr],
       })
     );
 
@@ -49,7 +49,7 @@ async function check_tree() {
   }
 }
 
-check_tree().catch(error => {
+check_tree().catch((error) => {
   console.error(error);
   process.exit(-1);
 });
