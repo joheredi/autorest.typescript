@@ -66,6 +66,7 @@ import { getModuleExports } from "./modular/buildProjectFiles.js";
 export * from "./lib.js";
 
 export async function $onEmit(context: EmitContext) {
+  return;
   /** Shared status */
   const program: Program = context.program;
   const emitterOptions: EmitterOptions = context.options;
