@@ -3,7 +3,7 @@ console.log(`Memory limit: ${memoryLimit}GB`);
 
 export async function runCommand(command, args = [], workingDirectory, logger) {
   const isLinux = os.platform() === "linux";
-  const memoryLimit = calculateMemoryLimit();
+  const memoryLimit = 4096;
 
   return new Promise((resolve, reject) => {
     const env = { ...process.env, FORCE_COLOR: "true" };

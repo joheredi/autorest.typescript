@@ -14,21 +14,21 @@ async function exists(filePath) {
   }
 }
 
-const calculateMemoryLimit = () => {
-  const totalMemory = os.totalmem();
-  const freeMemory = os.freemem();
-  const minimumFreeMemory = 1024 * 1024 * 1024; // e.g., 1GB
+// const calculateMemoryLimit = () => {
+//   const totalMemory = os.totalmem();
+//   const freeMemory = os.freemem();
+//   const minimumFreeMemory = 1024 * 1024 * 1024; // e.g., 1GB
 
-  if (freeMemory > minimumFreeMemory) {
-    // Allow using up to 50% of total memory if there is at least 1GB free
-    return Math.floor(totalMemory / 1024 / 1024 / 1024 / 2); // in GB
-  } else {
-    // Default or lower memory limit if free memory is less than 1GB
-    return 512; // 512MB as a fallback
-  }
-};
+//   if (freeMemory > minimumFreeMemory) {
+//     // Allow using up to 50% of total memory if there is at least 1GB free
+//     return Math.floor(totalMemory / 1024 / 1024 / 1024 / 2); // in GB
+//   } else {
+//     // Default or lower memory limit if free memory is less than 1GB
+//     return 512; // 512MB as a fallback
+//   }
+// };
 
-const memoryLimit = calculateMemoryLimit();
+const memoryLimit = 2048;
 console.log(`Memory limit: ${memoryLimit}GB`);
 
 function runCommand(command, args = [], workingDirectory, logger) {
