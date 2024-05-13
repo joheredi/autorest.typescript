@@ -6,7 +6,7 @@ import {
 } from "./cadl-ranch-list.js";
 import { runTypespec } from "./run.js";
 
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 20;
 
 async function generateTypeSpecs(tag = "rlc", isDebugging) {
   let list = rlcTsps;
