@@ -6,6 +6,8 @@ import {
 } from "./cadl-ranch-list.js";
 import { runTypespec } from "./run.js";
 
+const BATCH_SIZE = 10;
+
 async function generateTypeSpecs(tag = "rlc", isDebugging) {
   let list = rlcTsps;
 
@@ -27,17 +29,17 @@ async function generateTypeSpecs(tag = "rlc", isDebugging) {
       break;
   }
 
-  const generatePromises = [];
+  for (let i = 0; i < list.length; i += BATCH_SIZE) {
+    const batch = list.slice(i, i + BATCH_SIZE);
+    const generatePromises = batch.map((tsp) => {
+      if (isDebugging && tsp.debug !== true) {
+        return Promise.resolve(); // Skip non-debugging tasks in debug mode
+      }
+      return runTypespec(tsp, tag);
+    });
 
-  for (const tsp of list) {
-    if (isDebugging === true && tsp.debug !== true) {
-      continue;
-    }
-    const generatePromise = runTypespec(tsp, tag);
-    generatePromises.push(generatePromise);
+    await Promise.allSettled(generatePromises);
   }
-
-  await Promise.allSettled(generatePromises);
 }
 
 async function main() {
