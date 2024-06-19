@@ -1,9 +1,10 @@
-import { assert } from "chai";
+import { describe, it, assert } from "vitest";
 import {
-  emitModularSerializeUtilsFromTypeSpec,
-  emitModularOperationsFromTypeSpec
-} from "../util/emitUtil.js";
-import { assertEqualContent } from "../util/testUtil.js";
+  emitModularOperationsFromTypeSpec,
+  emitModularSerializeUtilsFromTypeSpec
+} from "../../../test/util/emitUtil.js";
+import { format } from "prettier";
+import { prettierTypeScriptOptions } from "../../../src/lib.js";
 
 describe("modular special union serialization", () => {
   it("shouldn't generate serialize util or as any if there's no special union variant without discriminator", async () => {
@@ -2003,3 +2004,27 @@ describe("modular special union deserialization", () => {
     );
   });
 });
+
+export async function assertEqualContent(
+  actual: string,
+  expected: string,
+  ignoreWeirdLine: boolean = false
+) {
+  assert.strictEqual(
+    await format(
+      ignoreWeirdLine ? actual.replace(/\n/g, "") : actual,
+      prettierTypeScriptOptions
+    ),
+    await format(
+      ignoreWeirdLine ? expected.replace(/\n/g, "") : expected,
+      prettierTypeScriptOptions
+    )
+  );
+}
+
+export type VerifyPropertyConfig = {
+  additionalTypeSpecDefinition?: string;
+  outputType?: string;
+  additionalInputContent?: string;
+  additionalOutputContent?: string;
+};
