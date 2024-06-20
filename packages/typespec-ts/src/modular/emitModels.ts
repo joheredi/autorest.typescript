@@ -1,4 +1,4 @@
-import { getImportSpecifier } from "@azure-tools/rlc-common";
+import { addImportsToFiles, getImportSpecifier } from "@azure-tools/rlc-common";
 import * as path from "path";
 import {
   InterfaceDeclarationStructure,
@@ -11,6 +11,7 @@ import { getDocsFromDescription } from "./helpers/docsHelpers.js";
 import { getModularModelFilePath } from "./helpers/namingHelpers.js";
 import { getType } from "./helpers/typeHelpers.js";
 import { Client, ModularCodeModel, Type } from "./modularCodeModel.js";
+import { buildModelSerializer } from "./serialization/buildSerializerFunctions.js";
 
 // ====== UTILITIES ======
 
@@ -225,7 +226,20 @@ export function buildModels(
       }
       modelsFile.addInterface(modelInterface);
     }
+
+    const serializerFunction = buildModelSerializer(
+      model,
+      codeModel.runtimeImports
+    );
+
+    if (serializerFunction) {
+      modelsFile.addStatements(serializerFunction);
+    }
   }
+
+  addImportsToFiles(codeModel.runtimeImports, modelsFile, {
+    rlcIndex: "../rest/index.js"
+  });
 
   if (coreClientTypes.size > 0) {
     modelsFile.addImportDeclarations([
@@ -258,6 +272,7 @@ export function buildModels(
   aliases.forEach((alias) => {
     modelsFile.addTypeAlias(buildModelTypeAlias(alias));
   });
+
   return modelsFile;
 }
 
@@ -317,7 +332,7 @@ export function buildModelsOptions(
   );
   for (const operationGroup of client.operationGroups) {
     operationGroup.operations.forEach((o) => {
-      buildOperationOptions(o, modelOptionsFile);
+      buildOperationOptions(o, modelOptionsFile, codeModel.runtimeImports);
     });
   }
   modelOptionsFile.addImportDeclarations([
@@ -330,7 +345,7 @@ export function buildModelsOptions(
     }
   ]);
 
-  modelOptionsFile.fixMissingImports();
+  modelOptionsFile.fixMissingImports({}, { importModuleSpecifierEnding: "js" });
   modelOptionsFile
     .getImportDeclarations()
     .filter((id) => {

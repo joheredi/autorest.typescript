@@ -450,7 +450,7 @@ function emitBodyParameter(
 ): BodyParameter {
   const params = httpOperation.parameters;
   const body = params.body!;
-  const base = emitParamBase(context, body.parameter ?? body.type);
+  const base = emitParamBase(context, body.property ?? body.type);
   let contentTypes = body.contentTypes;
   if (contentTypes.length === 0) {
     contentTypes = ["application/json"];
@@ -951,7 +951,7 @@ function getName(program: Program, type: Model): string {
       return (
         type.name +
         type.templateMapper.args
-          .map((it) => (it.kind === "Model" ? it.name : ""))
+          .map((it) => ("kind" in it && it.kind === "Model" ? it.name : ""))
           .join("")
       );
     } else {
@@ -1002,13 +1002,17 @@ function emitModel(
     modelName =
       type.templateMapper.args
         .map((it) => {
-          switch (it.kind) {
-            case "Model":
-              return it.name;
-            case "String":
-              return it.value;
-            default:
-              return "";
+          if ("kind" in it) {
+            switch (it.kind) {
+              case "Model":
+                return it.name;
+              case "String":
+                return it.value;
+              default:
+                return "";
+            }
+          } else {
+            return "";
           }
         })
         .join("") + "List";
@@ -1329,7 +1333,13 @@ function emitUnion(
   type: Union,
   usage: UsageFlags
 ): Record<string, any> {
-  const sdkType = getSdkUnion(context, type);
+  let isNullable = false;
+  let sdkType = getSdkUnion(context, type);
+  if (sdkType.kind === "nullable") {
+    isNullable = true;
+    sdkType = sdkType.type;
+  }
+
   const nonNullOptions = getNonNullOptions(type);
   if (sdkType === undefined) {
     throw Error("Should not have an empty union");
@@ -1353,7 +1363,7 @@ function emitUnion(
       ? normalizeName(unionName, NameType.Interface)
       : undefined;
     return {
-      nullable: sdkType.nullable,
+      nullable: isNullable,
       name: unionTypeName,
       description: `Type of ${unionTypeName}`,
       internal: true,
@@ -1381,7 +1391,7 @@ function emitUnion(
       : undefined;
     return {
       name: typeName,
-      nullable: sdkType.nullable,
+      nullable: isNullable,
       description: sdkType.description || `Type of ${typeName}`,
       internal: true,
       type: sdkType.kind,
@@ -1395,12 +1405,12 @@ function emitUnion(
   } else if (nonNullOptions.length === 1 && nonNullOptions[0]) {
     return {
       ...emitType(context, nonNullOptions[0], usage),
-      nullable: sdkType.nullable
+      nullable: isNullable
     };
   } else {
     return {
       ...emitType(context, sdkType.__raw!, usage),
-      nullable: sdkType.nullable
+      nullable: isNullable
     };
   }
 }
@@ -1437,7 +1447,7 @@ function emitSimpleType(
   }
 
   return {
-    nullable: sdkType.nullable,
+    nullable: false,
     type: sdkType.kind === "string" ? "string" : "number", // TODO: handle other types
     doc: "",
     apiVersions: [],

@@ -1,9 +1,11 @@
 import {
   addImportsToFiles,
+  addImportToSpecifier,
   clearImportSets,
   getImportSpecifier,
   NameType,
-  normalizeName
+  normalizeName,
+  Imports as RuntimeImports
 } from "@azure-tools/rlc-common";
 import { Project, SourceFile } from "ts-morph";
 import { isRLCMultiEndpoint } from "../utils/clientUtils.js";
@@ -304,7 +306,8 @@ export function importLroDependencies(
  */
 export function buildOperationOptions(
   operation: Operation,
-  sourceFile: SourceFile
+  sourceFile: SourceFile,
+  imports: RuntimeImports
 ) {
   const optionalParameters = operation.parameters
     .filter((p) => p.implementation === "Method")
@@ -325,10 +328,14 @@ export function buildOperationOptions(
     extends: ["OperationOptions"],
     properties: (isLroOnlyOperation(operation) ? [lroOptions] : []).concat(
       options.map((p) => {
+        const { name, type } = buildType(p.clientName, p.type, p.format);
+        addImportToSpecifier("rlcIndex", imports, type);
+
         return {
           docs: getDocsFromDescription(p.description),
           hasQuestionToken: true,
-          ...buildType(p.clientName, p.type, p.format)
+          name,
+          type
         };
       })
     )

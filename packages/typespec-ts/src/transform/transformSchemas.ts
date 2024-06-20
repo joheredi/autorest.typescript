@@ -3,9 +3,13 @@
 
 import { SchemaContext } from "@azure-tools/rlc-common";
 import {
+  getAllModels,
   listOperationGroups,
   listOperationsInOperationGroup,
-  SdkClient
+  SdkClient,
+  SdkEnumType,
+  SdkModelType,
+  UsageFlags
 } from "@azure-tools/typespec-client-generator-core";
 import { ignoreDiagnostics, Model, Type } from "@typespec/compiler";
 import { getHttpOperation, getServers, HttpOperation } from "@typespec/http";
@@ -19,6 +23,14 @@ import {
   isAzureCoreErrorType,
   trimUsage
 } from "../utils/modelUtils.js";
+
+function isInputModel(model: SdkModelType | SdkEnumType) {
+  return (model.usage & UsageFlags.Input) === UsageFlags.Input;
+}
+
+function isOutputModel(model: SdkModelType | SdkEnumType) {
+  return (model.usage & UsageFlags.Output) === UsageFlags.Output;
+}
 
 export function transformSchemas(client: SdkClient, dpgContext: SdkContext) {
   const program = dpgContext.program;
@@ -39,6 +51,25 @@ export function transformSchemas(client: SdkClient, dpgContext: SdkContext) {
     }
     transformSchemaForRoute(route);
   }
+  const publicModels = getAllModels(dpgContext);
+  dpgContext.experimental_sdkPackage.models
+    .filter((p) => p.access === "public")
+    .forEach((model) => {
+      console.log(`${model.name} with type ${model.__raw?.kind} is public`);
+    });
+
+  publicModels.forEach((model) => {
+    if (model.access === "public") {
+      console.log(`${model.name} is public`);
+    }
+    if (model.__raw && isInputModel(model)) {
+      getGeneratedModels(model.__raw, SchemaContext.Input);
+    }
+
+    if (model.__raw && isOutputModel(model)) {
+      getGeneratedModels(model.__raw, SchemaContext.Output);
+    }
+  });
   const operationGroups = listOperationGroups(dpgContext, client, true);
   for (const operationGroup of operationGroups) {
     const operations = listOperationsInOperationGroup(

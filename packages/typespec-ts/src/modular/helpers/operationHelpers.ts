@@ -14,7 +14,7 @@ import {
   ParameterDeclarationStructure
 } from "ts-morph";
 import { reportDiagnostic } from "../../lib.js";
-import { toPascalCase } from "../../utils/casingUtils.js";
+import { toCamelCase, toPascalCase } from "../../utils/casingUtils.js";
 import {
   getCollectionFormatHelper,
   hasCollectionFormatInfo
@@ -41,6 +41,7 @@ import {
 } from "./docsHelpers.js";
 import { getClassicalLayerPrefix, getOperationName } from "./namingHelpers.js";
 import { buildType } from "./typeHelpers.js";
+import { getRequestModelMapping } from "../serialization/buildSerializerFunctions.js";
 
 function getRLCResponseType(rlcResponse?: OperationResponse) {
   if (!rlcResponse?.responses) {
@@ -488,7 +489,7 @@ export function getOperationOptionsName(
  * RLC internally. This will translate High Level parameters into the RLC ones.
  * Figuring out what goes in headers, body, path and qsp.
  */
-function getRequestParameters(
+export function getRequestParameters(
   dpgContext: SdkContext,
   operation: Operation,
   runtimeImports: RuntimeImports
@@ -901,114 +902,6 @@ function getNullableCheck(name: string, type: Type) {
 }
 
 /**
- *
- * This function helps translating an HLC request to RLC request,
- * extracting properties from body and headers and building the RLC response object
- */
-export function getRequestModelMapping(
-  modelPropertyType: Type,
-  propertyPath: string = "body",
-  runtimeImports: RuntimeImports,
-  typeStack: Type[] = []
-) {
-  const props: string[] = [];
-  const allParents = getAllAncestors(modelPropertyType);
-  const properties: Property[] =
-    getAllProperties(modelPropertyType, allParents) ?? [];
-  if (properties.length <= 0) {
-    return [];
-  }
-  if (isSpecialHandledUnion(modelPropertyType)) {
-    const deserializeFunctionName = getDeserializeFunctionName(
-      modelPropertyType,
-      "serialize"
-    );
-    const definition = `${deserializeFunctionName}(${propertyPath})`;
-    props.push(definition);
-    return props;
-  }
-  for (const property of properties) {
-    if (property.readonly) {
-      continue;
-    }
-    const propertyFullName = `${propertyPath}.${property.clientName}`;
-    if (property.type.type === "model") {
-      let definition;
-      if (property.type.coreTypeInfo === "ErrorType") {
-        definition = `"${property.restApiName}": ${getNullableCheck(
-          propertyFullName,
-          property.type
-        )} ${
-          !property.optional ? "" : `!${propertyFullName} ? undefined :`
-        } ${propertyFullName}`;
-      } else if (typeStack.includes(property.type)) {
-        const isSpecialModel = isSpecialUnionVariant(property.type);
-        definition = `"${property.restApiName}": ${
-          !property.optional
-            ? `${propertyFullName}${isSpecialModel ? " as any" : ""}`
-            : `!${propertyFullName} ? undefined : ${propertyFullName}${
-                isSpecialModel ? " as any" : ""
-              }`
-        }`;
-      } else if (isPolymorphicUnion(property.type)) {
-        let nullOrUndefinedPrefix = "";
-        if (property.optional || property.type.nullable) {
-          nullOrUndefinedPrefix = `!${propertyFullName} ? ${propertyFullName} :`;
-        }
-        const deserializeFunctionName = getDeserializeFunctionName(
-          property.type,
-          "serialize"
-        );
-        definition = `"${property.restApiName}": ${nullOrUndefinedPrefix}${deserializeFunctionName}(${propertyFullName})`;
-      } else {
-        definition = `"${property.restApiName}": ${getNullableCheck(
-          propertyFullName,
-          property.type
-        )} ${
-          !property.optional ? "" : `!${propertyFullName} ? undefined :`
-        } {${getRequestModelMapping(
-          property.type,
-          `${propertyPath}.${property.clientName}${
-            property.optional ? "?" : ""
-          }`,
-          runtimeImports,
-          [...typeStack, property.type]
-        )}}`;
-      }
-
-      props.push(definition);
-    } else if (typeStack.includes(property.type)) {
-      const isSpecialModel = isSpecialUnionVariant(property.type);
-      const definition = `"${property.restApiName}": ${
-        !property.optional
-          ? `${propertyFullName}${isSpecialModel ? " as any" : ""}`
-          : `!${propertyFullName} ? undefined : ${propertyFullName}${
-              isSpecialModel ? " as any" : ""
-            }`
-      }`;
-      props.push(definition);
-    } else {
-      const dot = propertyPath.endsWith("?") ? "." : "";
-      const clientValue = `${
-        propertyPath ? `${propertyPath}${dot}` : `${dot}`
-      }["${property.clientName}"]`;
-      props.push(
-        `"${property.restApiName}": ${serializeRequestValue(
-          property.type,
-          clientValue,
-          runtimeImports,
-          !property.optional,
-          [...typeStack, property.type],
-          property.format
-        )}`
-      );
-    }
-  }
-
-  return props;
-}
-
-/**
  * This function helps translating an RLC response to an HLC response,
  * extracting properties from body and headers and building the HLC response object
  */
@@ -1260,12 +1153,18 @@ export function serializeRequestValue(
           ? `${clientValue}`
           : `${requiredOrNullablePrefix}? ${clientValue}: ${clientValue}`;
       if (type.elementType?.type === "model" && !type.elementType.aliasType) {
-        return `${prefix}.map(p => ({${getRequestModelMapping(
-          type.elementType,
-          "p",
-          runtimeImports,
-          [...typeStack, type.elementType]
-        )}}))`;
+        if (!type.elementType.name) {
+          return `${prefix}.map(p => ({${getRequestModelMapping(
+            type.elementType,
+            "p",
+            runtimeImports,
+            [...typeStack, type.elementType]
+          )}}))`;
+        } else {
+          return `${prefix}.map(${toCamelCase(
+            type.elementType.name + "Serializer"
+          )})`;
+        }
       } else if (
         needsDeserialize(type.elementType) &&
         !type.elementType?.aliasType

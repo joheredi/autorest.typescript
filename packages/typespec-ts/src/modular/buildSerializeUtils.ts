@@ -14,11 +14,11 @@ import { toPascalCase } from "../utils/casingUtils.js";
 import {
   deserializeResponseValue,
   getAllAncestors,
-  getRequestModelMapping,
   getResponseMapping,
   serializeRequestValue
 } from "./helpers/operationHelpers.js";
 import { ModularCodeModel, Type } from "./modularCodeModel.js";
+import { getRequestModelMapping } from "./serialization/buildSerializerFunctions.js";
 
 /**
  * This function creates serialize and deserialize utils for special unions and that are used in the operation.
