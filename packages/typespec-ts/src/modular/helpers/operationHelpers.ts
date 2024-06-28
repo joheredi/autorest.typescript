@@ -45,6 +45,8 @@ import {
 } from "./docsHelpers.js";
 import { getClassicalLayerPrefix, getOperationName } from "./namingHelpers.js";
 import { buildType, isTypeNullable } from "./typeHelpers.js";
+import { getRecordPropertyDeserializer } from "./recordDeserializer.js";
+import { getDeserializer } from "./deserializers.js";
 
 function getRLCResponseType(rlcResponse?: OperationResponse) {
   if (!rlcResponse?.responses) {
@@ -807,7 +809,7 @@ function getRequired(param: RequiredType, runtimeImports: RuntimeImports) {
     [param.type],
     param.format === undefined &&
       (param as Parameter).location === "header" &&
-      param.type.type === "datetime"
+      param.type.type === "utcDateTime"
       ? "headerDefault"
       : param.format
   )}`;
@@ -872,7 +874,7 @@ function getOptional(param: OptionalType, runtimeImports: RuntimeImports) {
     [param.type],
     param.format === undefined &&
       (param as Parameter).location === "header" &&
-      param.type.type === "datetime"
+      param.type.type === "utcDateTime"
       ? "headerDefault"
       : param.format
   )}`;
@@ -1093,7 +1095,13 @@ export function getResponseMapping(
   for (const property of properties) {
     // TODO: Do we need to also add headers in the result type?
     const propertyFullName = `${propertyPath}.${property.restApiName}`;
-    if (property.type.type === "model") {
+    if (property.tcgcType.type.kind === "dict") {
+      const definition = getRecordPropertyDeserializer(
+        property.tcgcType,
+        propertyFullName
+      );
+      props.push(definition);
+    } else if (property.type.type === "model") {
       let definition;
       if (property.type.coreTypeInfo === "ErrorType") {
         definition = `"${property.clientName}": ${getNullableCheck(
@@ -1193,12 +1201,20 @@ export function deserializeResponseValue(
       ? `(${requiredPrefix} || ${nullablePrefix})`
       : `${requiredPrefix}${nullablePrefix}`;
   switch (type.type) {
-    case "datetime":
-      return required
-        ? isTypeNullable(type)
-          ? `${restValue} === null ? null : new Date(${restValue})`
-          : `new Date(${restValue})`
-        : `${restValue} !== undefined? new Date(${restValue}): undefined`;
+    case "utcDateTime":
+    case "plainDate":
+    case "plainTime":
+    case "duration":
+    case "offsetDateTime":
+      // eslint-disable-next-line no-case-declarations
+      const datetimeDeserializer = getDeserializer(type.tcgcType!, restValue);
+      return datetimeDeserializer;
+
+    case "dict":
+      // eslint-disable-next-line no-case-declarations
+      const recordDeserializer = getDeserializer(type.tcgcType!, restValue);
+      return recordDeserializer;
+
     case "list": {
       const prefix =
         required && !isTypeNullable(type)
@@ -1305,7 +1321,7 @@ export function serializeRequestValue(
       ? `(${requiredPrefix} || ${nullablePrefix})`
       : `${requiredPrefix}${nullablePrefix}`;
   switch (type.type) {
-    case "datetime":
+    case "utcDateTime":
       switch (type.format ?? format) {
         case "date":
           return `${clientValue}${required ? "" : "?"}.toDateString()`;
@@ -1408,7 +1424,11 @@ export function serializeRequestValue(
 
 function needsDeserialize(type?: Type) {
   return (
-    type?.type === "datetime" ||
+    type?.type === "utcDateTime" ||
+    type?.type === "plainDate" ||
+    type?.type === "plainTime" ||
+    type?.type === "duration" ||
+    type?.type === "offsetDateTime" ||
     type?.type === "model" ||
     type?.type === "list" ||
     type?.type === "byte-array"

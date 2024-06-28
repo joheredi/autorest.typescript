@@ -198,6 +198,13 @@ export function buildOperationFiles(
 
     addImportsToFiles(codeModel.runtimeImports, operationGroupFile);
     addImportBySymbol("serializeRecord", operationGroupFile);
+    addImportBySymbol("deserializeRecord", operationGroupFile);
+    addImportBySymbol("deserializePlainDate", operationGroupFile);
+    addImportBySymbol("deserializePlainTime", operationGroupFile);
+    addImportBySymbol("deserializeUtcDateTime", operationGroupFile);
+    addImportBySymbol("deserializeOffsetDateTime", operationGroupFile);
+    addImportBySymbol("deserializeDuration", operationGroupFile);
+    addImportBySymbol("withNullChecks", operationGroupFile);
 
     operationGroupFile.fixMissingImports();
     // have to fixUnusedIdentifiers after everything get generated.

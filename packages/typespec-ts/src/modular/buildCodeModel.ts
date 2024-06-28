@@ -16,6 +16,7 @@ import {
   getDefaultApiVersion,
   getLibraryName,
   getSdkBuiltInType,
+  getSdkModelPropertyType,
   getSdkUnion,
   getWireName,
   isApiVersion,
@@ -947,6 +948,7 @@ function emitProperty(
     getType(context, property.model, { usage });
   }
   const type = getType(context, property.type, { usage });
+  const [tcgcType] = getSdkModelPropertyType(context, property);
   return {
     clientName: applyCasing(clientName, { casing: CASING }),
     restApiName: jsonName,
@@ -956,7 +958,9 @@ function emitProperty(
     addedOn: getAddedOnVersion(context.program, property),
     readonly: isReadOnly(context.program, property),
     clientDefaultValue: clientDefaultValue,
-    format: newProperty.format
+    format: newProperty.format,
+    tcgcType,
+    __raw: property
   };
 }
 
@@ -1183,13 +1187,13 @@ function emitStdScalar(
     case "boolean":
       return { type: "boolean" };
     case "plainDate":
-      return { type: "datetime", format: newScalar.format ?? "date" };
+      return { type: "plainDate", format: newScalar.forma };
     case "utcDateTime":
-      return { type: "datetime", format: newScalar.format };
+      return { type: "utcDateTime", format: newScalar.format };
     case "plainTime":
-      return { type: "datetime", format: newScalar.format ?? "time" };
+      return { type: "plainTime", format: newScalar.format };
     case "offsetDateTime":
-      return { type: "string" };
+      return { type: "offsetDateTime", format: newScalar.format };
     case "duration":
       return { type: "duration", format: newScalar.format };
     case "numeric":

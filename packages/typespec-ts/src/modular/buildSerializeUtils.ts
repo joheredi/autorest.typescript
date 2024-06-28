@@ -166,7 +166,7 @@ export function isSpecialUnionVariant(
   }
 
   if (
-    t.type === "datetime" ||
+    t.type === "utcDateTime" ||
     t.type === "byte-array" ||
     (t.type === "model" &&
       t.properties
@@ -432,7 +432,7 @@ function getTypeDeserializeFunction(
         sourceFile.addFunction(functionStatement);
       }
     }
-  } else if (type.type === "datetime") {
+  } else if (type.type === "utcDateTime") {
     const functionStatement: FunctionDeclarationStructure = {
       kind: StructureKind.Function,
       docs: [`${serializeType} function for ${type.type}`],
@@ -583,7 +583,7 @@ function getTypeSerializeFunction(
         sourceFile.addFunction(functionStatement);
       }
     }
-  } else if (type.type === "datetime") {
+  } else if (type.type === "utcDateTime") {
     const functionStatement: FunctionDeclarationStructure = {
       kind: StructureKind.Function,
       docs: [`${serializeType} function for ${type.type}`],

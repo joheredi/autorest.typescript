@@ -6,6 +6,7 @@ import {
 } from "@azure-tools/rlc-common";
 import {
   SdkBodyParameter,
+  SdkModelPropertyType,
   SdkType
 } from "@azure-tools/typespec-client-generator-core";
 import { UsageFlags, Type as TypespecType } from "@typespec/compiler";
@@ -41,6 +42,8 @@ export interface Property {
   description: string;
   readonly?: boolean;
   format?: string;
+  __raw: Type;
+  tcgcType: SdkModelPropertyType;
 }
 
 export interface BodyParameter {
@@ -74,6 +77,7 @@ export interface EnumValue {
   value: string;
   description: string;
 }
+
 export interface Type {
   name?: string;
   description?: string;
@@ -85,7 +89,11 @@ export interface Type {
     | "model"
     | "list"
     | "byte-array"
-    | "datetime"
+    | "plainDate"
+    | "plainTime"
+    | "utcDateTime"
+    | "offsetDateTime"
+    | "duration"
     | "float"
     | "duration"
     | "enum"

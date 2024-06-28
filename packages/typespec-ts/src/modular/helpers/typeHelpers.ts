@@ -24,7 +24,6 @@ const simpleTypeMap: Record<string, TypeMetadata> = {
     isRelative: false
   },
   boolean: { name: "boolean" },
-  datetime: { name: "Date" },
   float: { name: "number" },
   integer: { name: "number" },
   "byte-array": { name: "Uint8Array" },
@@ -101,11 +100,40 @@ export function getType(type: Type, format?: string): TypeMetadata {
     case "dict":
       return handleDictType(type);
 
+    case "offsetDateTime":
+    case "plainDate":
+    case "plainTime":
+    case "utcDateTime":
+      return handleDateTimeType(type);
+
     case "never":
       return { name: "never", nullable: isTypeNullable(type) };
     default:
       throw new Error(`Unsupported type ${type.type}`);
   }
+}
+
+function handleDateTimeType(type: Type): TypeMetadata {
+  let name = "";
+  if (
+    type.type === "plainDate" ||
+    type.type === "plainTime" ||
+    type.type === "duration" ||
+    type.type === "offsetDateTime"
+  ) {
+    name = handleNullableTypeName({
+      name: "string",
+      nullable: isTypeNullable(type)
+    });
+  } else if (type.type === "utcDateTime") {
+    // TODO handle encoding;
+    name = handleNullableTypeName({
+      name: "Date",
+      nullable: isTypeNullable(type)
+    });
+  }
+
+  return { name };
 }
 
 /**
