@@ -205,6 +205,7 @@ export function buildOperationFiles(
     addImportBySymbol("deserializeOffsetDateTime", operationGroupFile);
     addImportBySymbol("deserializeDuration", operationGroupFile);
     addImportBySymbol("withNullChecks", operationGroupFile);
+    addImportBySymbol("passthroughDeserializer", operationGroupFile);
 
     operationGroupFile.fixMissingImports();
     // have to fixUnusedIdentifiers after everything get generated.

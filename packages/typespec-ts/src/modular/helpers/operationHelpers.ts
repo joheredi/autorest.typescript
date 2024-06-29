@@ -1282,19 +1282,7 @@ export function deserializeResponseValue(
       }
       return restValue;
     case "model":
-      if (type.discriminator) {
-        const discriminatorProp = type.properties?.filter(
-          (p) => p.restApiName === type.discriminator
-        );
-        if (
-          discriminatorProp?.length === 1 &&
-          discriminatorProp[0]?.type.isFixed === false &&
-          discriminatorProp[0].type.isNonExhaustive === false
-        ) {
-          return `${restValue} as ${type.name}`;
-        }
-      }
-      return restValue;
+      return getDeserializer(type.tcgcType!, restValue);
     default:
       return restValue;
   }

@@ -18,6 +18,8 @@ import {
 import { buildModelSerializer } from "./serialization/buildSerializerFunction.js";
 import { toCamelCase } from "../utils/casingUtils.js";
 import { addImportBySymbol } from "../utils/importHelper.js";
+import { buildModelDeserializer } from "./serialization/buildDeserializerFunction.js";
+import { SdkModelType } from "@azure-tools/typespec-client-generator-core";
 
 // ====== UTILITIES ======
 
@@ -185,6 +187,10 @@ export function buildModels(
   const modelsFile = codeModel.project.createSourceFile(
     getModularModelFilePath(codeModel, subClient)
   );
+  modelsFile.addImportDeclaration({
+    moduleSpecifier: "../rest/outputModels.js",
+    namedImports: []
+  });
   for (const model of models) {
     if (model.type === "enum") {
       if (modelsFile.getTypeAlias(model.name!)) {
@@ -231,13 +237,38 @@ export function buildModels(
         codeModel.runtimeImports
       );
 
+      const deserializerFunction = buildModelDeserializer(
+        model.tcgcType as SdkModelType
+      );
+
+      if (deserializerFunction) {
+        modelsFile.addStatements(deserializerFunction);
+      }
+
       if (
         serializerFunction &&
         !modelsFile.getFunction(toCamelCase(modelInterface.name + "Serializer"))
       ) {
         modelsFile.addStatements(serializerFunction);
       }
+      addImportBySymbol("deserializeRecord", modelsFile);
       addImportBySymbol("serializeRecord", modelsFile);
+      addImportBySymbol("passthroughDeserializer", modelsFile);
+      addImportBySymbol("deserializeRecord", modelsFile);
+      addImportBySymbol("deserializePlainDate", modelsFile);
+      addImportBySymbol("deserializePlainTime", modelsFile);
+      addImportBySymbol("deserializeUtcDateTime", modelsFile);
+      addImportBySymbol("deserializeOffsetDateTime", modelsFile);
+      addImportBySymbol("deserializeDuration", modelsFile);
+      addImportBySymbol("withNullChecks", modelsFile);
+      // importAllSymbolsFromComponent("rlcOutputModels", modelsFile);
+      modelsFile.fixMissingImports(
+        {},
+        {
+          importModuleSpecifierEnding: "js",
+          importModuleSpecifierPreference: "shortest"
+        }
+      );
       modelsFile.fixUnusedIdentifiers();
     }
   }
@@ -368,8 +399,8 @@ export function buildModelsOptions(
   modelOptionsFile.fixMissingImports(
     {},
     {
-      importModuleSpecifierPreference: "shortest",
-      importModuleSpecifierEnding: "js"
+      importModuleSpecifierEnding: "js",
+      includeCompletionsForImportStatements: true
     }
   );
   modelOptionsFile

@@ -1,4 +1,7 @@
-import { SdkType } from "@azure-tools/typespec-client-generator-core";
+import {
+  SdkModelType,
+  SdkType
+} from "@azure-tools/typespec-client-generator-core";
 
 export function getDeserializer(type: SdkType, propertyPath: string) {
   let deserializableType = type;
@@ -19,9 +22,21 @@ function getDeserializerArgs(type: SdkType) {
   return "";
 }
 
+export function getModelDeserializerName(type: SdkModelType) {
+  return `deserialize${type.name}`;
+}
+
 export function getDeserializerName(type: SdkType) {
+  if (type.kind === "nullable") {
+    return getDeserializerName(type.type);
+  }
+
   if (type.kind === "dict") {
     return "deserializeRecord";
+  }
+
+  if (type.kind === "model") {
+    return getModelDeserializerName(type);
   }
 
   if (type.kind === "plainDate") {
@@ -45,5 +60,5 @@ export function getDeserializerName(type: SdkType) {
     return "deserializeDuration";
   }
 
-  return "";
+  return "passthroughDeserializer";
 }

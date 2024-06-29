@@ -153,6 +153,17 @@ const deserializeDuration = {
   `
 };
 
+const passthroughDeserializer = {
+  symbol: "passthroughDeserializer",
+  content: `
+  function _passthroughDeserializer<T>(input: T): T {
+    return input;
+  }
+
+  export const passthroughDeserializer = withNullChecks(_passthroughDeserializer);
+  `
+};
+
 export function emitSerializerHelpersFile(
   project: Project,
   srcPath: string = "src"
@@ -202,6 +213,10 @@ export function emitSerializerHelpersFile(
     symbolMap.set(deserializeDuration.symbol, sourceFile);
   }
 
+  if (!symbolMap.has(passthroughDeserializer.symbol)) {
+    symbolMap.set(passthroughDeserializer.symbol, sourceFile);
+  }
+
   sourceFile.addStatements([
     serializeRecordFunction.content,
     isRecordElementSupportedFunction.content,
@@ -211,6 +226,7 @@ export function emitSerializerHelpersFile(
     deserializePlainTime.content,
     deserializeUtcDateTime.content,
     deserializeOffsetDateTime.content,
-    deserializeDuration.content
+    deserializeDuration.content,
+    passthroughDeserializer.content
   ]);
 }

@@ -1,4 +1,4 @@
-import { dirname, relative, resolve } from "path";
+import { dirname, relative, resolve, join } from "path";
 import { useContext } from "../contextManager.js";
 import { SourceFile } from "ts-morph";
 
@@ -46,6 +46,43 @@ export function addImportBySymbol(symbol: string, currentFile: SourceFile) {
       moduleSpecifier: relativeImportPath,
       namedImports: [symbol]
     });
+  }
+}
+
+export function importAllSymbolsFromComponent(
+  component: "rlcOutputModels",
+  currentFile: SourceFile
+) {
+  if (component === "rlcOutputModels") {
+    const moduleName = "outputModels.js";
+
+    const rootProject = currentFile.getProject();
+
+    const modulePath = join("src", "rest", moduleName);
+
+    const componentSourceFile = rootProject.getSourceFile(modulePath);
+    const exportedInterfaces = componentSourceFile
+      ?.getInterfaces()
+      .filter((i) => i.isExported());
+
+    const importSpecifier = getRelativeImportPath(
+      modulePath,
+      currentFile.getFilePath()
+    );
+
+    const existing =
+      currentFile.getImportDeclaration(
+        (i) => i.getModuleSpecifierValue() === importSpecifier
+      ) ??
+      currentFile.addImportDeclaration({ moduleSpecifier: importSpecifier });
+
+    for (const i of exportedInterfaces ?? []) {
+      if (
+        !existing.getNamedImports().some((ni) => ni.getName() === i.getName())
+      ) {
+        existing.addNamedImport(i.getName());
+      }
+    }
   }
 }
 
