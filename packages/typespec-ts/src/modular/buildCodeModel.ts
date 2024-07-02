@@ -264,6 +264,7 @@ function processModelProperties(
       newValue.properties = [];
     }
     let newProperty = emitProperty(context, property, usage);
+    newProperty["type"].tcgcType = newProperty["tcgcType"].type;
     if (isDiscriminator(context, model, property.name)) {
       hasDiscriminator = true;
       newProperty = {
@@ -339,7 +340,8 @@ function getType(
   }
 
   if (isTypespecType(type)) {
-    newValue.tcgcType = getClientType(context, type);
+    const tcgcType = getClientType(context, type);
+    newValue.tcgcType = tcgcType;
     newValue.__raw = type;
     modularMetatree.set(type, newValue);
   }
@@ -440,6 +442,8 @@ function emitParamBase(
     restApiName = "body";
   }
 
+  const tcgcType = getClientType(context, parameter)!;
+
   return {
     optional,
     description,
@@ -448,7 +452,7 @@ function emitParamBase(
     restApiName,
     inOverload: false,
     format,
-    tcgcType: getClientType(context, parameter)
+    tcgcType
   };
 }
 
@@ -949,6 +953,7 @@ function emitProperty(
   }
   const type = getType(context, property.type, { usage });
   const [tcgcType] = getSdkModelPropertyType(context, property);
+  newProperty.tcgcType = tcgcType.type;
   return {
     clientName: applyCasing(clientName, { casing: CASING }),
     restApiName: jsonName,
@@ -1044,7 +1049,8 @@ function emitModel(
   const isPaging = page && page.itemsSegments && page.itemsSegments.length > 0;
   return {
     type: "model",
-    name: `${isPaging ? "_" : ""}${modelName}`,
+    ...(isPaging ? { access: "internal" } : {}),
+    name: `${modelName}`,
     description: getDocStr(context.program, type),
     parents: baseModel ? [baseModel] : [],
     discriminatedSubtypes: [],

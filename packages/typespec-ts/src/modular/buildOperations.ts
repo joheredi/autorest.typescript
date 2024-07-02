@@ -76,7 +76,7 @@ export function buildOperationFiles(
     importModels(
       srcPath,
       operationGroupFile,
-      codeModel.project,
+      codeModel,
       subfolder,
       operationGroup.namespaceHierarchies.length
     );
@@ -203,7 +203,8 @@ export function buildOperationFiles(
     addImportBySymbol("deserializePlainTime", operationGroupFile);
     addImportBySymbol("deserializeUtcDateTime", operationGroupFile);
     addImportBySymbol("deserializeOffsetDateTime", operationGroupFile);
-    addImportBySymbol("deserializeDuration", operationGroupFile);
+    addImportBySymbol("deserializeNumericDuration", operationGroupFile);
+    addImportBySymbol("deserializeStringDuration", operationGroupFile);
     addImportBySymbol("withNullChecks", operationGroupFile);
     addImportBySymbol("passthroughDeserializer", operationGroupFile);
 
@@ -218,10 +219,12 @@ export function buildOperationFiles(
 export function importModels(
   srcPath: string,
   sourceFile: SourceFile,
-  project: Project,
+  codeModel: ModularCodeModel,
   subfolder: string = "",
   importLayer: number = 0
 ) {
+  const { project, types } = codeModel;
+  const internalTypes = types.filter((t) => t.access === "internal");
   const hasModelsImport = sourceFile.getImportDeclarations().some((i) => {
     return i.getModuleSpecifierValue().endsWith(`models/models.js`);
   });
@@ -233,7 +236,7 @@ export function importModels(
   const models: string[] = [];
 
   for (const [name] of modelsFile?.getExportedDeclarations().entries() ?? []) {
-    if (name.startsWith("_")) {
+    if (internalTypes.some((t) => t.name === name)) {
       continue;
     }
     models.push(name);

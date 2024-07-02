@@ -1378,7 +1378,7 @@ export function serializeRequestValue(
     }
     case "byte-array":
       if (format !== "binary") {
-        addImportToSpecifier("coreUtil", runtimeImports, "uint8ArrayToString");
+        // addImportToSpecifier("coreUtil", runtimeImports, "uint8ArrayToString");
         return required
           ? `${getNullableCheck(
               clientValue,

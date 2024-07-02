@@ -98,7 +98,7 @@ export function buildClassicalClient(
   importLroCoreDependencies(clientFile);
   importCredential(codeModel.runtimeImports, clientFile);
   importPipeline(codeModel.runtimeImports, clientFile);
-  importAllModels(clientFile, srcPath, subfolder);
+  importAllModels(clientFile, srcPath, subfolder, codeModel);
   buildClientOperationGroups(clientFile, client, dpgContext, clientClass);
   importAllApis(clientFile, srcPath, subfolder);
   clientFile.fixMissingImports();
@@ -128,10 +128,15 @@ function importAllApis(
   });
 }
 
+function getInternalModels(codeModel: ModularCodeModel) {
+  return codeModel.types.filter((t) => t.access === "internal");
+}
+
 function importAllModels(
   clientFile: SourceFile,
   srcPath: string,
-  subfolder: string
+  subfolder: string,
+  codeModel: ModularCodeModel
 ) {
   const project = clientFile.getProject();
   const apiModels = project.getSourceFile(
@@ -142,9 +147,14 @@ function importAllModels(
     return;
   }
 
+  const internalModels = getInternalModels(codeModel);
   const exported = [...apiModels.getExportedDeclarations().keys()].filter(
     (e) => {
-      return !e.startsWith("_");
+      if (internalModels.some((m) => m.name === e)) {
+        return false;
+      }
+
+      return true;
     }
   );
 

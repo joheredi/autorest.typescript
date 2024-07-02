@@ -76,7 +76,10 @@ function extractModels(codeModel: ModularCodeModel): ModularType[] {
   for (const model of codeModel.types) {
     if (model.type === "combined") {
       for (const unionModel of model.types ?? []) {
-        if (unionModel.type === "model") {
+        if (
+          unionModel.type === "model" &&
+          !models.find((m) => m === unionModel)
+        ) {
           models.push(unionModel);
         }
       }
@@ -259,7 +262,8 @@ export function buildModels(
       addImportBySymbol("deserializePlainTime", modelsFile);
       addImportBySymbol("deserializeUtcDateTime", modelsFile);
       addImportBySymbol("deserializeOffsetDateTime", modelsFile);
-      addImportBySymbol("deserializeDuration", modelsFile);
+      addImportBySymbol("deserializeNumericDuration", modelsFile);
+      addImportBySymbol("deserializeStringDuration", modelsFile);
       addImportBySymbol("withNullChecks", modelsFile);
       // importAllSymbolsFromComponent("rlcOutputModels", modelsFile);
       modelsFile.fixMissingImports(

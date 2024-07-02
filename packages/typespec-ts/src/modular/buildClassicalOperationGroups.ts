@@ -50,7 +50,7 @@ export function buildClassicOperationFiles(
       importModels(
         srcPath,
         classicFile,
-        codeModel.project,
+        codeModel,
         subfolder,
         operationGroup.namespaceHierarchies.length
       );
@@ -107,7 +107,7 @@ export function buildClassicOperationFiles(
 
         // Import models used from ./models.ts
         // We SHOULD keep this because otherwise ts-morph will "helpfully" try to import models from the rest layer when we call fixMissingImports().
-        importModels(srcPath, classicFile, codeModel.project, subfolder, layer);
+        importModels(srcPath, classicFile, codeModel, subfolder, layer);
         importApis(classicFile, client, codeModel, operationGroup, layer);
         // We need to import the paging helpers and types explicitly because ts-morph may not be able to find them.
         importPagingDependencies(

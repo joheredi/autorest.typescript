@@ -17,7 +17,7 @@ export function serializeRecord<T, R>(
 ): Record<string, R> {
   return Object.keys(item).reduce(
     (acc, key) => {
-      if (isSupportedRecordType(item[key])) {
+      if (isPassthroughElement(item[key])) {
         acc[key] = item[key] as any;
       } else if (serializer) {
         const value = item[key];
@@ -45,7 +45,7 @@ const deserializeRecordFunction = {
   return Object.keys(item).reduce(
     (acc, key) => {
       const value = item[key];
-      if (isSupportedRecordType(value)) {
+      if (isPassthroughElement(value)) {
         acc[key] = value as any;
       } else if (deserializer) {
         if (value !== undefined) {
@@ -65,10 +65,34 @@ export const deserializeRecord = withNullChecks(_deserializeRecord);
   `
 };
 
-const isRecordElementSupportedFunction = {
-  symbol: "isSupportedRecordType",
+const deserializeArrayFunction = {
+  symbol: "deserializeArray",
   content: `
-function isSupportedRecordType(t: any) {
+  function _deserializeArray<T, R>(
+  items: R[],
+  deserializer: (item: R) => T
+): T[] {
+  return items.map(item => {
+    if (isPassthroughElement(item)) {
+      return item as any;
+    } else if (deserializer) {
+      if (item !== undefined) {
+        return deserializer(item);
+      }
+    } else {
+      console.warn(\`Don't know how to deserialize \${item}\`);
+      return item as any;
+    }
+  });
+}
+
+export const deserializeArray = withNullChecks(_deserializeArray);`
+};
+
+const isPassthroughElement = {
+  symbol: "isPassthroughElement",
+  content: `
+function isPassthroughElement(t: any) {
   return ["number", "string", "boolean", "null"].includes(typeof t) || t instanceof Date;
 }
 `
@@ -126,8 +150,12 @@ const deserializePlainTime = {
 const deserializeUtcDateTime = {
   symbol: "deserializeUtcDateTime",
   content: `
- function _deserializeUtcDateTime(datetime: string): Date {
-  return new Date(datetime);
+  function _deserializeUtcDateTime(datetime: number | string, _encoding?: string): Date {
+  if(typeof datetime === "number") {
+  return new Date(datetime * 1000);
+  } else {
+    return new Date(datetime);
+  }
 }
   export const deserializeUtcDateTime = withNullChecks(_deserializeUtcDateTime)
   `
@@ -143,16 +171,6 @@ const deserializeOffsetDateTime = {
   `
 };
 
-const deserializeDuration = {
-  symbol: "deserializeLocalDateTime",
-  content: `
- function _deserializeDuration(duration: string): string {
-  return duration;
-}
-  export const deserializeDuration = withNullChecks(_deserializeDuration)
-  `
-};
-
 const passthroughDeserializer = {
   symbol: "passthroughDeserializer",
   content: `
@@ -161,6 +179,55 @@ const passthroughDeserializer = {
   }
 
   export const passthroughDeserializer = withNullChecks(_passthroughDeserializer);
+  `
+};
+
+const deserializeBytes = {
+  symbol: "deserializeBytes",
+  content: `
+  function _deserializeBytes(bytes: string, encoding: EncodingType): Uint8Array {
+    return stringToUint8Array(bytes, encoding);
+  }
+
+  export const deserializeBytes = withNullChecks(_deserializeBytes);
+  `
+};
+
+const deserializeNumericDuration = {
+  symbol: "deserializeNumericDuration",
+  content: `
+function _deserializeNumericDuration(
+  duration: number,
+  _encoding = "seconds"
+): number {
+  return duration;
+}
+
+export const deserializeNumericDuration = withNullChecks(
+  _deserializeNumericDuration
+);
+  `
+};
+
+const deserializeStringDuration = {
+  symbol: "deserializeStringDuration",
+  content: `
+  function _deserializeStringDuration(
+  duration: string,
+  encoding: string = "ISO8601"
+): string {
+  if (encoding === "ISO8601") {
+    return duration;
+  } else {
+    throw new Error(
+      \`Unsupported encoding \${encoding} or type \${typeof duration}\`
+    );
+  }
+}
+
+export const deserializeStringDuration = withNullChecks(
+  _deserializeStringDuration
+);
   `
 };
 
@@ -181,8 +248,8 @@ export function emitSerializerHelpersFile(
     symbolMap.set(serializeRecordFunction.symbol, sourceFile);
   }
 
-  if (!symbolMap.has(isRecordElementSupportedFunction.symbol)) {
-    symbolMap.set(isRecordElementSupportedFunction.symbol, sourceFile);
+  if (!symbolMap.has(isPassthroughElement.symbol)) {
+    symbolMap.set(isPassthroughElement.symbol, sourceFile);
   }
 
   if (!symbolMap.has(deserializeRecordFunction.symbol)) {
@@ -209,24 +276,46 @@ export function emitSerializerHelpersFile(
     symbolMap.set(deserializeOffsetDateTime.symbol, sourceFile);
   }
 
-  if (!symbolMap.has(deserializeDuration.symbol)) {
-    symbolMap.set(deserializeDuration.symbol, sourceFile);
+  if (!symbolMap.has(deserializeNumericDuration.symbol)) {
+    symbolMap.set(deserializeNumericDuration.symbol, sourceFile);
+  }
+
+  if (!symbolMap.has(deserializeStringDuration.symbol)) {
+    symbolMap.set(deserializeStringDuration.symbol, sourceFile);
   }
 
   if (!symbolMap.has(passthroughDeserializer.symbol)) {
     symbolMap.set(passthroughDeserializer.symbol, sourceFile);
   }
 
+  if (!symbolMap.has(deserializeBytes.symbol)) {
+    symbolMap.set(deserializeBytes.symbol, sourceFile);
+  }
+
+  if (!symbolMap.has(deserializeArrayFunction.symbol)) {
+    symbolMap.set(deserializeArrayFunction.symbol, sourceFile);
+  }
+
   sourceFile.addStatements([
     serializeRecordFunction.content,
-    isRecordElementSupportedFunction.content,
+    isPassthroughElement.content,
     deserializeRecordFunction.content,
     withNullChecks.content,
     deserializePlainDate.content,
     deserializePlainTime.content,
     deserializeUtcDateTime.content,
     deserializeOffsetDateTime.content,
-    deserializeDuration.content,
-    passthroughDeserializer.content
+    passthroughDeserializer.content,
+    deserializeBytes.content,
+    deserializeArrayFunction.content,
+    deserializeStringDuration.content,
+    deserializeNumericDuration.content
+  ]);
+
+  sourceFile.addImportDeclarations([
+    {
+      moduleSpecifier: "@azure/core-util",
+      namedImports: ["EncodingType", "stringToUint8Array"]
+    }
   ]);
 }

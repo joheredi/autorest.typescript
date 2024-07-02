@@ -126,6 +126,7 @@ export interface Type {
   discriminator?: string;
   discriminatorValue?: string;
   isPolymorphicBaseModel?: boolean;
+  access?: "internal";
   tcgcType?: SdkType;
   __raw?: TypespecType;
 }
