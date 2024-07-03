@@ -3,16 +3,28 @@
 
 export {
   BaseModel,
+  deserializeBaseModel,
   OuterModel,
+  deserializeOuterModel,
   InnerModel,
+  deserializeInnerModel,
   AbstractModel,
+  deserializeAbstractModel,
+  deserializeAbstractModelUnion,
   RealModel,
+  deserializeRealModel,
   SharedModel,
+  deserializeSharedModel,
   NoDecoratorModelInInternal,
+  deserializeNoDecoratorModelInInternal,
   InternalDecoratorModelInInternal,
+  deserializeInternalDecoratorModelInInternal,
   PublicDecoratorModelInInternal,
+  deserializePublicDecoratorModelInInternal,
   NoDecoratorModelInPublic,
+  deserializeNoDecoratorModelInPublic,
   PublicDecoratorModelInPublic,
+  deserializePublicDecoratorModelInPublic,
   AbstractModelUnion,
 } from "./models.js";
 export {

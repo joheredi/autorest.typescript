@@ -6,6 +6,7 @@ export { restorePoller, RestorePollerOptions } from "./restorePollerHelpers.js";
 export {
   GenerationOptions,
   GenerationResult,
+  deserializeGenerationResult,
   Versions,
   LongRunningRpcOptionalParams,
 } from "./models/index.js";

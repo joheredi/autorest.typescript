@@ -7,6 +7,7 @@ export {
 } from "./renamedFromClient.js";
 export {
   NewModel,
+  deserializeNewModel,
   NewEnum,
   Versions,
   NewUnion,

@@ -1,6 +1,31 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../rest/outputModels.js";
+import {
+  passthroughDeserializer,
+  withNullChecks,
+  deserializeArray,
+  deserializeBytes,
+  deserializeStringDuration,
+  deserializeUtcDateTime,
+} from "../helpers/serializerHelpers.js";
+import {
+  BooleanLiteralPropertyOutput,
+  BytesPropertyOutput,
+  CollectionsBytePropertyOutput,
+  CollectionsModelPropertyOutput,
+  DatetimePropertyOutput,
+  DurationPropertyOutput,
+  FloatLiteralPropertyOutput,
+  IntLiteralPropertyOutput,
+  RequiredAndOptionalPropertyOutput,
+  StringLiteralPropertyOutput,
+  StringPropertyOutput,
+  UnionFloatLiteralPropertyOutput,
+  UnionIntLiteralPropertyOutput,
+  UnionStringLiteralPropertyOutput,
+} from "../rest/outputModels.js";
 import { uint8ArrayToString } from "@azure/core-util";
 import {
   RequiredAndOptionalProperty as RequiredAndOptionalPropertyRest,
@@ -27,6 +52,19 @@ export interface RequiredAndOptionalProperty {
   requiredProperty: number;
 }
 
+function _deserializeRequiredAndOptionalProperty(
+  input: RequiredAndOptionalPropertyOutput,
+): RequiredAndOptionalProperty {
+  return {
+    optionalProperty: passthroughDeserializer(input["optionalProperty"]),
+    requiredProperty: passthroughDeserializer(input["requiredProperty"]),
+  };
+}
+
+export const deserializeRequiredAndOptionalProperty = withNullChecks(
+  _deserializeRequiredAndOptionalProperty,
+);
+
 export function requiredAndOptionalPropertySerializer(
   item: RequiredAndOptionalProperty,
 ): RequiredAndOptionalPropertyRest {
@@ -42,6 +80,18 @@ export interface UnionFloatLiteralProperty {
   property?: 1.25 | 2.375;
 }
 
+function _deserializeUnionFloatLiteralProperty(
+  input: UnionFloatLiteralPropertyOutput,
+): UnionFloatLiteralProperty {
+  return {
+    property: passthroughDeserializer(input["property"]),
+  };
+}
+
+export const deserializeUnionFloatLiteralProperty = withNullChecks(
+  _deserializeUnionFloatLiteralProperty,
+);
+
 export function unionFloatLiteralPropertySerializer(
   item: UnionFloatLiteralProperty,
 ): UnionFloatLiteralPropertyRest {
@@ -55,6 +105,18 @@ export interface UnionIntLiteralProperty {
   /** Property */
   property?: 1 | 2;
 }
+
+function _deserializeUnionIntLiteralProperty(
+  input: UnionIntLiteralPropertyOutput,
+): UnionIntLiteralProperty {
+  return {
+    property: passthroughDeserializer(input["property"]),
+  };
+}
+
+export const deserializeUnionIntLiteralProperty = withNullChecks(
+  _deserializeUnionIntLiteralProperty,
+);
 
 export function unionIntLiteralPropertySerializer(
   item: UnionIntLiteralProperty,
@@ -70,6 +132,18 @@ export interface UnionStringLiteralProperty {
   property?: "hello" | "world";
 }
 
+function _deserializeUnionStringLiteralProperty(
+  input: UnionStringLiteralPropertyOutput,
+): UnionStringLiteralProperty {
+  return {
+    property: passthroughDeserializer(input["property"]),
+  };
+}
+
+export const deserializeUnionStringLiteralProperty = withNullChecks(
+  _deserializeUnionStringLiteralProperty,
+);
+
 export function unionStringLiteralPropertySerializer(
   item: UnionStringLiteralProperty,
 ): UnionStringLiteralPropertyRest {
@@ -83,6 +157,18 @@ export interface BooleanLiteralProperty {
   /** Property */
   property?: true;
 }
+
+function _deserializeBooleanLiteralProperty(
+  input: BooleanLiteralPropertyOutput,
+): BooleanLiteralProperty {
+  return {
+    property: passthroughDeserializer(input["property"]),
+  };
+}
+
+export const deserializeBooleanLiteralProperty = withNullChecks(
+  _deserializeBooleanLiteralProperty,
+);
 
 export function booleanLiteralPropertySerializer(
   item: BooleanLiteralProperty,
@@ -98,6 +184,18 @@ export interface FloatLiteralProperty {
   property?: 1.25;
 }
 
+function _deserializeFloatLiteralProperty(
+  input: FloatLiteralPropertyOutput,
+): FloatLiteralProperty {
+  return {
+    property: passthroughDeserializer(input["property"]),
+  };
+}
+
+export const deserializeFloatLiteralProperty = withNullChecks(
+  _deserializeFloatLiteralProperty,
+);
+
 export function floatLiteralPropertySerializer(
   item: FloatLiteralProperty,
 ): FloatLiteralPropertyRest {
@@ -111,6 +209,18 @@ export interface IntLiteralProperty {
   /** Property */
   property?: 1;
 }
+
+function _deserializeIntLiteralProperty(
+  input: IntLiteralPropertyOutput,
+): IntLiteralProperty {
+  return {
+    property: passthroughDeserializer(input["property"]),
+  };
+}
+
+export const deserializeIntLiteralProperty = withNullChecks(
+  _deserializeIntLiteralProperty,
+);
 
 export function intLiteralPropertySerializer(
   item: IntLiteralProperty,
@@ -126,6 +236,18 @@ export interface StringLiteralProperty {
   property?: "hello";
 }
 
+function _deserializeStringLiteralProperty(
+  input: StringLiteralPropertyOutput,
+): StringLiteralProperty {
+  return {
+    property: passthroughDeserializer(input["property"]),
+  };
+}
+
+export const deserializeStringLiteralProperty = withNullChecks(
+  _deserializeStringLiteralProperty,
+);
+
 export function stringLiteralPropertySerializer(
   item: StringLiteralProperty,
 ): StringLiteralPropertyRest {
@@ -139,6 +261,18 @@ export interface CollectionsModelProperty {
   /** Property */
   property?: StringProperty[];
 }
+
+function _deserializeCollectionsModelProperty(
+  input: CollectionsModelPropertyOutput,
+): CollectionsModelProperty {
+  return {
+    property: deserializeArray(input["property"], deserializeStringProperty),
+  };
+}
+
+export const deserializeCollectionsModelProperty = withNullChecks(
+  _deserializeCollectionsModelProperty,
+);
 
 export function collectionsModelPropertySerializer(
   item: CollectionsModelProperty,
@@ -157,6 +291,18 @@ export interface StringProperty {
   property?: string;
 }
 
+function _deserializeStringProperty(
+  input: StringPropertyOutput,
+): StringProperty {
+  return {
+    property: passthroughDeserializer(input["property"]),
+  };
+}
+
+export const deserializeStringProperty = withNullChecks(
+  _deserializeStringProperty,
+);
+
 export function stringPropertySerializer(
   item: StringProperty,
 ): StringPropertyRest {
@@ -170,6 +316,20 @@ export interface CollectionsByteProperty {
   /** Property */
   property?: Uint8Array[];
 }
+
+function _deserializeCollectionsByteProperty(
+  input: CollectionsBytePropertyOutput,
+): CollectionsByteProperty {
+  return {
+    property: deserializeArray(input["property"], (i) =>
+      deserializeBytes(i, "base64"),
+    ),
+  };
+}
+
+export const deserializeCollectionsByteProperty = withNullChecks(
+  _deserializeCollectionsByteProperty,
+);
 
 export function collectionsBytePropertySerializer(
   item: CollectionsByteProperty,
@@ -188,6 +348,18 @@ export interface DurationProperty {
   property?: string;
 }
 
+function _deserializeDurationProperty(
+  input: DurationPropertyOutput,
+): DurationProperty {
+  return {
+    property: deserializeStringDuration(input["property"]),
+  };
+}
+
+export const deserializeDurationProperty = withNullChecks(
+  _deserializeDurationProperty,
+);
+
 export function durationPropertySerializer(
   item: DurationProperty,
 ): DurationPropertyRest {
@@ -202,6 +374,18 @@ export interface DatetimeProperty {
   property?: Date;
 }
 
+function _deserializeDatetimeProperty(
+  input: DatetimePropertyOutput,
+): DatetimeProperty {
+  return {
+    property: deserializeUtcDateTime(input["property"]),
+  };
+}
+
+export const deserializeDatetimeProperty = withNullChecks(
+  _deserializeDatetimeProperty,
+);
+
 export function datetimePropertySerializer(
   item: DatetimeProperty,
 ): DatetimePropertyRest {
@@ -215,6 +399,16 @@ export interface BytesProperty {
   /** Property */
   property?: Uint8Array;
 }
+
+function _deserializeBytesProperty(input: BytesPropertyOutput): BytesProperty {
+  return {
+    property: deserializeBytes(input["property"], "base64"),
+  };
+}
+
+export const deserializeBytesProperty = withNullChecks(
+  _deserializeBytesProperty,
+);
 
 export function bytesPropertySerializer(
   item: BytesProperty,

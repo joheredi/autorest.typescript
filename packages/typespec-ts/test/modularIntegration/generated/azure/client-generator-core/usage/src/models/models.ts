@@ -1,6 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../rest/outputModels.js";
+import {
+  passthroughDeserializer,
+  withNullChecks,
+} from "../helpers/serializerHelpers.js";
+import { OutputModelOutput } from "../rest/outputModels.js";
 import { InputModel as InputModelRest } from "../rest/index.js";
 
 /** Usage override to roundtrip. */
@@ -18,6 +24,14 @@ export function inputModelSerializer(item: InputModel): InputModelRest {
 export interface OutputModel {
   name: string;
 }
+
+function _deserializeOutputModel(input: OutputModelOutput): OutputModel {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeOutputModel = withNullChecks(_deserializeOutputModel);
 
 export function outputModelSerializer(item: OutputModel) {
   return {

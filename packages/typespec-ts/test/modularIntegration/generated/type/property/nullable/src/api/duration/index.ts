@@ -14,6 +14,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { deserializeStringDuration } from "../../helpers/serializerHelpers.js";
 import {
   DurationGetNonNullOptionalParams,
   DurationGetNullOptionalParams,
@@ -39,7 +40,9 @@ export async function _getNonNullDeserialize(
 
   return {
     requiredProperty: result.body["requiredProperty"],
-    nullableProperty: result.body["nullableProperty"],
+    nullableProperty: deserializeStringDuration(
+      result.body["nullableProperty"],
+    ),
   };
 }
 
@@ -70,7 +73,9 @@ export async function _getNullDeserialize(
 
   return {
     requiredProperty: result.body["requiredProperty"],
-    nullableProperty: result.body["nullableProperty"],
+    nullableProperty: deserializeStringDuration(
+      result.body["nullableProperty"],
+    ),
   };
 }
 

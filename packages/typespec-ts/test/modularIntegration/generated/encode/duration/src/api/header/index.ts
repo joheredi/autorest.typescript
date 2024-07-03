@@ -98,7 +98,7 @@ export function _headerIso8601ArraySend(
     .path("/encode/duration/header/iso8601-array")
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: { duration: buildCsvCollection(duration) },
+      headers: { duration: buildCsvCollection(duration.map((p) => p)) },
     });
 }
 

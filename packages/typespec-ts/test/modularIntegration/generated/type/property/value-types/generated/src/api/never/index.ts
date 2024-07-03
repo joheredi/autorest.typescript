@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { NeverProperty } from "../../models/models.js";
+import {
+  NeverProperty,
+  deserializeNeverProperty,
+} from "../../models/models.js";
 import {
   NeverGet200Response,
   NeverPut204Response,
@@ -33,7 +36,7 @@ export async function _neverGetDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeNeverProperty(result.body);
 }
 
 /** Get call */

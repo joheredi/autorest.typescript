@@ -4,6 +4,8 @@
 import {
   dogUnionSerializer,
   snakeUnionSerializer,
+  deserializeDogUnion,
+  deserializeSnakeUnion,
   DogUnion,
   SnakeUnion,
 } from "../models/models.js";
@@ -50,7 +52,7 @@ export async function _getExtensibleModelDeserialize(
     throw createRestError(result);
   }
 
-  return result.body as DogUnion;
+  return deserializeDogUnion(result.body);
 }
 
 /** Receive model with extensible enum discriminator type. */
@@ -115,7 +117,7 @@ export async function _getExtensibleModelMissingDiscriminatorDeserialize(
     throw createRestError(result);
   }
 
-  return result.body as DogUnion;
+  return deserializeDogUnion(result.body);
 }
 
 /** Get a model omitting the discriminator. */
@@ -152,7 +154,7 @@ export async function _getExtensibleModelWrongDiscriminatorDeserialize(
     throw createRestError(result);
   }
 
-  return result.body as DogUnion;
+  return deserializeDogUnion(result.body);
 }
 
 /** Get a model containing discriminator value never defined. */
@@ -185,7 +187,7 @@ export async function _getFixedModelDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeSnakeUnion(result.body);
 }
 
 /** Receive model with fixed enum discriminator type. */
@@ -250,7 +252,7 @@ export async function _getFixedModelMissingDiscriminatorDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeSnakeUnion(result.body);
 }
 
 /** Get a model omitting the discriminator. */
@@ -284,7 +286,7 @@ export async function _getFixedModelWrongDiscriminatorDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeSnakeUnion(result.body);
 }
 
 /** Get a model containing discriminator value never defined. */

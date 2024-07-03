@@ -24,6 +24,10 @@ import {
   createRestError,
 } from "@azure-rest/core-client";
 import {
+  deserializeNumericDuration,
+  deserializeStringDuration,
+} from "../../helpers/serializerHelpers.js";
+import {
   PropertyDefaultOptionalParams,
   PropertyIso8601OptionalParams,
   PropertyInt32SecondsOptionalParams,
@@ -53,7 +57,7 @@ export async function _propertyDefaultDeserialize(
   }
 
   return {
-    value: result.body["value"],
+    value: deserializeStringDuration(result.body["value"]),
   };
 }
 
@@ -87,7 +91,7 @@ export async function _propertyIso8601Deserialize(
   }
 
   return {
-    value: result.body["value"],
+    value: deserializeStringDuration(result.body["value"]),
   };
 }
 
@@ -121,7 +125,7 @@ export async function _propertyInt32SecondsDeserialize(
   }
 
   return {
-    value: result.body["value"],
+    value: deserializeNumericDuration(result.body["value"]),
   };
 }
 
@@ -155,7 +159,7 @@ export async function _propertyFloatSecondsDeserialize(
   }
 
   return {
-    value: result.body["value"],
+    value: deserializeNumericDuration(result.body["value"]),
   };
 }
 
@@ -189,7 +193,7 @@ export async function _propertyFloat64SecondsDeserialize(
   }
 
   return {
-    value: result.body["value"],
+    value: deserializeNumericDuration(result.body["value"]),
   };
 }
 
@@ -211,7 +215,7 @@ export function _propertyFloatSecondsArraySend(
     .path("/encode/duration/property/float-seconds-array")
     .post({
       ...operationOptionsToRequestParameters(options),
-      body: { value: body["value"] },
+      body: { value: body["value"].map((p) => p) },
     });
 }
 
@@ -223,7 +227,7 @@ export async function _propertyFloatSecondsArrayDeserialize(
   }
 
   return {
-    value: result.body["value"],
+    value: result.body["value"].map((p) => deserializeNumericDuration(p)),
   };
 }
 

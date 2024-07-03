@@ -1,7 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { EmptyInput, EmptyOutput, EmptyInputOutput } from "../models/models.js";
+import {
+  EmptyInput,
+  EmptyOutput,
+  deserializeEmptyOutput,
+  EmptyInputOutput,
+  deserializeEmptyInputOutput,
+} from "../models/models.js";
 import {
   EmptyContext as Client,
   GetEmpty200Response,
@@ -64,7 +70,7 @@ export async function _getEmptyDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeEmptyOutput(result.body);
 }
 
 export async function getEmpty(
@@ -92,7 +98,7 @@ export async function _postRoundTripEmptyDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeEmptyInputOutput(result.body);
 }
 
 export async function postRoundTripEmpty(

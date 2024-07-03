@@ -3,13 +3,19 @@
 
 export {
   MixedTypesCases,
+  deserializeMixedTypesCases,
   Cat,
+  deserializeCat,
   MixedLiteralsCases,
+  deserializeMixedLiteralsCases,
   StringAndArrayCases,
+  deserializeStringAndArrayCases,
   EnumsOnlyCases,
+  deserializeEnumsOnlyCases,
   Lr,
   Ud,
   Dog,
+  deserializeDog,
   StringExtensibleNamedUnion,
   KnownStringExtensibleNamedUnion,
 } from "./models.js";

@@ -1,6 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../rest/outputModels.js";
+import {
+  passthroughDeserializer,
+  withNullChecks,
+} from "../helpers/serializerHelpers.js";
+import {
+  ChildFlattenModelOutput,
+  ChildModelOutput,
+  FlattenModelOutput,
+  NestedFlattenModelOutput,
+} from "../rest/outputModels.js";
 import {
   FlattenModel as FlattenModelRest,
   ChildModel as ChildModelRest,
@@ -13,6 +24,15 @@ export interface FlattenModel {
   name: string;
   properties: ChildModel;
 }
+
+function _deserializeFlattenModel(input: FlattenModelOutput): FlattenModel {
+  return {
+    name: passthroughDeserializer(input["name"]),
+    properties: deserializeChildModel(input["properties"]),
+  };
+}
+
+export const deserializeFlattenModel = withNullChecks(_deserializeFlattenModel);
 
 export function flattenModelSerializer(item: FlattenModel): FlattenModelRest {
   return {
@@ -27,6 +47,15 @@ export interface ChildModel {
   age: number;
 }
 
+function _deserializeChildModel(input: ChildModelOutput): ChildModel {
+  return {
+    description: passthroughDeserializer(input["description"]),
+    age: passthroughDeserializer(input["age"]),
+  };
+}
+
+export const deserializeChildModel = withNullChecks(_deserializeChildModel);
+
 export function childModelSerializer(item: ChildModel): ChildModelRest {
   return {
     description: item["description"],
@@ -39,6 +68,19 @@ export interface NestedFlattenModel {
   name: string;
   properties: ChildFlattenModel;
 }
+
+function _deserializeNestedFlattenModel(
+  input: NestedFlattenModelOutput,
+): NestedFlattenModel {
+  return {
+    name: passthroughDeserializer(input["name"]),
+    properties: deserializeChildFlattenModel(input["properties"]),
+  };
+}
+
+export const deserializeNestedFlattenModel = withNullChecks(
+  _deserializeNestedFlattenModel,
+);
 
 export function nestedFlattenModelSerializer(
   item: NestedFlattenModel,
@@ -54,6 +96,19 @@ export interface ChildFlattenModel {
   summary: string;
   properties: ChildModel;
 }
+
+function _deserializeChildFlattenModel(
+  input: ChildFlattenModelOutput,
+): ChildFlattenModel {
+  return {
+    summary: passthroughDeserializer(input["summary"]),
+    properties: deserializeChildModel(input["properties"]),
+  };
+}
+
+export const deserializeChildFlattenModel = withNullChecks(
+  _deserializeChildFlattenModel,
+);
 
 export function childFlattenModelSerializer(
   item: ChildFlattenModel,

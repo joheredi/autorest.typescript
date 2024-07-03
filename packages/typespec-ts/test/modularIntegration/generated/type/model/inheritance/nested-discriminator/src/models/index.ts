@@ -3,10 +3,17 @@
 
 export {
   Fish,
+  deserializeFish,
+  deserializeFishUnion,
   Shark,
+  deserializeShark,
+  deserializeSharkUnion,
   SawShark,
+  deserializeSawShark,
   GoblinShark,
+  deserializeGoblinShark,
   Salmon,
+  deserializeSalmon,
   FishUnion,
   SharkUnion,
 } from "./models.js";

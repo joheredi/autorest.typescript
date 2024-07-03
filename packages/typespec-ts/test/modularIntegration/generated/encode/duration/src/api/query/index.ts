@@ -193,7 +193,7 @@ export function _queryInt32SecondsArraySend(
     .path("/encode/duration/query/int32-seconds-array")
     .get({
       ...operationOptionsToRequestParameters(options),
-      queryParameters: { input: input },
+      queryParameters: { input: input.map((p) => p) },
     });
 }
 

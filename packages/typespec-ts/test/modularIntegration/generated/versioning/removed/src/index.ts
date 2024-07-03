@@ -4,6 +4,7 @@
 export { RemovedClient, RemovedClientOptions } from "./removedClient.js";
 export {
   ModelV2,
+  deserializeModelV2,
   EnumV2,
   Versions,
   UnionV2,

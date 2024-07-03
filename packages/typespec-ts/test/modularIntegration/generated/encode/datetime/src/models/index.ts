@@ -3,10 +3,15 @@
 
 export {
   DefaultDatetimeProperty,
+  deserializeDefaultDatetimeProperty,
   Rfc3339DatetimeProperty,
+  deserializeRfc3339DatetimeProperty,
   Rfc7231DatetimeProperty,
+  deserializeRfc7231DatetimeProperty,
   UnixTimestampDatetimeProperty,
+  deserializeUnixTimestampDatetimeProperty,
   UnixTimestampArrayDatetimeProperty,
+  deserializeUnixTimestampArrayDatetimeProperty,
 } from "./models.js";
 export {
   QueryDefaultOptionalParams,

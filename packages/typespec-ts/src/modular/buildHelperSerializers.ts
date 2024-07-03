@@ -118,7 +118,7 @@ export function withNullChecks<I, R, A extends any[]>(
 ): (input: I | null | undefined, ...args: A) => SafeReturn<I, R> {
   return function (input: I | null | undefined, ...args: A): SafeReturn<I, R> {
     if (input === null || input === undefined) {
-      return null as SafeReturn<I, R>;
+      return input as SafeReturn<I, R>;
     }
 
     return fn(input as NonNullable<I>, ...args) as SafeReturn<I, R>;
@@ -151,11 +151,7 @@ const deserializeUtcDateTime = {
   symbol: "deserializeUtcDateTime",
   content: `
   function _deserializeUtcDateTime(datetime: number | string, _encoding?: string): Date {
-  if(typeof datetime === "number") {
-  return new Date(datetime * 1000);
-  } else {
     return new Date(datetime);
-  }
 }
   export const deserializeUtcDateTime = withNullChecks(_deserializeUtcDateTime)
   `

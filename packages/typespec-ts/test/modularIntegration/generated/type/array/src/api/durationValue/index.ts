@@ -11,6 +11,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { deserializeStringDuration } from "../../helpers/serializerHelpers.js";
 import {
   DurationValueGetOptionalParams,
   DurationValuePutOptionalParams,
@@ -32,7 +33,9 @@ export async function _durationValueGetDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return result.body === undefined
+    ? result.body
+    : result.body.map((p) => deserializeStringDuration(p));
 }
 
 export async function durationValueGet(

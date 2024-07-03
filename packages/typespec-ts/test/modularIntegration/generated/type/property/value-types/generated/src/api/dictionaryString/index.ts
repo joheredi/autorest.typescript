@@ -12,7 +12,11 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
-import { serializeRecord } from "../../helpers/serializerHelpers.js";
+import {
+  serializeRecord,
+  deserializeRecord,
+  passthroughDeserializer,
+} from "../../helpers/serializerHelpers.js";
 import {
   DictionaryStringGetOptionalParams,
   DictionaryStringPutOptionalParams,
@@ -35,7 +39,7 @@ export async function _dictionaryStringGetDeserialize(
   }
 
   return {
-    property: result.body["property"],
+    property: deserializeRecord(result.body.property, passthroughDeserializer),
   };
 }
 

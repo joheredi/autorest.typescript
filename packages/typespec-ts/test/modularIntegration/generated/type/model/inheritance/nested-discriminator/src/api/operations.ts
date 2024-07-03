@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { fishUnionSerializer, FishUnion } from "../models/models.js";
+import {
+  fishUnionSerializer,
+  deserializeFishUnion,
+  FishUnion,
+} from "../models/models.js";
 import {
   GetMissingDiscriminator200Response,
   GetModel200Response,
@@ -41,7 +45,7 @@ export async function _getModelDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeFishUnion(result.body);
 }
 
 export async function getModel(
@@ -100,7 +104,7 @@ export async function _getRecursiveModelDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeFishUnion(result.body);
 }
 
 export async function getRecursiveModel(
@@ -159,7 +163,7 @@ export async function _getMissingDiscriminatorDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeFishUnion(result.body);
 }
 
 export async function getMissingDiscriminator(
@@ -186,7 +190,7 @@ export async function _getWrongDiscriminatorDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeFishUnion(result.body);
 }
 
 export async function getWrongDiscriminator(

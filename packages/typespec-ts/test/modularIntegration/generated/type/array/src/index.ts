@@ -4,6 +4,7 @@
 export { ArrayClient, ArrayClientOptions } from "./arrayClient.js";
 export {
   InnerModel,
+  deserializeInnerModel,
   Int32ValueGetOptionalParams,
   Int32ValuePutOptionalParams,
   Int64ValueGetOptionalParams,

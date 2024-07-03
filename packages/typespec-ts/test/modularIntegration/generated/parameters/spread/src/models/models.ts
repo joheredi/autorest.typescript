@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../rest/outputModels.js";
 import { BodyParameter as BodyParameterRest } from "../rest/index.js";
 
 /** This is a simple model. */

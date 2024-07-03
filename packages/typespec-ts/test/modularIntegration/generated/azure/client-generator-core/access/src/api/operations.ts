@@ -3,6 +3,7 @@
 
 import {
   OuterModel,
+  deserializeAbstractModelUnion,
   SharedModel,
   NoDecoratorModelInInternal,
   InternalDecoratorModelInInternal,
@@ -365,7 +366,7 @@ export async function _discriminatorDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeAbstractModelUnion(result.body);
 }
 
 /**

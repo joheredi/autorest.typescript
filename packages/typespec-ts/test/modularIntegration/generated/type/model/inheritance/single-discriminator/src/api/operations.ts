@@ -3,6 +3,8 @@
 
 import {
   birdUnionSerializer,
+  deserializeBirdUnion,
+  deserializeDinosaurUnion,
   BirdUnion,
   DinosaurUnion,
 } from "../models/models.js";
@@ -47,7 +49,7 @@ export async function _getModelDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeBirdUnion(result.body);
 }
 
 export async function getModel(
@@ -106,7 +108,7 @@ export async function _getRecursiveModelDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeBirdUnion(result.body);
 }
 
 export async function getRecursiveModel(
@@ -165,7 +167,7 @@ export async function _getMissingDiscriminatorDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeBirdUnion(result.body);
 }
 
 export async function getMissingDiscriminator(
@@ -192,7 +194,7 @@ export async function _getWrongDiscriminatorDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeBirdUnion(result.body);
 }
 
 export async function getWrongDiscriminator(
@@ -219,7 +221,7 @@ export async function _getLegacyModelDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializeDinosaurUnion(result.body);
 }
 
 export async function getLegacyModel(

@@ -7,10 +7,16 @@ export {
 } from "./enumDiscriminatorClient.js";
 export {
   Dog,
+  deserializeDog,
+  deserializeDogUnion,
   Golden,
+  deserializeGolden,
   DogKind,
   Snake,
+  deserializeSnake,
+  deserializeSnakeUnion,
   Cobra,
+  deserializeCobra,
   SnakeKind,
   DogUnion,
   SnakeUnion,

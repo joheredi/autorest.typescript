@@ -1,6 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../rest/outputModels.js";
+import {
+  passthroughDeserializer,
+  withNullChecks,
+  deserializeArray,
+} from "../helpers/serializerHelpers.js";
+import {
+  CatOutput,
+  DogOutput,
+  EnumsOnlyCasesOutput,
+  MixedLiteralsCasesOutput,
+  MixedTypesCasesOutput,
+  StringAndArrayCasesOutput,
+} from "../rest/outputModels.js";
 import {
   MixedTypesCases as MixedTypesCasesRest,
   Cat as CatRest,
@@ -23,6 +37,22 @@ export interface MixedTypesCases {
   array: (Cat | "a" | number | boolean)[];
 }
 
+function _deserializeMixedTypesCases(
+  input: MixedTypesCasesOutput,
+): MixedTypesCases {
+  return {
+    model: passthroughDeserializer(input["model"]),
+    literal: passthroughDeserializer(input["literal"]),
+    int: passthroughDeserializer(input["int"]),
+    boolean: passthroughDeserializer(input["boolean"]),
+    array: deserializeArray(input["array"], passthroughDeserializer),
+  };
+}
+
+export const deserializeMixedTypesCases = withNullChecks(
+  _deserializeMixedTypesCases,
+);
+
 export function mixedTypesCasesSerializer(
   item: MixedTypesCases,
 ): MixedTypesCasesRest {
@@ -38,6 +68,14 @@ export function mixedTypesCasesSerializer(
 export interface Cat {
   name: string;
 }
+
+function _deserializeCat(input: CatOutput): Cat {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeCat = withNullChecks(_deserializeCat);
 
 export function catSerializer(item: Cat): CatRest {
   return {
@@ -55,6 +93,21 @@ export interface MixedLiteralsCases {
   /** This should be receive/send the true variant */
   booleanLiteral: "a" | 2 | 3.3 | true;
 }
+
+function _deserializeMixedLiteralsCases(
+  input: MixedLiteralsCasesOutput,
+): MixedLiteralsCases {
+  return {
+    stringLiteral: passthroughDeserializer(input["stringLiteral"]),
+    intLiteral: passthroughDeserializer(input["intLiteral"]),
+    floatLiteral: passthroughDeserializer(input["floatLiteral"]),
+    booleanLiteral: passthroughDeserializer(input["booleanLiteral"]),
+  };
+}
+
+export const deserializeMixedLiteralsCases = withNullChecks(
+  _deserializeMixedLiteralsCases,
+);
 
 export function mixedLiteralsCasesSerializer(
   item: MixedLiteralsCases,
@@ -74,6 +127,19 @@ export interface StringAndArrayCases {
   array: string | string[];
 }
 
+function _deserializeStringAndArrayCases(
+  input: StringAndArrayCasesOutput,
+): StringAndArrayCases {
+  return {
+    string: passthroughDeserializer(input["string"]),
+    array: passthroughDeserializer(input["array"]),
+  };
+}
+
+export const deserializeStringAndArrayCases = withNullChecks(
+  _deserializeStringAndArrayCases,
+);
+
 export function stringAndArrayCasesSerializer(
   item: StringAndArrayCases,
 ): StringAndArrayCasesRest {
@@ -89,6 +155,19 @@ export interface EnumsOnlyCases {
   /** This should be receive/send the up variant */
   ud: Ud | Ud;
 }
+
+function _deserializeEnumsOnlyCases(
+  input: EnumsOnlyCasesOutput,
+): EnumsOnlyCases {
+  return {
+    lr: passthroughDeserializer(input["lr"]),
+    ud: passthroughDeserializer(input["ud"]),
+  };
+}
+
+export const deserializeEnumsOnlyCases = withNullChecks(
+  _deserializeEnumsOnlyCases,
+);
 
 export function enumsOnlyCasesSerializer(
   item: EnumsOnlyCases,
@@ -107,6 +186,14 @@ export type Ud = "up" | "down";
 export interface Dog {
   bark: string;
 }
+
+function _deserializeDog(input: DogOutput): Dog {
+  return {
+    bark: passthroughDeserializer(input["bark"]),
+  };
+}
+
+export const deserializeDog = withNullChecks(_deserializeDog);
 
 export function dogSerializer(item: Dog): DogRest {
   return {

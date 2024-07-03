@@ -99,21 +99,16 @@ describe("NestedDiscriminatorClient Rest Client", () => {
     }
   };
   it("should get recursive body", async () => {
-    try {
-      const result = await client.getRecursiveModel();
-      assert.strictEqual(
-        JSON.stringify(result),
-        JSON.stringify(validRecursiveBody)
-      );
-      if (result.kind === "salmon") {
-        assert.strictEqual(
-          (result as Salmon).partner?.kind,
-          validRecursiveBody.partner?.kind
-        );
-      }
-    } catch (err) {
-      assert.fail(err as string);
-    }
+    const result = await client.getRecursiveModel();
+    assert.deepEqual(
+      JSON.parse(JSON.stringify(result)),
+      JSON.parse(JSON.stringify(validRecursiveBody))
+    );
+
+    assert.strictEqual(
+      (result as Salmon).partner?.kind,
+      validRecursiveBody.partner?.kind
+    );
   });
 
   it("should put recursive body", async () => {

@@ -1,6 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../rest/outputModels.js";
+import {
+  passthroughDeserializer,
+  withNullChecks,
+} from "../helpers/serializerHelpers.js";
+import { NewModelOutput } from "../rest/outputModels.js";
 import { NewModel as NewModelRest } from "../rest/index.js";
 
 export interface NewModel {
@@ -8,6 +14,16 @@ export interface NewModel {
   enumProp: NewEnum;
   unionProp: NewUnion;
 }
+
+function _deserializeNewModel(input: NewModelOutput): NewModel {
+  return {
+    newProp: passthroughDeserializer(input["newProp"]),
+    enumProp: passthroughDeserializer(input["enumProp"]),
+    unionProp: passthroughDeserializer(input["unionProp"]),
+  };
+}
+
+export const deserializeNewModel = withNullChecks(_deserializeNewModel);
 
 export function newModelSerializer(item: NewModel): NewModelRest {
   return {

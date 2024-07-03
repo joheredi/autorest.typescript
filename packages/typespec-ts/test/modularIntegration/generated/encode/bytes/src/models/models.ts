@@ -1,7 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../rest/outputModels.js";
+import {
+  withNullChecks,
+  deserializeBytes,
+  deserializeArray,
+} from "../helpers/serializerHelpers.js";
 import { uint8ArrayToString } from "@azure/core-util";
+import {
+  Base64BytesPropertyOutput,
+  Base64urlArrayBytesPropertyOutput,
+  Base64urlBytesPropertyOutput,
+  DefaultBytesPropertyOutput,
+} from "../rest/outputModels.js";
 import {
   DefaultBytesProperty as DefaultBytesPropertyRest,
   Base64BytesProperty as Base64BytesPropertyRest,
@@ -12,6 +24,18 @@ import {
 export interface DefaultBytesProperty {
   value: Uint8Array;
 }
+
+function _deserializeDefaultBytesProperty(
+  input: DefaultBytesPropertyOutput,
+): DefaultBytesProperty {
+  return {
+    value: deserializeBytes(input["value"], "base64"),
+  };
+}
+
+export const deserializeDefaultBytesProperty = withNullChecks(
+  _deserializeDefaultBytesProperty,
+);
 
 export function defaultBytesPropertySerializer(
   item: DefaultBytesProperty,
@@ -25,6 +49,18 @@ export interface Base64BytesProperty {
   value: Uint8Array;
 }
 
+function _deserializeBase64BytesProperty(
+  input: Base64BytesPropertyOutput,
+): Base64BytesProperty {
+  return {
+    value: deserializeBytes(input["value"], "base64"),
+  };
+}
+
+export const deserializeBase64BytesProperty = withNullChecks(
+  _deserializeBase64BytesProperty,
+);
+
 export function base64BytesPropertySerializer(
   item: Base64BytesProperty,
 ): Base64BytesPropertyRest {
@@ -37,6 +73,18 @@ export interface Base64urlBytesProperty {
   value: Uint8Array;
 }
 
+function _deserializeBase64urlBytesProperty(
+  input: Base64urlBytesPropertyOutput,
+): Base64urlBytesProperty {
+  return {
+    value: deserializeBytes(input["value"], "base64url"),
+  };
+}
+
+export const deserializeBase64urlBytesProperty = withNullChecks(
+  _deserializeBase64urlBytesProperty,
+);
+
 export function base64urlBytesPropertySerializer(
   item: Base64urlBytesProperty,
 ): Base64urlBytesPropertyRest {
@@ -48,6 +96,20 @@ export function base64urlBytesPropertySerializer(
 export interface Base64urlArrayBytesProperty {
   value: Uint8Array[];
 }
+
+function _deserializeBase64urlArrayBytesProperty(
+  input: Base64urlArrayBytesPropertyOutput,
+): Base64urlArrayBytesProperty {
+  return {
+    value: deserializeArray(input["value"], (i) =>
+      deserializeBytes(i, "base64url"),
+    ),
+  };
+}
+
+export const deserializeBase64urlArrayBytesProperty = withNullChecks(
+  _deserializeBase64urlArrayBytesProperty,
+);
 
 export function base64urlArrayBytesPropertySerializer(
   item: Base64urlArrayBytesProperty,

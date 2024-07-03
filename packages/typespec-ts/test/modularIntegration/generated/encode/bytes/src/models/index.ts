@@ -3,9 +3,13 @@
 
 export {
   DefaultBytesProperty,
+  deserializeDefaultBytesProperty,
   Base64BytesProperty,
+  deserializeBase64BytesProperty,
   Base64urlBytesProperty,
+  deserializeBase64urlBytesProperty,
   Base64urlArrayBytesProperty,
+  deserializeBase64urlArrayBytesProperty,
 } from "./models.js";
 export {
   QueryDefaultOptionalParams,

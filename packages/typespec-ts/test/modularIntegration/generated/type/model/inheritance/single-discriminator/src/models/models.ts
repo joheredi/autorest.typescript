@@ -1,7 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { serializeRecord } from "../helpers/serializerHelpers.js";
+import "../rest/outputModels.js";
+import {
+  passthroughDeserializer,
+  withNullChecks,
+  deserializeRecord,
+  serializeRecord,
+  deserializeArray,
+} from "../helpers/serializerHelpers.js";
+import {
+  BirdOutput,
+  DinosaurOutput,
+  EagleOutput,
+  GooseOutput,
+  SeaGullOutput,
+  SparrowOutput,
+  TRexOutput,
+} from "../rest/outputModels.js";
 import {
   Bird as BirdRest,
   SeaGull as SeaGullRest,
@@ -16,6 +32,32 @@ export interface Bird {
   kind: string;
   wingspan: number;
 }
+
+function _deserializeBird(input: BirdOutput): Bird {
+  return {
+    kind: passthroughDeserializer(input["kind"]),
+    wingspan: passthroughDeserializer(input["wingspan"]),
+  };
+}
+
+export const deserializeBird = withNullChecks(_deserializeBird);
+
+function _deserializeBirdUnion(input: BirdOutput): Bird {
+  switch (input["kind"]) {
+    case "seagull":
+      return deserializeSeaGull(input as SeaGull);
+    case "sparrow":
+      return deserializeSparrow(input as Sparrow);
+    case "goose":
+      return deserializeGoose(input as Goose);
+    case "eagle":
+      return deserializeEagle(input as Eagle);
+    default:
+      return deserializeBird(input);
+  }
+}
+
+export const deserializeBirdUnion = withNullChecks(_deserializeBirdUnion);
 
 export function birdUnionSerializer(item: BirdUnion) {
   switch (item.kind) {
@@ -48,6 +90,15 @@ export interface SeaGull extends Bird {
   kind: "seagull";
 }
 
+function _deserializeSeaGull(input: SeaGullOutput): SeaGull {
+  return {
+    ...deserializeBird(input),
+    kind: passthroughDeserializer(input["kind"]),
+  };
+}
+
+export const deserializeSeaGull = withNullChecks(_deserializeSeaGull);
+
 export function seaGullSerializer(item: SeaGull): SeaGullRest {
   return {
     kind: item["kind"],
@@ -60,6 +111,15 @@ export interface Sparrow extends Bird {
   kind: "sparrow";
 }
 
+function _deserializeSparrow(input: SparrowOutput): Sparrow {
+  return {
+    ...deserializeBird(input),
+    kind: passthroughDeserializer(input["kind"]),
+  };
+}
+
+export const deserializeSparrow = withNullChecks(_deserializeSparrow);
+
 export function sparrowSerializer(item: Sparrow): SparrowRest {
   return {
     kind: item["kind"],
@@ -71,6 +131,15 @@ export function sparrowSerializer(item: Sparrow): SparrowRest {
 export interface Goose extends Bird {
   kind: "goose";
 }
+
+function _deserializeGoose(input: GooseOutput): Goose {
+  return {
+    ...deserializeBird(input),
+    kind: passthroughDeserializer(input["kind"]),
+  };
+}
+
+export const deserializeGoose = withNullChecks(_deserializeGoose);
 
 export function gooseSerializer(item: Goose): GooseRest {
   return {
@@ -86,6 +155,18 @@ export interface Eagle extends Bird {
   hate?: Record<string, BirdUnion>;
   partner?: BirdUnion;
 }
+
+function _deserializeEagle(input: EagleOutput): Eagle {
+  return {
+    ...deserializeBird(input),
+    kind: passthroughDeserializer(input["kind"]),
+    friends: deserializeArray(input["friends"], deserializeBirdUnion),
+    hate: deserializeRecord(input["hate"], deserializeBirdUnion),
+    partner: deserializeBirdUnion(input["partner"]),
+  };
+}
+
+export const deserializeEagle = withNullChecks(_deserializeEagle);
 
 export function eagleSerializer(item: Eagle): EagleRest {
   return {
@@ -106,10 +187,41 @@ export interface Dinosaur {
   kind: string;
 }
 
+function _deserializeDinosaur(input: DinosaurOutput): Dinosaur {
+  return {
+    kind: passthroughDeserializer(input["kind"]),
+    size: passthroughDeserializer(input["size"]),
+  };
+}
+
+export const deserializeDinosaur = withNullChecks(_deserializeDinosaur);
+
+function _deserializeDinosaurUnion(input: DinosaurOutput): Dinosaur {
+  switch (input["kind"]) {
+    case "t-rex":
+      return deserializeTRex(input as TRex);
+    default:
+      return deserializeDinosaur(input);
+  }
+}
+
+export const deserializeDinosaurUnion = withNullChecks(
+  _deserializeDinosaurUnion,
+);
+
 /** The second level legacy model in polymorphic single level inheritance. */
 export interface TRex extends Dinosaur {
   kind: "t-rex";
 }
+
+function _deserializeTRex(input: TRexOutput): TRex {
+  return {
+    ...deserializeDinosaur(input),
+    kind: passthroughDeserializer(input["kind"]),
+  };
+}
+
+export const deserializeTRex = withNullChecks(_deserializeTRex);
 
 /** Alias for BirdUnion */
 export type BirdUnion = SeaGull | Sparrow | Goose | Eagle | Bird;

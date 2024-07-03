@@ -11,6 +11,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { deserializeUtcDateTime } from "../../helpers/serializerHelpers.js";
 import {
   DatetimeValueGetOptionalParams,
   DatetimeValuePutOptionalParams,
@@ -34,7 +35,7 @@ export async function _datetimeValueGetDeserialize(
 
   return result.body === undefined
     ? result.body
-    : result.body.map((p) => new Date(p));
+    : result.body.map((p) => deserializeUtcDateTime(p));
 }
 
 export async function datetimeValueGet(

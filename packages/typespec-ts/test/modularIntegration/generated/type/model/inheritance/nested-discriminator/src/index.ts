@@ -7,10 +7,17 @@ export {
 } from "./nestedDiscriminatorClient.js";
 export {
   Fish,
+  deserializeFish,
+  deserializeFishUnion,
   Shark,
+  deserializeShark,
+  deserializeSharkUnion,
   SawShark,
+  deserializeSawShark,
   GoblinShark,
+  deserializeGoblinShark,
   Salmon,
+  deserializeSalmon,
   FishUnion,
   SharkUnion,
   GetModelOptionalParams,

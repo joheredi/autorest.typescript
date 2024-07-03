@@ -4,9 +4,13 @@
 export { BytesClient, BytesClientOptions } from "./bytesClient.js";
 export {
   DefaultBytesProperty,
+  deserializeDefaultBytesProperty,
   Base64BytesProperty,
+  deserializeBase64BytesProperty,
   Base64urlBytesProperty,
+  deserializeBase64urlBytesProperty,
   Base64urlArrayBytesProperty,
+  deserializeBase64urlArrayBytesProperty,
   QueryDefaultOptionalParams,
   QueryBase64OptionalParams,
   QueryBase64urlOptionalParams,

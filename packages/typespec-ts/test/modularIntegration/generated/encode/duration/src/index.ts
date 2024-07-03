@@ -4,11 +4,17 @@
 export { DurationClient, DurationClientOptions } from "./durationClient.js";
 export {
   DefaultDurationProperty,
+  deserializeDefaultDurationProperty,
   ISO8601DurationProperty,
+  deserializeISO8601DurationProperty,
   Int32SecondsDurationProperty,
+  deserializeInt32SecondsDurationProperty,
   FloatSecondsDurationProperty,
+  deserializeFloatSecondsDurationProperty,
   Float64SecondsDurationProperty,
+  deserializeFloat64SecondsDurationProperty,
   FloatSecondsDurationArrayProperty,
+  deserializeFloatSecondsDurationArrayProperty,
   QueryDefaultOptionalParams,
   QueryIso8601OptionalParams,
   QueryInt32SecondsOptionalParams,

@@ -3,9 +3,13 @@
 
 export {
   FlattenModel,
+  deserializeFlattenModel,
   ChildModel,
+  deserializeChildModel,
   NestedFlattenModel,
+  deserializeNestedFlattenModel,
   ChildFlattenModel,
+  deserializeChildFlattenModel,
 } from "./models.js";
 export {
   PutFlattenModelOptionalParams,

@@ -21,6 +21,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { deserializeUtcDateTime } from "../../helpers/serializerHelpers.js";
 import {
   PropertyDefaultOptionalParams,
   PropertyRfc3339OptionalParams,
@@ -50,7 +51,7 @@ export async function _propertyDefaultDeserialize(
   }
 
   return {
-    value: new Date(result.body["value"]),
+    value: deserializeUtcDateTime(result.body["value"]),
   };
 }
 
@@ -84,7 +85,7 @@ export async function _propertyRfc3339Deserialize(
   }
 
   return {
-    value: new Date(result.body["value"]),
+    value: deserializeUtcDateTime(result.body["value"]),
   };
 }
 
@@ -118,7 +119,7 @@ export async function _propertyRfc7231Deserialize(
   }
 
   return {
-    value: new Date(result.body["value"]),
+    value: deserializeUtcDateTime(result.body["value"]),
   };
 }
 
@@ -152,7 +153,7 @@ export async function _propertyUnixTimestampDeserialize(
   }
 
   return {
-    value: new Date(result.body["value"]),
+    value: deserializeUtcDateTime(result.body["value"]),
   };
 }
 
@@ -186,7 +187,7 @@ export async function _propertyUnixTimestampArrayDeserialize(
   }
 
   return {
-    value: result.body["value"].map((p) => new Date(p)),
+    value: result.body["value"].map((p) => deserializeUtcDateTime(p)),
   };
 }
 

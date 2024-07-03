@@ -1,6 +1,53 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../rest/outputModels.js";
+import {
+  passthroughDeserializer,
+  withNullChecks,
+  deserializeUtcDateTime,
+  deserializeArray,
+} from "../helpers/serializerHelpers.js";
+import {
+  DifferentSpreadFloatDerivedOutput,
+  DifferentSpreadFloatRecordOutput,
+  DifferentSpreadModelArrayDerivedOutput,
+  DifferentSpreadModelArrayRecordOutput,
+  DifferentSpreadModelDerivedOutput,
+  DifferentSpreadModelRecordOutput,
+  DifferentSpreadStringDerivedOutput,
+  DifferentSpreadStringRecordOutput,
+  ExtendsFloatAdditionalPropertiesOutput,
+  ExtendsModelAdditionalPropertiesOutput,
+  ExtendsModelArrayAdditionalPropertiesOutput,
+  ExtendsStringAdditionalPropertiesOutput,
+  ExtendsUnknownAdditionalPropertiesDerivedOutput,
+  ExtendsUnknownAdditionalPropertiesDiscriminatedDerivedOutput,
+  ExtendsUnknownAdditionalPropertiesDiscriminatedOutput,
+  ExtendsUnknownAdditionalPropertiesOutput,
+  IsFloatAdditionalPropertiesOutput,
+  IsModelAdditionalPropertiesOutput,
+  IsModelArrayAdditionalPropertiesOutput,
+  IsStringAdditionalPropertiesOutput,
+  IsUnknownAdditionalPropertiesDerivedOutput,
+  IsUnknownAdditionalPropertiesDiscriminatedDerivedOutput,
+  IsUnknownAdditionalPropertiesDiscriminatedOutput,
+  IsUnknownAdditionalPropertiesOutput,
+  ModelForRecordOutput,
+  MultipleSpreadRecordOutput,
+  SpreadFloatRecordOutput,
+  SpreadModelArrayRecordOutput,
+  SpreadModelRecordOutput,
+  SpreadRecordForDiscriminatedUnionOutput,
+  SpreadRecordForNonDiscriminatedUnion2Output,
+  SpreadRecordForNonDiscriminatedUnion3Output,
+  SpreadRecordForNonDiscriminatedUnionOutput,
+  SpreadRecordForUnionOutput,
+  SpreadStringRecordOutput,
+  WidgetData0Output,
+  WidgetData1Output,
+  WidgetData2Output,
+} from "../rest/outputModels.js";
 import {
   WidgetData2 as WidgetData2Rest,
   WidgetData1 as WidgetData1Rest,
@@ -47,6 +94,15 @@ export interface WidgetData2 {
   start: string;
 }
 
+function _deserializeWidgetData2(input: WidgetData2Output): WidgetData2 {
+  return {
+    kind: passthroughDeserializer(input["kind"]),
+    start: passthroughDeserializer(input["start"]),
+  };
+}
+
+export const deserializeWidgetData2 = withNullChecks(_deserializeWidgetData2);
+
 export function widgetData2Serializer(item: WidgetData2): WidgetData2Rest {
   return {
     kind: item["kind"],
@@ -59,6 +115,16 @@ export interface WidgetData1 {
   start: Date;
   end?: Date;
 }
+
+function _deserializeWidgetData1(input: WidgetData1Output): WidgetData1 {
+  return {
+    kind: passthroughDeserializer(input["kind"]),
+    start: deserializeUtcDateTime(input["start"]),
+    end: deserializeUtcDateTime(input["end"]),
+  };
+}
+
+export const deserializeWidgetData1 = withNullChecks(_deserializeWidgetData1);
 
 export function widgetData1Serializer(item: WidgetData1): WidgetData1Rest {
   return {
@@ -74,6 +140,18 @@ export interface SpreadRecordForNonDiscriminatedUnion3
   /** The name property */
   name: string;
 }
+
+function _deserializeSpreadRecordForNonDiscriminatedUnion3(
+  input: SpreadRecordForNonDiscriminatedUnion3Output,
+): SpreadRecordForNonDiscriminatedUnion3 {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeSpreadRecordForNonDiscriminatedUnion3 = withNullChecks(
+  _deserializeSpreadRecordForNonDiscriminatedUnion3,
+);
 
 export function spreadRecordForNonDiscriminatedUnion3Serializer(
   item: SpreadRecordForNonDiscriminatedUnion3,
@@ -91,6 +169,18 @@ export interface SpreadRecordForNonDiscriminatedUnion2
   name: string;
 }
 
+function _deserializeSpreadRecordForNonDiscriminatedUnion2(
+  input: SpreadRecordForNonDiscriminatedUnion2Output,
+): SpreadRecordForNonDiscriminatedUnion2 {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeSpreadRecordForNonDiscriminatedUnion2 = withNullChecks(
+  _deserializeSpreadRecordForNonDiscriminatedUnion2,
+);
+
 export function spreadRecordForNonDiscriminatedUnion2Serializer(
   item: SpreadRecordForNonDiscriminatedUnion2,
 ): SpreadRecordForNonDiscriminatedUnion2Rest {
@@ -105,6 +195,15 @@ export interface WidgetData0 {
   fooProp: string;
 }
 
+function _deserializeWidgetData0(input: WidgetData0Output): WidgetData0 {
+  return {
+    kind: passthroughDeserializer(input["kind"]),
+    fooProp: passthroughDeserializer(input["fooProp"]),
+  };
+}
+
+export const deserializeWidgetData0 = withNullChecks(_deserializeWidgetData0);
+
 export function widgetData0Serializer(item: WidgetData0): WidgetData0Rest {
   return {
     kind: item["kind"],
@@ -118,6 +217,18 @@ export interface SpreadRecordForNonDiscriminatedUnion
   /** The name property */
   name: string;
 }
+
+function _deserializeSpreadRecordForNonDiscriminatedUnion(
+  input: SpreadRecordForNonDiscriminatedUnionOutput,
+): SpreadRecordForNonDiscriminatedUnion {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeSpreadRecordForNonDiscriminatedUnion = withNullChecks(
+  _deserializeSpreadRecordForNonDiscriminatedUnion,
+);
 
 export function spreadRecordForNonDiscriminatedUnionSerializer(
   item: SpreadRecordForNonDiscriminatedUnion,
@@ -134,6 +245,18 @@ export interface SpreadRecordForDiscriminatedUnion extends Record<string, any> {
   name: string;
 }
 
+function _deserializeSpreadRecordForDiscriminatedUnion(
+  input: SpreadRecordForDiscriminatedUnionOutput,
+): SpreadRecordForDiscriminatedUnion {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeSpreadRecordForDiscriminatedUnion = withNullChecks(
+  _deserializeSpreadRecordForDiscriminatedUnion,
+);
+
 export function spreadRecordForDiscriminatedUnionSerializer(
   item: SpreadRecordForDiscriminatedUnion,
 ): SpreadRecordForDiscriminatedUnionRest {
@@ -148,6 +271,18 @@ export interface SpreadRecordForUnion extends Record<string, any> {
   /** The name property */
   flag: boolean;
 }
+
+function _deserializeSpreadRecordForUnion(
+  input: SpreadRecordForUnionOutput,
+): SpreadRecordForUnion {
+  return {
+    flag: passthroughDeserializer(input["flag"]),
+  };
+}
+
+export const deserializeSpreadRecordForUnion = withNullChecks(
+  _deserializeSpreadRecordForUnion,
+);
 
 export function spreadRecordForUnionSerializer(
   item: SpreadRecordForUnion,
@@ -164,6 +299,18 @@ export interface MultipleSpreadRecord extends Record<string, any> {
   flag: boolean;
 }
 
+function _deserializeMultipleSpreadRecord(
+  input: MultipleSpreadRecordOutput,
+): MultipleSpreadRecord {
+  return {
+    flag: passthroughDeserializer(input["flag"]),
+  };
+}
+
+export const deserializeMultipleSpreadRecord = withNullChecks(
+  _deserializeMultipleSpreadRecord,
+);
+
 export function multipleSpreadRecordSerializer(
   item: MultipleSpreadRecord,
 ): MultipleSpreadRecordRest {
@@ -179,6 +326,18 @@ export interface ModelForRecord {
   state: string;
 }
 
+function _deserializeModelForRecord(
+  input: ModelForRecordOutput,
+): ModelForRecord {
+  return {
+    state: passthroughDeserializer(input["state"]),
+  };
+}
+
+export const deserializeModelForRecord = withNullChecks(
+  _deserializeModelForRecord,
+);
+
 export function modelForRecordSerializer(
   item: ModelForRecord,
 ): ModelForRecordRest {
@@ -191,6 +350,18 @@ export function modelForRecordSerializer(
 export interface DifferentSpreadModelArrayRecord extends Record<string, any> {
   knownProp: string;
 }
+
+function _deserializeDifferentSpreadModelArrayRecord(
+  input: DifferentSpreadModelArrayRecordOutput,
+): DifferentSpreadModelArrayRecord {
+  return {
+    knownProp: passthroughDeserializer(input["knownProp"]),
+  };
+}
+
+export const deserializeDifferentSpreadModelArrayRecord = withNullChecks(
+  _deserializeDifferentSpreadModelArrayRecord,
+);
 
 export function differentSpreadModelArrayRecordSerializer(
   item: DifferentSpreadModelArrayRecord,
@@ -208,6 +379,22 @@ export interface DifferentSpreadModelArrayDerived
   derivedProp: ModelForRecord[];
 }
 
+function _deserializeDifferentSpreadModelArrayDerived(
+  input: DifferentSpreadModelArrayDerivedOutput,
+): DifferentSpreadModelArrayDerived {
+  return {
+    ...deserializeDifferentSpreadModelArrayRecord(input),
+    derivedProp: deserializeArray(
+      input["derivedProp"],
+      deserializeModelForRecord,
+    ),
+  };
+}
+
+export const deserializeDifferentSpreadModelArrayDerived = withNullChecks(
+  _deserializeDifferentSpreadModelArrayDerived,
+);
+
 export function differentSpreadModelArrayDerivedSerializer(
   item: DifferentSpreadModelArrayDerived,
 ): DifferentSpreadModelArrayDerivedRest {
@@ -222,6 +409,18 @@ export function differentSpreadModelArrayDerivedSerializer(
 export interface DifferentSpreadModelRecord extends Record<string, any> {
   knownProp: string;
 }
+
+function _deserializeDifferentSpreadModelRecord(
+  input: DifferentSpreadModelRecordOutput,
+): DifferentSpreadModelRecord {
+  return {
+    knownProp: passthroughDeserializer(input["knownProp"]),
+  };
+}
+
+export const deserializeDifferentSpreadModelRecord = withNullChecks(
+  _deserializeDifferentSpreadModelRecord,
+);
 
 export function differentSpreadModelRecordSerializer(
   item: DifferentSpreadModelRecord,
@@ -239,6 +438,19 @@ export interface DifferentSpreadModelDerived
   derivedProp: ModelForRecord;
 }
 
+function _deserializeDifferentSpreadModelDerived(
+  input: DifferentSpreadModelDerivedOutput,
+): DifferentSpreadModelDerived {
+  return {
+    ...deserializeDifferentSpreadModelRecord(input),
+    derivedProp: deserializeModelForRecord(input["derivedProp"]),
+  };
+}
+
+export const deserializeDifferentSpreadModelDerived = withNullChecks(
+  _deserializeDifferentSpreadModelDerived,
+);
+
 export function differentSpreadModelDerivedSerializer(
   item: DifferentSpreadModelDerived,
 ): DifferentSpreadModelDerivedRest {
@@ -254,6 +466,18 @@ export interface DifferentSpreadFloatRecord extends Record<string, any> {
   /** The id property */
   name: string;
 }
+
+function _deserializeDifferentSpreadFloatRecord(
+  input: DifferentSpreadFloatRecordOutput,
+): DifferentSpreadFloatRecord {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeDifferentSpreadFloatRecord = withNullChecks(
+  _deserializeDifferentSpreadFloatRecord,
+);
 
 export function differentSpreadFloatRecordSerializer(
   item: DifferentSpreadFloatRecord,
@@ -271,6 +495,19 @@ export interface DifferentSpreadFloatDerived
   derivedProp: number;
 }
 
+function _deserializeDifferentSpreadFloatDerived(
+  input: DifferentSpreadFloatDerivedOutput,
+): DifferentSpreadFloatDerived {
+  return {
+    ...deserializeDifferentSpreadFloatRecord(input),
+    derivedProp: passthroughDeserializer(input["derivedProp"]),
+  };
+}
+
+export const deserializeDifferentSpreadFloatDerived = withNullChecks(
+  _deserializeDifferentSpreadFloatDerived,
+);
+
 export function differentSpreadFloatDerivedSerializer(
   item: DifferentSpreadFloatDerived,
 ): DifferentSpreadFloatDerivedRest {
@@ -286,6 +523,18 @@ export interface DifferentSpreadStringRecord extends Record<string, any> {
   /** The name property */
   id: number;
 }
+
+function _deserializeDifferentSpreadStringRecord(
+  input: DifferentSpreadStringRecordOutput,
+): DifferentSpreadStringRecord {
+  return {
+    id: passthroughDeserializer(input["id"]),
+  };
+}
+
+export const deserializeDifferentSpreadStringRecord = withNullChecks(
+  _deserializeDifferentSpreadStringRecord,
+);
 
 export function differentSpreadStringRecordSerializer(
   item: DifferentSpreadStringRecord,
@@ -303,6 +552,19 @@ export interface DifferentSpreadStringDerived
   derivedProp: string;
 }
 
+function _deserializeDifferentSpreadStringDerived(
+  input: DifferentSpreadStringDerivedOutput,
+): DifferentSpreadStringDerived {
+  return {
+    ...deserializeDifferentSpreadStringRecord(input),
+    derivedProp: passthroughDeserializer(input["derivedProp"]),
+  };
+}
+
+export const deserializeDifferentSpreadStringDerived = withNullChecks(
+  _deserializeDifferentSpreadStringDerived,
+);
+
 export function differentSpreadStringDerivedSerializer(
   item: DifferentSpreadStringDerived,
 ): DifferentSpreadStringDerivedRest {
@@ -317,6 +579,18 @@ export interface SpreadModelArrayRecord
   extends Record<string, ModelForRecord[]> {
   knownProp: ModelForRecord[];
 }
+
+function _deserializeSpreadModelArrayRecord(
+  input: SpreadModelArrayRecordOutput,
+): SpreadModelArrayRecord {
+  return {
+    knownProp: deserializeArray(input["knownProp"], deserializeModelForRecord),
+  };
+}
+
+export const deserializeSpreadModelArrayRecord = withNullChecks(
+  _deserializeSpreadModelArrayRecord,
+);
 
 export function spreadModelArrayRecordSerializer(
   item: SpreadModelArrayRecord,
@@ -333,6 +607,18 @@ export interface IsModelArrayAdditionalProperties
   knownProp: ModelForRecord[];
 }
 
+function _deserializeIsModelArrayAdditionalProperties(
+  input: IsModelArrayAdditionalPropertiesOutput,
+): IsModelArrayAdditionalProperties {
+  return {
+    knownProp: deserializeArray(input["knownProp"], deserializeModelForRecord),
+  };
+}
+
+export const deserializeIsModelArrayAdditionalProperties = withNullChecks(
+  _deserializeIsModelArrayAdditionalProperties,
+);
+
 export function isModelArrayAdditionalPropertiesSerializer(
   item: IsModelArrayAdditionalProperties,
 ): IsModelArrayAdditionalPropertiesRest {
@@ -348,6 +634,18 @@ export interface ExtendsModelArrayAdditionalProperties
   knownProp: ModelForRecord[];
 }
 
+function _deserializeExtendsModelArrayAdditionalProperties(
+  input: ExtendsModelArrayAdditionalPropertiesOutput,
+): ExtendsModelArrayAdditionalProperties {
+  return {
+    knownProp: deserializeArray(input["knownProp"], deserializeModelForRecord),
+  };
+}
+
+export const deserializeExtendsModelArrayAdditionalProperties = withNullChecks(
+  _deserializeExtendsModelArrayAdditionalProperties,
+);
+
 export function extendsModelArrayAdditionalPropertiesSerializer(
   item: ExtendsModelArrayAdditionalProperties,
 ): ExtendsModelArrayAdditionalPropertiesRest {
@@ -361,6 +659,18 @@ export function extendsModelArrayAdditionalPropertiesSerializer(
 export interface SpreadModelRecord extends Record<string, ModelForRecord> {
   knownProp: ModelForRecord;
 }
+
+function _deserializeSpreadModelRecord(
+  input: SpreadModelRecordOutput,
+): SpreadModelRecord {
+  return {
+    knownProp: deserializeModelForRecord(input["knownProp"]),
+  };
+}
+
+export const deserializeSpreadModelRecord = withNullChecks(
+  _deserializeSpreadModelRecord,
+);
 
 export function spreadModelRecordSerializer(
   item: SpreadModelRecord,
@@ -377,6 +687,18 @@ export interface IsModelAdditionalProperties
   knownProp: ModelForRecord;
 }
 
+function _deserializeIsModelAdditionalProperties(
+  input: IsModelAdditionalPropertiesOutput,
+): IsModelAdditionalProperties {
+  return {
+    knownProp: deserializeModelForRecord(input["knownProp"]),
+  };
+}
+
+export const deserializeIsModelAdditionalProperties = withNullChecks(
+  _deserializeIsModelAdditionalProperties,
+);
+
 export function isModelAdditionalPropertiesSerializer(
   item: IsModelAdditionalProperties,
 ): IsModelAdditionalPropertiesRest {
@@ -391,6 +713,18 @@ export interface ExtendsModelAdditionalProperties
   extends Record<string, ModelForRecord> {
   knownProp: ModelForRecord;
 }
+
+function _deserializeExtendsModelAdditionalProperties(
+  input: ExtendsModelAdditionalPropertiesOutput,
+): ExtendsModelAdditionalProperties {
+  return {
+    knownProp: deserializeModelForRecord(input["knownProp"]),
+  };
+}
+
+export const deserializeExtendsModelAdditionalProperties = withNullChecks(
+  _deserializeExtendsModelAdditionalProperties,
+);
 
 export function extendsModelAdditionalPropertiesSerializer(
   item: ExtendsModelAdditionalProperties,
@@ -407,6 +741,18 @@ export interface SpreadFloatRecord extends Record<string, number> {
   id: number;
 }
 
+function _deserializeSpreadFloatRecord(
+  input: SpreadFloatRecordOutput,
+): SpreadFloatRecord {
+  return {
+    id: passthroughDeserializer(input["id"]),
+  };
+}
+
+export const deserializeSpreadFloatRecord = withNullChecks(
+  _deserializeSpreadFloatRecord,
+);
+
 export function spreadFloatRecordSerializer(
   item: SpreadFloatRecord,
 ): SpreadFloatRecordRest {
@@ -421,6 +767,18 @@ export interface IsFloatAdditionalProperties extends Record<string, number> {
   /** The id property */
   id: number;
 }
+
+function _deserializeIsFloatAdditionalProperties(
+  input: IsFloatAdditionalPropertiesOutput,
+): IsFloatAdditionalProperties {
+  return {
+    id: passthroughDeserializer(input["id"]),
+  };
+}
+
+export const deserializeIsFloatAdditionalProperties = withNullChecks(
+  _deserializeIsFloatAdditionalProperties,
+);
 
 export function isFloatAdditionalPropertiesSerializer(
   item: IsFloatAdditionalProperties,
@@ -438,6 +796,18 @@ export interface ExtendsFloatAdditionalProperties
   id: number;
 }
 
+function _deserializeExtendsFloatAdditionalProperties(
+  input: ExtendsFloatAdditionalPropertiesOutput,
+): ExtendsFloatAdditionalProperties {
+  return {
+    id: passthroughDeserializer(input["id"]),
+  };
+}
+
+export const deserializeExtendsFloatAdditionalProperties = withNullChecks(
+  _deserializeExtendsFloatAdditionalProperties,
+);
+
 export function extendsFloatAdditionalPropertiesSerializer(
   item: ExtendsFloatAdditionalProperties,
 ): ExtendsFloatAdditionalPropertiesRest {
@@ -452,6 +822,18 @@ export interface SpreadStringRecord extends Record<string, string> {
   /** The name property */
   name: string;
 }
+
+function _deserializeSpreadStringRecord(
+  input: SpreadStringRecordOutput,
+): SpreadStringRecord {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeSpreadStringRecord = withNullChecks(
+  _deserializeSpreadStringRecord,
+);
 
 export function spreadStringRecordSerializer(
   item: SpreadStringRecord,
@@ -468,6 +850,18 @@ export interface IsStringAdditionalProperties extends Record<string, string> {
   name: string;
 }
 
+function _deserializeIsStringAdditionalProperties(
+  input: IsStringAdditionalPropertiesOutput,
+): IsStringAdditionalProperties {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeIsStringAdditionalProperties = withNullChecks(
+  _deserializeIsStringAdditionalProperties,
+);
+
 export function isStringAdditionalPropertiesSerializer(
   item: IsStringAdditionalProperties,
 ): IsStringAdditionalPropertiesRest {
@@ -483,6 +877,18 @@ export interface ExtendsStringAdditionalProperties
   /** The name property */
   name: string;
 }
+
+function _deserializeExtendsStringAdditionalProperties(
+  input: ExtendsStringAdditionalPropertiesOutput,
+): ExtendsStringAdditionalProperties {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeExtendsStringAdditionalProperties = withNullChecks(
+  _deserializeExtendsStringAdditionalProperties,
+);
 
 export function extendsStringAdditionalPropertiesSerializer(
   item: ExtendsStringAdditionalProperties,
@@ -501,6 +907,34 @@ export interface IsUnknownAdditionalPropertiesDiscriminated
   /** the discriminator possible values: derived */
   kind: string;
 }
+
+function _deserializeIsUnknownAdditionalPropertiesDiscriminated(
+  input: IsUnknownAdditionalPropertiesDiscriminatedOutput,
+): IsUnknownAdditionalPropertiesDiscriminated {
+  return {
+    name: passthroughDeserializer(input["name"]),
+    kind: passthroughDeserializer(input["kind"]),
+  };
+}
+
+export const deserializeIsUnknownAdditionalPropertiesDiscriminated =
+  withNullChecks(_deserializeIsUnknownAdditionalPropertiesDiscriminated);
+
+function _deserializeIsUnknownAdditionalPropertiesDiscriminatedUnion(
+  input: IsUnknownAdditionalPropertiesDiscriminatedOutput,
+): IsUnknownAdditionalPropertiesDiscriminated {
+  switch (input["kind"]) {
+    case "derived":
+      return deserializeIsUnknownAdditionalPropertiesDiscriminatedDerived(
+        input as IsUnknownAdditionalPropertiesDiscriminatedDerived,
+      );
+    default:
+      return deserializeIsUnknownAdditionalPropertiesDiscriminated(input);
+  }
+}
+
+export const deserializeIsUnknownAdditionalPropertiesDiscriminatedUnion =
+  withNullChecks(_deserializeIsUnknownAdditionalPropertiesDiscriminatedUnion);
 
 export function isUnknownAdditionalPropertiesDiscriminatedUnionSerializer(
   item: IsUnknownAdditionalPropertiesDiscriminatedUnion,
@@ -536,6 +970,20 @@ export interface IsUnknownAdditionalPropertiesDiscriminatedDerived
   age?: number;
 }
 
+function _deserializeIsUnknownAdditionalPropertiesDiscriminatedDerived(
+  input: IsUnknownAdditionalPropertiesDiscriminatedDerivedOutput,
+): IsUnknownAdditionalPropertiesDiscriminatedDerived {
+  return {
+    ...deserializeIsUnknownAdditionalPropertiesDiscriminated(input),
+    kind: passthroughDeserializer(input["kind"]),
+    index: passthroughDeserializer(input["index"]),
+    age: passthroughDeserializer(input["age"]),
+  };
+}
+
+export const deserializeIsUnknownAdditionalPropertiesDiscriminatedDerived =
+  withNullChecks(_deserializeIsUnknownAdditionalPropertiesDiscriminatedDerived);
+
 export function isUnknownAdditionalPropertiesDiscriminatedDerivedSerializer(
   item: IsUnknownAdditionalPropertiesDiscriminatedDerived,
 ): IsUnknownAdditionalPropertiesDiscriminatedDerivedRest {
@@ -554,6 +1002,18 @@ export interface IsUnknownAdditionalProperties extends Record<string, any> {
   name: string;
 }
 
+function _deserializeIsUnknownAdditionalProperties(
+  input: IsUnknownAdditionalPropertiesOutput,
+): IsUnknownAdditionalProperties {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeIsUnknownAdditionalProperties = withNullChecks(
+  _deserializeIsUnknownAdditionalProperties,
+);
+
 export function isUnknownAdditionalPropertiesSerializer(
   item: IsUnknownAdditionalProperties,
 ): IsUnknownAdditionalPropertiesRest {
@@ -571,6 +1031,20 @@ export interface IsUnknownAdditionalPropertiesDerived
   /** The age property */
   age?: number;
 }
+
+function _deserializeIsUnknownAdditionalPropertiesDerived(
+  input: IsUnknownAdditionalPropertiesDerivedOutput,
+): IsUnknownAdditionalPropertiesDerived {
+  return {
+    ...deserializeIsUnknownAdditionalProperties(input),
+    index: passthroughDeserializer(input["index"]),
+    age: passthroughDeserializer(input["age"]),
+  };
+}
+
+export const deserializeIsUnknownAdditionalPropertiesDerived = withNullChecks(
+  _deserializeIsUnknownAdditionalPropertiesDerived,
+);
 
 export function isUnknownAdditionalPropertiesDerivedSerializer(
   item: IsUnknownAdditionalPropertiesDerived,
@@ -591,6 +1065,36 @@ export interface ExtendsUnknownAdditionalPropertiesDiscriminated
   /** the discriminator possible values: derived */
   kind: string;
 }
+
+function _deserializeExtendsUnknownAdditionalPropertiesDiscriminated(
+  input: ExtendsUnknownAdditionalPropertiesDiscriminatedOutput,
+): ExtendsUnknownAdditionalPropertiesDiscriminated {
+  return {
+    name: passthroughDeserializer(input["name"]),
+    kind: passthroughDeserializer(input["kind"]),
+  };
+}
+
+export const deserializeExtendsUnknownAdditionalPropertiesDiscriminated =
+  withNullChecks(_deserializeExtendsUnknownAdditionalPropertiesDiscriminated);
+
+function _deserializeExtendsUnknownAdditionalPropertiesDiscriminatedUnion(
+  input: ExtendsUnknownAdditionalPropertiesDiscriminatedOutput,
+): ExtendsUnknownAdditionalPropertiesDiscriminated {
+  switch (input["kind"]) {
+    case "derived":
+      return deserializeExtendsUnknownAdditionalPropertiesDiscriminatedDerived(
+        input as ExtendsUnknownAdditionalPropertiesDiscriminatedDerived,
+      );
+    default:
+      return deserializeExtendsUnknownAdditionalPropertiesDiscriminated(input);
+  }
+}
+
+export const deserializeExtendsUnknownAdditionalPropertiesDiscriminatedUnion =
+  withNullChecks(
+    _deserializeExtendsUnknownAdditionalPropertiesDiscriminatedUnion,
+  );
 
 export function extendsUnknownAdditionalPropertiesDiscriminatedUnionSerializer(
   item: ExtendsUnknownAdditionalPropertiesDiscriminatedUnion,
@@ -626,6 +1130,22 @@ export interface ExtendsUnknownAdditionalPropertiesDiscriminatedDerived
   age?: number;
 }
 
+function _deserializeExtendsUnknownAdditionalPropertiesDiscriminatedDerived(
+  input: ExtendsUnknownAdditionalPropertiesDiscriminatedDerivedOutput,
+): ExtendsUnknownAdditionalPropertiesDiscriminatedDerived {
+  return {
+    ...deserializeExtendsUnknownAdditionalPropertiesDiscriminated(input),
+    kind: passthroughDeserializer(input["kind"]),
+    index: passthroughDeserializer(input["index"]),
+    age: passthroughDeserializer(input["age"]),
+  };
+}
+
+export const deserializeExtendsUnknownAdditionalPropertiesDiscriminatedDerived =
+  withNullChecks(
+    _deserializeExtendsUnknownAdditionalPropertiesDiscriminatedDerived,
+  );
+
 export function extendsUnknownAdditionalPropertiesDiscriminatedDerivedSerializer(
   item: ExtendsUnknownAdditionalPropertiesDiscriminatedDerived,
 ): ExtendsUnknownAdditionalPropertiesDiscriminatedDerivedRest {
@@ -645,6 +1165,18 @@ export interface ExtendsUnknownAdditionalProperties
   name: string;
 }
 
+function _deserializeExtendsUnknownAdditionalProperties(
+  input: ExtendsUnknownAdditionalPropertiesOutput,
+): ExtendsUnknownAdditionalProperties {
+  return {
+    name: passthroughDeserializer(input["name"]),
+  };
+}
+
+export const deserializeExtendsUnknownAdditionalProperties = withNullChecks(
+  _deserializeExtendsUnknownAdditionalProperties,
+);
+
 export function extendsUnknownAdditionalPropertiesSerializer(
   item: ExtendsUnknownAdditionalProperties,
 ): ExtendsUnknownAdditionalPropertiesRest {
@@ -662,6 +1194,19 @@ export interface ExtendsUnknownAdditionalPropertiesDerived
   /** The age property */
   age?: number;
 }
+
+function _deserializeExtendsUnknownAdditionalPropertiesDerived(
+  input: ExtendsUnknownAdditionalPropertiesDerivedOutput,
+): ExtendsUnknownAdditionalPropertiesDerived {
+  return {
+    ...deserializeExtendsUnknownAdditionalProperties(input),
+    index: passthroughDeserializer(input["index"]),
+    age: passthroughDeserializer(input["age"]),
+  };
+}
+
+export const deserializeExtendsUnknownAdditionalPropertiesDerived =
+  withNullChecks(_deserializeExtendsUnknownAdditionalPropertiesDerived);
 
 export function extendsUnknownAdditionalPropertiesDerivedSerializer(
   item: ExtendsUnknownAdditionalPropertiesDerived,

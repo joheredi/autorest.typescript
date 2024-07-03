@@ -3,12 +3,21 @@
 
 export {
   Bird,
+  deserializeBird,
+  deserializeBirdUnion,
   SeaGull,
+  deserializeSeaGull,
   Sparrow,
+  deserializeSparrow,
   Goose,
+  deserializeGoose,
   Eagle,
+  deserializeEagle,
   Dinosaur,
+  deserializeDinosaur,
+  deserializeDinosaurUnion,
   TRex,
+  deserializeTRex,
   BirdUnion,
   DinosaurUnion,
 } from "./models.js";

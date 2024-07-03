@@ -3,12 +3,19 @@
 
 export {
   CollectionsModelProperty,
+  deserializeCollectionsModelProperty,
   InnerModel,
+  deserializeInnerModel,
   CollectionsByteProperty,
+  deserializeCollectionsByteProperty,
   DurationProperty,
+  deserializeDurationProperty,
   DatetimeProperty,
+  deserializeDatetimeProperty,
   BytesProperty,
+  deserializeBytesProperty,
   StringProperty,
+  deserializeStringProperty,
 } from "./models.js";
 export {
   StringGetNonNullOptionalParams,

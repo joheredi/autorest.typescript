@@ -3,11 +3,17 @@
 
 export {
   DefaultDurationProperty,
+  deserializeDefaultDurationProperty,
   ISO8601DurationProperty,
+  deserializeISO8601DurationProperty,
   Int32SecondsDurationProperty,
+  deserializeInt32SecondsDurationProperty,
   FloatSecondsDurationProperty,
+  deserializeFloatSecondsDurationProperty,
   Float64SecondsDurationProperty,
+  deserializeFloat64SecondsDurationProperty,
   FloatSecondsDurationArrayProperty,
+  deserializeFloatSecondsDurationArrayProperty,
 } from "./models.js";
 export {
   QueryDefaultOptionalParams,

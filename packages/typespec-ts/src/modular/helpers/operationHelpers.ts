@@ -1282,7 +1282,14 @@ export function deserializeResponseValue(
       }
       return restValue;
     case "model":
-      return getDeserializer(type.tcgcType!, restValue);
+      // eslint-disable-next-line no-case-declarations
+      const tcgcType = type.tcgcType! as SdkModelType;
+      // eslint-disable-next-line no-case-declarations
+      let nameSuffix: string | undefined;
+      if (tcgcType.discriminatedSubtypes) {
+        nameSuffix = "Union";
+      }
+      return getDeserializer(type.tcgcType!, restValue, { nameSuffix });
     default:
       return restValue;
   }

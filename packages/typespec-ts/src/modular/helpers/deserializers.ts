@@ -5,6 +5,7 @@ import {
 
 export interface DeserializerOptions {
   cast?: string;
+  nameSuffix?: string;
 }
 
 export function getDeserializer(
@@ -17,7 +18,9 @@ export function getDeserializer(
     deserializableType = type.type;
   }
   const cast = options?.cast ? ` as ${options.cast}` : "";
-  const functionName = getDeserializerName(deserializableType);
+  const nameSuffix = options?.nameSuffix ? options.nameSuffix : "";
+  const functionName = getDeserializerName(deserializableType) + nameSuffix;
+
   return `${functionName}(${propertyPath} ${cast}, ${getDeserializerArgs(
     deserializableType
   )})`;
@@ -25,7 +28,14 @@ export function getDeserializer(
 
 function getDeserializerArgs(type: SdkType) {
   if (type.kind === "dict" || type.kind === "array") {
-    const deserializerName = getDeserializerName(type.valueType);
+    let deserializerName = getDeserializerName(type.valueType);
+
+    if (
+      type.valueType.kind === "model" &&
+      type.valueType.discriminatedSubtypes
+    ) {
+      deserializerName = deserializerName + "Union";
+    }
 
     if (
       deserializerName !== "passthroughDeserializer" &&

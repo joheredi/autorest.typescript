@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import "../rest/outputModels.js";
 import {
   SameAsModel as SameAsModelRest,
   And as AndRest,

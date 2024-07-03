@@ -50,10 +50,15 @@ export function buildModelDeserializer(model: SdkModelType) {
       wireName = property.serializedName ?? property.name;
     }
 
+    let nameSuffix;
+    if (property.type.kind === "model" && property.type.discriminatedSubtypes) {
+      nameSuffix = "Union";
+    }
+
     const deserializer = getDeserializer(
       property.type,
       `input["${wireName}"]`,
-      { cast: getCasting(property.type) }
+      { cast: getCasting(property.type), nameSuffix }
     );
     deserializeStatements.push(`  ${property.name}: ${deserializer},`);
   }
@@ -81,21 +86,22 @@ export function buildModelDeserializer(model: SdkModelType) {
   // Handle polymorphic deserialization
   if (model.discriminatedSubtypes && model.discriminatorProperty) {
     const inputTypeName = `${model.name}Output`;
-    const deserializerName = `deserialize${model.name}Union`;
+    const unionDeserializerName = `deserialize${model.name}Union`;
+    const defaultDeserializerName = `deserialize${model.name}`;
 
     const discriminatorDeserializer = `
-    function _${deserializerName}(input: ${inputTypeName}): ${model.name} {
+    function _${unionDeserializerName}(input: ${inputTypeName}): ${model.name} {
         switch (input["${model.discriminatorProperty.name}"]) {
             ${Object.entries(model.discriminatedSubtypes)
               .map(([key, value]) => {
                 return `case "${key}": return deserialize${value.name}(input as ${value.name});`;
               })
               .join("\n")}
-            default: return ${deserializerName}(input);
+            default: return ${defaultDeserializerName}(input);
         }
     }
 
-    export const ${deserializerName} = withNullChecks(_${deserializerName});
+    export const ${unionDeserializerName} = withNullChecks(_${unionDeserializerName});
     `;
     output.push(discriminatorDeserializer);
   }
