@@ -128,7 +128,6 @@ describe("operations", () => {
         `
         import { TestingContext as Client } from "../rest/index.js";
         import { StreamableMethod, operationOptionsToRequestParameters, createRestError } from "@azure-rest/core-client";
-        import { uint8ArrayToString } from "@azure/core-util";
         
         export function _readSend(
           context: Client, 
@@ -628,7 +627,7 @@ describe("operations", () => {
             return context.path("/", ).post({...operationOptionsToRequestParameters(options), })  ;  
         }
 
-        export async function _testDeserialize(result: Test200Response | TestDefaultResponse): Promise<_Bar> {
+        export async function _testDeserialize(result: Test200Response | TestDefaultResponse): Promise<Bar> {
             if(result.status !== "200"){
               throw createRestError(result);
             }

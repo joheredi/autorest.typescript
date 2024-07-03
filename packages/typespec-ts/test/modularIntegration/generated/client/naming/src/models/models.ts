@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import "../rest/outputModels.js";
 import {
   ClientNameModel as ClientNameModelRest,
   LanguageClientNameModel as LanguageClientNameModelRest,

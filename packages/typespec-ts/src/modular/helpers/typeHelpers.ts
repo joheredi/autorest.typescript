@@ -66,7 +66,8 @@ function handleNullableTypeName(type: {
 /**
  * Maps a given Type to its TypeScript representation metadata.
  */
-export function getType(type: Type, format?: string): TypeMetadata {
+export function getType(type: Type, _format?: string): TypeMetadata {
+  const format = _format ?? type.format;
   // Handle simple type conversions
   const simpleType = simpleTypeMap[type.type];
   if (simpleType) {

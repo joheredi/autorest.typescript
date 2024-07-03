@@ -847,6 +847,15 @@ describe("anonymous model", () => {
           modelFile?.getFullText()!,
           `
           export interface PublishResult {}
+
+      
+          function _deserializePublishResult(input: PublishResultOutput): PublishResult {
+            return input as PublishResult;
+          }
+          
+          export const deserializePublishResult = withNullChecks(
+            _deserializePublishResult,
+          );
         `
         );
         const operationFiles =
@@ -854,9 +863,30 @@ describe("anonymous model", () => {
         assert.ok(operationFiles);
         assert.equal(operationFiles?.length, 1);
         // Model name referred in operations.ts
-        await verifyReturnTypeAsEmpty(
-          operationFiles?.[0]?.getFullText()!,
-          "PublishResult"
+
+        const functions = operationFiles?.[0]?.getFunctions();
+
+        const readSend = functions?.find((f) => f.getName() === "_readSend");
+        const read = functions?.find((f) => f.getName() === "read");
+
+        await assertEqualContent(
+          readSend?.getFullText()!,
+          `
+        export function _readSend(context: Client, options: ReadOptionalParams = { requestOptions: {} }): StreamableMethod<Read200Response> {
+          return context.path("/", ).get({...operationOptionsToRequestParameters(options), })  ;
+        }`
+        );
+        await assertEqualContent(
+          read?.getFullText()!,
+          `
+      export async function read(
+        context: Client,
+        options: ReadOptionalParams = { requestOptions: {} },
+      ): Promise<PublishResult> {
+        const result = await _readSend(context, options);
+        return _readDeserialize(result);
+      }
+        `
         );
       });
 
@@ -939,7 +969,38 @@ describe("anonymous model", () => {
           emptyModelDict: Record<string, EmptyModel>;
         }
 
+      function _deserializeReturnBody(input: ReturnBodyOutput): ReturnBody {
+        return {
+          emptyAnomyous: deserializeReturnBodyEmptyAnomyous(input["emptyAnomyous"]),
+          emptyAnomyousArray: deserializeArray(
+            input["emptyAnomyousArray"],
+            deserializeReturnBodyEmptyAnomyousArray,
+          ),
+          emptyAnomyousDict: deserializeRecord(
+            input["emptyAnomyousDict"],
+            deserializeReturnBodyEmptyAnomyousDict,
+          ),
+          emptyModel: deserializeEmptyModel(input["emptyModel"]),
+          emptyModelArray: deserializeArray(
+            input["emptyModelArray"],
+            deserializeEmptyModel,
+          ),
+          emptyModelDict: deserializeRecord(
+            input["emptyModelDict"],
+            deserializeEmptyModel,
+          ),
+        };
+      }
+      
+      export const deserializeReturnBody = withNullChecks(_deserializeReturnBody);
+
         export interface EmptyModel {}
+
+      function _deserializeEmptyModel(input: EmptyModelOutput): EmptyModel {
+        return input as EmptyModel;
+      }
+      
+      export const deserializeEmptyModel = withNullChecks(_deserializeEmptyModel);
         `
         );
         const operationFiles =
@@ -974,10 +1035,16 @@ describe("anonymous model", () => {
           return {
             emptyAnomyous: result.body["emptyAnomyous"],
             emptyAnomyousArray: result.body["emptyAnomyousArray"],
-            emptyAnomyousDict: result.body["emptyAnomyousDict"],
+           emptyAnomyousDict: deserializeRecord(
+             result.body.emptyAnomyousDict,
+             deserializeReturnBodyEmptyAnomyousDict,
+           ),
             emptyModel: {},
             emptyModelArray: result.body["emptyModelArray"].map(() => ({})),
-            emptyModelDict: result.body["emptyModelDict"],
+          emptyModelDict: deserializeRecord(
+            result.body.emptyModelDict,
+            deserializeEmptyModel,
+          ),
           };
         }
 
@@ -1023,10 +1090,26 @@ describe("anonymous model", () => {
                 nonemptyAnomyousDict: Record<string, { c: number[] }>;
               };
           }
+
+      function _deserializeFoz(input: FozOutput): Foz {
+        return {
+          baz: deserializeFozBaz(input["baz"]),
+        };
+      }
+      
+      export const deserializeFoz = withNullChecks(_deserializeFoz);
           
           export interface SimpleModel {
             test: string;
           }
+
+      function _deserializeSimpleModel(input: SimpleModelOutput): SimpleModel {
+        return {
+          test: passthroughDeserializer(input["test"]),
+        };
+      }
+      
+      export const deserializeSimpleModel = withNullChecks(_deserializeSimpleModel);
         `
         );
 
@@ -1066,8 +1149,11 @@ describe("anonymous model", () => {
                     ? result.body.baz["test"]
                     : result.body.baz["test"].map((p) => ({ test: p["test"] })),
                 nonemptyAnomyous: { a: result.body.baz.nonemptyAnomyous["a"] },
-                nonemptyAnomyousArray: result.body.baz["nonemptyAnomyousArray"].map((p) => ({ b: p["b"] })),
-                nonemptyAnomyousDict: result.body.baz["nonemptyAnomyousDict"],
+                nonemptyAnomyousArray: result.body.baz["nonemptyAnomyousArray"].map((p) => ({ b: deserializeRecord(p.b, passthroughDeserializer) })),
+            nonemptyAnomyousDict: deserializeRecord(
+              result.body.baz.nonemptyAnomyousDict,
+              deserializeFozBazNonemptyAnomyousDict,
+            ),
               },
             };
           }

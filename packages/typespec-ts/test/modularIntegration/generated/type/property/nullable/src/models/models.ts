@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import "../rest/outputModels.js";
+import { uint8ArrayToString } from "@azure/core-util";
 import {
   passthroughDeserializer,
   withNullChecks,
@@ -19,7 +19,6 @@ import {
   InnerModelOutput,
   StringPropertyOutput,
 } from "../rest/outputModels.js";
-import { uint8ArrayToString } from "@azure/core-util";
 import {
   CollectionsModelProperty as CollectionsModelPropertyRest,
   InnerModel as InnerModelRest,

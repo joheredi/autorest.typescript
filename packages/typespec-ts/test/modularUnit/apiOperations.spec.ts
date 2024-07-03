@@ -140,7 +140,6 @@ describe("api operations in Modular", () => {
            operationOptionsToRequestParameters,
            createRestError
          } from "@azure-rest/core-client";
-         import { uint8ArrayToString } from "@azure/core-util";
          export function _uploadFileSend(
            context: Client,
            name: string,
@@ -200,7 +199,6 @@ describe("api operations in Modular", () => {
            operationOptionsToRequestParameters,
            createRestError
          } from "@azure-rest/core-client";
-         import { uint8ArrayToString } from "@azure/core-util";
          export function _uploadFilesSend(
            context: Client,
            files: Uint8Array[],

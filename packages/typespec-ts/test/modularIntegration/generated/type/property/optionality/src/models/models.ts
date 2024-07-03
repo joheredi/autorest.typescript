@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import "../rest/outputModels.js";
+import { uint8ArrayToString } from "@azure/core-util";
 import {
   passthroughDeserializer,
   withNullChecks,
@@ -26,7 +26,6 @@ import {
   UnionIntLiteralPropertyOutput,
   UnionStringLiteralPropertyOutput,
 } from "../rest/outputModels.js";
-import { uint8ArrayToString } from "@azure/core-util";
 import {
   RequiredAndOptionalProperty as RequiredAndOptionalPropertyRest,
   UnionFloatLiteralProperty as UnionFloatLiteralPropertyRest,

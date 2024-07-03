@@ -1508,8 +1508,8 @@ describe("modular special union deserialization", () => {
       function deserializeWidgetData1(obj: WidgetData1Output): WidgetData1 {
         return {
           kind: obj["kind"],
-          start: new Date(obj["start"]),
-          end: obj["end"] !== undefined ? new Date(obj["end"]) : undefined,
+          start: deserializeUtcDateTime(obj["start"]),
+          end: deserializeUtcDateTime(obj["end"]),
         };
       }
       
@@ -1742,7 +1742,7 @@ describe("modular special union deserialization", () => {
       
       /** deserialize function for WidgetData1 */
       function deserializeWidgetData1(obj: WidgetData1Output): WidgetData1 {
-        return { kind: obj["kind"], data: new Date(obj["data"]) };
+        return { kind: obj["kind"], data: deserializeUtcDateTime(obj["data"]) };
       }
       
       /** deserialize function for WidgetDataOutput */
@@ -2015,7 +2015,7 @@ describe("modular special union deserialization", () => {
           name: obj["name"],
           weight: obj["weight"],
           friends: obj["friends"].map((p) => deserializePetUnion(p)),
-          birthDay: new Date(obj["birthDay"]),
+          birthDay: deserializeUtcDateTime(obj["birthDay"]),
         };
       }
       

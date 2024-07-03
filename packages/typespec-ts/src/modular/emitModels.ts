@@ -275,6 +275,19 @@ export function buildModels(
       );
       modelsFile.fixUnusedIdentifiers();
     }
+
+    const outputModelsImports = modelsFile
+      .getImportDeclarations()
+      .filter(
+        (i) =>
+          i.getModuleSpecifier().getLiteralValue() === "../rest/outputModels.js"
+      );
+
+    for (const item of outputModelsImports) {
+      if (item.getNamedImports().length === 0) {
+        item.remove();
+      }
+    }
   }
 
   const projectRootFromModels = codeModel.clients.length > 1 ? "../.." : "../";

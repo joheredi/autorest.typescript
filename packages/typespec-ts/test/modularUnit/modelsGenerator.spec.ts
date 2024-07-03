@@ -48,6 +48,18 @@ async function verifyModularPropertyType(
   export interface InputOutputModel {
       prop: ${inputType};
   }
+
+    function _deserializeInputOutputModel(
+      input: InputOutputModelOutput,
+    ): InputOutputModel {
+      return {
+        prop: passthroughDeserializer(input["prop"]),
+      };
+    }
+
+    export const deserializeInputOutputModel = withNullChecks(
+      _deserializeInputOutputModel,
+    );
     
   export function inputOutputModelSerializer(item: InputOutputModel): InputOutputModelRest {
     return {
@@ -126,8 +138,8 @@ describe("modular encode test for property type datetime", () => {
       modelFile?.getInterface("Foo")?.getFullText()!,
       `
       export interface Foo {
-        prop1: Date;
-        prop2: Date;
+        prop1: string;
+        prop2: string;
         prop3: Date;
         prop4: string;
       }`
@@ -139,8 +151,8 @@ describe("modular encode test for property type datetime", () => {
       `
       export function fooSerializer(item: Foo): FooRest {
         return {
-          prop1: item["prop1"].toDateString(),
-          prop2: item["prop2"].toTimeString(),
+          prop1: item["prop1"],
+          prop2: item["prop2"],
           prop3: item["prop3"].toISOString(),
           prop4: item["prop4"],
         };
@@ -170,8 +182,8 @@ describe("modular encode test for property type datetime", () => {
           .post({
             ...operationOptionsToRequestParameters(options),
             body: {
-              prop1: body["prop1"].toDateString(),
-              prop2: body["prop2"].toTimeString(),
+              prop1: body["prop1"],
+              prop2: body["prop2"],
               prop3: body["prop3"].toISOString(),
               prop4: body["prop4"],
             },
@@ -184,10 +196,10 @@ describe("modular encode test for property type datetime", () => {
         }
       
         return {
-          prop1: new Date(result.body["prop1"]),
-          prop2: new Date(result.body["prop2"]),
-          prop3: new Date(result.body["prop3"]),
-          prop4: result.body["prop4"],
+          prop1: deserializePlainDate(result.body["prop1"]),
+          prop2: deserializePlainTime(result.body["prop2"]),
+          prop3: deserializeUtcDateTime(result.body["prop3"]),
+          prop4: deserializeOffsetDateTime(result.body["prop4"]),
         };
       }
       
@@ -323,8 +335,8 @@ describe("modular encode test for property type datetime", () => {
         }
       
         return {
-          prop1: new Date(result.body["prop1"]),
-          prop2: result.body["prop2"],
+          prop1: deserializeUtcDateTime(result.body["prop1"]),
+          prop2: deserializeOffsetDateTime(result.body["prop2"]),
         };
       }
       
@@ -408,8 +420,8 @@ describe("modular encode test for property type datetime", () => {
         }
       
         return {
-          prop1: new Date(result.body["prop1"]),
-          prop2: result.body["prop2"],
+          prop1: deserializeUtcDateTime(result.body["prop1"]),
+          prop2: deserializeOffsetDateTime(result.body["prop2"]),
         };
       }
       
@@ -487,9 +499,7 @@ describe("modular encode test for property type datetime", () => {
           throw createRestError(result);
         }
       
-        return {
-          prop1: new Date(result.body["prop1"]),
-        };
+        return { prop1: deserializeUtcDateTime(result.body["prop1"]) };
       }
       
       export async function read(
@@ -555,9 +565,7 @@ describe("modular encode test for property type duration", () => {
           throw createRestError(result);
         }
       
-        return {
-          prop1: result.body["prop1"],
-        };
+         return { prop1: deserializeStringDuration(result.body["prop1"]) };
       }
       
       export async function read(
@@ -622,9 +630,7 @@ describe("modular encode test for property type duration", () => {
           throw createRestError(result);
         }
       
-        return {
-          prop1: result.body["prop1"],
-        };
+        return { prop1: deserializeStringDuration(result.body["prop1"]) };
       }
       
       export async function read(
@@ -694,8 +700,8 @@ describe("modular encode test for property type duration", () => {
         }
       
         return {
-          prop1: result.body["prop1"],
-          prop2: result.body["prop2"],
+          prop1: deserializeNumericDuration(result.body["prop1"]),
+          prop2: deserializeNumericDuration(result.body["prop2"]),
         };
       }
       
@@ -753,7 +759,7 @@ describe("modular encode test for property type bytes", () => {
         operationOptionsToRequestParameters,
         createRestError
       } from "@azure-rest/core-client";
-      import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
+      import { stringToUint8Array } from "@azure/core-util";
       
       export function _readSend(
         context: Client,
@@ -824,7 +830,7 @@ describe("modular encode test for property type bytes", () => {
         operationOptionsToRequestParameters,
         createRestError
       } from "@azure-rest/core-client";
-      import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
+      import { stringToUint8Array } from "@azure/core-util";
       
       export function _readSend(
         context: Client,
@@ -895,7 +901,7 @@ describe("modular encode test for property type bytes", () => {
         operationOptionsToRequestParameters,
         createRestError
       } from "@azure-rest/core-client";
-      import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
+      import { stringToUint8Array } from "@azure/core-util";
       
       export function _readSend(
         context: Client,
@@ -956,22 +962,84 @@ describe("inheritance & polymorphism", () => {
     op read(): { @body body: Cat | Dog };
     `);
     assert.ok(modelFile);
-    await assertEqualContent(
-      modelFile?.getFullText()!,
-      `
-      export interface Pet {
+
+    const ifaces = modelFile?.getInterfaces()!;
+    const deserializers = modelFile?.getFunctions()!;
+
+    const petIface = ifaces.find((iface) => iface.getName() === "Pet");
+
+    assertEqualContent(
+      petIface?.getFullText()!,
+      `export interface Pet {
         name: string;
         weight?: number;
-      }
+      }`
+    );
 
-      export interface Cat extends Pet {
+    const catIface = ifaces.find((iface) => iface.getName() === "Cat");
+
+    assertEqualContent(
+      catIface?.getFullText()!,
+      `export interface Cat extends Pet {
         kind: "cat";
         meow: number;
-      }
+      }`
+    );
 
-      export interface Dog extends Pet {
+    const dogIface = ifaces.find((iface) => iface.getName() === "Dog");
+    assertEqualContent(
+      dogIface?.getFullText()!,
+      `export interface Dog extends Pet {
         kind: "dog";
         bark: string;
+      }`
+    );
+
+    const deserializePetFn = deserializers.find(
+      (d) => d.getName() === "_deserializePet"
+    )!;
+
+    assertEqualContent(
+      deserializePetFn.getText()!,
+      `
+     function _deserializePet(input: PetOutput): Pet {
+        return {
+          name: passthroughDeserializer(input["name"]),
+          weight: passthroughDeserializer(input["weight"]),
+        };
+      }
+    `
+    );
+
+    const deserializeCat = deserializers.find(
+      (d) => d.getName() === "_deserializeCat"
+    )!;
+
+    assertEqualContent(
+      deserializeCat.getText()!,
+      `
+      function _deserializeCat(input: CatOutput): Cat {
+        return {
+          ...deserializePet(input),
+          kind: passthroughDeserializer(input["kind"]),
+          meow: passthroughDeserializer(input["meow"]),
+        };
+      }`
+    );
+
+    const deserializeDog = deserializers.find(
+      (d) => d.getName() === "_deserializeDog"
+    )!;
+
+    assertEqualContent(
+      deserializeDog.getText()!,
+      `
+      function _deserializeDog(input: DogOutput): Dog {
+        return {
+          ...deserializePet(input),
+          kind: passthroughDeserializer(input["kind"]),
+          bark: passthroughDeserializer(input["bark"]),
+        };
       }`
     );
   });
@@ -992,21 +1060,7 @@ describe("inheritance & polymorphism", () => {
     }
     op read(): { @body body: Cat };
     `;
-    const modelFile = await emitModularModelsFromTypeSpec(tspContent);
-    assert.ok(modelFile);
-    await assertEqualContent(
-      modelFile?.getFullText()!,
-      `
-      export interface Pet {
-        name: string;
-        weight?: number;
-      }
 
-      export interface Cat extends Pet {
-        kind: "cat";
-        meow: number;
-      }`
-    );
     const operationFiles = await emitModularOperationsFromTypeSpec(tspContent);
     assert.ok(operationFiles);
     assert.equal(operationFiles?.length, 1);
@@ -1076,14 +1130,41 @@ describe("inheritance & polymorphism", () => {
         name: string;
       }
 
+      function _deserializeAnimal(input: AnimalOutput): Animal {
+        return {
+          name: passthroughDeserializer(input["name"]),
+        };
+      }
+      
+      export const deserializeAnimal = withNullChecks(_deserializeAnimal);
+
       export interface Pet extends Animal {
         weight?: number;
       }
+
+      function _deserializePet(input: PetOutput): Pet {
+        return {
+          ...deserializeAnimal(input),
+          weight: passthroughDeserializer(input["weight"]),
+        };
+      }
+      
+      export const deserializePet = withNullChecks(_deserializePet);
 
       export interface Cat extends Pet {
         kind: "cat";
         meow: number;
       }
+      
+      function _deserializeCat(input: CatOutput): Cat {
+        return {
+          ...deserializePet(input),
+          kind: passthroughDeserializer(input["kind"]),
+          meow: passthroughDeserializer(input["meow"]),
+        };
+      }
+      
+      export const deserializeCat = withNullChecks(_deserializeCat);
       `
     );
     const operationFiles = await emitModularOperationsFromTypeSpec(tspContent);
@@ -1162,10 +1243,43 @@ describe("inheritance & polymorphism", () => {
         weight?: number;
       }
 
+      function _deserializePet(input: PetOutput): Pet {
+        return {
+          kind: passthroughDeserializer(input["kind"]),
+          name: passthroughDeserializer(input["name"]),
+          weight: passthroughDeserializer(input["weight"]),
+        };
+      }
+      
+      export const deserializePet = withNullChecks(_deserializePet);
+      
+      function _deserializePetUnion(input: PetOutput): Pet {
+        switch (input["kind"]) {
+          case "cat":
+            return deserializeCat(input as Cat);
+          case "dog":
+            return deserializeDog(input as Dog);
+          default:
+            return deserializePet(input);
+        }
+      }
+      
+      export const deserializePetUnion = withNullChecks(_deserializePetUnion);
+
       export interface Cat extends Pet {
         kind: "cat";
         meow: number;
       }
+
+      function _deserializeCat(input: CatOutput): Cat {
+        return {
+          ...deserializePet(input),
+          kind: passthroughDeserializer(input["kind"]),
+          meow: passthroughDeserializer(input["meow"]),
+        };
+      }
+      
+      export const deserializeCat = withNullChecks(_deserializeCat);
 
       export interface Dog extends Pet {
         kind: "dog";
@@ -1241,42 +1355,151 @@ describe("inheritance & polymorphism", () => {
     `;
     const modelFile = await emitModularModelsFromTypeSpec(tspContent);
     assert.ok(modelFile);
+
+    const ifaces = modelFile?.getInterfaces();
+    const fns = modelFile?.getFunctions();
+    const variables = modelFile?.getVariableDeclarations();
+
+    const petInterface = ifaces
+      ?.find((i) => i.getName() === "Pet")
+      ?.getFullText()!;
+
     await assertEqualContent(
-      modelFile?.getFullText()!,
-      `
-      export interface Pet {
+      petInterface,
+      `export interface Pet {
         /** the discriminator possible values: cat, dog */
         kind: string;
         name: string;
         weight?: number;
-      }
+      }`
+    );
 
-      export interface Cat extends Pet {
+    const catInterface = ifaces
+      ?.find((i) => i.getName() === "Cat")
+      ?.getFullText()!;
+
+    await assertEqualContent(
+      catInterface,
+      `
+        export interface Cat extends Pet {
         kind: "cat";
         meow: number;
-      }
+      }`
+    );
 
-      export interface Dog extends Pet {
+    const dogInterface = ifaces
+      ?.find((i) => i.getName() === "Dog")
+      ?.getFullText()!;
+
+    await assertEqualContent(
+      dogInterface,
+      `export interface Dog extends Pet {
         kind: "dog";
         bark: string;
-      }
-      
-      /** Alias for PetUnion */
+      }`
+    );
+
+    const petUnionFn = modelFile?.getTypeAlias("PetUnion")?.getFullText()!;
+    await assertEqualContent(
+      petUnionFn,
+      `/** Alias for PetUnion */
       export type PetUnion = Cat | Dog | Pet;`
     );
+
     const operationFiles = await emitModularOperationsFromTypeSpec(tspContent);
     assert.ok(operationFiles);
     assert.equal(operationFiles?.length, 1);
+
+    const internalDeserializePetFn = fns
+      ?.find((f) => f.getName() === "_deserializePet")
+      ?.getFullText()!;
+
     await assertEqualContent(
-      operationFiles?.[0]?.getFullText()!,
+      internalDeserializePetFn,
       `
-      import { TestingContext as Client } from "../rest/index.js";
-      import {
-        StreamableMethod,
-        operationOptionsToRequestParameters,
-        createRestError
-      } from "@azure-rest/core-client";
-      
+      function _deserializePet(input: PetOutput): Pet {
+        return {
+          kind: passthroughDeserializer(input["kind"]),
+          name: passthroughDeserializer(input["name"]),
+          weight: passthroughDeserializer(input["weight"]),
+        };
+      } `
+    );
+
+    const deserializePetFn = variables?.find(
+      (f) => f.getName() === "deserializePet"
+    )!;
+
+    assert.equal(deserializePetFn.isExported(), true);
+
+    await assertEqualContent(
+      deserializePetFn.getFullText(),
+      `deserializePet = withNullChecks(_deserializePet);`
+    );
+
+    const internalDeserializePetUnionFn = fns
+      ?.find((f) => f.getName() === "_deserializePetUnion")
+      ?.getFullText()!;
+    await assertEqualContent(
+      internalDeserializePetUnionFn,
+      `
+      function _deserializePetUnion(input: PetOutput): Pet {
+        switch (input["kind"]) {
+          case "cat":
+            return deserializeCat(input as Cat);
+          case "dog":
+            return deserializeDog(input as Dog);
+          default:
+            return deserializePet(input);
+        }
+      }`
+    );
+
+    const deserializePetUnionFn = variables?.find(
+      (f) => f.getName() === "deserializePetUnion"
+    )!;
+
+    assert.equal(deserializePetUnionFn.isExported(), true);
+
+    await assertEqualContent(
+      deserializePetUnionFn.getFullText(),
+      `deserializePetUnion = withNullChecks(_deserializePetUnion);`
+    );
+
+    const internalDeserializeCatFn = fns
+      ?.find((f) => f.getName() === "_deserializeCat")
+      ?.getFullText()!;
+
+    await assertEqualContent(
+      internalDeserializeCatFn,
+      `
+        function _deserializeCat(input: CatOutput): Cat {
+          return {
+                 ...deserializePet(input),
+                 kind: passthroughDeserializer(input["kind"]),
+                 meow: passthroughDeserializer(input["meow"]),
+          };
+        }`
+    );
+
+    const deserializeCatFn = variables?.find(
+      (f) => f.getName() === "deserializeCat"
+    )!;
+
+    assert.equal(deserializeCatFn.isExported(), true);
+    await assertEqualContent(
+      deserializeCatFn.getFullText(),
+      `deserializeCat = withNullChecks(_deserializeCat);`
+    );
+
+    const operations = operationFiles![0]?.getFunctions()!;
+
+    const sendFn = operations
+      .find((f) => f.getName() === "_readSend")
+      ?.getFullText()!;
+    await assertEqualContent(
+      sendFn,
+      `
       export function _readSend(
         context: Client,
         options: ReadOptionalParams = { requestOptions: {} }
@@ -1284,24 +1507,39 @@ describe("inheritance & polymorphism", () => {
         return context
           .path("/")
           .get({ ...operationOptionsToRequestParameters(options) });
-      }
-      
+      }`
+    );
+
+    const deserializeFn = operations
+      .find((f) => f.getName() === "_readDeserialize")
+      ?.getFullText()!;
+
+    await assertEqualContent(
+      deserializeFn,
+      `
       export async function _readDeserialize(result: Read200Response): Promise<PetUnion> {
         if (result.status !== "200") {
           throw createRestError(result);
         }
       
-        return result.body;
+        return deserializePetUnion(result.body);
       }
-      
-      export async function read(
+      `
+    );
+
+    const readFn = operations
+      .find((f) => f.getName() === "read")
+      ?.getFullText()!;
+
+    await assertEqualContent(
+      readFn,
+      `export async function read(
         context: Client,
         options: ReadOptionalParams = { requestOptions: {} }
       ): Promise<PetUnion> {
         const result = await _readSend(context, options);
         return _readDeserialize(result);
-      }      
-      `
+      }     `
     );
   });
 

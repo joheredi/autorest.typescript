@@ -111,22 +111,86 @@ describe("typeHelpers", () => {
     });
 
     describe("datetime types", () => {
-      it("should handle basic datetime", () => {
+      it("should handle basic utcDateTime", () => {
         const type: Type = {
-          type: "datetime"
+          type: "utcDateTime"
         };
         const result = getType(type);
         expect(result.name).to.equal("Date");
         expect(Boolean(result.nullable)).to.be.false;
       });
 
-      it("should handle nullable datetime", () => {
+      it("should handle nullable utcDateTime", () => {
         const type: Type = {
-          type: "datetime",
+          type: "utcDateTime",
           tcgcType: { kind: "nullable" } as any
         };
         const result = getType(type);
         expect(result.name).to.equal("(Date | null)");
+      });
+
+      it("should handle basic plainDate", () => {
+        const type: Type = {
+          type: "plainDate"
+        };
+        const result = getType(type);
+        expect(result.name).to.equal("string");
+        expect(Boolean(result.nullable)).to.be.false;
+      });
+
+      it("should handle nullable plainDate", () => {
+        const type: Type = {
+          type: "plainDate",
+          tcgcType: { kind: "nullable" } as any
+        };
+        const result = getType(type);
+        expect(result.name).to.equal("(string | null)");
+      });
+
+      it("should handle basic plainTime", () => {
+        const type: Type = {
+          type: "plainTime"
+        };
+        const result = getType(type);
+        expect(result.name).to.equal("string");
+        expect(Boolean(result.nullable)).to.be.false;
+      });
+
+      it("should handle nullable plainTime", () => {
+        const type: Type = {
+          type: "plainTime",
+          tcgcType: { kind: "nullable" } as any
+        };
+        const result = getType(type);
+        expect(result.name).to.equal("(string | null)");
+      });
+
+      it("should handle basic duration", () => {
+        const type: Type = {
+          type: "duration"
+        };
+        const result = getType(type);
+        expect(result.name).to.equal("string");
+        expect(Boolean(result.nullable)).to.be.false;
+      });
+
+      it("should handle seconds encoded duration", () => {
+        const type: Type = {
+          type: "duration",
+          format: "seconds"
+        };
+        const result = getType(type);
+        expect(result.name).to.equal("number");
+        expect(Boolean(result.nullable)).to.be.false;
+      });
+
+      it("should handle nullable duration", () => {
+        const type: Type = {
+          type: "duration",
+          tcgcType: { kind: "nullable" } as any
+        };
+        const result = getType(type);
+        expect(result.name).to.equal("(string | null)");
       });
 
       it("should handle string type with default format", () => {
@@ -426,9 +490,9 @@ describe("typeHelpers", () => {
       expect(result.name).to.equal("true");
     });
 
-    it("should handle datetime type", () => {
+    it("should handle utcDateTime type", () => {
       const type: Type = {
-        type: "datetime",
+        type: "utcDateTime",
         tcgcType: { kind: "nullable" } as any
       };
       const result = getType(type);
