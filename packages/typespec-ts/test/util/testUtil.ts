@@ -42,6 +42,7 @@ export async function rlcEmitterFor(
   needArmTemplate: boolean = false
 ): Promise<TestHost> {
   const host: TestHost = await createRLCEmitterTestHost();
+
   const namespace = `
   #suppress "@azure-tools/typespec-azure-core/auth-required" "for test"
   ${withVersionedApiVersion ? "@versioned(Versions)" : ""}
@@ -84,6 +85,7 @@ ${code}
   await host.compile("./", {
     warningAsError: false
   });
+
   return host;
 }
 
@@ -92,10 +94,11 @@ export function createDpgContextTestHelper(
   enableModelNamespace = false
 ): SdkContext {
   const context = createContextWithDefaultOptions({
-    program
+    program,
+    options: {}
   } as EmitContext);
   provideContext("emitContext", {
-    compilerContext: context as any,
+    compilerContext: context.emitContext as any,
     tcgcContext: context
   });
 
@@ -103,6 +106,7 @@ export function createDpgContextTestHelper(
   provideContext("modularMetaTree", new Map());
   provideContext("symbolMap", new Map());
   provideContext("outputProject", new Project());
+  provideContext("declarations", new Map());
 
   return {
     ...context,
@@ -121,11 +125,15 @@ export async function assertEqualContent(
 ) {
   assert.strictEqual(
     await format(
-      ignoreWeirdLine ? actual.replace(/$\n^/g, "").replace(/\s+/g, " ") : actual,
+      ignoreWeirdLine
+        ? actual.replace(/$\n^/g, "").replace(/\s+/g, " ")
+        : actual,
       prettierTypeScriptOptions
     ),
     await format(
-      ignoreWeirdLine ? expected.replace(/$\n^/g, "").replace(/\s+/g, " ") : expected,
+      ignoreWeirdLine
+        ? expected.replace(/$\n^/g, "").replace(/\s+/g, " ")
+        : expected,
       prettierTypeScriptOptions
     )
   );

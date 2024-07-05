@@ -140,6 +140,7 @@ describe("api operations in Modular", () => {
            operationOptionsToRequestParameters,
            createRestError
          } from "@azure-rest/core-client";
+        import { uint8ArrayToString } from "@typespec/ts-http-runtime";
          export function _uploadFileSend(
            context: Client,
            name: string,
@@ -199,6 +200,7 @@ describe("api operations in Modular", () => {
            operationOptionsToRequestParameters,
            createRestError
          } from "@azure-rest/core-client";
+        import { uint8ArrayToString } from "@typespec/ts-http-runtime";
          export function _uploadFilesSend(
            context: Client,
            files: Uint8Array[],
@@ -357,7 +359,7 @@ describe("api operations in Modular", () => {
            operationOptionsToRequestParameters,
            createRestError
          } from "@azure-rest/core-client";
-         import { stringToUint8Array } from "@azure/core-util";
+         import { stringToUint8Array } from "@typespec/ts-http-runtime";
          export function _downloadFileSend(
            context: Client,
            options: DownloadFileOptionalParams = { requestOptions: {} }
@@ -417,7 +419,7 @@ describe("api operations in Modular", () => {
            operationOptionsToRequestParameters,
            createRestError
          } from "@azure-rest/core-client";
-         import { stringToUint8Array } from "@azure/core-util";
+         import { stringToUint8Array } from "@typespec/ts-http-runtime";
          export function _downloadFileSend(
            context: Client,
            options: DownloadFileOptionalParams = { requestOptions: {} }

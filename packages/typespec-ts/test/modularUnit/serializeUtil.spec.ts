@@ -1610,7 +1610,6 @@ describe("modular special union deserialization", () => {
     await assertEqualContent(
       serializeUtil?.[0]?.getFullText()!,
       `
-      import { stringToUint8Array } from "@azure/core-util";
       import { WidgetData1Output, WidgetDataOutput } from "../rest/index.js";
       import { WidgetData1, WidgetData } from "../models/models.js";
       
@@ -1721,7 +1720,6 @@ describe("modular special union deserialization", () => {
     await assertEqualContent(
       serializeUtil?.[0]?.getFullText()!,
       `
-      import { stringToUint8Array } from "@azure/core-util";
       import {
         WidgetData0Output,
         WidgetData1Output,
@@ -1844,7 +1842,6 @@ describe("modular special union deserialization", () => {
     await assertEqualContent(
       serializeUtil?.[0]?.getFullText()!,
       `
-      import { stringToUint8Array } from "@azure/core-util";
       import {
         WidgetData0Output,
         WidgetData1Output,

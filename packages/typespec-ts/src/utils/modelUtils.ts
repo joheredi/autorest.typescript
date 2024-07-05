@@ -1633,16 +1633,35 @@ export function isAzureCoreLroType(t?: Type): boolean {
   return isAzureCoreFoundationsNamespace(t);
 }
 
-function isAzureCoreFoundationsNamespace(t?: Type): boolean {
-  const namespaces = ".Azure.Core.Foundations".split(".");
-  while (
-    namespaces.length > 0 &&
-    (t?.kind === "Model" || t?.kind === "Enum" || t?.kind === "Namespace") &&
-    t.namespace?.name === namespaces.pop()
-  ) {
-    t = t.namespace;
+// export function isAzureCoreFoundationsNamespace(t?: Type): boolean {
+//   const namespaces = ".Azure.Core.Foundations".split(".");
+//   while (
+//     namespaces.length > 0 &&
+//     (t?.kind === "Model" || t?.kind === "Enum" || t?.kind === "Namespace") &&
+//     t.namespace?.name === namespaces.pop()
+//   ) {
+//     t = t.namespace;
+//   }
+//   return namespaces.length == 0;
+// }
+
+export function isAzureCoreFoundationsNamespace(t?: Type): boolean {
+  const coreNamespace = "Azure.Core.Foundations";
+  const fullNamespace = getFullNamespace(t);
+  return fullNamespace.includes(coreNamespace);
+}
+
+function getFullNamespace(t: Type | undefined) {
+  const namespaces = [];
+  while (t) {
+    if ("namespace" in t && t.namespace) {
+      namespaces.push(t.namespace.name);
+      t = t.namespace;
+    } else {
+      break;
+    }
   }
-  return namespaces.length == 0;
+  return namespaces.reverse().join(".");
 }
 
 // Check if the schema is an anonymous object

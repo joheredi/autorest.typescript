@@ -49,6 +49,14 @@ async function verifyModularPropertyType(
       prop: ${inputType};
   }
 
+  export function inputOutputModelSerializer(item: InputOutputModel): InputOutputModelRest {
+    return {
+      prop: item["prop"]
+    }
+  }
+
+  ${additionalInputContent}
+
     function _deserializeInputOutputModel(
       input: InputOutputModelOutput,
     ): InputOutputModel {
@@ -59,14 +67,7 @@ async function verifyModularPropertyType(
 
     export const deserializeInputOutputModel = withNullChecks(
       _deserializeInputOutputModel,
-    );
-    
-  export function inputOutputModelSerializer(item: InputOutputModel): InputOutputModelRest {
-    return {
-      prop: item["prop"]
-    }
-  }
-  ${additionalInputContent}`
+    );`
   );
 }
 
@@ -750,6 +751,7 @@ describe("modular encode test for property type bytes", () => {
     const operationFiles = await emitModularOperationsFromTypeSpec(tspContent);
     assert.ok(operationFiles);
     assert.equal(operationFiles?.length, 1);
+
     await assertEqualContent(
       operationFiles?.[0]?.getFullText()!,
       `
@@ -759,7 +761,7 @@ describe("modular encode test for property type bytes", () => {
         operationOptionsToRequestParameters,
         createRestError
       } from "@azure-rest/core-client";
-      import { stringToUint8Array } from "@azure/core-util";
+      import { stringToUint8Array, uint8ArrayToString } from "@typespec/ts-http-runtime";
       
       export function _readSend(
         context: Client,
@@ -830,7 +832,7 @@ describe("modular encode test for property type bytes", () => {
         operationOptionsToRequestParameters,
         createRestError
       } from "@azure-rest/core-client";
-      import { stringToUint8Array } from "@azure/core-util";
+      import { stringToUint8Array, uint8ArrayToString } from "@typespec/ts-http-runtime";
       
       export function _readSend(
         context: Client,
@@ -901,7 +903,7 @@ describe("modular encode test for property type bytes", () => {
         operationOptionsToRequestParameters,
         createRestError
       } from "@azure-rest/core-client";
-      import { stringToUint8Array } from "@azure/core-util";
+      import { stringToUint8Array, uint8ArrayToString } from "@typespec/ts-http-runtime";
       
       export function _readSend(
         context: Client,
@@ -1130,6 +1132,15 @@ describe("inheritance & polymorphism", () => {
         name: string;
       }
 
+      export interface Pet extends Animal {
+        weight?: number;
+      }
+        
+      export interface Cat extends Pet {
+        kind: "cat";
+        meow: number;
+      }
+
       function _deserializeAnimal(input: AnimalOutput): Animal {
         return {
           name: passthroughDeserializer(input["name"]),
@@ -1137,10 +1148,6 @@ describe("inheritance & polymorphism", () => {
       }
       
       export const deserializeAnimal = withNullChecks(_deserializeAnimal);
-
-      export interface Pet extends Animal {
-        weight?: number;
-      }
 
       function _deserializePet(input: PetOutput): Pet {
         return {
@@ -1150,11 +1157,6 @@ describe("inheritance & polymorphism", () => {
       }
       
       export const deserializePet = withNullChecks(_deserializePet);
-
-      export interface Cat extends Pet {
-        kind: "cat";
-        meow: number;
-      }
       
       function _deserializeCat(input: CatOutput): Cat {
         return {
@@ -1243,6 +1245,16 @@ describe("inheritance & polymorphism", () => {
         weight?: number;
       }
 
+      export interface Cat extends Pet {
+        kind: "cat";
+        meow: number;
+      }
+
+      export interface Dog extends Pet {
+        kind: "dog";
+        bark: string;
+      }
+
       function _deserializePet(input: PetOutput): Pet {
         return {
           kind: passthroughDeserializer(input["kind"]),
@@ -1266,11 +1278,6 @@ describe("inheritance & polymorphism", () => {
       
       export const deserializePetUnion = withNullChecks(_deserializePetUnion);
 
-      export interface Cat extends Pet {
-        kind: "cat";
-        meow: number;
-      }
-
       function _deserializeCat(input: CatOutput): Cat {
         return {
           ...deserializePet(input),
@@ -1281,10 +1288,6 @@ describe("inheritance & polymorphism", () => {
       
       export const deserializeCat = withNullChecks(_deserializeCat);
 
-      export interface Dog extends Pet {
-        kind: "dog";
-        bark: string;
-      }
       
       /** Alias for PetUnion */
       export type PetUnion = Cat | Dog | Pet;`

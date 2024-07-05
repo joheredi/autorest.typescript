@@ -17,9 +17,10 @@ import {
 } from "./modularCodeModel.js";
 import { buildModelSerializer } from "./serialization/buildSerializerFunction.js";
 import { toCamelCase } from "../utils/casingUtils.js";
-import { addImportBySymbol } from "../utils/importHelper.js";
-import { buildModelDeserializer } from "./serialization/buildDeserializerFunction.js";
+import { addImportBySymbol, getCoreUtil } from "../utils/importHelper.js";
 import { SdkModelType } from "@azure-tools/typespec-client-generator-core";
+import { useDeclarations } from "../context/declarations.js";
+import { emitDeserializers } from "./serialization/emitDeserializers.js";
 
 // ====== UTILITIES ======
 
@@ -184,6 +185,7 @@ export function buildModels(
   const models = extractModels(codeModel).filter((m) => !!m.name);
   const aliases = extractAliases(codeModel);
   // Skip to generate models.ts if there is no any models
+  const [addDeclaration] = useDeclarations();
   if (models.length === 0 && aliases.length === 0) {
     return;
   }
@@ -202,15 +204,28 @@ export function buildModels(
       }
       const enumAlias = buildEnumModel(model);
       modelsFile.addTypeAlias(enumAlias);
+      addDeclaration(model.__raw!, {
+        symbolName: enumAlias.name,
+        sourceFile: modelsFile,
+        kind: "union"
+      });
+
       if (model.isNonExhaustive && model.name) {
+        const enumName = `Known${model.name}`;
         modelsFile.addEnum({
-          name: `Known${model.name}`,
+          name: enumName,
           isExported: true,
           members:
             model.values?.map((v) => ({
               name: v.value,
               value: v.value
             })) ?? []
+        });
+
+        addDeclaration(model.__raw!, {
+          symbolName: enumAlias.name,
+          sourceFile: modelsFile,
+          kind: "enum"
         });
       }
     } else {
@@ -232,6 +247,11 @@ export function buildModels(
 
       if (!modelsFile.getInterface(modelInterface.name)) {
         modelsFile.addInterface(modelInterface);
+        addDeclaration(model.__raw!, {
+          symbolName: modelInterface.name,
+          sourceFile: modelsFile,
+          kind: "interface"
+        });
       }
 
       // Generate a serializer function next to each model
@@ -239,14 +259,6 @@ export function buildModels(
         model,
         codeModel.runtimeImports
       );
-
-      const deserializerFunction = buildModelDeserializer(
-        model.tcgcType as SdkModelType
-      );
-
-      if (deserializerFunction) {
-        modelsFile.addStatements(deserializerFunction);
-      }
 
       if (
         serializerFunction &&
@@ -265,7 +277,6 @@ export function buildModels(
       addImportBySymbol("deserializeNumericDuration", modelsFile);
       addImportBySymbol("deserializeStringDuration", modelsFile);
       addImportBySymbol("withNullChecks", modelsFile);
-      // importAllSymbolsFromComponent("rlcOutputModels", modelsFile);
       modelsFile.fixMissingImports(
         {},
         {
@@ -273,22 +284,13 @@ export function buildModels(
           importModuleSpecifierPreference: "shortest"
         }
       );
-      modelsFile.fixUnusedIdentifiers();
-    }
-
-    const outputModelsImports = modelsFile
-      .getImportDeclarations()
-      .filter(
-        (i) =>
-          i.getModuleSpecifier().getLiteralValue() === "../rest/outputModels.js"
-      );
-
-    for (const item of outputModelsImports) {
-      if (item.getNamedImports().length === 0) {
-        item.remove();
-      }
     }
   }
+
+  const tcgcModels = models
+    .filter((m) => m.tcgcType!.kind === "model")
+    .map((m) => m.tcgcType! as SdkModelType);
+  emitDeserializers(tcgcModels, modelsFile);
 
   const projectRootFromModels = codeModel.clients.length > 1 ? "../.." : "../";
   addImportsToFiles(codeModel.runtimeImports, modelsFile, {
@@ -341,7 +343,40 @@ export function buildModels(
       }
     }
   });
+
+  modelsFile.addImportDeclarations([
+    {
+      moduleSpecifier: getCoreUtil(),
+      namedImports: ["stringToUint8Array", "uint8ArrayToString"]
+    }
+  ]);
+
+  cleanupImports(modelsFile);
+
   return modelsFile;
+}
+
+function cleanupImports(sourceFile: SourceFile) {
+  const outputModelsImports = sourceFile
+    .getImportDeclarations()
+    .filter(
+      (i) =>
+        i.getModuleSpecifier().getLiteralValue() === "../rest/outputModels.js"
+    );
+
+  for (const item of outputModelsImports) {
+    if (item.getNamedImports().length === 0) {
+      item.remove();
+    }
+  }
+  sourceFile.fixMissingImports(
+    {},
+    {
+      importModuleSpecifierEnding: "js",
+      importModuleSpecifierPreference: "shortest"
+    }
+  );
+  sourceFile.fixUnusedIdentifiers();
 }
 
 function addExtendedDictInfo(

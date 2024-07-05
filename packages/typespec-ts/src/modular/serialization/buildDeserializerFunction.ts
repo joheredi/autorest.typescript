@@ -9,6 +9,8 @@ import {
 } from "../helpers/deserializers.js";
 import { useContext } from "../../contextManager.js";
 import { SchemaContext } from "@azure-tools/rlc-common";
+import { useDeclarations } from "../../context/declarations.js";
+import { toCamelCase } from "../../utils/casingUtils.js";
 
 /**
  * This function generates the deserializer function for the given model
@@ -22,7 +24,7 @@ export function buildModelDeserializer(model: SdkModelType) {
   }
 
   const rlcMetadata = useContext("rlcMetaTree");
-
+  const [_, getDeclaration] = useDeclarations();
   const deserializerName = getDeserializerName(model);
   const restModel = rlcMetadata.get(model.__raw!);
 
@@ -60,9 +62,12 @@ export function buildModelDeserializer(model: SdkModelType) {
       `input["${wireName}"]`,
       { cast: getCasting(property.type), nameSuffix }
     );
-    deserializeStatements.push(`  ${property.name}: ${deserializer},`);
+    deserializeStatements.push(
+      `  "${toCamelCase(property.name)}": ${deserializer},`
+    );
   }
-
+  const returnType =
+    getDeclaration(model.__raw!, "interface")?.symbolName ?? model.name;
   // Need to reference internal types like PagedResult
 
   let deserializerBody = `return {
@@ -70,12 +75,12 @@ export function buildModelDeserializer(model: SdkModelType) {
       };`;
 
   if (!model.properties?.length) {
-    deserializerBody = `return input as ${model.name};`;
+    deserializerBody = `return input as ${returnType};`;
   }
 
   const output: string[] = [
     `
-    function _${deserializerName}(input: ${restModelName}): ${model.name} {
+    function _${deserializerName}(input: ${restModelName}): ${returnType} {
       ${deserializerBody}
     }
 
@@ -86,11 +91,11 @@ export function buildModelDeserializer(model: SdkModelType) {
   // Handle polymorphic deserialization
   if (model.discriminatedSubtypes && model.discriminatorProperty) {
     const inputTypeName = `${model.name}Output`;
-    const unionDeserializerName = `deserialize${model.name}Union`;
-    const defaultDeserializerName = `deserialize${model.name}`;
+    const unionDeserializerName = `deserialize${returnType}Union`;
+    const defaultDeserializerName = `deserialize${returnType}`;
 
     const discriminatorDeserializer = `
-    function _${unionDeserializerName}(input: ${inputTypeName}): ${model.name} {
+    function _${unionDeserializerName}(input: ${inputTypeName}): ${returnType} {
         switch (input["${model.discriminatorProperty.name}"]) {
             ${Object.entries(model.discriminatedSubtypes)
               .map(([key, value]) => {

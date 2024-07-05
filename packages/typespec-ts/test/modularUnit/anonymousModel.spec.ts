@@ -969,16 +969,18 @@ describe("anonymous model", () => {
           emptyModelDict: Record<string, EmptyModel>;
         }
 
+      export interface EmptyModel {}
+
       function _deserializeReturnBody(input: ReturnBodyOutput): ReturnBody {
         return {
-          emptyAnomyous: deserializeReturnBodyEmptyAnomyous(input["emptyAnomyous"]),
+          emptyAnomyous: passthroughDeserializer(input["emptyAnomyous"]),
           emptyAnomyousArray: deserializeArray(
             input["emptyAnomyousArray"],
-            deserializeReturnBodyEmptyAnomyousArray,
+            passthroughDeserializer,
           ),
           emptyAnomyousDict: deserializeRecord(
             input["emptyAnomyousDict"],
-            deserializeReturnBodyEmptyAnomyousDict,
+            passthroughDeserializer,
           ),
           emptyModel: deserializeEmptyModel(input["emptyModel"]),
           emptyModelArray: deserializeArray(
@@ -993,8 +995,6 @@ describe("anonymous model", () => {
       }
       
       export const deserializeReturnBody = withNullChecks(_deserializeReturnBody);
-
-        export interface EmptyModel {}
 
       function _deserializeEmptyModel(input: EmptyModelOutput): EmptyModel {
         return input as EmptyModel;
@@ -1037,7 +1037,7 @@ describe("anonymous model", () => {
             emptyAnomyousArray: result.body["emptyAnomyousArray"],
            emptyAnomyousDict: deserializeRecord(
              result.body.emptyAnomyousDict,
-             deserializeReturnBodyEmptyAnomyousDict,
+             passthroughDeserializer,
            ),
             emptyModel: {},
             emptyModelArray: result.body["emptyModelArray"].map(() => ({})),
@@ -1091,17 +1091,17 @@ describe("anonymous model", () => {
               };
           }
 
+      export interface SimpleModel {
+            test: string;
+          }
+
       function _deserializeFoz(input: FozOutput): Foz {
         return {
-          baz: deserializeFozBaz(input["baz"]),
+          baz: passthroughDeserializer(input["baz"]),
         };
       }
       
       export const deserializeFoz = withNullChecks(_deserializeFoz);
-          
-          export interface SimpleModel {
-            test: string;
-          }
 
       function _deserializeSimpleModel(input: SimpleModelOutput): SimpleModel {
         return {
@@ -1152,7 +1152,7 @@ describe("anonymous model", () => {
                 nonemptyAnomyousArray: result.body.baz["nonemptyAnomyousArray"].map((p) => ({ b: deserializeRecord(p.b, passthroughDeserializer) })),
             nonemptyAnomyousDict: deserializeRecord(
               result.body.baz.nonemptyAnomyousDict,
-              deserializeFozBazNonemptyAnomyousDict,
+              passthroughDeserializer,
             ),
               },
             };

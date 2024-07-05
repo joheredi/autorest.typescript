@@ -128,7 +128,7 @@ describe("operations", () => {
         `
         import { TestingContext as Client } from "../rest/index.js";
         import { StreamableMethod, operationOptionsToRequestParameters, createRestError } from "@azure-rest/core-client";
-        
+        import { uint8ArrayToString } from "@typespec/ts-http-runtime";
         export function _readSend(
           context: Client, 
           requiredHeader: string,

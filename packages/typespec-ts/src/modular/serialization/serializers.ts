@@ -154,7 +154,7 @@ function getSerializeHandler<TCGCType extends SdkType | SdkModelPropertyType>(
 function serializeByteArray(
   options: SerializeTypeOptions<SdkType & { kind: "bytes" }>
 ): string {
-  const { functionType, type, valueExpr, importCallback } = options;
+  const { functionType, type, valueExpr } = options;
 
   if (type.encode === "binary") {
     return valueExpr;
@@ -164,10 +164,8 @@ function serializeByteArray(
   const args = [valueExpr, `"${format}"`].join(", ");
 
   if (functionType === UsageFlags.Input) {
-    importCallback("coreUtil", "uint8ArrayToString");
     return `uint8ArrayToString(${args})`;
   }
-  importCallback("coreUtil", "stringToUint8Array");
   return `(typeof (${valueExpr}) === 'string')
       ? (stringToUint8Array(${args}))
       : (${valueExpr})`;

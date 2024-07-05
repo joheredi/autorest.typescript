@@ -27,7 +27,7 @@ import {
   getSendPrivateFunction as experimentalGetSendPrivateFunction
 } from "./serialization/operationHelpers.js";
 import { SerializerMap } from "./serialization/util.js";
-import { addImportBySymbol } from "../utils/importHelper.js";
+import { addImportBySymbol, getCoreUtil } from "../utils/importHelper.js";
 /**
  * This function creates a file under /api for each operation group.
  * If there is no operation group in the TypeSpec program, we create a single
@@ -207,6 +207,28 @@ export function buildOperationFiles(
     addImportBySymbol("deserializeStringDuration", operationGroupFile);
     addImportBySymbol("withNullChecks", operationGroupFile);
     addImportBySymbol("passthroughDeserializer", operationGroupFile);
+
+    let utilsToImport = [
+      "stringToUint8Array",
+      "uint8ArrayToString",
+      "EncodingType"
+    ];
+
+    const utilsModule = getCoreUtil();
+    operationGroupFile
+      .getImportDeclarations()
+      .find((d) => d.getModuleSpecifierValue() === utilsModule)
+      ?.getNamedImports()
+      .forEach((i) => {
+        utilsToImport = utilsToImport.filter((u) => u !== i.getName());
+      });
+
+    operationGroupFile.addImportDeclarations([
+      {
+        moduleSpecifier: utilsModule,
+        namedImports: utilsToImport
+      }
+    ]);
 
     operationGroupFile.fixMissingImports();
     // have to fixUnusedIdentifiers after everything get generated.

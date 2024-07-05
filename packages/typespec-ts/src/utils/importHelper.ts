@@ -1,6 +1,10 @@
 import { dirname, relative, resolve, join } from "path";
 import { useContext } from "../contextManager.js";
 import { SourceFile } from "ts-morph";
+import {
+  getFlavor,
+  getPackageDetails
+} from "../transform/transfromRLCOptions.js";
 
 /**
  * Adds a named import to a TypeScript source file if it does not already exist.
@@ -98,4 +102,19 @@ function getRelativeImportPath(from: string, to: string) {
   const relativePath = relative(dirname(from), to);
   // Adjust the path format to TypeScript module syntax
   return relativePath.startsWith(".") ? relativePath : "./" + relativePath;
+}
+
+export function getCoreUtil() {
+  const { compilerContext } = useContext("emitContext");
+  const packageDetails = getPackageDetails(
+    compilerContext.program,
+    compilerContext.options
+  );
+  const flavor = getFlavor(compilerContext.options, packageDetails);
+
+  if (flavor === "azure") {
+    return "@azure/core-util";
+  } else {
+    return "@typespec/ts-http-runtime";
+  }
 }

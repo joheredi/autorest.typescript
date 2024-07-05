@@ -2,6 +2,9 @@ import {
   SdkModelType,
   SdkType
 } from "@azure-tools/typespec-client-generator-core";
+import { useDeclarations } from "../../context/declarations.js";
+import { isAzureCoreErrorType } from "../../utils/modelUtils.js";
+import { useContext } from "../../contextManager.js";
 
 export interface DeserializerOptions {
   cast?: string;
@@ -37,6 +40,12 @@ function getDeserializerArgs(type: SdkType) {
       deserializerName = deserializerName + "Union";
     }
 
+    if (type.valueType.kind === "dict" || type.valueType.kind === "array") {
+      return `(i) => ${deserializerName}(i, ${getDeserializerName(
+        type.valueType.valueType
+      )})`;
+    }
+
     if (
       deserializerName !== "passthroughDeserializer" &&
       "encode" in type.valueType
@@ -55,10 +64,15 @@ function getDeserializerArgs(type: SdkType) {
 }
 
 export function getModelDeserializerName(type: SdkModelType) {
-  return `deserialize${type.name}`;
+  const [_, getDeclaration] = useDeclarations();
+  const modelName =
+    getDeclaration(type.__raw!, "interface")?.symbolName ?? type.name;
+  return `deserialize${modelName}`;
 }
 
 export function getDeserializerName(type: SdkType) {
+  const { tcgcContext } = useContext("emitContext");
+
   if (type.kind === "nullable") {
     return getDeserializerName(type.type);
   }
@@ -71,7 +85,12 @@ export function getDeserializerName(type: SdkType) {
     return "deserializeArray";
   }
 
-  if (type.kind === "model") {
+  //TODO: Remove generatedName check when we generate interfaces for anonymous models
+  if (
+    type.kind === "model" &&
+    !type.isGeneratedName &&
+    !isAzureCoreErrorType(tcgcContext.program, type.__raw!)
+  ) {
     return getModelDeserializerName(type);
   }
 

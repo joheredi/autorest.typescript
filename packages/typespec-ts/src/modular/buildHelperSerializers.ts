@@ -1,5 +1,6 @@
 import { Project } from "ts-morph";
 import { useContext } from "../contextManager.js";
+import { getCoreUtil } from "../utils/importHelper.js";
 const serializeRecordFunction = {
   symbol: "serializeRecord",
   content: `
@@ -292,6 +293,11 @@ export function emitSerializerHelpersFile(
     symbolMap.set(deserializeArrayFunction.symbol, sourceFile);
   }
 
+  sourceFile.addImportDeclaration({
+    moduleSpecifier: getCoreUtil(),
+    namedImports: ["stringToUint8Array", "EncodingType"]
+  });
+
   sourceFile.addStatements([
     serializeRecordFunction.content,
     isPassthroughElement.content,
@@ -306,12 +312,5 @@ export function emitSerializerHelpersFile(
     deserializeArrayFunction.content,
     deserializeStringDuration.content,
     deserializeNumericDuration.content
-  ]);
-
-  sourceFile.addImportDeclarations([
-    {
-      moduleSpecifier: "@azure/core-util",
-      namedImports: ["EncodingType", "stringToUint8Array"]
-    }
   ]);
 }

@@ -19,6 +19,7 @@ import {
   serializeRequestValue
 } from "./helpers/operationHelpers.js";
 import { ModularCodeModel, Type } from "./modularCodeModel.js";
+import { getCoreUtil } from "../utils/importHelper.js";
 
 /**
  * This function creates serialize and deserialize utils for special unions and that are used in the operation.
@@ -105,10 +106,12 @@ export function buildSerializeUtils(model: ModularCodeModel) {
         );
       }
     });
+
+    const coreUtilModule = getCoreUtil();
     addImportsToFiles(model.runtimeImports, utilsFile, {
       rlcIndex: "../rest/index.js",
       modularModel: "../models/models.js",
-      coreUtil: "@azure/core-util"
+      coreUtil: coreUtilModule
     });
     serializeUtilFiles.push(utilsFile);
   }

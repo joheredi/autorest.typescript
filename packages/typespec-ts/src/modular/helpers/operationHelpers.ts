@@ -1258,7 +1258,6 @@ export function deserializeResponseValue(
     }
     case "byte-array":
       if (format !== "binary") {
-        addImportToSpecifier("coreUtil", runtimeImports, "stringToUint8Array");
         return `typeof ${restValue} === 'string'
         ? stringToUint8Array(${restValue}, "${format ?? "base64"}")
         : ${restValue}`;
