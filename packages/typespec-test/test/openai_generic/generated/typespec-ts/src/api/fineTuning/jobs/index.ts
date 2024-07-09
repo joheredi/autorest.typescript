@@ -26,6 +26,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { deserializeUtcDateTime } from "../../../helpers/serializerHelpers.js";
 import {
   FineTuningJobsCreateOptionalParams,
   FineTuningJobsListOptionalParams,
@@ -67,11 +68,8 @@ export async function _createDeserialize(
   return {
     id: result.body["id"],
     object: result.body["object"],
-    createdAt: new Date(result.body["created_at"]),
-    finishedAt:
-      result.body["finished_at"] === null
-        ? null
-        : new Date(result.body["finished_at"]),
+    createdAt: deserializeUtcDateTime(result.body["created_at"]),
+    finishedAt: deserializeUtcDateTime(result.body["finished_at"]),
     model: result.body["model"],
     fineTunedModel: result.body["fine_tuned_model"],
     organizationId: result.body["organization_id"],
@@ -135,8 +133,8 @@ export async function _listDeserialize(
     data: result.body["data"].map((p) => ({
       id: p["id"],
       object: p["object"],
-      createdAt: new Date(p["created_at"]),
-      finishedAt: p["finished_at"] === null ? null : new Date(p["finished_at"]),
+      createdAt: deserializeUtcDateTime(p["created_at"]),
+      finishedAt: deserializeUtcDateTime(p["finished_at"]),
       model: p["model"],
       fineTunedModel: p["fine_tuned_model"],
       organizationId: p["organization_id"],
@@ -191,11 +189,8 @@ export async function _retrieveDeserialize(
   return {
     id: result.body["id"],
     object: result.body["object"],
-    createdAt: new Date(result.body["created_at"]),
-    finishedAt:
-      result.body["finished_at"] === null
-        ? null
-        : new Date(result.body["finished_at"]),
+    createdAt: deserializeUtcDateTime(result.body["created_at"]),
+    finishedAt: deserializeUtcDateTime(result.body["finished_at"]),
     model: result.body["model"],
     fineTunedModel: result.body["fine_tuned_model"],
     organizationId: result.body["organization_id"],
@@ -254,7 +249,7 @@ export async function _listEventsDeserialize(
     data: result.body["data"].map((p) => ({
       id: p["id"],
       object: p["object"],
-      createdAt: new Date(p["created_at"]),
+      createdAt: deserializeUtcDateTime(p["created_at"]),
       level: p["level"],
       message: p["message"],
     })),
@@ -292,11 +287,8 @@ export async function _cancelDeserialize(
   return {
     id: result.body["id"],
     object: result.body["object"],
-    createdAt: new Date(result.body["created_at"]),
-    finishedAt:
-      result.body["finished_at"] === null
-        ? null
-        : new Date(result.body["finished_at"]),
+    createdAt: deserializeUtcDateTime(result.body["created_at"]),
+    finishedAt: deserializeUtcDateTime(result.body["finished_at"]),
     model: result.body["model"],
     fineTunedModel: result.body["fine_tuned_model"],
     organizationId: result.body["organization_id"],

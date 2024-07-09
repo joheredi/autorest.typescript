@@ -13,14 +13,6 @@ export interface User {
   name: string;
 }
 
-function _deserializeUser(input: UserOutput): User {
-  return {
-    name: passthroughDeserializer(input["name"]),
-  };
-}
-
-export const deserializeUser = withNullChecks(_deserializeUser);
-
 /** Paged collection of User items */
 export interface PagedUser {
   /** The User items on this page */
@@ -28,3 +20,11 @@ export interface PagedUser {
   /** The link to the next page of items */
   nextLink?: string;
 }
+
+function _deserializeUser(input: UserOutput): User {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+  } as any;
+}
+
+export const deserializeUser = withNullChecks(_deserializeUser);

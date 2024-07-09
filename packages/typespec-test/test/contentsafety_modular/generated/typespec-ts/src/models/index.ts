@@ -21,6 +21,13 @@ export {
   TextBlocklistMatchResult,
   TextAnalyzeSeverityResult,
   Versions,
+  PagedTextBlocklist,
+  PagedTextBlockItem,
+  deserializeTextBlocklist,
+  deserializeTextBlockItem,
+  deserializeImageAnalyzeSeverityResult,
+  deserializeTextBlocklistMatchResult,
+  deserializeTextAnalyzeSeverityResult,
 } from "./models.js";
 export {
   AnalyzeTextOptionalParams,

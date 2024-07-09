@@ -5,6 +5,8 @@ export {
   InputRecord,
   OutputRecord,
   InputOutputRecord,
+  deserializeOutputRecord,
+  deserializeInputOutputRecord,
   InputOptionalParams,
   OutputOptionalParams,
   InputAndOutputOptionalParams,

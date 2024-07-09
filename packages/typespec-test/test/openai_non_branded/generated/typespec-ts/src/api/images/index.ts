@@ -19,9 +19,12 @@ import {
 import {
   StreamableMethod,
   operationOptionsToRequestParameters,
+  createRestError,
+} from "@typespec/ts-http-runtime";
+import { deserializeUtcDateTime } from "../../helpers/serializerHelpers.js";
+import {
   stringToUint8Array,
   uint8ArrayToString,
-  createRestError,
 } from "@typespec/ts-http-runtime";
 import {
   ImagesCreateOptionalParams,
@@ -56,7 +59,7 @@ export async function _createDeserialize(
   }
 
   return {
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     data: result.body["data"].map((p) => ({
       url: p["url"],
       b64Json:
@@ -111,7 +114,7 @@ export async function _createEditDeserialize(
   }
 
   return {
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     data: result.body["data"].map((p) => ({
       url: p["url"],
       b64Json:
@@ -163,7 +166,7 @@ export async function _createVariationDeserialize(
   }
 
   return {
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     data: result.body["data"].map((p) => ({
       url: p["url"],
       b64Json:

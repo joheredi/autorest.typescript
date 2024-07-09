@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { EncodingType, stringToUint8Array } from "@azure/core-util";
+import { stringToUint8Array, EncodingType } from "@azure/core-util";
 
 export function serializeRecord<
   T extends string | number | boolean | Date | null,

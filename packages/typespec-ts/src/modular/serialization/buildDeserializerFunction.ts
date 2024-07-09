@@ -35,7 +35,10 @@ export function buildModelDeserializer(model: SdkModelType) {
     return;
   }
 
-  const restModelName = restModel?.rlcType.name + "Output";
+  const restModelName = restModel?.rlcType.name
+    ? `${restModel?.rlcType.name}Output`
+    : "any";
+
   const deserializeStatements: string[] = [];
 
   // If the model has a base model, we need to deserialize the base model first
@@ -62,17 +65,33 @@ export function buildModelDeserializer(model: SdkModelType) {
       `input["${wireName}"]`,
       { cast: getCasting(property.type), nameSuffix }
     );
+
+    let cast = `as any`;
+    if ("isGeneratedName" in property.type && property.type.isGeneratedName) {
+      cast = ` as any`;
+    }
+
+    if (
+      "valueType" in property.type &&
+      "isGeneratedName" in property.type.valueType &&
+      property.type.valueType.isGeneratedName
+    ) {
+      cast = ` as any`;
+    }
+
     deserializeStatements.push(
-      `  "${toCamelCase(property.name)}": ${deserializer},`
+      `  "${toCamelCase(property.name)}": ${deserializer}${cast},`
     );
   }
   const returnType =
     getDeclaration(model.__raw!, "interface")?.symbolName ?? model.name;
   // Need to reference internal types like PagedResult
 
+  const cast = restModelName === "any" ? ` as any` : `as any`;
+
   let deserializerBody = `return {
-       ${deserializeStatements.join("\n")}
-      };`;
+       ${deserializeStatements.join(`\n`)}
+      } ${cast};`;
 
   if (!model.properties?.length) {
     deserializerBody = `return input as ${returnType};`;
@@ -90,7 +109,7 @@ export function buildModelDeserializer(model: SdkModelType) {
 
   // Handle polymorphic deserialization
   if (model.discriminatedSubtypes && model.discriminatorProperty) {
-    const inputTypeName = `${model.name}Output`;
+    const inputTypeName = model.name ? `${model.name}Output` : "any";
     const unionDeserializerName = `deserialize${returnType}Union`;
     const defaultDeserializerName = `deserialize${returnType}`;
 

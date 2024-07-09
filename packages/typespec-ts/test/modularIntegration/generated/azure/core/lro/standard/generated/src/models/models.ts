@@ -5,8 +5,7 @@ import {
   passthroughDeserializer,
   withNullChecks,
 } from "../helpers/serializerHelpers.js";
-import { ExportedUserOutput } from "../rest/outputModels.js";
-import { User as UserRest } from "../rest/index.js";
+import { ExportedUserOutput, User as UserRest } from "../rest/index.js";
 
 /** Details about a user. */
 export interface User {
@@ -30,14 +29,14 @@ export interface ExportedUser {
   resourceUri: string;
 }
 
+/** The API version. */
+export type Versions = "2022-12-01-preview";
+
 function _deserializeExportedUser(input: ExportedUserOutput): ExportedUser {
   return {
-    name: passthroughDeserializer(input["name"]),
-    resourceUri: passthroughDeserializer(input["resourceUri"]),
-  };
+    name: passthroughDeserializer(input["name"]) as any,
+    resourceUri: passthroughDeserializer(input["resourceUri"]) as any,
+  } as any;
 }
 
 export const deserializeExportedUser = withNullChecks(_deserializeExportedUser);
-
-/** The API version. */
-export type Versions = "2022-12-01-preview";

@@ -15,7 +15,8 @@ import {
   RoleAssignmentCommonProperties,
   RoleAssignmentDetail,
   ListRoleAssignments,
-  _DataProductListResult,
+  deserializeUserAssignedIdentity,
+  DataProductListResult,
 } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../models/pagingTypes.js";
 import { buildPagedAsyncIterator } from "../pagingHelpers.js";
@@ -56,7 +57,12 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
-import { serializeRecord } from "../../helpers/serializerHelpers.js";
+import {
+  serializeRecord,
+  deserializeRecord,
+  deserializeUtcDateTime,
+  passthroughDeserializer,
+} from "../../helpers/serializerHelpers.js";
 import {
   DataProductsCreateOptionalParams,
   DataProductsGetOptionalParams,
@@ -121,7 +127,7 @@ export async function _createDeserialize(
 
   result = result as DataProductsCreateLogicalResponse;
   return {
-    tags: result.body["tags"],
+    tags: deserializeRecord(result.body.tags, passthroughDeserializer),
     location: result.body["location"],
     id: result.body["id"],
     name: result.body["name"],
@@ -131,16 +137,14 @@ export async function _createDeserialize(
       : {
           createdBy: result.body.systemData?.["createdBy"],
           createdByType: result.body.systemData?.["createdByType"],
-          createdAt:
-            result.body.systemData?.["createdAt"] !== undefined
-              ? new Date(result.body.systemData?.["createdAt"])
-              : undefined,
+          createdAt: deserializeUtcDateTime(
+            result.body.systemData?.["createdAt"],
+          ),
           lastModifiedBy: result.body.systemData?.["lastModifiedBy"],
           lastModifiedByType: result.body.systemData?.["lastModifiedByType"],
-          lastModifiedAt:
-            result.body.systemData?.["lastModifiedAt"] !== undefined
-              ? new Date(result.body.systemData?.["lastModifiedAt"])
-              : undefined,
+          lastModifiedAt: deserializeUtcDateTime(
+            result.body.systemData?.["lastModifiedAt"],
+          ),
         },
     properties: !result.body.properties
       ? undefined
@@ -239,8 +243,10 @@ export async function _createDeserialize(
           principalId: result.body.identity?.["principalId"],
           tenantId: result.body.identity?.["tenantId"],
           type: result.body.identity?.["type"],
-          userAssignedIdentities:
-            result.body.identity?.["userAssignedIdentities"],
+          userAssignedIdentities: deserializeRecord(
+            result.body.identity?.userAssignedIdentities,
+            deserializeUserAssignedIdentity,
+          ),
         },
   };
 }
@@ -296,7 +302,7 @@ export async function _getDeserialize(
   }
 
   return {
-    tags: result.body["tags"],
+    tags: deserializeRecord(result.body.tags, passthroughDeserializer),
     location: result.body["location"],
     id: result.body["id"],
     name: result.body["name"],
@@ -306,16 +312,14 @@ export async function _getDeserialize(
       : {
           createdBy: result.body.systemData?.["createdBy"],
           createdByType: result.body.systemData?.["createdByType"],
-          createdAt:
-            result.body.systemData?.["createdAt"] !== undefined
-              ? new Date(result.body.systemData?.["createdAt"])
-              : undefined,
+          createdAt: deserializeUtcDateTime(
+            result.body.systemData?.["createdAt"],
+          ),
           lastModifiedBy: result.body.systemData?.["lastModifiedBy"],
           lastModifiedByType: result.body.systemData?.["lastModifiedByType"],
-          lastModifiedAt:
-            result.body.systemData?.["lastModifiedAt"] !== undefined
-              ? new Date(result.body.systemData?.["lastModifiedAt"])
-              : undefined,
+          lastModifiedAt: deserializeUtcDateTime(
+            result.body.systemData?.["lastModifiedAt"],
+          ),
         },
     properties: !result.body.properties
       ? undefined
@@ -414,8 +418,10 @@ export async function _getDeserialize(
           principalId: result.body.identity?.["principalId"],
           tenantId: result.body.identity?.["tenantId"],
           type: result.body.identity?.["type"],
-          userAssignedIdentities:
-            result.body.identity?.["userAssignedIdentities"],
+          userAssignedIdentities: deserializeRecord(
+            result.body.identity?.userAssignedIdentities,
+            deserializeUserAssignedIdentity,
+          ),
         },
   };
 }
@@ -487,7 +493,7 @@ export async function _updateDeserialize(
 
   result = result as DataProductsUpdateLogicalResponse;
   return {
-    tags: result.body["tags"],
+    tags: deserializeRecord(result.body.tags, passthroughDeserializer),
     location: result.body["location"],
     id: result.body["id"],
     name: result.body["name"],
@@ -497,16 +503,14 @@ export async function _updateDeserialize(
       : {
           createdBy: result.body.systemData?.["createdBy"],
           createdByType: result.body.systemData?.["createdByType"],
-          createdAt:
-            result.body.systemData?.["createdAt"] !== undefined
-              ? new Date(result.body.systemData?.["createdAt"])
-              : undefined,
+          createdAt: deserializeUtcDateTime(
+            result.body.systemData?.["createdAt"],
+          ),
           lastModifiedBy: result.body.systemData?.["lastModifiedBy"],
           lastModifiedByType: result.body.systemData?.["lastModifiedByType"],
-          lastModifiedAt:
-            result.body.systemData?.["lastModifiedAt"] !== undefined
-              ? new Date(result.body.systemData?.["lastModifiedAt"])
-              : undefined,
+          lastModifiedAt: deserializeUtcDateTime(
+            result.body.systemData?.["lastModifiedAt"],
+          ),
         },
     properties: !result.body.properties
       ? undefined
@@ -605,8 +609,10 @@ export async function _updateDeserialize(
           principalId: result.body.identity?.["principalId"],
           tenantId: result.body.identity?.["tenantId"],
           type: result.body.identity?.["type"],
-          userAssignedIdentities:
-            result.body.identity?.["userAssignedIdentities"],
+          userAssignedIdentities: deserializeRecord(
+            result.body.identity?.userAssignedIdentities,
+            deserializeUserAssignedIdentity,
+          ),
         },
   };
 }
@@ -1046,14 +1052,14 @@ export async function _listByResourceGroupDeserialize(
   result:
     | DataProductsListByResourceGroup200Response
     | DataProductsListByResourceGroupDefaultResponse,
-): Promise<_DataProductListResult> {
+): Promise<DataProductListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
 
   return {
     value: result.body["value"].map((p) => ({
-      tags: p["tags"],
+      tags: deserializeRecord(p.tags, passthroughDeserializer),
       location: p["location"],
       id: p["id"],
       name: p["name"],
@@ -1063,16 +1069,12 @@ export async function _listByResourceGroupDeserialize(
         : {
             createdBy: p.systemData?.["createdBy"],
             createdByType: p.systemData?.["createdByType"],
-            createdAt:
-              p.systemData?.["createdAt"] !== undefined
-                ? new Date(p.systemData?.["createdAt"])
-                : undefined,
+            createdAt: deserializeUtcDateTime(p.systemData?.["createdAt"]),
             lastModifiedBy: p.systemData?.["lastModifiedBy"],
             lastModifiedByType: p.systemData?.["lastModifiedByType"],
-            lastModifiedAt:
-              p.systemData?.["lastModifiedAt"] !== undefined
-                ? new Date(p.systemData?.["lastModifiedAt"])
-                : undefined,
+            lastModifiedAt: deserializeUtcDateTime(
+              p.systemData?.["lastModifiedAt"],
+            ),
           },
       properties: !p.properties
         ? undefined
@@ -1157,7 +1159,10 @@ export async function _listByResourceGroupDeserialize(
             principalId: p.identity?.["principalId"],
             tenantId: p.identity?.["tenantId"],
             type: p.identity?.["type"],
-            userAssignedIdentities: p.identity?.["userAssignedIdentities"],
+            userAssignedIdentities: deserializeRecord(
+              p.identity?.userAssignedIdentities,
+              deserializeUserAssignedIdentity,
+            ),
           },
     })),
     nextLink: result.body["nextLink"],
@@ -1209,14 +1214,14 @@ export async function _listBySubscriptionDeserialize(
   result:
     | DataProductsListBySubscription200Response
     | DataProductsListBySubscriptionDefaultResponse,
-): Promise<_DataProductListResult> {
+): Promise<DataProductListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
 
   return {
     value: result.body["value"].map((p) => ({
-      tags: p["tags"],
+      tags: deserializeRecord(p.tags, passthroughDeserializer),
       location: p["location"],
       id: p["id"],
       name: p["name"],
@@ -1226,16 +1231,12 @@ export async function _listBySubscriptionDeserialize(
         : {
             createdBy: p.systemData?.["createdBy"],
             createdByType: p.systemData?.["createdByType"],
-            createdAt:
-              p.systemData?.["createdAt"] !== undefined
-                ? new Date(p.systemData?.["createdAt"])
-                : undefined,
+            createdAt: deserializeUtcDateTime(p.systemData?.["createdAt"]),
             lastModifiedBy: p.systemData?.["lastModifiedBy"],
             lastModifiedByType: p.systemData?.["lastModifiedByType"],
-            lastModifiedAt:
-              p.systemData?.["lastModifiedAt"] !== undefined
-                ? new Date(p.systemData?.["lastModifiedAt"])
-                : undefined,
+            lastModifiedAt: deserializeUtcDateTime(
+              p.systemData?.["lastModifiedAt"],
+            ),
           },
       properties: !p.properties
         ? undefined
@@ -1320,7 +1321,10 @@ export async function _listBySubscriptionDeserialize(
             principalId: p.identity?.["principalId"],
             tenantId: p.identity?.["tenantId"],
             type: p.identity?.["type"],
-            userAssignedIdentities: p.identity?.["userAssignedIdentities"],
+            userAssignedIdentities: deserializeRecord(
+              p.identity?.userAssignedIdentities,
+              deserializeUserAssignedIdentity,
+            ),
           },
     })),
     nextLink: result.body["nextLink"],

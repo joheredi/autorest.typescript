@@ -17,7 +17,10 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@typespec/ts-http-runtime";
-import { serializeRecord } from "../../../helpers/serializerHelpers.js";
+import {
+  serializeRecord,
+  deserializeUtcDateTime,
+} from "../../../helpers/serializerHelpers.js";
 import { ChatCompletionsCreateOptionalParams } from "../../../models/options.js";
 
 export function _createSend(
@@ -67,7 +70,7 @@ export async function _createDeserialize(
   return {
     id: result.body["id"],
     object: result.body["object"],
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     model: result.body["model"],
     choices: result.body["choices"].map((p) => ({
       index: p["index"],

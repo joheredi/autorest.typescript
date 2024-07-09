@@ -604,6 +604,177 @@ export interface ContentFilterResultsForPrompt {
 // @public
 export type ContentFilterSeverity = "safe" | "low" | "medium" | "high";
 
+// Warning: (ae-forgotten-export) The symbol "AudioTranscriptionSegmentOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAudioTranscriptionSegment: (input: AudioTranscriptionSegmentOutput | null | undefined) => AudioTranscriptionSegment;
+
+// Warning: (ae-forgotten-export) The symbol "AudioTranslationSegmentOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAudioTranslationSegment: (input: AudioTranslationSegmentOutput | null | undefined) => AudioTranslationSegment;
+
+// Warning: (ae-forgotten-export) The symbol "AzureChatEnhancementsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAzureChatEnhancements: (input: AzureChatEnhancementsOutput | null | undefined) => AzureChatEnhancements;
+
+// Warning: (ae-forgotten-export) The symbol "AzureChatExtensionDataSourceResponseCitationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAzureChatExtensionDataSourceResponseCitation: (input: AzureChatExtensionDataSourceResponseCitationOutput | null | undefined) => AzureChatExtensionDataSourceResponseCitation;
+
+// Warning: (ae-forgotten-export) The symbol "AzureChatExtensionsMessageContextOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAzureChatExtensionsMessageContext: (input: AzureChatExtensionsMessageContextOutput | null | undefined) => AzureChatExtensionsMessageContext;
+
+// Warning: (ae-forgotten-export) The symbol "AzureGroundingEnhancementOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAzureGroundingEnhancement: (input: AzureGroundingEnhancementOutput | null | undefined) => AzureGroundingEnhancement;
+
+// Warning: (ae-forgotten-export) The symbol "AzureGroundingEnhancementCoordinatePointOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAzureGroundingEnhancementCoordinatePoint: (input: AzureGroundingEnhancementCoordinatePointOutput | null | undefined) => AzureGroundingEnhancementCoordinatePoint;
+
+// Warning: (ae-forgotten-export) The symbol "AzureGroundingEnhancementLineOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAzureGroundingEnhancementLine: (input: AzureGroundingEnhancementLineOutput | null | undefined) => AzureGroundingEnhancementLine;
+
+// Warning: (ae-forgotten-export) The symbol "AzureGroundingEnhancementLineSpanOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAzureGroundingEnhancementLineSpan: (input: AzureGroundingEnhancementLineSpanOutput | null | undefined) => AzureGroundingEnhancementLineSpan;
+
+// Warning: (ae-forgotten-export) The symbol "ChatChoiceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatChoice: (input: ChatChoiceOutput | null | undefined) => ChatChoice;
+
+// Warning: (ae-forgotten-export) The symbol "ChatChoiceLogProbabilityInfoOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatChoiceLogProbabilityInfo: (input: ChatChoiceLogProbabilityInfoOutput | null | undefined) => ChatChoiceLogProbabilityInfo;
+
+// Warning: (ae-forgotten-export) The symbol "ChatCompletionsFunctionToolCallOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatCompletionsFunctionToolCall: (input: ChatCompletionsFunctionToolCallOutput | null | undefined) => ChatCompletionsFunctionToolCall;
+
+// Warning: (ae-forgotten-export) The symbol "ChatCompletionsToolCallOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatCompletionsToolCall: (input: ChatCompletionsToolCallOutput | null | undefined) => ChatCompletionsToolCall;
+
+// @public (undocumented)
+export const deserializeChatCompletionsToolCallUnion: (input: ChatCompletionsToolCallOutput | null | undefined) => ChatCompletionsToolCall;
+
+// Warning: (ae-forgotten-export) The symbol "ChatFinishDetailsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatFinishDetails: (input: ChatFinishDetailsOutput | null | undefined) => ChatFinishDetails;
+
+// @public (undocumented)
+export const deserializeChatFinishDetailsUnion: (input: ChatFinishDetailsOutput | null | undefined) => ChatFinishDetails;
+
+// Warning: (ae-forgotten-export) The symbol "ChatResponseMessageOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatResponseMessage: (input: ChatResponseMessageOutput | null | undefined) => ChatResponseMessage;
+
+// Warning: (ae-forgotten-export) The symbol "ChatTokenLogProbabilityInfoOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatTokenLogProbabilityInfo: (input: ChatTokenLogProbabilityInfoOutput | null | undefined) => ChatTokenLogProbabilityInfo;
+
+// Warning: (ae-forgotten-export) The symbol "ChatTokenLogProbabilityResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatTokenLogProbabilityResult: (input: ChatTokenLogProbabilityResultOutput | null | undefined) => ChatTokenLogProbabilityResult;
+
+// Warning: (ae-forgotten-export) The symbol "ChoiceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChoice: (input: ChoiceOutput | null | undefined) => Choice;
+
+// Warning: (ae-forgotten-export) The symbol "CompletionsLogProbabilityModelOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCompletionsLogProbabilityModel: (input: CompletionsLogProbabilityModelOutput | null | undefined) => CompletionsLogProbabilityModel;
+
+// Warning: (ae-forgotten-export) The symbol "CompletionsUsageOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCompletionsUsage: (input: CompletionsUsageOutput | null | undefined) => CompletionsUsage;
+
+// Warning: (ae-forgotten-export) The symbol "ContentFilterBlocklistIdResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContentFilterBlocklistIdResult: (input: ContentFilterBlocklistIdResultOutput | null | undefined) => ContentFilterBlocklistIdResult;
+
+// Warning: (ae-forgotten-export) The symbol "ContentFilterCitedDetectionResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContentFilterCitedDetectionResult: (input: ContentFilterCitedDetectionResultOutput | null | undefined) => ContentFilterCitedDetectionResult;
+
+// Warning: (ae-forgotten-export) The symbol "ContentFilterDetectionResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContentFilterDetectionResult: (input: ContentFilterDetectionResultOutput | null | undefined) => ContentFilterDetectionResult;
+
+// Warning: (ae-forgotten-export) The symbol "ContentFilterResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContentFilterResult: (input: ContentFilterResultOutput | null | undefined) => ContentFilterResult;
+
+// Warning: (ae-forgotten-export) The symbol "ContentFilterResultDetailsForPromptOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContentFilterResultDetailsForPrompt: (input: ContentFilterResultDetailsForPromptOutput | null | undefined) => ContentFilterResultDetailsForPrompt;
+
+// Warning: (ae-forgotten-export) The symbol "ContentFilterResultsForChoiceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContentFilterResultsForChoice: (input: ContentFilterResultsForChoiceOutput | null | undefined) => ContentFilterResultsForChoice;
+
+// Warning: (ae-forgotten-export) The symbol "ContentFilterResultsForPromptOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContentFilterResultsForPrompt: (input: ContentFilterResultsForPromptOutput | null | undefined) => ContentFilterResultsForPrompt;
+
+// Warning: (ae-forgotten-export) The symbol "EmbeddingItemOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeEmbeddingItem: (input: EmbeddingItemOutput | null | undefined) => EmbeddingItem;
+
+// Warning: (ae-forgotten-export) The symbol "EmbeddingsUsageOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeEmbeddingsUsage: (input: EmbeddingsUsageOutput | null | undefined) => EmbeddingsUsage;
+
+// Warning: (ae-forgotten-export) The symbol "FunctionCallOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFunctionCall: (input: FunctionCallOutput | null | undefined) => FunctionCall;
+
+// Warning: (ae-forgotten-export) The symbol "ImageGenerationDataOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeImageGenerationData: (input: ImageGenerationDataOutput | null | undefined) => ImageGenerationData;
+
+// Warning: (ae-forgotten-export) The symbol "MaxTokensFinishDetailsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMaxTokensFinishDetails: (input: MaxTokensFinishDetailsOutput | null | undefined) => MaxTokensFinishDetails;
+
+// Warning: (ae-forgotten-export) The symbol "StopFinishDetailsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeStopFinishDetails: (input: StopFinishDetailsOutput | null | undefined) => StopFinishDetails;
+
 // @public
 export interface ElasticsearchChatExtensionConfiguration extends AzureChatExtensionConfiguration {
     parameters: ElasticsearchChatExtensionParameters;

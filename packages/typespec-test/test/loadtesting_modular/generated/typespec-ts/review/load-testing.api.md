@@ -8,6 +8,7 @@ import { AbortSignalLike } from '@azure/abort-controller';
 import { ClientOptions } from '@azure-rest/core-client';
 import { OperationOptions } from '@azure-rest/core-client';
 import { OperationState } from '@azure/core-lro';
+import { Paged } from '@azure/core-paging';
 import { PathUncheckedResponse } from '@azure-rest/core-client';
 import { Pipeline } from '@azure/core-rest-pipeline';
 import { PollerLike } from '@azure/core-lro';
@@ -97,6 +98,181 @@ export interface DeleteTestOptionalParams extends OperationOptions {
 // @public (undocumented)
 export interface DeleteTestRunOptionalParams extends OperationOptions {
 }
+
+// Warning: (ae-forgotten-export) The symbol "AppComponentOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAppComponent: (input: AppComponentOutput | null | undefined) => AppComponent;
+
+// Warning: (ae-forgotten-export) The symbol "CertificateMetadataOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCertificateMetadata: (input: CertificateMetadataOutput | null | undefined) => CertificateMetadata;
+
+// Warning: (ae-forgotten-export) The symbol "DimensionValueOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDimensionValue: (input: DimensionValueOutput | null | undefined) => DimensionValue;
+
+// Warning: (ae-forgotten-export) The symbol "DimensionValueListOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDimensionValueList: (input: DimensionValueListOutput | null | undefined) => DimensionValueList;
+
+// Warning: (ae-forgotten-export) The symbol "ErrorDetailsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeErrorDetails: (input: ErrorDetailsOutput | null | undefined) => ErrorDetails;
+
+// Warning: (ae-forgotten-export) The symbol "FileInfoOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFileInfo: (input: FileInfoOutput | null | undefined) => FileInfo;
+
+// Warning: (ae-forgotten-export) The symbol "LoadTestConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeLoadTestConfiguration: (input: LoadTestConfigurationOutput | null | undefined) => LoadTestConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "MetricAvailabilityOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMetricAvailability: (input: MetricAvailabilityOutput | null | undefined) => MetricAvailability;
+
+// Warning: (ae-forgotten-export) The symbol "MetricDefinitionOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMetricDefinition: (input: MetricDefinitionOutput | null | undefined) => MetricDefinition;
+
+// Warning: (ae-forgotten-export) The symbol "MetricDefinitionCollectionOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMetricDefinitionCollection: (input: MetricDefinitionCollectionOutput | null | undefined) => MetricDefinitionCollection;
+
+// Warning: (ae-forgotten-export) The symbol "MetricNamespaceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMetricNamespace: (input: MetricNamespaceOutput | null | undefined) => MetricNamespace;
+
+// Warning: (ae-forgotten-export) The symbol "MetricNamespaceCollectionOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMetricNamespaceCollection: (input: MetricNamespaceCollectionOutput | null | undefined) => MetricNamespaceCollection;
+
+// Warning: (ae-forgotten-export) The symbol "MetricValueOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMetricValue: (input: MetricValueOutput | null | undefined) => MetricValue;
+
+// Warning: (ae-forgotten-export) The symbol "NameAndDescOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNameAndDesc: (input: NameAndDescOutput | null | undefined) => NameAndDesc;
+
+// Warning: (ae-forgotten-export) The symbol "OptionalLoadTestConfigOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOptionalLoadTestConfig: (input: OptionalLoadTestConfigOutput | null | undefined) => OptionalLoadTestConfig;
+
+// Warning: (ae-forgotten-export) The symbol "PagedFileInfoOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePagedFileInfo: (input: PagedFileInfoOutput | null | undefined) => PagedFileInfo;
+
+// Warning: (ae-forgotten-export) The symbol "PagedTestOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePagedTest: (input: PagedTestOutput | null | undefined) => PagedTest;
+
+// Warning: (ae-forgotten-export) The symbol "PagedTestRunOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePagedTestRun: (input: PagedTestRunOutput | null | undefined) => PagedTestRun;
+
+// Warning: (ae-forgotten-export) The symbol "PagedTimeSeriesElementOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePagedTimeSeriesElement: (input: PagedTimeSeriesElementOutput | null | undefined) => PagedTimeSeriesElement;
+
+// Warning: (ae-forgotten-export) The symbol "PassFailCriteriaOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePassFailCriteria: (input: PassFailCriteriaOutput | null | undefined) => PassFailCriteria;
+
+// Warning: (ae-forgotten-export) The symbol "PassFailMetricOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePassFailMetric: (input: PassFailMetricOutput | null | undefined) => PassFailMetric;
+
+// Warning: (ae-forgotten-export) The symbol "ResourceMetricOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeResourceMetric: (input: ResourceMetricOutput | null | undefined) => ResourceMetric;
+
+// Warning: (ae-forgotten-export) The symbol "SecretOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeSecret: (input: SecretOutput | null | undefined) => Secret;
+
+// Warning: (ae-forgotten-export) The symbol "TestOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTest: (input: TestOutput | null | undefined) => Test;
+
+// Warning: (ae-forgotten-export) The symbol "TestAppComponentsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestAppComponents: (input: TestAppComponentsOutput | null | undefined) => TestAppComponents;
+
+// Warning: (ae-forgotten-export) The symbol "TestInputArtifactsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestInputArtifacts: (input: TestInputArtifactsOutput | null | undefined) => TestInputArtifacts;
+
+// Warning: (ae-forgotten-export) The symbol "TestRunOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestRun: (input: TestRunOutput | null | undefined) => TestRun;
+
+// Warning: (ae-forgotten-export) The symbol "TestRunAppComponentsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestRunAppComponents: (input: TestRunAppComponentsOutput | null | undefined) => TestRunAppComponents;
+
+// Warning: (ae-forgotten-export) The symbol "TestRunArtifactsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestRunArtifacts: (input: TestRunArtifactsOutput | null | undefined) => TestRunArtifacts;
+
+// Warning: (ae-forgotten-export) The symbol "TestRunInputArtifactsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestRunInputArtifacts: (input: TestRunInputArtifactsOutput | null | undefined) => TestRunInputArtifacts;
+
+// Warning: (ae-forgotten-export) The symbol "TestRunOutputArtifactsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestRunOutputArtifacts: (input: TestRunOutputArtifactsOutput | null | undefined) => TestRunOutputArtifacts;
+
+// Warning: (ae-forgotten-export) The symbol "TestRunServerMetricConfigOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestRunServerMetricConfig: (input: TestRunServerMetricConfigOutput | null | undefined) => TestRunServerMetricConfig;
+
+// Warning: (ae-forgotten-export) The symbol "TestRunStatisticsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestRunStatistics: (input: TestRunStatisticsOutput | null | undefined) => TestRunStatistics;
+
+// Warning: (ae-forgotten-export) The symbol "TestServerMetricConfigOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTestServerMetricConfig: (input: TestServerMetricConfigOutput | null | undefined) => TestServerMetricConfig;
+
+// Warning: (ae-forgotten-export) The symbol "TimeSeriesElementOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTimeSeriesElement: (input: TimeSeriesElementOutput | null | undefined) => TimeSeriesElement;
 
 // @public
 export interface DimensionFilter {
@@ -287,6 +463,36 @@ export interface PagedAsyncIterableIterator<TElement, TPage = TElement[], TPageS
     [Symbol.asyncIterator](): PagedAsyncIterableIterator<TElement, TPage, TPageSettings>;
     byPage: (settings?: TPageSettings) => AsyncIterableIterator<ContinuablePage<TElement, TPage>>;
     next(): Promise<IteratorResult<TElement>>;
+}
+
+// @public
+export interface PagedDimensionValueList {
+    nextLink?: string;
+    value: DimensionValueList[];
+}
+
+// @public
+export interface PagedFileInfo {
+    nextLink?: string;
+    value: FileInfo[];
+}
+
+// @public
+export interface PagedTest {
+    nextLink?: string;
+    value: Test[];
+}
+
+// @public
+export interface PagedTestRun {
+    nextLink?: string;
+    value: TestRun[];
+}
+
+// @public
+export interface PagedTimeSeriesElement {
+    nextLink?: string;
+    value: TimeSeriesElement[];
 }
 
 // @public
@@ -521,6 +727,111 @@ export interface TestRunOperationsClientCreateOrUpdateServerMetricsConfigOptiona
     contentType?: string;
 }
 
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeAppComponent: (input: AppComponentOutput | null | undefined) => TestRunOperationsClientAppComponent;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeCertificateMetadata: (input: CertificateMetadataOutput | null | undefined) => TestRunOperationsClientCertificateMetadata;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeDimensionValue: (input: DimensionValueOutput | null | undefined) => TestRunOperationsClientDimensionValue;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeDimensionValueList: (input: DimensionValueListOutput | null | undefined) => TestRunOperationsClientDimensionValueList;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeErrorDetails: (input: ErrorDetailsOutput | null | undefined) => TestRunOperationsClientErrorDetails;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeFileInfo: (input: FileInfoOutput | null | undefined) => TestRunOperationsClientFileInfo;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeLoadTestConfiguration: (input: LoadTestConfigurationOutput | null | undefined) => TestRunOperationsClientLoadTestConfiguration;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeMetricAvailability: (input: MetricAvailabilityOutput | null | undefined) => TestRunOperationsClientMetricAvailability;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeMetricDefinition: (input: MetricDefinitionOutput | null | undefined) => TestRunOperationsClientMetricDefinition;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeMetricDefinitionCollection: (input: MetricDefinitionCollectionOutput | null | undefined) => TestRunOperationsClientMetricDefinitionCollection;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeMetricNamespace: (input: MetricNamespaceOutput | null | undefined) => TestRunOperationsClientMetricNamespace;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeMetricNamespaceCollection: (input: MetricNamespaceCollectionOutput | null | undefined) => TestRunOperationsClientMetricNamespaceCollection;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeMetricValue: (input: MetricValueOutput | null | undefined) => TestRunOperationsClientMetricValue;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeNameAndDesc: (input: NameAndDescOutput | null | undefined) => TestRunOperationsClientNameAndDesc;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeOptionalLoadTestConfig: (input: OptionalLoadTestConfigOutput | null | undefined) => TestRunOperationsClientOptionalLoadTestConfig;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializePagedFileInfo: (input: PagedFileInfoOutput | null | undefined) => TestRunOperationsClientPagedFileInfo;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializePagedTest: (input: PagedTestOutput | null | undefined) => TestRunOperationsClientPagedTest;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializePagedTestRun: (input: PagedTestRunOutput | null | undefined) => TestRunOperationsClientPagedTestRun;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializePagedTimeSeriesElement: (input: PagedTimeSeriesElementOutput | null | undefined) => TestRunOperationsClientPagedTimeSeriesElement;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializePassFailCriteria: (input: PassFailCriteriaOutput | null | undefined) => TestRunOperationsClientPassFailCriteria;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializePassFailMetric: (input: PassFailMetricOutput | null | undefined) => TestRunOperationsClientPassFailMetric;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeResourceMetric: (input: ResourceMetricOutput | null | undefined) => TestRunOperationsClientResourceMetric;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeSecret: (input: SecretOutput | null | undefined) => TestRunOperationsClientSecret;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTest: (input: TestOutput | null | undefined) => TestRunOperationsClientTest;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestAppComponents: (input: TestAppComponentsOutput | null | undefined) => TestRunOperationsClientTestAppComponents;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestInputArtifacts: (input: TestInputArtifactsOutput | null | undefined) => TestRunOperationsClientTestInputArtifacts;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestRun: (input: TestRunOutput | null | undefined) => TestRunOperationsClientTestRun;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestRunAppComponents: (input: TestRunAppComponentsOutput | null | undefined) => TestRunOperationsClientTestRunAppComponents;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestRunArtifacts: (input: TestRunArtifactsOutput | null | undefined) => TestRunOperationsClientTestRunArtifacts;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestRunInputArtifacts: (input: TestRunInputArtifactsOutput | null | undefined) => TestRunOperationsClientTestRunInputArtifacts;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestRunOutputArtifacts: (input: TestRunOutputArtifactsOutput | null | undefined) => TestRunOperationsClientTestRunOutputArtifacts;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestRunServerMetricConfig: (input: TestRunServerMetricConfigOutput | null | undefined) => TestRunOperationsClientTestRunServerMetricConfig;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestRunStatistics: (input: TestRunStatisticsOutput | null | undefined) => TestRunOperationsClientTestRunStatistics;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTestServerMetricConfig: (input: TestServerMetricConfigOutput | null | undefined) => TestRunOperationsClientTestServerMetricConfig;
+
+// @public (undocumented)
+export const TestRunOperationsClientdeserializeTimeSeriesElement: (input: TimeSeriesElementOutput | null | undefined) => TestRunOperationsClientTimeSeriesElement;
+
 // @public
 export interface TestRunOperationsClientDimensionFilter {
     name?: string;
@@ -650,6 +961,36 @@ export interface TestRunOperationsClientPagedAsyncIterableIterator<TElement, TPa
     [Symbol.asyncIterator](): TestRunOperationsClientPagedAsyncIterableIterator<TElement, TPage, TPageSettings>;
     byPage: (settings?: TPageSettings) => AsyncIterableIterator<TestRunOperationsClientContinuablePage<TElement, TPage>>;
     next(): Promise<IteratorResult<TElement>>;
+}
+
+// @public
+export interface TestRunOperationsClientPagedDimensionValueList {
+    nextLink?: string;
+    value: TestRunOperationsClientDimensionValueList[];
+}
+
+// @public
+export interface TestRunOperationsClientPagedFileInfo {
+    nextLink?: string;
+    value: TestRunOperationsClientFileInfo[];
+}
+
+// @public
+export interface TestRunOperationsClientPagedTest {
+    nextLink?: string;
+    value: TestRunOperationsClientTest[];
+}
+
+// @public
+export interface TestRunOperationsClientPagedTestRun {
+    nextLink?: string;
+    value: TestRunOperationsClientTestRun[];
+}
+
+// @public
+export interface TestRunOperationsClientPagedTimeSeriesElement {
+    nextLink?: string;
+    value: TestRunOperationsClientTimeSeriesElement[];
 }
 
 // @public

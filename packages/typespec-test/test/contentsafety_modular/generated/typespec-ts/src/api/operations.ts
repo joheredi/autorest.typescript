@@ -13,8 +13,8 @@ import {
   AnalyzeImageResult,
   AnalyzeTextOptions,
   AnalyzeTextResult,
-  _PagedTextBlockItem,
-  _PagedTextBlocklist,
+  PagedTextBlockItem,
+  PagedTextBlocklist,
 } from "../models/models.js";
 import { PagedAsyncIterableIterator } from "../models/pagingTypes.js";
 import { buildPagedAsyncIterator } from "./pagingHelpers.js";
@@ -294,7 +294,7 @@ export function _listTextBlocklistsSend(
 
 export async function _listTextBlocklistsDeserialize(
   result: ListTextBlocklists200Response | ListTextBlocklistsDefaultResponse,
-): Promise<_PagedTextBlocklist> {
+): Promise<PagedTextBlocklist> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -489,7 +489,7 @@ export async function _listTextBlocklistItemsDeserialize(
   result:
     | ListTextBlocklistItems200Response
     | ListTextBlocklistItemsDefaultResponse,
-): Promise<_PagedTextBlockItem> {
+): Promise<PagedTextBlockItem> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }

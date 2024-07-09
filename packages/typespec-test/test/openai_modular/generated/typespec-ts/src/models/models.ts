@@ -1,7 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { serializeRecord } from "../helpers/serializerHelpers.js";
+import {
+  deserializeRecord,
+  serializeRecord,
+  passthroughDeserializer,
+  deserializeNumericDuration,
+  withNullChecks,
+  deserializeArray,
+} from "../helpers/serializerHelpers.js";
 import { uint8ArrayToString } from "@azure/core-util";
 import {
   AudioTranscriptionOptions as AudioTranscriptionOptionsRest,
@@ -64,6 +71,39 @@ import {
   ImageGenerationOptions as ImageGenerationOptionsRest,
   AudioSpeechOptions as AudioSpeechOptionsRest,
   EmbeddingsOptions as EmbeddingsOptionsRest,
+  AudioTranscriptionSegmentOutput,
+  AudioTranslationSegmentOutput,
+  AzureChatEnhancementsOutput,
+  AzureChatExtensionDataSourceResponseCitationOutput,
+  AzureChatExtensionsMessageContextOutput,
+  AzureGroundingEnhancementCoordinatePointOutput,
+  AzureGroundingEnhancementLineOutput,
+  AzureGroundingEnhancementLineSpanOutput,
+  AzureGroundingEnhancementOutput,
+  ChatChoiceLogProbabilityInfoOutput,
+  ChatChoiceOutput,
+  ChatCompletionsFunctionToolCallOutput,
+  ChatCompletionsToolCallOutput,
+  ChatFinishDetailsOutput,
+  ChatResponseMessageOutput,
+  ChatTokenLogProbabilityInfoOutput,
+  ChatTokenLogProbabilityResultOutput,
+  ChoiceOutput,
+  CompletionsLogProbabilityModelOutput,
+  CompletionsUsageOutput,
+  ContentFilterBlocklistIdResultOutput,
+  ContentFilterCitedDetectionResultOutput,
+  ContentFilterDetectionResultOutput,
+  ContentFilterResultDetailsForPromptOutput,
+  ContentFilterResultOutput,
+  ContentFilterResultsForChoiceOutput,
+  ContentFilterResultsForPromptOutput,
+  EmbeddingItemOutput,
+  EmbeddingsUsageOutput,
+  FunctionCallOutput,
+  ImageGenerationDataOutput,
+  MaxTokensFinishDetailsOutput,
+  StopFinishDetailsOutput,
 } from "../rest/index.js";
 import { ErrorModel } from "@azure-rest/core-client";
 
@@ -2691,6 +2731,575 @@ export type ServiceApiVersions =
   | "2023-06-01-preview"
   | "2023-07-01-preview"
   | "2024-02-15-preview";
+
+function _deserializeAudioTranscriptionSegment(
+  input: AudioTranscriptionSegmentOutput,
+): AudioTranscriptionSegment {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    start: deserializeNumericDuration(input["start"]) as any,
+    end: deserializeNumericDuration(input["end"]) as any,
+    text: passthroughDeserializer(input["text"]) as any,
+    temperature: passthroughDeserializer(input["temperature"]) as any,
+    avgLogprob: passthroughDeserializer(input["avg_logprob"]) as any,
+    compressionRatio: passthroughDeserializer(
+      input["compression_ratio"],
+    ) as any,
+    noSpeechProb: passthroughDeserializer(input["no_speech_prob"]) as any,
+    tokens: deserializeArray(input["tokens"], passthroughDeserializer) as any,
+    seek: passthroughDeserializer(input["seek"]) as any,
+  } as any;
+}
+
+export const deserializeAudioTranscriptionSegment = withNullChecks(
+  _deserializeAudioTranscriptionSegment,
+);
+
+function _deserializeAudioTranslationSegment(
+  input: AudioTranslationSegmentOutput,
+): AudioTranslationSegment {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    start: deserializeNumericDuration(input["start"]) as any,
+    end: deserializeNumericDuration(input["end"]) as any,
+    text: passthroughDeserializer(input["text"]) as any,
+    temperature: passthroughDeserializer(input["temperature"]) as any,
+    avgLogprob: passthroughDeserializer(input["avg_logprob"]) as any,
+    compressionRatio: passthroughDeserializer(
+      input["compression_ratio"],
+    ) as any,
+    noSpeechProb: passthroughDeserializer(input["no_speech_prob"]) as any,
+    tokens: deserializeArray(input["tokens"], passthroughDeserializer) as any,
+    seek: passthroughDeserializer(input["seek"]) as any,
+  } as any;
+}
+
+export const deserializeAudioTranslationSegment = withNullChecks(
+  _deserializeAudioTranslationSegment,
+);
+
+function _deserializeContentFilterResultsForPrompt(
+  input: ContentFilterResultsForPromptOutput,
+): ContentFilterResultsForPrompt {
+  return {
+    promptIndex: passthroughDeserializer(input["prompt_index"]) as any,
+    contentFilterResults: deserializeContentFilterResultDetailsForPrompt(
+      input["content_filter_results"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeContentFilterResultsForPrompt = withNullChecks(
+  _deserializeContentFilterResultsForPrompt,
+);
+
+function _deserializeContentFilterResultDetailsForPrompt(
+  input: ContentFilterResultDetailsForPromptOutput,
+): ContentFilterResultDetailsForPrompt {
+  return {
+    sexual: deserializeContentFilterResult(input["sexual"]) as any,
+    violence: deserializeContentFilterResult(input["violence"]) as any,
+    hate: deserializeContentFilterResult(input["hate"]) as any,
+    selfHarm: deserializeContentFilterResult(input["self_harm"]) as any,
+    profanity: deserializeContentFilterDetectionResult(
+      input["profanity"],
+    ) as any,
+    customBlocklists: deserializeArray(
+      input["custom_blocklists"],
+      deserializeContentFilterBlocklistIdResult,
+    ) as any,
+    error: passthroughDeserializer(input["error"]) as any,
+    jailbreak: deserializeContentFilterDetectionResult(
+      input["jailbreak"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeContentFilterResultDetailsForPrompt = withNullChecks(
+  _deserializeContentFilterResultDetailsForPrompt,
+);
+
+function _deserializeContentFilterResult(
+  input: ContentFilterResultOutput,
+): ContentFilterResult {
+  return {
+    severity: passthroughDeserializer(input["severity"]) as any,
+    filtered: passthroughDeserializer(input["filtered"]) as any,
+  } as any;
+}
+
+export const deserializeContentFilterResult = withNullChecks(
+  _deserializeContentFilterResult,
+);
+
+function _deserializeContentFilterDetectionResult(
+  input: ContentFilterDetectionResultOutput,
+): ContentFilterDetectionResult {
+  return {
+    filtered: passthroughDeserializer(input["filtered"]) as any,
+    detected: passthroughDeserializer(input["detected"]) as any,
+  } as any;
+}
+
+export const deserializeContentFilterDetectionResult = withNullChecks(
+  _deserializeContentFilterDetectionResult,
+);
+
+function _deserializeContentFilterBlocklistIdResult(
+  input: ContentFilterBlocklistIdResultOutput,
+): ContentFilterBlocklistIdResult {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    filtered: passthroughDeserializer(input["filtered"]) as any,
+  } as any;
+}
+
+export const deserializeContentFilterBlocklistIdResult = withNullChecks(
+  _deserializeContentFilterBlocklistIdResult,
+);
+
+function _deserializeChoice(input: ChoiceOutput): Choice {
+  return {
+    text: passthroughDeserializer(input["text"]) as any,
+    index: passthroughDeserializer(input["index"]) as any,
+    contentFilterResults: deserializeContentFilterResultsForChoice(
+      input["content_filter_results"],
+    ) as any,
+    logprobs: deserializeCompletionsLogProbabilityModel(
+      input["logprobs"],
+    ) as any,
+    finishReason: passthroughDeserializer(input["finish_reason"]) as any,
+  } as any;
+}
+
+export const deserializeChoice = withNullChecks(_deserializeChoice);
+
+function _deserializeContentFilterResultsForChoice(
+  input: ContentFilterResultsForChoiceOutput,
+): ContentFilterResultsForChoice {
+  return {
+    sexual: deserializeContentFilterResult(input["sexual"]) as any,
+    violence: deserializeContentFilterResult(input["violence"]) as any,
+    hate: deserializeContentFilterResult(input["hate"]) as any,
+    selfHarm: deserializeContentFilterResult(input["self_harm"]) as any,
+    profanity: deserializeContentFilterDetectionResult(
+      input["profanity"],
+    ) as any,
+    customBlocklists: deserializeArray(
+      input["custom_blocklists"],
+      deserializeContentFilterBlocklistIdResult,
+    ) as any,
+    error: passthroughDeserializer(input["error"]) as any,
+    protectedMaterialText: deserializeContentFilterDetectionResult(
+      input["protected_material_text"],
+    ) as any,
+    protectedMaterialCode: deserializeContentFilterCitedDetectionResult(
+      input["protected_material_code"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeContentFilterResultsForChoice = withNullChecks(
+  _deserializeContentFilterResultsForChoice,
+);
+
+function _deserializeContentFilterCitedDetectionResult(
+  input: ContentFilterCitedDetectionResultOutput,
+): ContentFilterCitedDetectionResult {
+  return {
+    filtered: passthroughDeserializer(input["filtered"]) as any,
+    detected: passthroughDeserializer(input["detected"]) as any,
+    url: passthroughDeserializer(input["URL"]) as any,
+    license: passthroughDeserializer(input["license"]) as any,
+  } as any;
+}
+
+export const deserializeContentFilterCitedDetectionResult = withNullChecks(
+  _deserializeContentFilterCitedDetectionResult,
+);
+
+function _deserializeCompletionsLogProbabilityModel(
+  input: CompletionsLogProbabilityModelOutput,
+): CompletionsLogProbabilityModel {
+  return {
+    tokens: deserializeArray(input["tokens"], passthroughDeserializer) as any,
+    tokenLogprobs: deserializeArray(
+      input["token_logprobs"],
+      passthroughDeserializer,
+    ) as any,
+    topLogprobs: deserializeArray(input["top_logprobs"], (i: any) =>
+      deserializeRecord(i, passthroughDeserializer),
+    ) as any,
+    textOffset: deserializeArray(
+      input["text_offset"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeCompletionsLogProbabilityModel = withNullChecks(
+  _deserializeCompletionsLogProbabilityModel,
+);
+
+function _deserializeCompletionsUsage(
+  input: CompletionsUsageOutput,
+): CompletionsUsage {
+  return {
+    completionTokens: passthroughDeserializer(
+      input["completion_tokens"],
+    ) as any,
+    promptTokens: passthroughDeserializer(input["prompt_tokens"]) as any,
+    totalTokens: passthroughDeserializer(input["total_tokens"]) as any,
+  } as any;
+}
+
+export const deserializeCompletionsUsage = withNullChecks(
+  _deserializeCompletionsUsage,
+);
+
+function _deserializeChatCompletionsToolCall(
+  input: ChatCompletionsToolCallOutput,
+): ChatCompletionsToolCall {
+  return {
+    type: passthroughDeserializer(input["type"]) as any,
+    id: passthroughDeserializer(input["id"]) as any,
+  } as any;
+}
+
+export const deserializeChatCompletionsToolCall = withNullChecks(
+  _deserializeChatCompletionsToolCall,
+);
+
+function _deserializeChatCompletionsToolCallUnion(
+  input: ChatCompletionsToolCallOutput,
+): ChatCompletionsToolCall {
+  switch (input["type"]) {
+    case "function":
+      return deserializeChatCompletionsFunctionToolCall(
+        input as ChatCompletionsFunctionToolCall,
+      );
+    default:
+      return deserializeChatCompletionsToolCall(input);
+  }
+}
+
+export const deserializeChatCompletionsToolCallUnion = withNullChecks(
+  _deserializeChatCompletionsToolCallUnion,
+);
+
+function _deserializeChatCompletionsFunctionToolCall(
+  input: ChatCompletionsFunctionToolCallOutput,
+): ChatCompletionsFunctionToolCall {
+  return {
+    ...deserializeChatCompletionsToolCall(input),
+    type: passthroughDeserializer(input["type"]) as any,
+    function: deserializeFunctionCall(input["function"]) as any,
+  } as any;
+}
+
+export const deserializeChatCompletionsFunctionToolCall = withNullChecks(
+  _deserializeChatCompletionsFunctionToolCall,
+);
+
+function _deserializeFunctionCall(input: FunctionCallOutput): FunctionCall {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    arguments: passthroughDeserializer(input["arguments"]) as any,
+  } as any;
+}
+
+export const deserializeFunctionCall = withNullChecks(_deserializeFunctionCall);
+
+function _deserializeChatChoice(input: ChatChoiceOutput): ChatChoice {
+  return {
+    message: deserializeChatResponseMessage(input["message"]) as any,
+    logprobs: deserializeChatChoiceLogProbabilityInfo(input["logprobs"]) as any,
+    index: passthroughDeserializer(input["index"]) as any,
+    finishReason: passthroughDeserializer(input["finish_reason"]) as any,
+    finishDetails: deserializeChatFinishDetailsUnion(
+      input["finish_details"],
+    ) as any,
+    delta: deserializeChatResponseMessage(input["delta"]) as any,
+    contentFilterResults: deserializeContentFilterResultsForChoice(
+      input["content_filter_results"],
+    ) as any,
+    enhancements: deserializeAzureChatEnhancements(
+      input["enhancements"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeChatChoice = withNullChecks(_deserializeChatChoice);
+
+function _deserializeChatResponseMessage(
+  input: ChatResponseMessageOutput,
+): ChatResponseMessage {
+  return {
+    role: passthroughDeserializer(input["role"]) as any,
+    content: passthroughDeserializer(input["content"]) as any,
+    toolCalls: deserializeArray(
+      input["tool_calls"],
+      deserializeChatCompletionsToolCallUnion,
+    ) as any,
+    functionCall: deserializeFunctionCall(input["function_call"]) as any,
+    context: deserializeAzureChatExtensionsMessageContext(
+      input["context"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeChatResponseMessage = withNullChecks(
+  _deserializeChatResponseMessage,
+);
+
+function _deserializeAzureChatExtensionsMessageContext(
+  input: AzureChatExtensionsMessageContextOutput,
+): AzureChatExtensionsMessageContext {
+  return {
+    citations: deserializeArray(
+      input["citations"],
+      deserializeAzureChatExtensionDataSourceResponseCitation,
+    ) as any,
+    intent: passthroughDeserializer(input["intent"]) as any,
+  } as any;
+}
+
+export const deserializeAzureChatExtensionsMessageContext = withNullChecks(
+  _deserializeAzureChatExtensionsMessageContext,
+);
+
+function _deserializeAzureChatExtensionDataSourceResponseCitation(
+  input: AzureChatExtensionDataSourceResponseCitationOutput,
+): AzureChatExtensionDataSourceResponseCitation {
+  return {
+    content: passthroughDeserializer(input["content"]) as any,
+    title: passthroughDeserializer(input["title"]) as any,
+    url: passthroughDeserializer(input["url"]) as any,
+    filepath: passthroughDeserializer(input["filepath"]) as any,
+    chunkId: passthroughDeserializer(input["chunk_id"]) as any,
+  } as any;
+}
+
+export const deserializeAzureChatExtensionDataSourceResponseCitation =
+  withNullChecks(_deserializeAzureChatExtensionDataSourceResponseCitation);
+
+function _deserializeChatChoiceLogProbabilityInfo(
+  input: ChatChoiceLogProbabilityInfoOutput,
+): ChatChoiceLogProbabilityInfo {
+  return {
+    content: deserializeArray(
+      input["content"],
+      deserializeChatTokenLogProbabilityResult,
+    ) as any,
+  } as any;
+}
+
+export const deserializeChatChoiceLogProbabilityInfo = withNullChecks(
+  _deserializeChatChoiceLogProbabilityInfo,
+);
+
+function _deserializeChatTokenLogProbabilityResult(
+  input: ChatTokenLogProbabilityResultOutput,
+): ChatTokenLogProbabilityResult {
+  return {
+    token: passthroughDeserializer(input["token"]) as any,
+    logprob: passthroughDeserializer(input["logprob"]) as any,
+    bytes: deserializeArray(input["bytes"], passthroughDeserializer) as any,
+    topLogprobs: deserializeArray(
+      input["top_logprobs"],
+      deserializeChatTokenLogProbabilityInfo,
+    ) as any,
+  } as any;
+}
+
+export const deserializeChatTokenLogProbabilityResult = withNullChecks(
+  _deserializeChatTokenLogProbabilityResult,
+);
+
+function _deserializeChatTokenLogProbabilityInfo(
+  input: ChatTokenLogProbabilityInfoOutput,
+): ChatTokenLogProbabilityInfo {
+  return {
+    token: passthroughDeserializer(input["token"]) as any,
+    logprob: passthroughDeserializer(input["logprob"]) as any,
+    bytes: deserializeArray(input["bytes"], passthroughDeserializer) as any,
+  } as any;
+}
+
+export const deserializeChatTokenLogProbabilityInfo = withNullChecks(
+  _deserializeChatTokenLogProbabilityInfo,
+);
+
+function _deserializeChatFinishDetails(
+  input: ChatFinishDetailsOutput,
+): ChatFinishDetails {
+  return {
+    type: passthroughDeserializer(input["type"]) as any,
+  } as any;
+}
+
+export const deserializeChatFinishDetails = withNullChecks(
+  _deserializeChatFinishDetails,
+);
+
+function _deserializeChatFinishDetailsUnion(
+  input: ChatFinishDetailsOutput,
+): ChatFinishDetails {
+  switch (input["type"]) {
+    case "stop":
+      return deserializeStopFinishDetails(input as StopFinishDetails);
+    case "max_tokens":
+      return deserializeMaxTokensFinishDetails(input as MaxTokensFinishDetails);
+    default:
+      return deserializeChatFinishDetails(input);
+  }
+}
+
+export const deserializeChatFinishDetailsUnion = withNullChecks(
+  _deserializeChatFinishDetailsUnion,
+);
+
+function _deserializeStopFinishDetails(
+  input: StopFinishDetailsOutput,
+): StopFinishDetails {
+  return {
+    ...deserializeChatFinishDetails(input),
+    type: passthroughDeserializer(input["type"]) as any,
+    stop: passthroughDeserializer(input["stop"]) as any,
+  } as any;
+}
+
+export const deserializeStopFinishDetails = withNullChecks(
+  _deserializeStopFinishDetails,
+);
+
+function _deserializeMaxTokensFinishDetails(
+  input: MaxTokensFinishDetailsOutput,
+): MaxTokensFinishDetails {
+  return {
+    ...deserializeChatFinishDetails(input),
+    type: passthroughDeserializer(input["type"]) as any,
+  } as any;
+}
+
+export const deserializeMaxTokensFinishDetails = withNullChecks(
+  _deserializeMaxTokensFinishDetails,
+);
+
+function _deserializeAzureChatEnhancements(
+  input: AzureChatEnhancementsOutput,
+): AzureChatEnhancements {
+  return {
+    grounding: deserializeAzureGroundingEnhancement(input["grounding"]) as any,
+  } as any;
+}
+
+export const deserializeAzureChatEnhancements = withNullChecks(
+  _deserializeAzureChatEnhancements,
+);
+
+function _deserializeAzureGroundingEnhancement(
+  input: AzureGroundingEnhancementOutput,
+): AzureGroundingEnhancement {
+  return {
+    lines: deserializeArray(
+      input["lines"],
+      deserializeAzureGroundingEnhancementLine,
+    ) as any,
+  } as any;
+}
+
+export const deserializeAzureGroundingEnhancement = withNullChecks(
+  _deserializeAzureGroundingEnhancement,
+);
+
+function _deserializeAzureGroundingEnhancementLine(
+  input: AzureGroundingEnhancementLineOutput,
+): AzureGroundingEnhancementLine {
+  return {
+    text: passthroughDeserializer(input["text"]) as any,
+    spans: deserializeArray(
+      input["spans"],
+      deserializeAzureGroundingEnhancementLineSpan,
+    ) as any,
+  } as any;
+}
+
+export const deserializeAzureGroundingEnhancementLine = withNullChecks(
+  _deserializeAzureGroundingEnhancementLine,
+);
+
+function _deserializeAzureGroundingEnhancementLineSpan(
+  input: AzureGroundingEnhancementLineSpanOutput,
+): AzureGroundingEnhancementLineSpan {
+  return {
+    text: passthroughDeserializer(input["text"]) as any,
+    offset: passthroughDeserializer(input["offset"]) as any,
+    length: passthroughDeserializer(input["length"]) as any,
+    polygon: deserializeArray(
+      input["polygon"],
+      deserializeAzureGroundingEnhancementCoordinatePoint,
+    ) as any,
+  } as any;
+}
+
+export const deserializeAzureGroundingEnhancementLineSpan = withNullChecks(
+  _deserializeAzureGroundingEnhancementLineSpan,
+);
+
+function _deserializeAzureGroundingEnhancementCoordinatePoint(
+  input: AzureGroundingEnhancementCoordinatePointOutput,
+): AzureGroundingEnhancementCoordinatePoint {
+  return {
+    x: passthroughDeserializer(input["x"]) as any,
+    y: passthroughDeserializer(input["y"]) as any,
+  } as any;
+}
+
+export const deserializeAzureGroundingEnhancementCoordinatePoint =
+  withNullChecks(_deserializeAzureGroundingEnhancementCoordinatePoint);
+
+function _deserializeImageGenerationData(
+  input: ImageGenerationDataOutput,
+): ImageGenerationData {
+  return {
+    url: passthroughDeserializer(input["url"]) as any,
+    base64Data: passthroughDeserializer(input["b64_json"]) as any,
+    revisedPrompt: passthroughDeserializer(input["revised_prompt"]) as any,
+  } as any;
+}
+
+export const deserializeImageGenerationData = withNullChecks(
+  _deserializeImageGenerationData,
+);
+
+function _deserializeEmbeddingItem(input: EmbeddingItemOutput): EmbeddingItem {
+  return {
+    embedding: deserializeArray(
+      input["embedding"],
+      passthroughDeserializer,
+    ) as any,
+    index: passthroughDeserializer(input["index"]) as any,
+  } as any;
+}
+
+export const deserializeEmbeddingItem = withNullChecks(
+  _deserializeEmbeddingItem,
+);
+
+function _deserializeEmbeddingsUsage(
+  input: EmbeddingsUsageOutput,
+): EmbeddingsUsage {
+  return {
+    promptTokens: passthroughDeserializer(input["prompt_tokens"]) as any,
+    totalTokens: passthroughDeserializer(input["total_tokens"]) as any,
+  } as any;
+}
+
+export const deserializeEmbeddingsUsage = withNullChecks(
+  _deserializeEmbeddingsUsage,
+);
+
 /** Alias for ChatRequestMessageUnion */
 export type ChatRequestMessageUnion =
   | ChatRequestSystemMessage

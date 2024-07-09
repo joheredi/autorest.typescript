@@ -3,7 +3,7 @@
 
 import {
   DataProductsCatalog,
-  _DataProductsCatalogListResult,
+  DataProductsCatalogListResult,
 } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../models/pagingTypes.js";
 import { buildPagedAsyncIterator } from "../pagingHelpers.js";
@@ -22,6 +22,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { deserializeUtcDateTime } from "../../helpers/serializerHelpers.js";
 import {
   DataProductsCatalogsGetOptionalParams,
   DataProductsCatalogsListByResourceGroupOptionalParams,
@@ -63,16 +64,14 @@ export async function _getDeserialize(
       : {
           createdBy: result.body.systemData?.["createdBy"],
           createdByType: result.body.systemData?.["createdByType"],
-          createdAt:
-            result.body.systemData?.["createdAt"] !== undefined
-              ? new Date(result.body.systemData?.["createdAt"])
-              : undefined,
+          createdAt: deserializeUtcDateTime(
+            result.body.systemData?.["createdAt"],
+          ),
           lastModifiedBy: result.body.systemData?.["lastModifiedBy"],
           lastModifiedByType: result.body.systemData?.["lastModifiedByType"],
-          lastModifiedAt:
-            result.body.systemData?.["lastModifiedAt"] !== undefined
-              ? new Date(result.body.systemData?.["lastModifiedAt"])
-              : undefined,
+          lastModifiedAt: deserializeUtcDateTime(
+            result.body.systemData?.["lastModifiedAt"],
+          ),
         },
     properties: !result.body.properties
       ? undefined
@@ -132,7 +131,7 @@ export async function _listByResourceGroupDeserialize(
   result:
     | DataProductsCatalogsListByResourceGroup200Response
     | DataProductsCatalogsListByResourceGroupDefaultResponse,
-): Promise<_DataProductsCatalogListResult> {
+): Promise<DataProductsCatalogListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -147,16 +146,12 @@ export async function _listByResourceGroupDeserialize(
         : {
             createdBy: p.systemData?.["createdBy"],
             createdByType: p.systemData?.["createdByType"],
-            createdAt:
-              p.systemData?.["createdAt"] !== undefined
-                ? new Date(p.systemData?.["createdAt"])
-                : undefined,
+            createdAt: deserializeUtcDateTime(p.systemData?.["createdAt"]),
             lastModifiedBy: p.systemData?.["lastModifiedBy"],
             lastModifiedByType: p.systemData?.["lastModifiedByType"],
-            lastModifiedAt:
-              p.systemData?.["lastModifiedAt"] !== undefined
-                ? new Date(p.systemData?.["lastModifiedAt"])
-                : undefined,
+            lastModifiedAt: deserializeUtcDateTime(
+              p.systemData?.["lastModifiedAt"],
+            ),
           },
       properties: !p.properties
         ? undefined
@@ -223,7 +218,7 @@ export async function _listBySubscriptionDeserialize(
   result:
     | DataProductsCatalogsListBySubscription200Response
     | DataProductsCatalogsListBySubscriptionDefaultResponse,
-): Promise<_DataProductsCatalogListResult> {
+): Promise<DataProductsCatalogListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -238,16 +233,12 @@ export async function _listBySubscriptionDeserialize(
         : {
             createdBy: p.systemData?.["createdBy"],
             createdByType: p.systemData?.["createdByType"],
-            createdAt:
-              p.systemData?.["createdAt"] !== undefined
-                ? new Date(p.systemData?.["createdAt"])
-                : undefined,
+            createdAt: deserializeUtcDateTime(p.systemData?.["createdAt"]),
             lastModifiedBy: p.systemData?.["lastModifiedBy"],
             lastModifiedByType: p.systemData?.["lastModifiedByType"],
-            lastModifiedAt:
-              p.systemData?.["lastModifiedAt"] !== undefined
-                ? new Date(p.systemData?.["lastModifiedAt"])
-                : undefined,
+            lastModifiedAt: deserializeUtcDateTime(
+              p.systemData?.["lastModifiedAt"],
+            ),
           },
       properties: !p.properties
         ? undefined

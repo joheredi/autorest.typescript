@@ -1,7 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { serializeRecord } from "../helpers/serializerHelpers.js";
+import {
+  deserializeRecord,
+  serializeRecord,
+  passthroughDeserializer,
+  deserializeUtcDateTime,
+  deserializeStringDuration,
+  withNullChecks,
+  deserializeArray,
+  deserializeBytes,
+} from "../helpers/serializerHelpers.js";
 import { uint8ArrayToString } from "@azure/core-util";
 import {
   BatchNodeUserCreateOptions as BatchNodeUserCreateOptionsRest,
@@ -90,6 +99,121 @@ import {
   BatchPoolResizeOptions as BatchPoolResizeOptionsRest,
   BatchPoolReplaceOptions as BatchPoolReplaceOptionsRest,
   NodeRemoveOptions as NodeRemoveOptionsRest,
+  AffinityInformationOutput,
+  ApplicationPackageReferenceOutput,
+  AuthenticationTokenSettingsOutput,
+  AutoPoolSpecificationOutput,
+  AutoScaleRunErrorOutput,
+  AutoScaleRunOutput,
+  AutoUserSpecificationOutput,
+  AzureBlobFileSystemConfigurationOutput,
+  AzureFileShareConfigurationOutput,
+  BatchApplicationOutput,
+  BatchCertificateOutput,
+  BatchErrorDetailOutput,
+  BatchErrorOutput,
+  BatchJobOutput,
+  BatchJobScheduleOutput,
+  BatchNodeEndpointConfigurationOutput,
+  BatchNodeErrorOutput,
+  BatchNodeIdentityReferenceOutput,
+  BatchNodeInformationOutput,
+  BatchNodeOutput,
+  BatchPoolIdentityOutput,
+  BatchPoolOutput,
+  BatchTaskOutput,
+  CertificateReferenceOutput,
+  CifsMountConfigurationOutput,
+  CloudServiceConfigurationOutput,
+  ContainerConfigurationOutput,
+  ContainerRegistryOutput,
+  DataDiskOutput,
+  DeleteCertificateErrorOutput,
+  DiffDiskSettingsOutput,
+  DiskEncryptionConfigurationOutput,
+  EnvironmentSettingOutput,
+  ErrorMessageOutput,
+  ExitCodeMappingOutput,
+  ExitCodeRangeMappingOutput,
+  ExitConditionsOutput,
+  ExitOptionsOutput,
+  FilePropertiesOutput,
+  HttpHeaderOutput,
+  ImageInformationOutput,
+  ImageReferenceOutput,
+  InboundEndpointOutput,
+  InboundNATPoolOutput,
+  InstanceViewStatusOutput,
+  JobConstraintsOutput,
+  JobExecutionInformationOutput,
+  JobManagerTaskOutput,
+  JobNetworkConfigurationOutput,
+  JobPreparationAndReleaseTaskExecutionInformationOutput,
+  JobPreparationTaskExecutionInformationOutput,
+  JobPreparationTaskOutput,
+  JobReleaseTaskExecutionInformationOutput,
+  JobReleaseTaskOutput,
+  JobScheduleExecutionInformationOutput,
+  JobScheduleStatisticsOutput,
+  JobSchedulingErrorOutput,
+  JobSpecificationOutput,
+  JobStatisticsOutput,
+  LinuxUserConfigurationOutput,
+  MetadataItemOutput,
+  MountConfigurationOutput,
+  MultiInstanceSettingsOutput,
+  NameValuePairOutput,
+  NetworkConfigurationOutput,
+  NetworkSecurityGroupRuleOutput,
+  NFSMountConfigurationOutput,
+  NodeAgentInformationOutput,
+  NodeCountsOutput,
+  NodeFileOutput,
+  NodePlacementConfigurationOutput,
+  NodeVMExtensionOutput,
+  OSDiskOutput,
+  OutputFileBlobContainerDestinationOutput,
+  OutputFileDestinationOutput,
+  OutputFileOutput,
+  OutputFileUploadOptionsOutput,
+  PoolEndpointConfigurationOutput,
+  PoolInformationOutput,
+  PoolNodeCountsOutput,
+  PoolSpecificationOutput,
+  PoolStatisticsOutput,
+  PoolUsageMetricsOutput,
+  PublicIPAddressConfigurationOutput,
+  RecentJobOutput,
+  ResizeErrorOutput,
+  ResourceFileOutput,
+  ResourceStatisticsOutput,
+  ScheduleOutput,
+  StartTaskInformationOutput,
+  StartTaskOutput,
+  SubtaskInformationOutput,
+  TaskAddResultOutput,
+  TaskConstraintsOutput,
+  TaskContainerExecutionInformationOutput,
+  TaskContainerSettingsOutput,
+  TaskCountsOutput,
+  TaskDependenciesOutput,
+  TaskExecutionInformationOutput,
+  TaskFailureInformationOutput,
+  TaskIdRangeOutput,
+  TaskInformationOutput,
+  TaskSchedulingPolicyOutput,
+  TaskSlotCountsOutput,
+  TaskStatisticsOutput,
+  UsageStatisticsOutput,
+  UserAccountOutput,
+  UserAssignedIdentityOutput,
+  UserIdentityOutput,
+  VirtualMachineConfigurationOutput,
+  VirtualMachineInfoOutput,
+  VMExtensionInstanceViewOutput,
+  VMExtensionOutput,
+  WindowsConfigurationOutput,
+  WindowsUserConfigurationOutput,
 } from "../rest/index.js";
 
 /** Options for creating a user account for RDP or SSH access on an Azure Batch Compute Node. */
@@ -774,7 +898,7 @@ export interface UploadBatchServiceLogsResult {
 }
 
 /** The result of listing the Compute Nodes in a Pool. */
-export interface _BatchNodeListResult {
+export interface BatchNodeListResult {
   /** The list of Compute Nodes. */
   value?: BatchNode[];
   /** The URL to get the next set of results. */
@@ -859,7 +983,7 @@ export interface InstanceViewStatus {
 export type StatusLevelTypes = "Error" | "Info" | "Warning";
 
 /** The result of listing the Compute Node extensions in a Node. */
-export interface _NodeVMExtensionList {
+export interface NodeVMExtensionList {
   /** The list of Compute Node extensions. */
   value?: NodeVMExtension[];
   /** The URL to get the next set of results. */
@@ -870,7 +994,7 @@ export interface _NodeVMExtensionList {
  * The result of listing the files on a Compute Node, or the files associated with
  * a Task on a Compute Node.
  */
-export interface _NodeFileListResult {
+export interface NodeFileListResult {
   /** The list of files. */
   value?: NodeFile[];
   /** The URL to get the next set of results. */
@@ -1336,7 +1460,7 @@ export function authenticationTokenSettingsSerializer(
 export type AccessScope = "job";
 
 /** The result of listing the Tasks in a Job. */
-export interface _BatchTaskListResult {
+export interface BatchTaskListResult {
   /** The list of Tasks. */
   value?: BatchTask[];
   /** The URL to get the next set of results. */
@@ -2869,7 +2993,7 @@ export function batchJobScheduleCreateOptionsSerializer(
 }
 
 /** The result of listing the Job Schedules in an Account. */
-export interface _BatchJobScheduleListResult {
+export interface BatchJobScheduleListResult {
   /** The list of Job Schedules. */
   value?: BatchJobSchedule[];
   /** The URL to get the next set of results. */
@@ -2936,7 +3060,7 @@ export interface DeleteCertificateError {
 export type CertificateFormat = "pfx" | "cer";
 
 /** The result of listing the Certificates in the Account. */
-export interface _CertificateListResult {
+export interface CertificateListResult {
   /** The list of Certificates. */
   value?: BatchCertificate[];
   /** The URL to get the next set of results. */
@@ -3230,7 +3354,7 @@ export function batchJobCreateOptionsSerializer(
 }
 
 /** The result of listing the Jobs in an Account. */
-export interface _BatchJobListResult {
+export interface BatchJobListResult {
   /** The list of Jobs. */
   value?: BatchJob[];
   /** The URL to get the next set of results. */
@@ -3241,7 +3365,7 @@ export interface _BatchJobListResult {
  * The result of listing the status of the Job Preparation and Job Release Tasks
  * for a Job.
  */
-export interface _BatchJobListPreparationAndReleaseTaskStatusResult {
+export interface BatchJobListPreparationAndReleaseTaskStatusResult {
   /** A list of Job Preparation and Job Release Task execution information. */
   value?: JobPreparationAndReleaseTaskExecutionInformation[];
   /** The URL to get the next set of results. */
@@ -3359,7 +3483,7 @@ export interface TaskSlotCounts {
 }
 
 /** The result of listing the supported Virtual Machine Images. */
-export interface _AccountListSupportedImagesResult {
+export interface AccountListSupportedImagesResult {
   /** The list of supported Virtual Machine Images. */
   value?: ImageInformation[];
   /** The URL to get the next set of results. */
@@ -3391,7 +3515,7 @@ export type OSType = "linux" | "windows";
 export type VerificationType = "verified" | "unverified";
 
 /** The result of listing the Compute Node counts in the Account. */
-export interface _PoolNodeCountsListResult {
+export interface PoolNodeCountsListResult {
   /** A list of Compute Node counts by Pool. */
   value?: PoolNodeCounts[];
   /** The URL to get the next set of results. */
@@ -3441,7 +3565,7 @@ export interface NodeCounts {
 }
 
 /** The result of a listing the usage metrics for an Account. */
-export interface _PoolListUsageMetricsResult {
+export interface PoolListUsageMetricsResult {
   /** The Pool usage metrics data. */
   value?: PoolUsageMetrics[];
   /** The URL to get the next set of results. */
@@ -3575,7 +3699,7 @@ export function batchPoolCreateOptionsSerializer(
 }
 
 /** The result of listing the Pools in an Account. */
-export interface _BatchPoolListResult {
+export interface BatchPoolListResult {
   /** The list of Pools. */
   value?: BatchPool[];
   /** The URL to get the next set of results. */
@@ -3944,7 +4068,7 @@ export function nodeRemoveOptionsSerializer(
 }
 
 /** The result of listing the applications available in an Account. */
-export interface _ApplicationListResult {
+export interface ApplicationListResult {
   /** The list of applications available in the Account. */
   value?: BatchApplication[];
   /** The URL to get the next set of results. */
@@ -3963,3 +4087,2269 @@ export interface BatchApplication {
 
 /** The Azure Batch service version. */
 export type Versions = "2023-05-01.17.0";
+
+function _deserializeBatchError(input: BatchErrorOutput): BatchError {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    message: deserializeErrorMessage(input["message"]) as any,
+    values: deserializeArray(
+      input["values"],
+      deserializeBatchErrorDetail,
+    ) as any,
+  } as any;
+}
+
+export const deserializeBatchError = withNullChecks(_deserializeBatchError);
+
+function _deserializeErrorMessage(input: ErrorMessageOutput): ErrorMessage {
+  return {
+    lang: passthroughDeserializer(input["lang"]) as any,
+    value: passthroughDeserializer(input["value"]) as any,
+  } as any;
+}
+
+export const deserializeErrorMessage = withNullChecks(_deserializeErrorMessage);
+
+function _deserializeBatchErrorDetail(
+  input: BatchErrorDetailOutput,
+): BatchErrorDetail {
+  return {
+    key: passthroughDeserializer(input["key"]) as any,
+    value: passthroughDeserializer(input["value"]) as any,
+  } as any;
+}
+
+export const deserializeBatchErrorDetail = withNullChecks(
+  _deserializeBatchErrorDetail,
+);
+
+function _deserializeBatchNode(input: BatchNodeOutput): BatchNode {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    url: passthroughDeserializer(input["url"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    schedulingState: passthroughDeserializer(input["schedulingState"]) as any,
+    stateTransitionTime: deserializeUtcDateTime(
+      input["stateTransitionTime"],
+    ) as any,
+    lastBootTime: deserializeUtcDateTime(input["lastBootTime"]) as any,
+    allocationTime: deserializeUtcDateTime(input["allocationTime"]) as any,
+    ipAddress: passthroughDeserializer(input["ipAddress"]) as any,
+    affinityId: passthroughDeserializer(input["affinityId"]) as any,
+    vmSize: passthroughDeserializer(input["vmSize"]) as any,
+    totalTasksRun: passthroughDeserializer(input["totalTasksRun"]) as any,
+    runningTasksCount: passthroughDeserializer(
+      input["runningTasksCount"],
+    ) as any,
+    runningTaskSlotsCount: passthroughDeserializer(
+      input["runningTaskSlotsCount"],
+    ) as any,
+    totalTasksSucceeded: passthroughDeserializer(
+      input["totalTasksSucceeded"],
+    ) as any,
+    recentTasks: deserializeArray(
+      input["recentTasks"],
+      deserializeTaskInformation,
+    ) as any,
+    startTask: deserializeStartTask(input["startTask"]) as any,
+    startTaskInfo: deserializeStartTaskInformation(
+      input["startTaskInfo"],
+    ) as any,
+    certificateReferences: deserializeArray(
+      input["certificateReferences"],
+      deserializeCertificateReference,
+    ) as any,
+    errors: deserializeArray(input["errors"], deserializeBatchNodeError) as any,
+    isDedicated: passthroughDeserializer(input["isDedicated"]) as any,
+    endpointConfiguration: deserializeBatchNodeEndpointConfiguration(
+      input["endpointConfiguration"],
+    ) as any,
+    nodeAgentInfo: deserializeNodeAgentInformation(
+      input["nodeAgentInfo"],
+    ) as any,
+    virtualMachineInfo: deserializeVirtualMachineInfo(
+      input["virtualMachineInfo"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeBatchNode = withNullChecks(_deserializeBatchNode);
+
+function _deserializeTaskInformation(
+  input: TaskInformationOutput,
+): TaskInformation {
+  return {
+    taskUrl: passthroughDeserializer(input["taskUrl"]) as any,
+    jobId: passthroughDeserializer(input["jobId"]) as any,
+    taskId: passthroughDeserializer(input["taskId"]) as any,
+    subtaskId: passthroughDeserializer(input["subtaskId"]) as any,
+    taskState: passthroughDeserializer(input["taskState"]) as any,
+    executionInfo: deserializeTaskExecutionInformation(
+      input["executionInfo"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeTaskInformation = withNullChecks(
+  _deserializeTaskInformation,
+);
+
+function _deserializeTaskExecutionInformation(
+  input: TaskExecutionInformationOutput,
+): TaskExecutionInformation {
+  return {
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+    exitCode: passthroughDeserializer(input["exitCode"]) as any,
+    containerInfo: deserializeTaskContainerExecutionInformation(
+      input["containerInfo"],
+    ) as any,
+    failureInfo: deserializeTaskFailureInformation(input["failureInfo"]) as any,
+    retryCount: passthroughDeserializer(input["retryCount"]) as any,
+    lastRetryTime: deserializeUtcDateTime(input["lastRetryTime"]) as any,
+    requeueCount: passthroughDeserializer(input["requeueCount"]) as any,
+    lastRequeueTime: deserializeUtcDateTime(input["lastRequeueTime"]) as any,
+    result: passthroughDeserializer(input["result"]) as any,
+  } as any;
+}
+
+export const deserializeTaskExecutionInformation = withNullChecks(
+  _deserializeTaskExecutionInformation,
+);
+
+function _deserializeTaskContainerExecutionInformation(
+  input: TaskContainerExecutionInformationOutput,
+): TaskContainerExecutionInformation {
+  return {
+    containerId: passthroughDeserializer(input["containerId"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    error: passthroughDeserializer(input["error"]) as any,
+  } as any;
+}
+
+export const deserializeTaskContainerExecutionInformation = withNullChecks(
+  _deserializeTaskContainerExecutionInformation,
+);
+
+function _deserializeTaskFailureInformation(
+  input: TaskFailureInformationOutput,
+): TaskFailureInformation {
+  return {
+    category: passthroughDeserializer(input["category"]) as any,
+    code: passthroughDeserializer(input["code"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+    details: deserializeArray(
+      input["details"],
+      deserializeNameValuePair,
+    ) as any,
+  } as any;
+}
+
+export const deserializeTaskFailureInformation = withNullChecks(
+  _deserializeTaskFailureInformation,
+);
+
+function _deserializeNameValuePair(input: NameValuePairOutput): NameValuePair {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    value: passthroughDeserializer(input["value"]) as any,
+  } as any;
+}
+
+export const deserializeNameValuePair = withNullChecks(
+  _deserializeNameValuePair,
+);
+
+function _deserializeStartTask(input: StartTaskOutput): StartTask {
+  return {
+    commandLine: passthroughDeserializer(input["commandLine"]) as any,
+    containerSettings: deserializeTaskContainerSettings(
+      input["containerSettings"],
+    ) as any,
+    resourceFiles: deserializeArray(
+      input["resourceFiles"],
+      deserializeResourceFile,
+    ) as any,
+    environmentSettings: deserializeArray(
+      input["environmentSettings"],
+      deserializeEnvironmentSetting,
+    ) as any,
+    userIdentity: deserializeUserIdentity(input["userIdentity"]) as any,
+    maxTaskRetryCount: passthroughDeserializer(
+      input["maxTaskRetryCount"],
+    ) as any,
+    waitForSuccess: passthroughDeserializer(input["waitForSuccess"]) as any,
+  } as any;
+}
+
+export const deserializeStartTask = withNullChecks(_deserializeStartTask);
+
+function _deserializeTaskContainerSettings(
+  input: TaskContainerSettingsOutput,
+): TaskContainerSettings {
+  return {
+    containerRunOptions: passthroughDeserializer(
+      input["containerRunOptions"],
+    ) as any,
+    imageName: passthroughDeserializer(input["imageName"]) as any,
+    registry: deserializeContainerRegistry(input["registry"]) as any,
+    workingDirectory: passthroughDeserializer(input["workingDirectory"]) as any,
+  } as any;
+}
+
+export const deserializeTaskContainerSettings = withNullChecks(
+  _deserializeTaskContainerSettings,
+);
+
+function _deserializeContainerRegistry(
+  input: ContainerRegistryOutput,
+): ContainerRegistry {
+  return {
+    username: passthroughDeserializer(input["username"]) as any,
+    password: passthroughDeserializer(input["password"]) as any,
+    registryServer: passthroughDeserializer(input["registryServer"]) as any,
+    identityReference: deserializeBatchNodeIdentityReference(
+      input["identityReference"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeContainerRegistry = withNullChecks(
+  _deserializeContainerRegistry,
+);
+
+function _deserializeBatchNodeIdentityReference(
+  input: BatchNodeIdentityReferenceOutput,
+): BatchNodeIdentityReference {
+  return {
+    resourceId: passthroughDeserializer(input["resourceId"]) as any,
+  } as any;
+}
+
+export const deserializeBatchNodeIdentityReference = withNullChecks(
+  _deserializeBatchNodeIdentityReference,
+);
+
+function _deserializeResourceFile(input: ResourceFileOutput): ResourceFile {
+  return {
+    autoStorageContainerName: passthroughDeserializer(
+      input["autoStorageContainerName"],
+    ) as any,
+    storageContainerUrl: passthroughDeserializer(
+      input["storageContainerUrl"],
+    ) as any,
+    httpUrl: passthroughDeserializer(input["httpUrl"]) as any,
+    blobPrefix: passthroughDeserializer(input["blobPrefix"]) as any,
+    filePath: passthroughDeserializer(input["filePath"]) as any,
+    fileMode: passthroughDeserializer(input["fileMode"]) as any,
+    identityReference: deserializeBatchNodeIdentityReference(
+      input["identityReference"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeResourceFile = withNullChecks(_deserializeResourceFile);
+
+function _deserializeEnvironmentSetting(
+  input: EnvironmentSettingOutput,
+): EnvironmentSetting {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    value: passthroughDeserializer(input["value"]) as any,
+  } as any;
+}
+
+export const deserializeEnvironmentSetting = withNullChecks(
+  _deserializeEnvironmentSetting,
+);
+
+function _deserializeUserIdentity(input: UserIdentityOutput): UserIdentity {
+  return {
+    username: passthroughDeserializer(input["username"]) as any,
+    autoUser: deserializeAutoUserSpecification(input["autoUser"]) as any,
+  } as any;
+}
+
+export const deserializeUserIdentity = withNullChecks(_deserializeUserIdentity);
+
+function _deserializeAutoUserSpecification(
+  input: AutoUserSpecificationOutput,
+): AutoUserSpecification {
+  return {
+    scope: passthroughDeserializer(input["scope"]) as any,
+    elevationLevel: passthroughDeserializer(input["elevationLevel"]) as any,
+  } as any;
+}
+
+export const deserializeAutoUserSpecification = withNullChecks(
+  _deserializeAutoUserSpecification,
+);
+
+function _deserializeStartTaskInformation(
+  input: StartTaskInformationOutput,
+): StartTaskInformation {
+  return {
+    state: passthroughDeserializer(input["state"]) as any,
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+    exitCode: passthroughDeserializer(input["exitCode"]) as any,
+    containerInfo: deserializeTaskContainerExecutionInformation(
+      input["containerInfo"],
+    ) as any,
+    failureInfo: deserializeTaskFailureInformation(input["failureInfo"]) as any,
+    retryCount: passthroughDeserializer(input["retryCount"]) as any,
+    lastRetryTime: deserializeUtcDateTime(input["lastRetryTime"]) as any,
+    result: passthroughDeserializer(input["result"]) as any,
+  } as any;
+}
+
+export const deserializeStartTaskInformation = withNullChecks(
+  _deserializeStartTaskInformation,
+);
+
+function _deserializeCertificateReference(
+  input: CertificateReferenceOutput,
+): CertificateReference {
+  return {
+    thumbprint: passthroughDeserializer(input["thumbprint"]) as any,
+    thumbprintAlgorithm: passthroughDeserializer(
+      input["thumbprintAlgorithm"],
+    ) as any,
+    storeLocation: passthroughDeserializer(input["storeLocation"]) as any,
+    storeName: passthroughDeserializer(input["storeName"]) as any,
+    visibility: deserializeArray(
+      input["visibility"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeCertificateReference = withNullChecks(
+  _deserializeCertificateReference,
+);
+
+function _deserializeBatchNodeError(
+  input: BatchNodeErrorOutput,
+): BatchNodeError {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+    errorDetails: deserializeArray(
+      input["errorDetails"],
+      deserializeNameValuePair,
+    ) as any,
+  } as any;
+}
+
+export const deserializeBatchNodeError = withNullChecks(
+  _deserializeBatchNodeError,
+);
+
+function _deserializeBatchNodeEndpointConfiguration(
+  input: BatchNodeEndpointConfigurationOutput,
+): BatchNodeEndpointConfiguration {
+  return {
+    inboundEndpoints: deserializeArray(
+      input["inboundEndpoints"],
+      deserializeInboundEndpoint,
+    ) as any,
+  } as any;
+}
+
+export const deserializeBatchNodeEndpointConfiguration = withNullChecks(
+  _deserializeBatchNodeEndpointConfiguration,
+);
+
+function _deserializeInboundEndpoint(
+  input: InboundEndpointOutput,
+): InboundEndpoint {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    protocol: passthroughDeserializer(input["protocol"]) as any,
+    publicIpAddress: passthroughDeserializer(input["publicIPAddress"]) as any,
+    publicFQDN: passthroughDeserializer(input["publicFQDN"]) as any,
+    frontendPort: passthroughDeserializer(input["frontendPort"]) as any,
+    backendPort: passthroughDeserializer(input["backendPort"]) as any,
+  } as any;
+}
+
+export const deserializeInboundEndpoint = withNullChecks(
+  _deserializeInboundEndpoint,
+);
+
+function _deserializeNodeAgentInformation(
+  input: NodeAgentInformationOutput,
+): NodeAgentInformation {
+  return {
+    version: passthroughDeserializer(input["version"]) as any,
+    lastUpdateTime: deserializeUtcDateTime(input["lastUpdateTime"]) as any,
+  } as any;
+}
+
+export const deserializeNodeAgentInformation = withNullChecks(
+  _deserializeNodeAgentInformation,
+);
+
+function _deserializeVirtualMachineInfo(
+  input: VirtualMachineInfoOutput,
+): VirtualMachineInfo {
+  return {
+    imageReference: deserializeImageReference(input["imageReference"]) as any,
+  } as any;
+}
+
+export const deserializeVirtualMachineInfo = withNullChecks(
+  _deserializeVirtualMachineInfo,
+);
+
+function _deserializeImageReference(
+  input: ImageReferenceOutput,
+): ImageReference {
+  return {
+    publisher: passthroughDeserializer(input["publisher"]) as any,
+    offer: passthroughDeserializer(input["offer"]) as any,
+    sku: passthroughDeserializer(input["sku"]) as any,
+    version: passthroughDeserializer(input["version"]) as any,
+    virtualMachineImageId: passthroughDeserializer(
+      input["virtualMachineImageId"],
+    ) as any,
+    exactVersion: passthroughDeserializer(input["exactVersion"]) as any,
+  } as any;
+}
+
+export const deserializeImageReference = withNullChecks(
+  _deserializeImageReference,
+);
+
+function _deserializeNodeVMExtension(
+  input: NodeVMExtensionOutput,
+): NodeVMExtension {
+  return {
+    provisioningState: passthroughDeserializer(
+      input["provisioningState"],
+    ) as any,
+    vmExtension: deserializeVMExtension(input["vmExtension"]) as any,
+    instanceView: deserializeVMExtensionInstanceView(
+      input["instanceView"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeNodeVMExtension = withNullChecks(
+  _deserializeNodeVMExtension,
+);
+
+function _deserializeVMExtension(input: VMExtensionOutput): VMExtension {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    publisher: passthroughDeserializer(input["publisher"]) as any,
+    type: passthroughDeserializer(input["type"]) as any,
+    typeHandlerVersion: passthroughDeserializer(
+      input["typeHandlerVersion"],
+    ) as any,
+    autoUpgradeMinorVersion: passthroughDeserializer(
+      input["autoUpgradeMinorVersion"],
+    ) as any,
+    enableAutomaticUpgrade: passthroughDeserializer(
+      input["enableAutomaticUpgrade"],
+    ) as any,
+    settings: deserializeRecord(
+      input["settings"],
+      passthroughDeserializer,
+    ) as any,
+    protectedSettings: deserializeRecord(
+      input["protectedSettings"],
+      passthroughDeserializer,
+    ) as any,
+    provisionAfterExtensions: deserializeArray(
+      input["provisionAfterExtensions"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeVMExtension = withNullChecks(_deserializeVMExtension);
+
+function _deserializeVMExtensionInstanceView(
+  input: VMExtensionInstanceViewOutput,
+): VMExtensionInstanceView {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    statuses: deserializeArray(
+      input["statuses"],
+      deserializeInstanceViewStatus,
+    ) as any,
+    subStatuses: deserializeArray(
+      input["subStatuses"],
+      deserializeInstanceViewStatus,
+    ) as any,
+  } as any;
+}
+
+export const deserializeVMExtensionInstanceView = withNullChecks(
+  _deserializeVMExtensionInstanceView,
+);
+
+function _deserializeInstanceViewStatus(
+  input: InstanceViewStatusOutput,
+): InstanceViewStatus {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    displayStatus: passthroughDeserializer(input["displayStatus"]) as any,
+    level: passthroughDeserializer(input["level"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+    time: passthroughDeserializer(input["time"]) as any,
+  } as any;
+}
+
+export const deserializeInstanceViewStatus = withNullChecks(
+  _deserializeInstanceViewStatus,
+);
+
+function _deserializeNodeFile(input: NodeFileOutput): NodeFile {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    url: passthroughDeserializer(input["url"]) as any,
+    isDirectory: passthroughDeserializer(input["isDirectory"]) as any,
+    properties: deserializeFileProperties(input["properties"]) as any,
+  } as any;
+}
+
+export const deserializeNodeFile = withNullChecks(_deserializeNodeFile);
+
+function _deserializeFileProperties(
+  input: FilePropertiesOutput,
+): FileProperties {
+  return {
+    creationTime: deserializeUtcDateTime(input["creationTime"]) as any,
+    lastModified: deserializeUtcDateTime(input["lastModified"]) as any,
+    contentLength: passthroughDeserializer(input["contentLength"]) as any,
+    contentType: passthroughDeserializer(input["contentType"]) as any,
+    fileMode: passthroughDeserializer(input["fileMode"]) as any,
+  } as any;
+}
+
+export const deserializeFileProperties = withNullChecks(
+  _deserializeFileProperties,
+);
+
+function _deserializeExitConditions(
+  input: ExitConditionsOutput,
+): ExitConditions {
+  return {
+    exitCodes: deserializeArray(
+      input["exitCodes"],
+      deserializeExitCodeMapping,
+    ) as any,
+    exitCodeRanges: deserializeArray(
+      input["exitCodeRanges"],
+      deserializeExitCodeRangeMapping,
+    ) as any,
+    preProcessingError: deserializeExitOptions(
+      input["preProcessingError"],
+    ) as any,
+    fileUploadError: deserializeExitOptions(input["fileUploadError"]) as any,
+    default: deserializeExitOptions(input["default"]) as any,
+  } as any;
+}
+
+export const deserializeExitConditions = withNullChecks(
+  _deserializeExitConditions,
+);
+
+function _deserializeExitCodeMapping(
+  input: ExitCodeMappingOutput,
+): ExitCodeMapping {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    exitOptions: deserializeExitOptions(input["exitOptions"]) as any,
+  } as any;
+}
+
+export const deserializeExitCodeMapping = withNullChecks(
+  _deserializeExitCodeMapping,
+);
+
+function _deserializeExitOptions(input: ExitOptionsOutput): ExitOptions {
+  return {
+    jobAction: passthroughDeserializer(input["jobAction"]) as any,
+    dependencyAction: passthroughDeserializer(input["dependencyAction"]) as any,
+  } as any;
+}
+
+export const deserializeExitOptions = withNullChecks(_deserializeExitOptions);
+
+function _deserializeExitCodeRangeMapping(
+  input: ExitCodeRangeMappingOutput,
+): ExitCodeRangeMapping {
+  return {
+    start: passthroughDeserializer(input["start"]) as any,
+    end: passthroughDeserializer(input["end"]) as any,
+    exitOptions: deserializeExitOptions(input["exitOptions"]) as any,
+  } as any;
+}
+
+export const deserializeExitCodeRangeMapping = withNullChecks(
+  _deserializeExitCodeRangeMapping,
+);
+
+function _deserializeOutputFile(input: OutputFileOutput): OutputFile {
+  return {
+    filePattern: passthroughDeserializer(input["filePattern"]) as any,
+    destination: deserializeOutputFileDestination(input["destination"]) as any,
+    uploadOptions: deserializeOutputFileUploadOptions(
+      input["uploadOptions"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeOutputFile = withNullChecks(_deserializeOutputFile);
+
+function _deserializeOutputFileDestination(
+  input: OutputFileDestinationOutput,
+): OutputFileDestination {
+  return {
+    container: deserializeOutputFileBlobContainerDestination(
+      input["container"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeOutputFileDestination = withNullChecks(
+  _deserializeOutputFileDestination,
+);
+
+function _deserializeOutputFileBlobContainerDestination(
+  input: OutputFileBlobContainerDestinationOutput,
+): OutputFileBlobContainerDestination {
+  return {
+    path: passthroughDeserializer(input["path"]) as any,
+    containerUrl: passthroughDeserializer(input["containerUrl"]) as any,
+    identityReference: deserializeBatchNodeIdentityReference(
+      input["identityReference"],
+    ) as any,
+    uploadHeaders: deserializeArray(
+      input["uploadHeaders"],
+      deserializeHttpHeader,
+    ) as any,
+  } as any;
+}
+
+export const deserializeOutputFileBlobContainerDestination = withNullChecks(
+  _deserializeOutputFileBlobContainerDestination,
+);
+
+function _deserializeHttpHeader(input: HttpHeaderOutput): HttpHeader {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    value: passthroughDeserializer(input["value"]) as any,
+  } as any;
+}
+
+export const deserializeHttpHeader = withNullChecks(_deserializeHttpHeader);
+
+function _deserializeOutputFileUploadOptions(
+  input: OutputFileUploadOptionsOutput,
+): OutputFileUploadOptions {
+  return {
+    uploadCondition: passthroughDeserializer(input["uploadCondition"]) as any,
+  } as any;
+}
+
+export const deserializeOutputFileUploadOptions = withNullChecks(
+  _deserializeOutputFileUploadOptions,
+);
+
+function _deserializeAffinityInformation(
+  input: AffinityInformationOutput,
+): AffinityInformation {
+  return {
+    affinityId: passthroughDeserializer(input["affinityId"]) as any,
+  } as any;
+}
+
+export const deserializeAffinityInformation = withNullChecks(
+  _deserializeAffinityInformation,
+);
+
+function _deserializeTaskConstraints(
+  input: TaskConstraintsOutput,
+): TaskConstraints {
+  return {
+    maxWallClockTime: deserializeStringDuration(
+      input["maxWallClockTime"],
+    ) as any,
+    retentionTime: deserializeStringDuration(input["retentionTime"]) as any,
+    maxTaskRetryCount: passthroughDeserializer(
+      input["maxTaskRetryCount"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeTaskConstraints = withNullChecks(
+  _deserializeTaskConstraints,
+);
+
+function _deserializeMultiInstanceSettings(
+  input: MultiInstanceSettingsOutput,
+): MultiInstanceSettings {
+  return {
+    numberOfInstances: passthroughDeserializer(
+      input["numberOfInstances"],
+    ) as any,
+    coordinationCommandLine: passthroughDeserializer(
+      input["coordinationCommandLine"],
+    ) as any,
+    commonResourceFiles: deserializeArray(
+      input["commonResourceFiles"],
+      deserializeResourceFile,
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultiInstanceSettings = withNullChecks(
+  _deserializeMultiInstanceSettings,
+);
+
+function _deserializeTaskDependencies(
+  input: TaskDependenciesOutput,
+): TaskDependencies {
+  return {
+    taskIds: deserializeArray(input["taskIds"], passthroughDeserializer) as any,
+    taskIdRanges: deserializeArray(
+      input["taskIdRanges"],
+      deserializeTaskIdRange,
+    ) as any,
+  } as any;
+}
+
+export const deserializeTaskDependencies = withNullChecks(
+  _deserializeTaskDependencies,
+);
+
+function _deserializeTaskIdRange(input: TaskIdRangeOutput): TaskIdRange {
+  return {
+    start: passthroughDeserializer(input["start"]) as any,
+    end: passthroughDeserializer(input["end"]) as any,
+  } as any;
+}
+
+export const deserializeTaskIdRange = withNullChecks(_deserializeTaskIdRange);
+
+function _deserializeApplicationPackageReference(
+  input: ApplicationPackageReferenceOutput,
+): ApplicationPackageReference {
+  return {
+    applicationId: passthroughDeserializer(input["applicationId"]) as any,
+    version: passthroughDeserializer(input["version"]) as any,
+  } as any;
+}
+
+export const deserializeApplicationPackageReference = withNullChecks(
+  _deserializeApplicationPackageReference,
+);
+
+function _deserializeAuthenticationTokenSettings(
+  input: AuthenticationTokenSettingsOutput,
+): AuthenticationTokenSettings {
+  return {
+    access: deserializeArray(input["access"], passthroughDeserializer) as any,
+  } as any;
+}
+
+export const deserializeAuthenticationTokenSettings = withNullChecks(
+  _deserializeAuthenticationTokenSettings,
+);
+
+function _deserializeBatchTask(input: BatchTaskOutput): BatchTask {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    url: passthroughDeserializer(input["url"]) as any,
+    eTag: passthroughDeserializer(input["eTag"]) as any,
+    lastModified: deserializeUtcDateTime(input["lastModified"]) as any,
+    creationTime: deserializeUtcDateTime(input["creationTime"]) as any,
+    exitConditions: deserializeExitConditions(input["exitConditions"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    stateTransitionTime: deserializeUtcDateTime(
+      input["stateTransitionTime"],
+    ) as any,
+    previousState: passthroughDeserializer(input["previousState"]) as any,
+    previousStateTransitionTime: deserializeUtcDateTime(
+      input["previousStateTransitionTime"],
+    ) as any,
+    commandLine: passthroughDeserializer(input["commandLine"]) as any,
+    containerSettings: deserializeTaskContainerSettings(
+      input["containerSettings"],
+    ) as any,
+    resourceFiles: deserializeArray(
+      input["resourceFiles"],
+      deserializeResourceFile,
+    ) as any,
+    outputFiles: deserializeArray(
+      input["outputFiles"],
+      deserializeOutputFile,
+    ) as any,
+    environmentSettings: deserializeArray(
+      input["environmentSettings"],
+      deserializeEnvironmentSetting,
+    ) as any,
+    affinityInfo: deserializeAffinityInformation(input["affinityInfo"]) as any,
+    constraints: deserializeTaskConstraints(input["constraints"]) as any,
+    requiredSlots: passthroughDeserializer(input["requiredSlots"]) as any,
+    userIdentity: deserializeUserIdentity(input["userIdentity"]) as any,
+    executionInfo: deserializeTaskExecutionInformation(
+      input["executionInfo"],
+    ) as any,
+    nodeInfo: deserializeBatchNodeInformation(input["nodeInfo"]) as any,
+    multiInstanceSettings: deserializeMultiInstanceSettings(
+      input["multiInstanceSettings"],
+    ) as any,
+    stats: deserializeTaskStatistics(input["stats"]) as any,
+    dependsOn: deserializeTaskDependencies(input["dependsOn"]) as any,
+    applicationPackageReferences: deserializeArray(
+      input["applicationPackageReferences"],
+      deserializeApplicationPackageReference,
+    ) as any,
+    authenticationTokenSettings: deserializeAuthenticationTokenSettings(
+      input["authenticationTokenSettings"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeBatchTask = withNullChecks(_deserializeBatchTask);
+
+function _deserializeBatchNodeInformation(
+  input: BatchNodeInformationOutput,
+): BatchNodeInformation {
+  return {
+    affinityId: passthroughDeserializer(input["affinityId"]) as any,
+    nodeUrl: passthroughDeserializer(input["nodeUrl"]) as any,
+    poolId: passthroughDeserializer(input["poolId"]) as any,
+    nodeId: passthroughDeserializer(input["nodeId"]) as any,
+    taskRootDirectory: passthroughDeserializer(
+      input["taskRootDirectory"],
+    ) as any,
+    taskRootDirectoryUrl: passthroughDeserializer(
+      input["taskRootDirectoryUrl"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeBatchNodeInformation = withNullChecks(
+  _deserializeBatchNodeInformation,
+);
+
+function _deserializeTaskStatistics(
+  input: TaskStatisticsOutput,
+): TaskStatistics {
+  return {
+    url: passthroughDeserializer(input["url"]) as any,
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    lastUpdateTime: deserializeUtcDateTime(input["lastUpdateTime"]) as any,
+    userCPUTime: deserializeStringDuration(input["userCPUTime"]) as any,
+    kernelCPUTime: deserializeStringDuration(input["kernelCPUTime"]) as any,
+    wallClockTime: deserializeStringDuration(input["wallClockTime"]) as any,
+    readIOps: passthroughDeserializer(input["readIOps"]) as any,
+    writeIOps: passthroughDeserializer(input["writeIOps"]) as any,
+    readIOGiB: passthroughDeserializer(input["readIOGiB"]) as any,
+    writeIOGiB: passthroughDeserializer(input["writeIOGiB"]) as any,
+    waitTime: deserializeStringDuration(input["waitTime"]) as any,
+  } as any;
+}
+
+export const deserializeTaskStatistics = withNullChecks(
+  _deserializeTaskStatistics,
+);
+
+function _deserializeTaskAddResult(input: TaskAddResultOutput): TaskAddResult {
+  return {
+    status: passthroughDeserializer(input["status"]) as any,
+    taskId: passthroughDeserializer(input["taskId"]) as any,
+    eTag: passthroughDeserializer(input["eTag"]) as any,
+    lastModified: deserializeUtcDateTime(input["lastModified"]) as any,
+    location: passthroughDeserializer(input["location"]) as any,
+    error: deserializeBatchError(input["error"]) as any,
+  } as any;
+}
+
+export const deserializeTaskAddResult = withNullChecks(
+  _deserializeTaskAddResult,
+);
+
+function _deserializeSubtaskInformation(
+  input: SubtaskInformationOutput,
+): SubtaskInformation {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    nodeInfo: deserializeBatchNodeInformation(input["nodeInfo"]) as any,
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+    exitCode: passthroughDeserializer(input["exitCode"]) as any,
+    containerInfo: deserializeTaskContainerExecutionInformation(
+      input["containerInfo"],
+    ) as any,
+    failureInfo: deserializeTaskFailureInformation(input["failureInfo"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    stateTransitionTime: deserializeUtcDateTime(
+      input["stateTransitionTime"],
+    ) as any,
+    previousState: passthroughDeserializer(input["previousState"]) as any,
+    previousStateTransitionTime: deserializeUtcDateTime(
+      input["previousStateTransitionTime"],
+    ) as any,
+    result: passthroughDeserializer(input["result"]) as any,
+  } as any;
+}
+
+export const deserializeSubtaskInformation = withNullChecks(
+  _deserializeSubtaskInformation,
+);
+
+function _deserializeBatchJobSchedule(
+  input: BatchJobScheduleOutput,
+): BatchJobSchedule {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    url: passthroughDeserializer(input["url"]) as any,
+    eTag: passthroughDeserializer(input["eTag"]) as any,
+    lastModified: deserializeUtcDateTime(input["lastModified"]) as any,
+    creationTime: deserializeUtcDateTime(input["creationTime"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    stateTransitionTime: deserializeUtcDateTime(
+      input["stateTransitionTime"],
+    ) as any,
+    previousState: passthroughDeserializer(input["previousState"]) as any,
+    previousStateTransitionTime: deserializeUtcDateTime(
+      input["previousStateTransitionTime"],
+    ) as any,
+    schedule: deserializeSchedule(input["schedule"]) as any,
+    jobSpecification: deserializeJobSpecification(
+      input["jobSpecification"],
+    ) as any,
+    executionInfo: deserializeJobScheduleExecutionInformation(
+      input["executionInfo"],
+    ) as any,
+    metadata: deserializeArray(
+      input["metadata"],
+      deserializeMetadataItem,
+    ) as any,
+    stats: deserializeJobScheduleStatistics(input["stats"]) as any,
+  } as any;
+}
+
+export const deserializeBatchJobSchedule = withNullChecks(
+  _deserializeBatchJobSchedule,
+);
+
+function _deserializeSchedule(input: ScheduleOutput): Schedule {
+  return {
+    doNotRunUntil: deserializeUtcDateTime(input["doNotRunUntil"]) as any,
+    doNotRunAfter: deserializeUtcDateTime(input["doNotRunAfter"]) as any,
+    startWindow: deserializeStringDuration(input["startWindow"]) as any,
+    recurrenceInterval: deserializeStringDuration(
+      input["recurrenceInterval"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeSchedule = withNullChecks(_deserializeSchedule);
+
+function _deserializeJobSpecification(
+  input: JobSpecificationOutput,
+): JobSpecification {
+  return {
+    priority: passthroughDeserializer(input["priority"]) as any,
+    allowTaskPreemption: passthroughDeserializer(
+      input["allowTaskPreemption"],
+    ) as any,
+    maxParallelTasks: passthroughDeserializer(input["maxParallelTasks"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    usesTaskDependencies: passthroughDeserializer(
+      input["usesTaskDependencies"],
+    ) as any,
+    onAllTasksComplete: passthroughDeserializer(
+      input["onAllTasksComplete"],
+    ) as any,
+    onTaskFailure: passthroughDeserializer(input["onTaskFailure"]) as any,
+    networkConfiguration: deserializeJobNetworkConfiguration(
+      input["networkConfiguration"],
+    ) as any,
+    constraints: deserializeJobConstraints(input["constraints"]) as any,
+    jobManagerTask: deserializeJobManagerTask(input["jobManagerTask"]) as any,
+    jobPreparationTask: deserializeJobPreparationTask(
+      input["jobPreparationTask"],
+    ) as any,
+    jobReleaseTask: deserializeJobReleaseTask(input["jobReleaseTask"]) as any,
+    commonEnvironmentSettings: deserializeArray(
+      input["commonEnvironmentSettings"],
+      deserializeEnvironmentSetting,
+    ) as any,
+    poolInfo: deserializePoolInformation(input["poolInfo"]) as any,
+    metadata: deserializeArray(
+      input["metadata"],
+      deserializeMetadataItem,
+    ) as any,
+  } as any;
+}
+
+export const deserializeJobSpecification = withNullChecks(
+  _deserializeJobSpecification,
+);
+
+function _deserializeJobNetworkConfiguration(
+  input: JobNetworkConfigurationOutput,
+): JobNetworkConfiguration {
+  return {
+    subnetId: passthroughDeserializer(input["subnetId"]) as any,
+  } as any;
+}
+
+export const deserializeJobNetworkConfiguration = withNullChecks(
+  _deserializeJobNetworkConfiguration,
+);
+
+function _deserializeJobConstraints(
+  input: JobConstraintsOutput,
+): JobConstraints {
+  return {
+    maxWallClockTime: deserializeStringDuration(
+      input["maxWallClockTime"],
+    ) as any,
+    maxTaskRetryCount: passthroughDeserializer(
+      input["maxTaskRetryCount"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeJobConstraints = withNullChecks(
+  _deserializeJobConstraints,
+);
+
+function _deserializeJobManagerTask(
+  input: JobManagerTaskOutput,
+): JobManagerTask {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    commandLine: passthroughDeserializer(input["commandLine"]) as any,
+    containerSettings: deserializeTaskContainerSettings(
+      input["containerSettings"],
+    ) as any,
+    resourceFiles: deserializeArray(
+      input["resourceFiles"],
+      deserializeResourceFile,
+    ) as any,
+    outputFiles: deserializeArray(
+      input["outputFiles"],
+      deserializeOutputFile,
+    ) as any,
+    environmentSettings: deserializeArray(
+      input["environmentSettings"],
+      deserializeEnvironmentSetting,
+    ) as any,
+    constraints: deserializeTaskConstraints(input["constraints"]) as any,
+    requiredSlots: passthroughDeserializer(input["requiredSlots"]) as any,
+    killJobOnCompletion: passthroughDeserializer(
+      input["killJobOnCompletion"],
+    ) as any,
+    userIdentity: deserializeUserIdentity(input["userIdentity"]) as any,
+    runExclusive: passthroughDeserializer(input["runExclusive"]) as any,
+    applicationPackageReferences: deserializeArray(
+      input["applicationPackageReferences"],
+      deserializeApplicationPackageReference,
+    ) as any,
+    authenticationTokenSettings: deserializeAuthenticationTokenSettings(
+      input["authenticationTokenSettings"],
+    ) as any,
+    allowLowPriorityNode: passthroughDeserializer(
+      input["allowLowPriorityNode"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeJobManagerTask = withNullChecks(
+  _deserializeJobManagerTask,
+);
+
+function _deserializeJobPreparationTask(
+  input: JobPreparationTaskOutput,
+): JobPreparationTask {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    commandLine: passthroughDeserializer(input["commandLine"]) as any,
+    containerSettings: deserializeTaskContainerSettings(
+      input["containerSettings"],
+    ) as any,
+    resourceFiles: deserializeArray(
+      input["resourceFiles"],
+      deserializeResourceFile,
+    ) as any,
+    environmentSettings: deserializeArray(
+      input["environmentSettings"],
+      deserializeEnvironmentSetting,
+    ) as any,
+    constraints: deserializeTaskConstraints(input["constraints"]) as any,
+    waitForSuccess: passthroughDeserializer(input["waitForSuccess"]) as any,
+    userIdentity: deserializeUserIdentity(input["userIdentity"]) as any,
+    rerunOnNodeRebootAfterSuccess: passthroughDeserializer(
+      input["rerunOnNodeRebootAfterSuccess"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeJobPreparationTask = withNullChecks(
+  _deserializeJobPreparationTask,
+);
+
+function _deserializeJobReleaseTask(
+  input: JobReleaseTaskOutput,
+): JobReleaseTask {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    commandLine: passthroughDeserializer(input["commandLine"]) as any,
+    containerSettings: deserializeTaskContainerSettings(
+      input["containerSettings"],
+    ) as any,
+    resourceFiles: deserializeArray(
+      input["resourceFiles"],
+      deserializeResourceFile,
+    ) as any,
+    environmentSettings: deserializeArray(
+      input["environmentSettings"],
+      deserializeEnvironmentSetting,
+    ) as any,
+    maxWallClockTime: deserializeStringDuration(
+      input["maxWallClockTime"],
+    ) as any,
+    retentionTime: deserializeStringDuration(input["retentionTime"]) as any,
+    userIdentity: deserializeUserIdentity(input["userIdentity"]) as any,
+  } as any;
+}
+
+export const deserializeJobReleaseTask = withNullChecks(
+  _deserializeJobReleaseTask,
+);
+
+function _deserializePoolInformation(
+  input: PoolInformationOutput,
+): PoolInformation {
+  return {
+    poolId: passthroughDeserializer(input["poolId"]) as any,
+    autoPoolSpecification: deserializeAutoPoolSpecification(
+      input["autoPoolSpecification"],
+    ) as any,
+  } as any;
+}
+
+export const deserializePoolInformation = withNullChecks(
+  _deserializePoolInformation,
+);
+
+function _deserializeAutoPoolSpecification(
+  input: AutoPoolSpecificationOutput,
+): AutoPoolSpecification {
+  return {
+    autoPoolIdPrefix: passthroughDeserializer(input["autoPoolIdPrefix"]) as any,
+    poolLifetimeOption: passthroughDeserializer(
+      input["poolLifetimeOption"],
+    ) as any,
+    keepAlive: passthroughDeserializer(input["keepAlive"]) as any,
+    pool: deserializePoolSpecification(input["pool"]) as any,
+  } as any;
+}
+
+export const deserializeAutoPoolSpecification = withNullChecks(
+  _deserializeAutoPoolSpecification,
+);
+
+function _deserializePoolSpecification(
+  input: PoolSpecificationOutput,
+): PoolSpecification {
+  return {
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    vmSize: passthroughDeserializer(input["vmSize"]) as any,
+    cloudServiceConfiguration: deserializeCloudServiceConfiguration(
+      input["cloudServiceConfiguration"],
+    ) as any,
+    virtualMachineConfiguration: deserializeVirtualMachineConfiguration(
+      input["virtualMachineConfiguration"],
+    ) as any,
+    taskSlotsPerNode: passthroughDeserializer(input["taskSlotsPerNode"]) as any,
+    taskSchedulingPolicy: deserializeTaskSchedulingPolicy(
+      input["taskSchedulingPolicy"],
+    ) as any,
+    resizeTimeout: deserializeStringDuration(input["resizeTimeout"]) as any,
+    targetDedicatedNodes: passthroughDeserializer(
+      input["targetDedicatedNodes"],
+    ) as any,
+    targetLowPriorityNodes: passthroughDeserializer(
+      input["targetLowPriorityNodes"],
+    ) as any,
+    enableAutoScale: passthroughDeserializer(input["enableAutoScale"]) as any,
+    autoScaleFormula: passthroughDeserializer(input["autoScaleFormula"]) as any,
+    autoScaleEvaluationInterval: deserializeStringDuration(
+      input["autoScaleEvaluationInterval"],
+    ) as any,
+    enableInterNodeCommunication: passthroughDeserializer(
+      input["enableInterNodeCommunication"],
+    ) as any,
+    networkConfiguration: deserializeNetworkConfiguration(
+      input["networkConfiguration"],
+    ) as any,
+    startTask: deserializeStartTask(input["startTask"]) as any,
+    certificateReferences: deserializeArray(
+      input["certificateReferences"],
+      deserializeCertificateReference,
+    ) as any,
+    applicationPackageReferences: deserializeArray(
+      input["applicationPackageReferences"],
+      deserializeApplicationPackageReference,
+    ) as any,
+    applicationLicenses: deserializeArray(
+      input["applicationLicenses"],
+      passthroughDeserializer,
+    ) as any,
+    userAccounts: deserializeArray(
+      input["userAccounts"],
+      deserializeUserAccount,
+    ) as any,
+    metadata: deserializeArray(
+      input["metadata"],
+      deserializeMetadataItem,
+    ) as any,
+    mountConfiguration: deserializeArray(
+      input["mountConfiguration"],
+      deserializeMountConfiguration,
+    ) as any,
+    targetNodeCommunicationMode: passthroughDeserializer(
+      input["targetNodeCommunicationMode"],
+    ) as any,
+  } as any;
+}
+
+export const deserializePoolSpecification = withNullChecks(
+  _deserializePoolSpecification,
+);
+
+function _deserializeCloudServiceConfiguration(
+  input: CloudServiceConfigurationOutput,
+): CloudServiceConfiguration {
+  return {
+    osFamily: passthroughDeserializer(input["osFamily"]) as any,
+    osVersion: passthroughDeserializer(input["osVersion"]) as any,
+  } as any;
+}
+
+export const deserializeCloudServiceConfiguration = withNullChecks(
+  _deserializeCloudServiceConfiguration,
+);
+
+function _deserializeVirtualMachineConfiguration(
+  input: VirtualMachineConfigurationOutput,
+): VirtualMachineConfiguration {
+  return {
+    imageReference: deserializeImageReference(input["imageReference"]) as any,
+    nodeAgentSkuId: passthroughDeserializer(input["nodeAgentSKUId"]) as any,
+    windowsConfiguration: deserializeWindowsConfiguration(
+      input["windowsConfiguration"],
+    ) as any,
+    dataDisks: deserializeArray(input["dataDisks"], deserializeDataDisk) as any,
+    licenseType: passthroughDeserializer(input["licenseType"]) as any,
+    containerConfiguration: deserializeContainerConfiguration(
+      input["containerConfiguration"],
+    ) as any,
+    diskEncryptionConfiguration: deserializeDiskEncryptionConfiguration(
+      input["diskEncryptionConfiguration"],
+    ) as any,
+    nodePlacementConfiguration: deserializeNodePlacementConfiguration(
+      input["nodePlacementConfiguration"],
+    ) as any,
+    extensions: deserializeArray(
+      input["extensions"],
+      deserializeVMExtension,
+    ) as any,
+    osDisk: deserializeOSDisk(input["osDisk"]) as any,
+  } as any;
+}
+
+export const deserializeVirtualMachineConfiguration = withNullChecks(
+  _deserializeVirtualMachineConfiguration,
+);
+
+function _deserializeWindowsConfiguration(
+  input: WindowsConfigurationOutput,
+): WindowsConfiguration {
+  return {
+    enableAutomaticUpdates: passthroughDeserializer(
+      input["enableAutomaticUpdates"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeWindowsConfiguration = withNullChecks(
+  _deserializeWindowsConfiguration,
+);
+
+function _deserializeDataDisk(input: DataDiskOutput): DataDisk {
+  return {
+    lun: passthroughDeserializer(input["lun"]) as any,
+    caching: passthroughDeserializer(input["caching"]) as any,
+    diskSizeGb: passthroughDeserializer(input["diskSizeGB"]) as any,
+    storageAccountType: passthroughDeserializer(
+      input["storageAccountType"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeDataDisk = withNullChecks(_deserializeDataDisk);
+
+function _deserializeContainerConfiguration(
+  input: ContainerConfigurationOutput,
+): ContainerConfiguration {
+  return {
+    type: passthroughDeserializer(input["type"]) as any,
+    containerImageNames: deserializeArray(
+      input["containerImageNames"],
+      passthroughDeserializer,
+    ) as any,
+    containerRegistries: deserializeArray(
+      input["containerRegistries"],
+      deserializeContainerRegistry,
+    ) as any,
+  } as any;
+}
+
+export const deserializeContainerConfiguration = withNullChecks(
+  _deserializeContainerConfiguration,
+);
+
+function _deserializeDiskEncryptionConfiguration(
+  input: DiskEncryptionConfigurationOutput,
+): DiskEncryptionConfiguration {
+  return {
+    targets: deserializeArray(input["targets"], passthroughDeserializer) as any,
+  } as any;
+}
+
+export const deserializeDiskEncryptionConfiguration = withNullChecks(
+  _deserializeDiskEncryptionConfiguration,
+);
+
+function _deserializeNodePlacementConfiguration(
+  input: NodePlacementConfigurationOutput,
+): NodePlacementConfiguration {
+  return {
+    policy: passthroughDeserializer(input["policy"]) as any,
+  } as any;
+}
+
+export const deserializeNodePlacementConfiguration = withNullChecks(
+  _deserializeNodePlacementConfiguration,
+);
+
+function _deserializeOSDisk(input: OSDiskOutput): OSDisk {
+  return {
+    ephemeralOSDiskSettings: deserializeDiffDiskSettings(
+      input["ephemeralOSDiskSettings"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeOSDisk = withNullChecks(_deserializeOSDisk);
+
+function _deserializeDiffDiskSettings(
+  input: DiffDiskSettingsOutput,
+): DiffDiskSettings {
+  return {
+    placement: passthroughDeserializer(input["placement"]) as any,
+  } as any;
+}
+
+export const deserializeDiffDiskSettings = withNullChecks(
+  _deserializeDiffDiskSettings,
+);
+
+function _deserializeTaskSchedulingPolicy(
+  input: TaskSchedulingPolicyOutput,
+): TaskSchedulingPolicy {
+  return {
+    nodeFillType: passthroughDeserializer(input["nodeFillType"]) as any,
+  } as any;
+}
+
+export const deserializeTaskSchedulingPolicy = withNullChecks(
+  _deserializeTaskSchedulingPolicy,
+);
+
+function _deserializeNetworkConfiguration(
+  input: NetworkConfigurationOutput,
+): NetworkConfiguration {
+  return {
+    subnetId: passthroughDeserializer(input["subnetId"]) as any,
+    dynamicVNetAssignmentScope: passthroughDeserializer(
+      input["dynamicVNetAssignmentScope"],
+    ) as any,
+    endpointConfiguration: deserializePoolEndpointConfiguration(
+      input["endpointConfiguration"],
+    ) as any,
+    publicIpAddressConfiguration: deserializePublicIpAddressConfiguration(
+      input["publicIPAddressConfiguration"],
+    ) as any,
+    enableAcceleratedNetworking: passthroughDeserializer(
+      input["enableAcceleratedNetworking"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeNetworkConfiguration = withNullChecks(
+  _deserializeNetworkConfiguration,
+);
+
+function _deserializePoolEndpointConfiguration(
+  input: PoolEndpointConfigurationOutput,
+): PoolEndpointConfiguration {
+  return {
+    inboundNatPools: deserializeArray(
+      input["inboundNATPools"],
+      deserializeInboundNATPool,
+    ) as any,
+  } as any;
+}
+
+export const deserializePoolEndpointConfiguration = withNullChecks(
+  _deserializePoolEndpointConfiguration,
+);
+
+function _deserializeInboundNATPool(
+  input: InboundNATPoolOutput,
+): InboundNATPool {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    protocol: passthroughDeserializer(input["protocol"]) as any,
+    backendPort: passthroughDeserializer(input["backendPort"]) as any,
+    frontendPortRangeStart: passthroughDeserializer(
+      input["frontendPortRangeStart"],
+    ) as any,
+    frontendPortRangeEnd: passthroughDeserializer(
+      input["frontendPortRangeEnd"],
+    ) as any,
+    networkSecurityGroupRules: deserializeArray(
+      input["networkSecurityGroupRules"],
+      deserializeNetworkSecurityGroupRule,
+    ) as any,
+  } as any;
+}
+
+export const deserializeInboundNATPool = withNullChecks(
+  _deserializeInboundNATPool,
+);
+
+function _deserializeNetworkSecurityGroupRule(
+  input: NetworkSecurityGroupRuleOutput,
+): NetworkSecurityGroupRule {
+  return {
+    priority: passthroughDeserializer(input["priority"]) as any,
+    access: passthroughDeserializer(input["access"]) as any,
+    sourceAddressPrefix: passthroughDeserializer(
+      input["sourceAddressPrefix"],
+    ) as any,
+    sourcePortRanges: deserializeArray(
+      input["sourcePortRanges"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeNetworkSecurityGroupRule = withNullChecks(
+  _deserializeNetworkSecurityGroupRule,
+);
+
+function _deserializePublicIpAddressConfiguration(
+  input: PublicIPAddressConfigurationOutput,
+): PublicIpAddressConfiguration {
+  return {
+    ipAddressProvisioningType: passthroughDeserializer(
+      input["provision"],
+    ) as any,
+    ipAddressIds: deserializeArray(
+      input["ipAddressIds"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializePublicIpAddressConfiguration = withNullChecks(
+  _deserializePublicIpAddressConfiguration,
+);
+
+function _deserializeUserAccount(input: UserAccountOutput): UserAccount {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    password: passthroughDeserializer(input["password"]) as any,
+    elevationLevel: passthroughDeserializer(input["elevationLevel"]) as any,
+    linuxUserConfiguration: deserializeLinuxUserConfiguration(
+      input["linuxUserConfiguration"],
+    ) as any,
+    windowsUserConfiguration: deserializeWindowsUserConfiguration(
+      input["windowsUserConfiguration"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeUserAccount = withNullChecks(_deserializeUserAccount);
+
+function _deserializeLinuxUserConfiguration(
+  input: LinuxUserConfigurationOutput,
+): LinuxUserConfiguration {
+  return {
+    uid: passthroughDeserializer(input["uid"]) as any,
+    gid: passthroughDeserializer(input["gid"]) as any,
+    sshPrivateKey: passthroughDeserializer(input["sshPrivateKey"]) as any,
+  } as any;
+}
+
+export const deserializeLinuxUserConfiguration = withNullChecks(
+  _deserializeLinuxUserConfiguration,
+);
+
+function _deserializeWindowsUserConfiguration(
+  input: WindowsUserConfigurationOutput,
+): WindowsUserConfiguration {
+  return {
+    loginMode: passthroughDeserializer(input["loginMode"]) as any,
+  } as any;
+}
+
+export const deserializeWindowsUserConfiguration = withNullChecks(
+  _deserializeWindowsUserConfiguration,
+);
+
+function _deserializeMetadataItem(input: MetadataItemOutput): MetadataItem {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    value: passthroughDeserializer(input["value"]) as any,
+  } as any;
+}
+
+export const deserializeMetadataItem = withNullChecks(_deserializeMetadataItem);
+
+function _deserializeMountConfiguration(
+  input: MountConfigurationOutput,
+): MountConfiguration {
+  return {
+    azureBlobFileSystemConfiguration:
+      deserializeAzureBlobFileSystemConfiguration(
+        input["azureBlobFileSystemConfiguration"],
+      ) as any,
+    nfsMountConfiguration: deserializeNfsMountConfiguration(
+      input["nfsMountConfiguration"],
+    ) as any,
+    cifsMountConfiguration: deserializeCifsMountConfiguration(
+      input["cifsMountConfiguration"],
+    ) as any,
+    azureFileShareConfiguration: deserializeAzureFileShareConfiguration(
+      input["azureFileShareConfiguration"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeMountConfiguration = withNullChecks(
+  _deserializeMountConfiguration,
+);
+
+function _deserializeAzureBlobFileSystemConfiguration(
+  input: AzureBlobFileSystemConfigurationOutput,
+): AzureBlobFileSystemConfiguration {
+  return {
+    accountName: passthroughDeserializer(input["accountName"]) as any,
+    containerName: passthroughDeserializer(input["containerName"]) as any,
+    accountKey: passthroughDeserializer(input["accountKey"]) as any,
+    sasKey: passthroughDeserializer(input["sasKey"]) as any,
+    blobfuseOptions: passthroughDeserializer(input["blobfuseOptions"]) as any,
+    relativeMountPath: passthroughDeserializer(
+      input["relativeMountPath"],
+    ) as any,
+    identityReference: deserializeBatchNodeIdentityReference(
+      input["identityReference"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeAzureBlobFileSystemConfiguration = withNullChecks(
+  _deserializeAzureBlobFileSystemConfiguration,
+);
+
+function _deserializeNfsMountConfiguration(
+  input: NFSMountConfigurationOutput,
+): NfsMountConfiguration {
+  return {
+    source: passthroughDeserializer(input["source"]) as any,
+    relativeMountPath: passthroughDeserializer(
+      input["relativeMountPath"],
+    ) as any,
+    mountOptions: passthroughDeserializer(input["mountOptions"]) as any,
+  } as any;
+}
+
+export const deserializeNfsMountConfiguration = withNullChecks(
+  _deserializeNfsMountConfiguration,
+);
+
+function _deserializeCifsMountConfiguration(
+  input: CifsMountConfigurationOutput,
+): CifsMountConfiguration {
+  return {
+    username: passthroughDeserializer(input["username"]) as any,
+    source: passthroughDeserializer(input["source"]) as any,
+    relativeMountPath: passthroughDeserializer(
+      input["relativeMountPath"],
+    ) as any,
+    mountOptions: passthroughDeserializer(input["mountOptions"]) as any,
+    password: passthroughDeserializer(input["password"]) as any,
+  } as any;
+}
+
+export const deserializeCifsMountConfiguration = withNullChecks(
+  _deserializeCifsMountConfiguration,
+);
+
+function _deserializeAzureFileShareConfiguration(
+  input: AzureFileShareConfigurationOutput,
+): AzureFileShareConfiguration {
+  return {
+    accountName: passthroughDeserializer(input["accountName"]) as any,
+    azureFileUrl: passthroughDeserializer(input["azureFileUrl"]) as any,
+    accountKey: passthroughDeserializer(input["accountKey"]) as any,
+    relativeMountPath: passthroughDeserializer(
+      input["relativeMountPath"],
+    ) as any,
+    mountOptions: passthroughDeserializer(input["mountOptions"]) as any,
+  } as any;
+}
+
+export const deserializeAzureFileShareConfiguration = withNullChecks(
+  _deserializeAzureFileShareConfiguration,
+);
+
+function _deserializeJobScheduleExecutionInformation(
+  input: JobScheduleExecutionInformationOutput,
+): JobScheduleExecutionInformation {
+  return {
+    nextRunTime: deserializeUtcDateTime(input["nextRunTime"]) as any,
+    recentJob: deserializeRecentJob(input["recentJob"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+  } as any;
+}
+
+export const deserializeJobScheduleExecutionInformation = withNullChecks(
+  _deserializeJobScheduleExecutionInformation,
+);
+
+function _deserializeRecentJob(input: RecentJobOutput): RecentJob {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    url: passthroughDeserializer(input["url"]) as any,
+  } as any;
+}
+
+export const deserializeRecentJob = withNullChecks(_deserializeRecentJob);
+
+function _deserializeJobScheduleStatistics(
+  input: JobScheduleStatisticsOutput,
+): JobScheduleStatistics {
+  return {
+    url: passthroughDeserializer(input["url"]) as any,
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    lastUpdateTime: deserializeUtcDateTime(input["lastUpdateTime"]) as any,
+    userCPUTime: deserializeStringDuration(input["userCPUTime"]) as any,
+    kernelCPUTime: deserializeStringDuration(input["kernelCPUTime"]) as any,
+    wallClockTime: deserializeStringDuration(input["wallClockTime"]) as any,
+    readIOps: passthroughDeserializer(input["readIOps"]) as any,
+    writeIOps: passthroughDeserializer(input["writeIOps"]) as any,
+    readIOGiB: passthroughDeserializer(input["readIOGiB"]) as any,
+    writeIOGiB: passthroughDeserializer(input["writeIOGiB"]) as any,
+    numSucceededTasks: passthroughDeserializer(
+      input["numSucceededTasks"],
+    ) as any,
+    numFailedTasks: passthroughDeserializer(input["numFailedTasks"]) as any,
+    numTaskRetries: passthroughDeserializer(input["numTaskRetries"]) as any,
+    waitTime: deserializeStringDuration(input["waitTime"]) as any,
+  } as any;
+}
+
+export const deserializeJobScheduleStatistics = withNullChecks(
+  _deserializeJobScheduleStatistics,
+);
+
+function _deserializeBatchCertificate(
+  input: BatchCertificateOutput,
+): BatchCertificate {
+  return {
+    thumbprint: passthroughDeserializer(input["thumbprint"]) as any,
+    thumbprintAlgorithm: passthroughDeserializer(
+      input["thumbprintAlgorithm"],
+    ) as any,
+    url: passthroughDeserializer(input["url"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    stateTransitionTime: deserializeUtcDateTime(
+      input["stateTransitionTime"],
+    ) as any,
+    previousState: passthroughDeserializer(input["previousState"]) as any,
+    previousStateTransitionTime: deserializeUtcDateTime(
+      input["previousStateTransitionTime"],
+    ) as any,
+    publicData: deserializeBytes(input["publicData"], "base64") as any,
+    deleteCertificateError: deserializeDeleteCertificateError(
+      input["deleteCertificateError"],
+    ) as any,
+    data: deserializeBytes(input["data"], "base64") as any,
+    certificateFormat: passthroughDeserializer(
+      input["certificateFormat"],
+    ) as any,
+    password: passthroughDeserializer(input["password"]) as any,
+  } as any;
+}
+
+export const deserializeBatchCertificate = withNullChecks(
+  _deserializeBatchCertificate,
+);
+
+function _deserializeDeleteCertificateError(
+  input: DeleteCertificateErrorOutput,
+): DeleteCertificateError {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+    values: deserializeArray(input["values"], deserializeNameValuePair) as any,
+  } as any;
+}
+
+export const deserializeDeleteCertificateError = withNullChecks(
+  _deserializeDeleteCertificateError,
+);
+
+function _deserializeBatchJob(input: BatchJobOutput): BatchJob {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    usesTaskDependencies: passthroughDeserializer(
+      input["usesTaskDependencies"],
+    ) as any,
+    url: passthroughDeserializer(input["url"]) as any,
+    eTag: passthroughDeserializer(input["eTag"]) as any,
+    lastModified: deserializeUtcDateTime(input["lastModified"]) as any,
+    creationTime: deserializeUtcDateTime(input["creationTime"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    stateTransitionTime: deserializeUtcDateTime(
+      input["stateTransitionTime"],
+    ) as any,
+    previousState: passthroughDeserializer(input["previousState"]) as any,
+    previousStateTransitionTime: deserializeUtcDateTime(
+      input["previousStateTransitionTime"],
+    ) as any,
+    priority: passthroughDeserializer(input["priority"]) as any,
+    allowTaskPreemption: passthroughDeserializer(
+      input["allowTaskPreemption"],
+    ) as any,
+    maxParallelTasks: passthroughDeserializer(input["maxParallelTasks"]) as any,
+    constraints: deserializeJobConstraints(input["constraints"]) as any,
+    jobManagerTask: deserializeJobManagerTask(input["jobManagerTask"]) as any,
+    jobPreparationTask: deserializeJobPreparationTask(
+      input["jobPreparationTask"],
+    ) as any,
+    jobReleaseTask: deserializeJobReleaseTask(input["jobReleaseTask"]) as any,
+    commonEnvironmentSettings: deserializeArray(
+      input["commonEnvironmentSettings"],
+      deserializeEnvironmentSetting,
+    ) as any,
+    poolInfo: deserializePoolInformation(input["poolInfo"]) as any,
+    onAllTasksComplete: passthroughDeserializer(
+      input["onAllTasksComplete"],
+    ) as any,
+    onTaskFailure: passthroughDeserializer(input["onTaskFailure"]) as any,
+    networkConfiguration: deserializeJobNetworkConfiguration(
+      input["networkConfiguration"],
+    ) as any,
+    metadata: deserializeArray(
+      input["metadata"],
+      deserializeMetadataItem,
+    ) as any,
+    executionInfo: deserializeJobExecutionInformation(
+      input["executionInfo"],
+    ) as any,
+    stats: deserializeJobStatistics(input["stats"]) as any,
+  } as any;
+}
+
+export const deserializeBatchJob = withNullChecks(_deserializeBatchJob);
+
+function _deserializeJobExecutionInformation(
+  input: JobExecutionInformationOutput,
+): JobExecutionInformation {
+  return {
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+    poolId: passthroughDeserializer(input["poolId"]) as any,
+    schedulingError: deserializeJobSchedulingError(
+      input["schedulingError"],
+    ) as any,
+    terminateReason: passthroughDeserializer(input["terminateReason"]) as any,
+  } as any;
+}
+
+export const deserializeJobExecutionInformation = withNullChecks(
+  _deserializeJobExecutionInformation,
+);
+
+function _deserializeJobSchedulingError(
+  input: JobSchedulingErrorOutput,
+): JobSchedulingError {
+  return {
+    category: passthroughDeserializer(input["category"]) as any,
+    code: passthroughDeserializer(input["code"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+    details: deserializeArray(
+      input["details"],
+      deserializeNameValuePair,
+    ) as any,
+  } as any;
+}
+
+export const deserializeJobSchedulingError = withNullChecks(
+  _deserializeJobSchedulingError,
+);
+
+function _deserializeJobStatistics(input: JobStatisticsOutput): JobStatistics {
+  return {
+    url: passthroughDeserializer(input["url"]) as any,
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    lastUpdateTime: deserializeUtcDateTime(input["lastUpdateTime"]) as any,
+    userCPUTime: deserializeStringDuration(input["userCPUTime"]) as any,
+    kernelCPUTime: deserializeStringDuration(input["kernelCPUTime"]) as any,
+    wallClockTime: deserializeStringDuration(input["wallClockTime"]) as any,
+    readIOps: passthroughDeserializer(input["readIOps"]) as any,
+    writeIOps: passthroughDeserializer(input["writeIOps"]) as any,
+    readIOGiB: passthroughDeserializer(input["readIOGiB"]) as any,
+    writeIOGiB: passthroughDeserializer(input["writeIOGiB"]) as any,
+    numSucceededTasks: passthroughDeserializer(
+      input["numSucceededTasks"],
+    ) as any,
+    numFailedTasks: passthroughDeserializer(input["numFailedTasks"]) as any,
+    numTaskRetries: passthroughDeserializer(input["numTaskRetries"]) as any,
+    waitTime: deserializeStringDuration(input["waitTime"]) as any,
+  } as any;
+}
+
+export const deserializeJobStatistics = withNullChecks(
+  _deserializeJobStatistics,
+);
+
+function _deserializeJobPreparationAndReleaseTaskExecutionInformation(
+  input: JobPreparationAndReleaseTaskExecutionInformationOutput,
+): JobPreparationAndReleaseTaskExecutionInformation {
+  return {
+    poolId: passthroughDeserializer(input["poolId"]) as any,
+    nodeId: passthroughDeserializer(input["nodeId"]) as any,
+    nodeUrl: passthroughDeserializer(input["nodeUrl"]) as any,
+    jobPreparationTaskExecutionInfo:
+      deserializeJobPreparationTaskExecutionInformation(
+        input["jobPreparationTaskExecutionInfo"],
+      ) as any,
+    jobReleaseTaskExecutionInfo: deserializeJobReleaseTaskExecutionInformation(
+      input["jobReleaseTaskExecutionInfo"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeJobPreparationAndReleaseTaskExecutionInformation =
+  withNullChecks(_deserializeJobPreparationAndReleaseTaskExecutionInformation);
+
+function _deserializeJobPreparationTaskExecutionInformation(
+  input: JobPreparationTaskExecutionInformationOutput,
+): JobPreparationTaskExecutionInformation {
+  return {
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    taskRootDirectory: passthroughDeserializer(
+      input["taskRootDirectory"],
+    ) as any,
+    taskRootDirectoryUrl: passthroughDeserializer(
+      input["taskRootDirectoryUrl"],
+    ) as any,
+    exitCode: passthroughDeserializer(input["exitCode"]) as any,
+    containerInfo: deserializeTaskContainerExecutionInformation(
+      input["containerInfo"],
+    ) as any,
+    failureInfo: deserializeTaskFailureInformation(input["failureInfo"]) as any,
+    retryCount: passthroughDeserializer(input["retryCount"]) as any,
+    lastRetryTime: deserializeUtcDateTime(input["lastRetryTime"]) as any,
+    result: passthroughDeserializer(input["result"]) as any,
+  } as any;
+}
+
+export const deserializeJobPreparationTaskExecutionInformation = withNullChecks(
+  _deserializeJobPreparationTaskExecutionInformation,
+);
+
+function _deserializeJobReleaseTaskExecutionInformation(
+  input: JobReleaseTaskExecutionInformationOutput,
+): JobReleaseTaskExecutionInformation {
+  return {
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    taskRootDirectory: passthroughDeserializer(
+      input["taskRootDirectory"],
+    ) as any,
+    taskRootDirectoryUrl: passthroughDeserializer(
+      input["taskRootDirectoryUrl"],
+    ) as any,
+    exitCode: passthroughDeserializer(input["exitCode"]) as any,
+    containerInfo: deserializeTaskContainerExecutionInformation(
+      input["containerInfo"],
+    ) as any,
+    failureInfo: deserializeTaskFailureInformation(input["failureInfo"]) as any,
+    result: passthroughDeserializer(input["result"]) as any,
+  } as any;
+}
+
+export const deserializeJobReleaseTaskExecutionInformation = withNullChecks(
+  _deserializeJobReleaseTaskExecutionInformation,
+);
+
+function _deserializeTaskCounts(input: TaskCountsOutput): TaskCounts {
+  return {
+    active: passthroughDeserializer(input["active"]) as any,
+    running: passthroughDeserializer(input["running"]) as any,
+    completed: passthroughDeserializer(input["completed"]) as any,
+    succeeded: passthroughDeserializer(input["succeeded"]) as any,
+    failed: passthroughDeserializer(input["failed"]) as any,
+  } as any;
+}
+
+export const deserializeTaskCounts = withNullChecks(_deserializeTaskCounts);
+
+function _deserializeTaskSlotCounts(
+  input: TaskSlotCountsOutput,
+): TaskSlotCounts {
+  return {
+    active: passthroughDeserializer(input["active"]) as any,
+    running: passthroughDeserializer(input["running"]) as any,
+    completed: passthroughDeserializer(input["completed"]) as any,
+    succeeded: passthroughDeserializer(input["succeeded"]) as any,
+    failed: passthroughDeserializer(input["failed"]) as any,
+  } as any;
+}
+
+export const deserializeTaskSlotCounts = withNullChecks(
+  _deserializeTaskSlotCounts,
+);
+
+function _deserializeImageInformation(
+  input: ImageInformationOutput,
+): ImageInformation {
+  return {
+    nodeAgentSkuId: passthroughDeserializer(input["nodeAgentSKUId"]) as any,
+    imageReference: deserializeImageReference(input["imageReference"]) as any,
+    osType: passthroughDeserializer(input["osType"]) as any,
+    capabilities: deserializeArray(
+      input["capabilities"],
+      passthroughDeserializer,
+    ) as any,
+    batchSupportEndOfLife: deserializeUtcDateTime(
+      input["batchSupportEndOfLife"],
+    ) as any,
+    verificationType: passthroughDeserializer(input["verificationType"]) as any,
+  } as any;
+}
+
+export const deserializeImageInformation = withNullChecks(
+  _deserializeImageInformation,
+);
+
+function _deserializePoolNodeCounts(
+  input: PoolNodeCountsOutput,
+): PoolNodeCounts {
+  return {
+    poolId: passthroughDeserializer(input["poolId"]) as any,
+    dedicated: deserializeNodeCounts(input["dedicated"]) as any,
+    lowPriority: deserializeNodeCounts(input["lowPriority"]) as any,
+  } as any;
+}
+
+export const deserializePoolNodeCounts = withNullChecks(
+  _deserializePoolNodeCounts,
+);
+
+function _deserializeNodeCounts(input: NodeCountsOutput): NodeCounts {
+  return {
+    creating: passthroughDeserializer(input["creating"]) as any,
+    idle: passthroughDeserializer(input["idle"]) as any,
+    offline: passthroughDeserializer(input["offline"]) as any,
+    preempted: passthroughDeserializer(input["preempted"]) as any,
+    rebooting: passthroughDeserializer(input["rebooting"]) as any,
+    reimaging: passthroughDeserializer(input["reimaging"]) as any,
+    running: passthroughDeserializer(input["running"]) as any,
+    starting: passthroughDeserializer(input["starting"]) as any,
+    startTaskFailed: passthroughDeserializer(input["startTaskFailed"]) as any,
+    leavingPool: passthroughDeserializer(input["leavingPool"]) as any,
+    unknown: passthroughDeserializer(input["unknown"]) as any,
+    unusable: passthroughDeserializer(input["unusable"]) as any,
+    waitingForStartTask: passthroughDeserializer(
+      input["waitingForStartTask"],
+    ) as any,
+    total: passthroughDeserializer(input["total"]) as any,
+  } as any;
+}
+
+export const deserializeNodeCounts = withNullChecks(_deserializeNodeCounts);
+
+function _deserializePoolUsageMetrics(
+  input: PoolUsageMetricsOutput,
+): PoolUsageMetrics {
+  return {
+    poolId: passthroughDeserializer(input["poolId"]) as any,
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+    vmSize: passthroughDeserializer(input["vmSize"]) as any,
+    totalCoreHours: passthroughDeserializer(input["totalCoreHours"]) as any,
+  } as any;
+}
+
+export const deserializePoolUsageMetrics = withNullChecks(
+  _deserializePoolUsageMetrics,
+);
+
+function _deserializeBatchPool(input: BatchPoolOutput): BatchPool {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    url: passthroughDeserializer(input["url"]) as any,
+    eTag: passthroughDeserializer(input["eTag"]) as any,
+    lastModified: deserializeUtcDateTime(input["lastModified"]) as any,
+    creationTime: deserializeUtcDateTime(input["creationTime"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+    stateTransitionTime: deserializeUtcDateTime(
+      input["stateTransitionTime"],
+    ) as any,
+    allocationState: passthroughDeserializer(input["allocationState"]) as any,
+    allocationStateTransitionTime: deserializeUtcDateTime(
+      input["allocationStateTransitionTime"],
+    ) as any,
+    vmSize: passthroughDeserializer(input["vmSize"]) as any,
+    cloudServiceConfiguration: deserializeCloudServiceConfiguration(
+      input["cloudServiceConfiguration"],
+    ) as any,
+    virtualMachineConfiguration: deserializeVirtualMachineConfiguration(
+      input["virtualMachineConfiguration"],
+    ) as any,
+    resizeTimeout: deserializeStringDuration(input["resizeTimeout"]) as any,
+    resizeErrors: deserializeArray(
+      input["resizeErrors"],
+      deserializeResizeError,
+    ) as any,
+    currentDedicatedNodes: passthroughDeserializer(
+      input["currentDedicatedNodes"],
+    ) as any,
+    currentLowPriorityNodes: passthroughDeserializer(
+      input["currentLowPriorityNodes"],
+    ) as any,
+    targetDedicatedNodes: passthroughDeserializer(
+      input["targetDedicatedNodes"],
+    ) as any,
+    targetLowPriorityNodes: passthroughDeserializer(
+      input["targetLowPriorityNodes"],
+    ) as any,
+    enableAutoScale: passthroughDeserializer(input["enableAutoScale"]) as any,
+    autoScaleFormula: passthroughDeserializer(input["autoScaleFormula"]) as any,
+    autoScaleEvaluationInterval: deserializeStringDuration(
+      input["autoScaleEvaluationInterval"],
+    ) as any,
+    autoScaleRun: deserializeAutoScaleRun(input["autoScaleRun"]) as any,
+    enableInterNodeCommunication: passthroughDeserializer(
+      input["enableInterNodeCommunication"],
+    ) as any,
+    networkConfiguration: deserializeNetworkConfiguration(
+      input["networkConfiguration"],
+    ) as any,
+    startTask: deserializeStartTask(input["startTask"]) as any,
+    certificateReferences: deserializeArray(
+      input["certificateReferences"],
+      deserializeCertificateReference,
+    ) as any,
+    applicationPackageReferences: deserializeArray(
+      input["applicationPackageReferences"],
+      deserializeApplicationPackageReference,
+    ) as any,
+    applicationLicenses: deserializeArray(
+      input["applicationLicenses"],
+      passthroughDeserializer,
+    ) as any,
+    taskSlotsPerNode: passthroughDeserializer(input["taskSlotsPerNode"]) as any,
+    taskSchedulingPolicy: deserializeTaskSchedulingPolicy(
+      input["taskSchedulingPolicy"],
+    ) as any,
+    userAccounts: deserializeArray(
+      input["userAccounts"],
+      deserializeUserAccount,
+    ) as any,
+    metadata: deserializeArray(
+      input["metadata"],
+      deserializeMetadataItem,
+    ) as any,
+    stats: deserializePoolStatistics(input["stats"]) as any,
+    mountConfiguration: deserializeArray(
+      input["mountConfiguration"],
+      deserializeMountConfiguration,
+    ) as any,
+    identity: deserializeBatchPoolIdentity(input["identity"]) as any,
+    targetNodeCommunicationMode: passthroughDeserializer(
+      input["targetNodeCommunicationMode"],
+    ) as any,
+    currentNodeCommunicationMode: passthroughDeserializer(
+      input["currentNodeCommunicationMode"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeBatchPool = withNullChecks(_deserializeBatchPool);
+
+function _deserializeResizeError(input: ResizeErrorOutput): ResizeError {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+    values: deserializeArray(input["values"], deserializeNameValuePair) as any,
+  } as any;
+}
+
+export const deserializeResizeError = withNullChecks(_deserializeResizeError);
+
+function _deserializeAutoScaleRun(input: AutoScaleRunOutput): AutoScaleRun {
+  return {
+    timestamp: deserializeUtcDateTime(input["timestamp"]) as any,
+    results: passthroughDeserializer(input["results"]) as any,
+    error: deserializeAutoScaleRunError(input["error"]) as any,
+  } as any;
+}
+
+export const deserializeAutoScaleRun = withNullChecks(_deserializeAutoScaleRun);
+
+function _deserializeAutoScaleRunError(
+  input: AutoScaleRunErrorOutput,
+): AutoScaleRunError {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+    values: deserializeArray(input["values"], deserializeNameValuePair) as any,
+  } as any;
+}
+
+export const deserializeAutoScaleRunError = withNullChecks(
+  _deserializeAutoScaleRunError,
+);
+
+function _deserializePoolStatistics(
+  input: PoolStatisticsOutput,
+): PoolStatistics {
+  return {
+    url: passthroughDeserializer(input["url"]) as any,
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    lastUpdateTime: deserializeUtcDateTime(input["lastUpdateTime"]) as any,
+    usageStats: deserializeUsageStatistics(input["usageStats"]) as any,
+    resourceStats: deserializeResourceStatistics(input["resourceStats"]) as any,
+  } as any;
+}
+
+export const deserializePoolStatistics = withNullChecks(
+  _deserializePoolStatistics,
+);
+
+function _deserializeUsageStatistics(
+  input: UsageStatisticsOutput,
+): UsageStatistics {
+  return {
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    lastUpdateTime: deserializeUtcDateTime(input["lastUpdateTime"]) as any,
+    dedicatedCoreTime: deserializeStringDuration(
+      input["dedicatedCoreTime"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeUsageStatistics = withNullChecks(
+  _deserializeUsageStatistics,
+);
+
+function _deserializeResourceStatistics(
+  input: ResourceStatisticsOutput,
+): ResourceStatistics {
+  return {
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    lastUpdateTime: deserializeUtcDateTime(input["lastUpdateTime"]) as any,
+    avgCpuPercentage: passthroughDeserializer(input["avgCPUPercentage"]) as any,
+    avgMemoryGiB: passthroughDeserializer(input["avgMemoryGiB"]) as any,
+    peakMemoryGiB: passthroughDeserializer(input["peakMemoryGiB"]) as any,
+    avgDiskGiB: passthroughDeserializer(input["avgDiskGiB"]) as any,
+    peakDiskGiB: passthroughDeserializer(input["peakDiskGiB"]) as any,
+    diskReadIOps: passthroughDeserializer(input["diskReadIOps"]) as any,
+    diskWriteIOps: passthroughDeserializer(input["diskWriteIOps"]) as any,
+    diskReadGiB: passthroughDeserializer(input["diskReadGiB"]) as any,
+    diskWriteGiB: passthroughDeserializer(input["diskWriteGiB"]) as any,
+    networkReadGiB: passthroughDeserializer(input["networkReadGiB"]) as any,
+    networkWriteGiB: passthroughDeserializer(input["networkWriteGiB"]) as any,
+  } as any;
+}
+
+export const deserializeResourceStatistics = withNullChecks(
+  _deserializeResourceStatistics,
+);
+
+function _deserializeBatchPoolIdentity(
+  input: BatchPoolIdentityOutput,
+): BatchPoolIdentity {
+  return {
+    type: passthroughDeserializer(input["type"]) as any,
+    userAssignedIdentities: deserializeArray(
+      input["userAssignedIdentities"],
+      deserializeUserAssignedIdentity,
+    ) as any,
+  } as any;
+}
+
+export const deserializeBatchPoolIdentity = withNullChecks(
+  _deserializeBatchPoolIdentity,
+);
+
+function _deserializeUserAssignedIdentity(
+  input: UserAssignedIdentityOutput,
+): UserAssignedIdentity {
+  return {
+    resourceId: passthroughDeserializer(input["resourceId"]) as any,
+    clientId: passthroughDeserializer(input["clientId"]) as any,
+    principalId: passthroughDeserializer(input["principalId"]) as any,
+  } as any;
+}
+
+export const deserializeUserAssignedIdentity = withNullChecks(
+  _deserializeUserAssignedIdentity,
+);
+
+function _deserializeBatchApplication(
+  input: BatchApplicationOutput,
+): BatchApplication {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    versions: deserializeArray(
+      input["versions"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeBatchApplication = withNullChecks(
+  _deserializeBatchApplication,
+);

@@ -4,8 +4,8 @@
 export { RecursiveClient, RecursiveClientOptions } from "./recursiveClient.js";
 export {
   Element,
-  deserializeElement,
   Extension,
+  deserializeElement,
   deserializeExtension,
   PutOptionalParams,
   GetOptionalParams,

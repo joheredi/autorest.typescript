@@ -3,10 +3,10 @@
 
 export {
   Pet,
-  deserializePet,
   Cat,
-  deserializeCat,
   Siamese,
+  deserializePet,
+  deserializeCat,
   deserializeSiamese,
 } from "./models.js";
 export {

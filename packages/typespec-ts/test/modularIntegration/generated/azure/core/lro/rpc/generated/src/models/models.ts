@@ -5,8 +5,10 @@ import {
   passthroughDeserializer,
   withNullChecks,
 } from "../helpers/serializerHelpers.js";
-import { GenerationResultOutput } from "../rest/outputModels.js";
-import { GenerationOptions as GenerationOptionsRest } from "../rest/index.js";
+import {
+  GenerationOptions as GenerationOptionsRest,
+  GenerationResultOutput,
+} from "../rest/index.js";
 
 /** Options for the generation. */
 export interface GenerationOptions {
@@ -28,17 +30,17 @@ export interface GenerationResult {
   data: string;
 }
 
+/** The API version. */
+export type Versions = "2022-12-01-preview";
+
 function _deserializeGenerationResult(
   input: GenerationResultOutput,
 ): GenerationResult {
   return {
-    data: passthroughDeserializer(input["data"]),
-  };
+    data: passthroughDeserializer(input["data"]) as any,
+  } as any;
 }
 
 export const deserializeGenerationResult = withNullChecks(
   _deserializeGenerationResult,
 );
-
-/** The API version. */
-export type Versions = "2022-12-01-preview";

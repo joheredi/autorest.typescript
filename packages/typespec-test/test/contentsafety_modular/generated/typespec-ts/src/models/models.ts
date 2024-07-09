@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import {
+  passthroughDeserializer,
+  withNullChecks,
+} from "../helpers/serializerHelpers.js";
 import { uint8ArrayToString } from "@azure/core-util";
 import {
   TextBlocklist as TextBlocklistRest,
@@ -10,6 +14,11 @@ import {
   AnalyzeImageOptions as AnalyzeImageOptionsRest,
   ImageData as ImageDataRest,
   AnalyzeTextOptions as AnalyzeTextOptionsRest,
+  ImageAnalyzeSeverityResultOutput,
+  TextAnalyzeSeverityResultOutput,
+  TextBlockItemOutput,
+  TextBlocklistMatchResultOutput,
+  TextBlocklistOutput,
 } from "../rest/index.js";
 
 /** Text Blocklist. */
@@ -208,7 +217,7 @@ export interface TextAnalyzeSeverityResult {
 export type Versions = "2023-10-01";
 
 /** Paged collection of TextBlocklist items */
-export interface _PagedTextBlocklist {
+export interface PagedTextBlocklist {
   /** The TextBlocklist items on this page */
   value: TextBlocklist[];
   /** The link to the next page of items */
@@ -216,9 +225,72 @@ export interface _PagedTextBlocklist {
 }
 
 /** Paged collection of TextBlockItem items */
-export interface _PagedTextBlockItem {
+export interface PagedTextBlockItem {
   /** The TextBlockItem items on this page */
   value: TextBlockItem[];
   /** The link to the next page of items */
   nextLink?: string;
 }
+
+function _deserializeTextBlocklist(input: TextBlocklistOutput): TextBlocklist {
+  return {
+    blocklistName: passthroughDeserializer(input["blocklistName"]) as any,
+    description: passthroughDeserializer(input["description"]) as any,
+  } as any;
+}
+
+export const deserializeTextBlocklist = withNullChecks(
+  _deserializeTextBlocklist,
+);
+
+function _deserializeTextBlockItem(input: TextBlockItemOutput): TextBlockItem {
+  return {
+    blockItemId: passthroughDeserializer(input["blockItemId"]) as any,
+    description: passthroughDeserializer(input["description"]) as any,
+    text: passthroughDeserializer(input["text"]) as any,
+  } as any;
+}
+
+export const deserializeTextBlockItem = withNullChecks(
+  _deserializeTextBlockItem,
+);
+
+function _deserializeImageAnalyzeSeverityResult(
+  input: ImageAnalyzeSeverityResultOutput,
+): ImageAnalyzeSeverityResult {
+  return {
+    category: passthroughDeserializer(input["category"]) as any,
+    severity: passthroughDeserializer(input["severity"]) as any,
+  } as any;
+}
+
+export const deserializeImageAnalyzeSeverityResult = withNullChecks(
+  _deserializeImageAnalyzeSeverityResult,
+);
+
+function _deserializeTextBlocklistMatchResult(
+  input: TextBlocklistMatchResultOutput,
+): TextBlocklistMatchResult {
+  return {
+    blocklistName: passthroughDeserializer(input["blocklistName"]) as any,
+    blockItemId: passthroughDeserializer(input["blockItemId"]) as any,
+    blockItemText: passthroughDeserializer(input["blockItemText"]) as any,
+  } as any;
+}
+
+export const deserializeTextBlocklistMatchResult = withNullChecks(
+  _deserializeTextBlocklistMatchResult,
+);
+
+function _deserializeTextAnalyzeSeverityResult(
+  input: TextAnalyzeSeverityResultOutput,
+): TextAnalyzeSeverityResult {
+  return {
+    category: passthroughDeserializer(input["category"]) as any,
+    severity: passthroughDeserializer(input["severity"]) as any,
+  } as any;
+}
+
+export const deserializeTextAnalyzeSeverityResult = withNullChecks(
+  _deserializeTextAnalyzeSeverityResult,
+);

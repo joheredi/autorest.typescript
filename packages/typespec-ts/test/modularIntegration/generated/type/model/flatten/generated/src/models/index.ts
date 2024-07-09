@@ -3,12 +3,12 @@
 
 export {
   FlattenModel,
-  deserializeFlattenModel,
   ChildModel,
-  deserializeChildModel,
   NestedFlattenModel,
-  deserializeNestedFlattenModel,
   ChildFlattenModel,
+  deserializeFlattenModel,
+  deserializeChildModel,
+  deserializeNestedFlattenModel,
   deserializeChildFlattenModel,
 } from "./models.js";
 export {

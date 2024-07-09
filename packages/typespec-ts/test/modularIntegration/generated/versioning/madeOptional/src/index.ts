@@ -7,7 +7,7 @@ export {
 } from "./madeOptionalClient.js";
 export {
   TestModel,
-  deserializeTestModel,
   Versions,
+  deserializeTestModel,
   TestOptionalParams,
 } from "./models/index.js";

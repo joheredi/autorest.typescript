@@ -5,25 +5,15 @@ import {
   passthroughDeserializer,
   withNullChecks,
 } from "../helpers/serializerHelpers.js";
-import { JsonEncodedNameModelOutput } from "../rest/outputModels.js";
-import { JsonEncodedNameModel as JsonEncodedNameModelRest } from "../rest/index.js";
+import {
+  JsonEncodedNameModel as JsonEncodedNameModelRest,
+  JsonEncodedNameModelOutput,
+} from "../rest/index.js";
 
 export interface JsonEncodedNameModel {
   /** Pass in true */
   defaultName: boolean;
 }
-
-function _deserializeJsonEncodedNameModel(
-  input: JsonEncodedNameModelOutput,
-): JsonEncodedNameModel {
-  return {
-    defaultName: passthroughDeserializer(input["wireName"]),
-  };
-}
-
-export const deserializeJsonEncodedNameModel = withNullChecks(
-  _deserializeJsonEncodedNameModel,
-);
 
 export function jsonEncodedNameModelSerializer(
   item: JsonEncodedNameModel,
@@ -32,3 +22,15 @@ export function jsonEncodedNameModelSerializer(
     wireName: item["defaultName"],
   };
 }
+
+function _deserializeJsonEncodedNameModel(
+  input: JsonEncodedNameModelOutput,
+): JsonEncodedNameModel {
+  return {
+    defaultName: passthroughDeserializer(input["wireName"]) as any,
+  } as any;
+}
+
+export const deserializeJsonEncodedNameModel = withNullChecks(
+  _deserializeJsonEncodedNameModel,
+);

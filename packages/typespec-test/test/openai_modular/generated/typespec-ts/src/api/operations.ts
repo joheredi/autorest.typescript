@@ -48,8 +48,12 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import {
+  serializeRecord,
+  deserializeUtcDateTime,
+  deserializeNumericDuration,
+} from "../helpers/serializerHelpers.js";
 import { uint8ArrayToString } from "@azure/core-util";
-import { serializeRecord } from "../helpers/serializerHelpers.js";
 import {
   GetAudioTranscriptionAsPlainTextOptionalParams,
   GetAudioTranscriptionAsResponseObjectOptionalParams,
@@ -170,14 +174,14 @@ export async function _getAudioTranscriptionAsResponseObjectDeserialize(
     text: result.body["text"],
     task: result.body["task"],
     language: result.body["language"],
-    duration: result.body["duration"],
+    duration: deserializeNumericDuration(result.body["duration"]),
     segments:
       result.body["segments"] === undefined
         ? result.body["segments"]
         : result.body["segments"].map((p) => ({
             id: p["id"],
-            start: p["start"],
-            end: p["end"],
+            start: deserializeNumericDuration(p["start"]),
+            end: deserializeNumericDuration(p["end"]),
             text: p["text"],
             temperature: p["temperature"],
             avgLogprob: p["avg_logprob"],
@@ -313,14 +317,14 @@ export async function _getAudioTranslationAsResponseObjectDeserialize(
     text: result.body["text"],
     task: result.body["task"],
     language: result.body["language"],
-    duration: result.body["duration"],
+    duration: deserializeNumericDuration(result.body["duration"]),
     segments:
       result.body["segments"] === undefined
         ? result.body["segments"]
         : result.body["segments"].map((p) => ({
             id: p["id"],
-            start: p["start"],
-            end: p["end"],
+            start: deserializeNumericDuration(p["start"]),
+            end: deserializeNumericDuration(p["end"]),
             text: p["text"],
             temperature: p["temperature"],
             avgLogprob: p["avg_logprob"],
@@ -391,7 +395,7 @@ export async function _getCompletionsDeserialize(
 
   return {
     id: result.body["id"],
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     promptFilterResults:
       result.body["prompt_filter_results"] === undefined
         ? result.body["prompt_filter_results"]
@@ -629,7 +633,7 @@ export async function _getChatCompletionsDeserialize(
 
   return {
     id: result.body["id"],
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     choices: result.body["choices"].map((p) => ({
       message: !p.message
         ? undefined
@@ -933,7 +937,7 @@ export async function _getImageGenerationsDeserialize(
   }
 
   return {
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     data: result.body["data"].map((p) => ({
       url: p["url"],
       base64Data: p["b64_json"],

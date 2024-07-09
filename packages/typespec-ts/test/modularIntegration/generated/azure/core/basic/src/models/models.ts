@@ -7,16 +7,14 @@ import {
   deserializeArray,
 } from "../helpers/serializerHelpers.js";
 import {
+  User as UserRest,
+  UserOrder as UserOrderRest,
+  ListItemInputBody as ListItemInputBodyRest,
   FirstItemOutput,
   SecondItemOutput,
   UserListResultsOutput,
   UserOrderOutput,
   UserOutput,
-} from "../rest/outputModels.js";
-import {
-  User as UserRest,
-  UserOrder as UserOrderRest,
-  ListItemInputBody as ListItemInputBodyRest,
 } from "../rest/index.js";
 
 /** Details about a user. */
@@ -30,17 +28,6 @@ export interface User {
   /** The entity tag for this resource. */
   readonly etag: string;
 }
-
-function _deserializeUser(input: UserOutput): User {
-  return {
-    id: passthroughDeserializer(input["id"]),
-    name: passthroughDeserializer(input["name"]),
-    orders: deserializeArray(input["orders"], deserializeUserOrder),
-    etag: passthroughDeserializer(input["etag"]),
-  };
-}
-
-export const deserializeUser = withNullChecks(_deserializeUser);
 
 export function userSerializer(item: User): UserRest {
   return {
@@ -61,16 +48,6 @@ export interface UserOrder {
   /** The user's order detail */
   detail: string;
 }
-
-function _deserializeUserOrder(input: UserOrderOutput): UserOrder {
-  return {
-    id: passthroughDeserializer(input["id"]),
-    userId: passthroughDeserializer(input["userId"]),
-    detail: passthroughDeserializer(input["detail"]),
-  };
-}
-
-export const deserializeUserOrder = withNullChecks(_deserializeUserOrder);
 
 export function userOrderSerializer(item: UserOrder): UserOrderRest {
   return {
@@ -103,46 +80,17 @@ export interface UserListResults {
   nextLink?: string;
 }
 
-function _deserializeUserListResults(
-  input: UserListResultsOutput,
-): UserListResults {
-  return {
-    items: deserializeArray(input["items"], deserializeUser),
-    nextLink: passthroughDeserializer(input["nextLink"]),
-  };
-}
-
-export const deserializeUserListResults = withNullChecks(
-  _deserializeUserListResults,
-);
-
 /** First item. */
 export interface FirstItem {
   /** The id of the item. */
   readonly id: number;
 }
 
-function _deserializeFirstItem(input: FirstItemOutput): FirstItem {
-  return {
-    id: passthroughDeserializer(input["id"]),
-  };
-}
-
-export const deserializeFirstItem = withNullChecks(_deserializeFirstItem);
-
 /** Second item. */
 export interface SecondItem {
   /** The name of the item. */
   readonly name: string;
 }
-
-function _deserializeSecondItem(input: SecondItemOutput): SecondItem {
-  return {
-    name: passthroughDeserializer(input["name"]),
-  };
-}
-
-export const deserializeSecondItem = withNullChecks(_deserializeSecondItem);
 
 /** The version of the API. */
 export type Versions = "2022-12-01-preview";
@@ -170,3 +118,53 @@ export interface PagedSecondItem {
   /** The link to the next page of items */
   nextLink?: string;
 }
+
+function _deserializeUser(input: UserOutput): User {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+    orders: deserializeArray(input["orders"], deserializeUserOrder) as any,
+    etag: passthroughDeserializer(input["etag"]) as any,
+  } as any;
+}
+
+export const deserializeUser = withNullChecks(_deserializeUser);
+
+function _deserializeUserOrder(input: UserOrderOutput): UserOrder {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    userId: passthroughDeserializer(input["userId"]) as any,
+    detail: passthroughDeserializer(input["detail"]) as any,
+  } as any;
+}
+
+export const deserializeUserOrder = withNullChecks(_deserializeUserOrder);
+
+function _deserializeUserListResults(
+  input: UserListResultsOutput,
+): UserListResults {
+  return {
+    items: deserializeArray(input["items"], deserializeUser) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializeUserListResults = withNullChecks(
+  _deserializeUserListResults,
+);
+
+function _deserializeFirstItem(input: FirstItemOutput): FirstItem {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+  } as any;
+}
+
+export const deserializeFirstItem = withNullChecks(_deserializeFirstItem);
+
+function _deserializeSecondItem(input: SecondItemOutput): SecondItem {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+  } as any;
+}
+
+export const deserializeSecondItem = withNullChecks(_deserializeSecondItem);

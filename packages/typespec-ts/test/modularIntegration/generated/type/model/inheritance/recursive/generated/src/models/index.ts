@@ -3,8 +3,8 @@
 
 export {
   Element,
-  deserializeElement,
   Extension,
+  deserializeElement,
   deserializeExtension,
 } from "./models.js";
 export { PutOptionalParams, GetOptionalParams } from "./options.js";

@@ -4,8 +4,8 @@
 export {
   EmptyInput,
   EmptyOutput,
-  deserializeEmptyOutput,
   EmptyInputOutput,
+  deserializeEmptyOutput,
   deserializeEmptyInputOutput,
 } from "./models.js";
 export {

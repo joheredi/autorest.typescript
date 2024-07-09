@@ -86,6 +86,36 @@ export interface CreateOptionalParams extends OperationOptions {
 export interface CreateStreamingOptionalParams extends OperationOptions {
 }
 
+// Warning: (ae-forgotten-export) The symbol "ChatChoiceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatChoiceRecord: (input: ChatChoiceOutput | null | undefined) => ChatChoiceRecord;
+
+// Warning: (ae-forgotten-export) The symbol "ChatCompletionChunkOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatCompletionChunkRecord: (input: ChatCompletionChunkOutput | null | undefined) => ChatCompletionChunkRecord;
+
+// Warning: (ae-forgotten-export) The symbol "ChatCompletionOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatCompletionRecord: (input: ChatCompletionOutput | null | undefined) => ChatCompletionRecord;
+
+// Warning: (ae-forgotten-export) The symbol "ChatMessageOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatMessage: (input: ChatMessageOutput | null | undefined) => ChatMessage;
+
+// Warning: (ae-forgotten-export) The symbol "ChatMessageDeltaOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatMessageDelta: (input: ChatMessageDeltaOutput | null | undefined) => ChatMessageDelta;
+
+// Warning: (ae-forgotten-export) The symbol "ChoiceDeltaOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChoiceDeltaRecord: (input: ChoiceDeltaOutput | null | undefined) => ChoiceDeltaRecord;
+
 // @public
 export type FinishReason = "stop" | "length";
 

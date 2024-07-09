@@ -5,8 +5,8 @@ export { EmptyClient, EmptyClientOptions } from "./emptyClient.js";
 export {
   EmptyInput,
   EmptyOutput,
-  deserializeEmptyOutput,
   EmptyInputOutput,
+  deserializeEmptyOutput,
   deserializeEmptyInputOutput,
   PutEmptyOptionalParams,
   GetEmptyOptionalParams,

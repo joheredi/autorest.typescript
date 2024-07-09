@@ -3,17 +3,17 @@
 
 export {
   Dog,
-  deserializeDog,
-  deserializeDogUnion,
   Golden,
-  deserializeGolden,
   DogKind,
   Snake,
+  Cobra,
+  SnakeKind,
+  deserializeDog,
+  deserializeDogUnion,
+  deserializeGolden,
   deserializeSnake,
   deserializeSnakeUnion,
-  Cobra,
   deserializeCobra,
-  SnakeKind,
   DogUnion,
   SnakeUnion,
 } from "./models.js";

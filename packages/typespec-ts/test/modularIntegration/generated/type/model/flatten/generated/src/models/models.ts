@@ -6,16 +6,14 @@ import {
   withNullChecks,
 } from "../helpers/serializerHelpers.js";
 import {
-  ChildFlattenModelOutput,
-  ChildModelOutput,
-  FlattenModelOutput,
-  NestedFlattenModelOutput,
-} from "../rest/outputModels.js";
-import {
   FlattenModel as FlattenModelRest,
   ChildModel as ChildModelRest,
   NestedFlattenModel as NestedFlattenModelRest,
   ChildFlattenModel as ChildFlattenModelRest,
+  ChildFlattenModelOutput,
+  ChildModelOutput,
+  FlattenModelOutput,
+  NestedFlattenModelOutput,
 } from "../rest/index.js";
 
 /** This is the model with one level of flattening. */
@@ -23,15 +21,6 @@ export interface FlattenModel {
   name: string;
   properties: ChildModel;
 }
-
-function _deserializeFlattenModel(input: FlattenModelOutput): FlattenModel {
-  return {
-    name: passthroughDeserializer(input["name"]),
-    properties: deserializeChildModel(input["properties"]),
-  };
-}
-
-export const deserializeFlattenModel = withNullChecks(_deserializeFlattenModel);
 
 export function flattenModelSerializer(item: FlattenModel): FlattenModelRest {
   return {
@@ -46,15 +35,6 @@ export interface ChildModel {
   age: number;
 }
 
-function _deserializeChildModel(input: ChildModelOutput): ChildModel {
-  return {
-    description: passthroughDeserializer(input["description"]),
-    age: passthroughDeserializer(input["age"]),
-  };
-}
-
-export const deserializeChildModel = withNullChecks(_deserializeChildModel);
-
 export function childModelSerializer(item: ChildModel): ChildModelRest {
   return {
     description: item["description"],
@@ -67,19 +47,6 @@ export interface NestedFlattenModel {
   name: string;
   properties: ChildFlattenModel;
 }
-
-function _deserializeNestedFlattenModel(
-  input: NestedFlattenModelOutput,
-): NestedFlattenModel {
-  return {
-    name: passthroughDeserializer(input["name"]),
-    properties: deserializeChildFlattenModel(input["properties"]),
-  };
-}
-
-export const deserializeNestedFlattenModel = withNullChecks(
-  _deserializeNestedFlattenModel,
-);
 
 export function nestedFlattenModelSerializer(
   item: NestedFlattenModel,
@@ -96,19 +63,6 @@ export interface ChildFlattenModel {
   properties: ChildModel;
 }
 
-function _deserializeChildFlattenModel(
-  input: ChildFlattenModelOutput,
-): ChildFlattenModel {
-  return {
-    summary: passthroughDeserializer(input["summary"]),
-    properties: deserializeChildModel(input["properties"]),
-  };
-}
-
-export const deserializeChildFlattenModel = withNullChecks(
-  _deserializeChildFlattenModel,
-);
-
 export function childFlattenModelSerializer(
   item: ChildFlattenModel,
 ): ChildFlattenModelRest {
@@ -117,3 +71,47 @@ export function childFlattenModelSerializer(
     properties: childModelSerializer(item.properties),
   };
 }
+
+function _deserializeFlattenModel(input: FlattenModelOutput): FlattenModel {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    properties: deserializeChildModel(input["properties"]) as any,
+  } as any;
+}
+
+export const deserializeFlattenModel = withNullChecks(_deserializeFlattenModel);
+
+function _deserializeChildModel(input: ChildModelOutput): ChildModel {
+  return {
+    description: passthroughDeserializer(input["description"]) as any,
+    age: passthroughDeserializer(input["age"]) as any,
+  } as any;
+}
+
+export const deserializeChildModel = withNullChecks(_deserializeChildModel);
+
+function _deserializeNestedFlattenModel(
+  input: NestedFlattenModelOutput,
+): NestedFlattenModel {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    properties: deserializeChildFlattenModel(input["properties"]) as any,
+  } as any;
+}
+
+export const deserializeNestedFlattenModel = withNullChecks(
+  _deserializeNestedFlattenModel,
+);
+
+function _deserializeChildFlattenModel(
+  input: ChildFlattenModelOutput,
+): ChildFlattenModel {
+  return {
+    summary: passthroughDeserializer(input["summary"]) as any,
+    properties: deserializeChildModel(input["properties"]) as any,
+  } as any;
+}
+
+export const deserializeChildFlattenModel = withNullChecks(
+  _deserializeChildFlattenModel,
+);

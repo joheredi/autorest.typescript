@@ -41,16 +41,28 @@ function getDeserializerArgs(type: SdkType) {
     }
 
     if (type.valueType.kind === "dict" || type.valueType.kind === "array") {
-      return `(i) => ${deserializerName}(i, ${getDeserializerName(
+      const param = "i: any";
+
+      let cast = "";
+      if ("isGeneratedName" in type.valueType) {
+        cast = " as any";
+      }
+
+      return `(${param}) => ${deserializerName}(i, ${getDeserializerName(
         type.valueType.valueType
-      )})`;
+      )}) ${cast}`;
     }
 
     if (
       deserializerName !== "passthroughDeserializer" &&
       "encode" in type.valueType
     ) {
-      return `(i) => ${deserializerName}(i, "${type.valueType.encode}")`;
+      let param = "i";
+
+      if ("isGeneratedName" in type.valueType) {
+        param = "i: any";
+      }
+      return `(${param}) => ${deserializerName}(i, "${type.valueType.encode}")`;
     } else {
       return deserializerName;
     }
@@ -88,7 +100,6 @@ export function getDeserializerName(type: SdkType) {
   //TODO: Remove generatedName check when we generate interfaces for anonymous models
   if (
     type.kind === "model" &&
-    !type.isGeneratedName &&
     !isAzureCoreErrorType(tcgcContext.program, type.__raw!)
   ) {
     return getModelDeserializerName(type);

@@ -6,12 +6,10 @@ import {
   withNullChecks,
 } from "../helpers/serializerHelpers.js";
 import {
-  InputOutputRecordOutput,
-  OutputRecordOutput,
-} from "../rest/outputModels.js";
-import {
   InputRecord as InputRecordRest,
   InputOutputRecord as InputOutputRecordRest,
+  InputOutputRecordOutput,
+  OutputRecordOutput,
 } from "../rest/index.js";
 
 /** Record used in operation parameters */
@@ -30,30 +28,10 @@ export interface OutputRecord {
   requiredProp: string;
 }
 
-function _deserializeOutputRecord(input: OutputRecordOutput): OutputRecord {
-  return {
-    requiredProp: passthroughDeserializer(input["requiredProp"]),
-  };
-}
-
-export const deserializeOutputRecord = withNullChecks(_deserializeOutputRecord);
-
 /** Record used both as operation parameter and return type */
 export interface InputOutputRecord {
   requiredProp: string;
 }
-
-function _deserializeInputOutputRecord(
-  input: InputOutputRecordOutput,
-): InputOutputRecord {
-  return {
-    requiredProp: passthroughDeserializer(input["requiredProp"]),
-  };
-}
-
-export const deserializeInputOutputRecord = withNullChecks(
-  _deserializeInputOutputRecord,
-);
 
 export function inputOutputRecordSerializer(
   item: InputOutputRecord,
@@ -62,3 +40,23 @@ export function inputOutputRecordSerializer(
     requiredProp: item["requiredProp"],
   };
 }
+
+function _deserializeOutputRecord(input: OutputRecordOutput): OutputRecord {
+  return {
+    requiredProp: passthroughDeserializer(input["requiredProp"]) as any,
+  } as any;
+}
+
+export const deserializeOutputRecord = withNullChecks(_deserializeOutputRecord);
+
+function _deserializeInputOutputRecord(
+  input: InputOutputRecordOutput,
+): InputOutputRecord {
+  return {
+    requiredProp: passthroughDeserializer(input["requiredProp"]) as any,
+  } as any;
+}
+
+export const deserializeInputOutputRecord = withNullChecks(
+  _deserializeInputOutputRecord,
+);

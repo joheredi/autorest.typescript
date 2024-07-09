@@ -3,13 +3,13 @@
 
 import {
   OuterModel,
-  deserializeAbstractModelUnion,
   SharedModel,
   NoDecoratorModelInInternal,
   InternalDecoratorModelInInternal,
   PublicDecoratorModelInInternal,
   NoDecoratorModelInPublic,
   PublicDecoratorModelInPublic,
+  deserializeAbstractModelUnion,
   AbstractModelUnion,
 } from "../models/models.js";
 import {

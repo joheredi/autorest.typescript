@@ -100,6 +100,31 @@ export interface CreateOrUpdateTextBlocklistOptionalParams extends OperationOpti
 export interface DeleteTextBlocklistOptionalParams extends OperationOptions {
 }
 
+// Warning: (ae-forgotten-export) The symbol "ImageAnalyzeSeverityResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeImageAnalyzeSeverityResult: (input: ImageAnalyzeSeverityResultOutput | null | undefined) => ImageAnalyzeSeverityResult;
+
+// Warning: (ae-forgotten-export) The symbol "TextAnalyzeSeverityResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTextAnalyzeSeverityResult: (input: TextAnalyzeSeverityResultOutput | null | undefined) => TextAnalyzeSeverityResult;
+
+// Warning: (ae-forgotten-export) The symbol "TextBlockItemOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTextBlockItem: (input: TextBlockItemOutput | null | undefined) => TextBlockItem;
+
+// Warning: (ae-forgotten-export) The symbol "TextBlocklistOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTextBlocklist: (input: TextBlocklistOutput | null | undefined) => TextBlocklist;
+
+// Warning: (ae-forgotten-export) The symbol "TextBlocklistMatchResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTextBlocklistMatchResult: (input: TextBlocklistMatchResultOutput | null | undefined) => TextBlocklistMatchResult;
+
 // @public (undocumented)
 export interface GetTextBlocklistItemOptionalParams extends OperationOptions {
 }
@@ -139,6 +164,18 @@ export interface PagedAsyncIterableIterator<TElement, TPage = TElement[], TPageS
     [Symbol.asyncIterator](): PagedAsyncIterableIterator<TElement, TPage, TPageSettings>;
     byPage: (settings?: TPageSettings) => AsyncIterableIterator<ContinuablePage<TElement, TPage>>;
     next(): Promise<IteratorResult<TElement>>;
+}
+
+// @public
+export interface PagedTextBlockItem {
+    nextLink?: string;
+    value: TextBlockItem[];
+}
+
+// @public
+export interface PagedTextBlocklist {
+    nextLink?: string;
+    value: TextBlocklist[];
 }
 
 // @public

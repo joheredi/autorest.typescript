@@ -1,7 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { serializeRecord } from "../helpers/serializerHelpers.js";
+import {
+  deserializeRecord,
+  serializeRecord,
+  passthroughDeserializer,
+  deserializeUtcDateTime,
+  withNullChecks,
+  deserializeArray,
+} from "../helpers/serializerHelpers.js";
 import {
   TrackedResource as TrackedResourceRest,
   DataProduct as DataProductRest,
@@ -23,6 +30,40 @@ import {
   DataTypeUpdate as DataTypeUpdateRest,
   DataTypeUpdateProperties as DataTypeUpdatePropertiesRest,
   ContainerSaS as ContainerSaSRest,
+  AccountSasTokenOutput,
+  ConsumptionEndpointsPropertiesOutput,
+  ContainerSasTokenOutput,
+  DataProductInformationOutput,
+  DataProductListResultOutput,
+  DataProductNetworkAclsOutput,
+  DataProductOutput,
+  DataProductPropertiesOutput,
+  DataProductsCatalogListResultOutput,
+  DataProductsCatalogOutput,
+  DataProductsCatalogPropertiesOutput,
+  DataProductVersionOutput,
+  DataTypeListResultOutput,
+  DataTypeOutput,
+  DataTypePropertiesOutput,
+  EncryptionKeyDetailsOutput,
+  ErrorAdditionalInfoOutput,
+  ErrorDetailOutput,
+  ErrorResponseOutput,
+  IPRulesOutput,
+  ListRoleAssignmentsOutput,
+  ManagedResourceGroupConfigurationOutput,
+  ManagedServiceIdentityOutput,
+  OperationDisplayOutput,
+  OperationListResultOutput,
+  OperationOutput,
+  ProxyResourceOutput,
+  PublisherInformationOutput,
+  ResourceOutput,
+  RoleAssignmentDetailOutput,
+  SystemDataOutput,
+  TrackedResourceOutput,
+  UserAssignedIdentityOutput,
+  VirtualNetworkRuleOutput,
 } from "../rest/index.js";
 
 /** Common fields that are returned in the response for all Azure Resource Manager resources */
@@ -560,7 +601,7 @@ export interface ListRoleAssignments {
 }
 
 /** The response of a DataProduct list operation. */
-export interface _DataProductListResult {
+export interface DataProductListResult {
   /** The DataProduct items on this page */
   value: DataProduct[];
   /** The link to the next page of items */
@@ -688,7 +729,7 @@ export interface ContainerSasToken {
 }
 
 /** The response of a DataType list operation. */
-export interface _DataTypeListResult {
+export interface DataTypeListResult {
   /** The DataType items on this page */
   value: DataType[];
   /** The link to the next page of items */
@@ -734,7 +775,7 @@ export interface DataProductVersion {
 }
 
 /** The response of a DataProductsCatalog list operation. */
-export interface _DataProductsCatalogListResult {
+export interface DataProductsCatalogListResult {
   /** The DataProductsCatalog items on this page */
   value: DataProductsCatalog[];
   /** The link to the next page of items */
@@ -742,7 +783,7 @@ export interface _DataProductsCatalogListResult {
 }
 
 /** A list of REST API operations supported by an Azure Resource Provider. It contains an URL link to get the next set of results. */
-export interface _OperationListResult {
+export interface OperationListResult {
   /** The Operation items on this page */
   value: Operation[];
   /** The link to the next page of items */
@@ -793,3 +834,555 @@ export enum KnownActionType {
 
 /** The available API versions for the Microsoft.NetworkAnalytics RP. */
 export type Versions = "2023-11-15";
+
+/** This interface for an anonymous model */
+interface ErrorAdditionalInfoInfo {}
+
+function _deserializeResource(input: ResourceOutput): Resource {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+    type: passthroughDeserializer(input["type"]) as any,
+    systemData: deserializeSystemData(input["systemData"]) as any,
+  } as any;
+}
+
+export const deserializeResource = withNullChecks(_deserializeResource);
+
+function _deserializeSystemData(input: SystemDataOutput): SystemData {
+  return {
+    createdBy: passthroughDeserializer(input["createdBy"]) as any,
+    createdByType: passthroughDeserializer(
+      input["createdByType"] as any,
+    ) as any,
+    createdAt: deserializeUtcDateTime(input["createdAt"]) as any,
+    lastModifiedBy: passthroughDeserializer(input["lastModifiedBy"]) as any,
+    lastModifiedByType: passthroughDeserializer(
+      input["lastModifiedByType"] as any,
+    ) as any,
+    lastModifiedAt: deserializeUtcDateTime(input["lastModifiedAt"]) as any,
+  } as any;
+}
+
+export const deserializeSystemData = withNullChecks(_deserializeSystemData);
+
+function _deserializeTrackedResource(
+  input: TrackedResourceOutput,
+): TrackedResource {
+  return {
+    ...deserializeResource(input),
+    tags: deserializeRecord(input["tags"], passthroughDeserializer) as any,
+    location: passthroughDeserializer(input["location"]) as any,
+  } as any;
+}
+
+export const deserializeTrackedResource = withNullChecks(
+  _deserializeTrackedResource,
+);
+
+function _deserializeDataProduct(input: DataProductOutput): DataProduct {
+  return {
+    ...deserializeTrackedResource(input),
+    properties: deserializeDataProductProperties(input["properties"]) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+    identity: deserializeManagedServiceIdentity(input["identity"]) as any,
+  } as any;
+}
+
+export const deserializeDataProduct = withNullChecks(_deserializeDataProduct);
+
+function _deserializeDataProductProperties(
+  input: DataProductPropertiesOutput,
+): DataProductProperties {
+  return {
+    resourceGuid: passthroughDeserializer(input["resourceGuid"]) as any,
+    provisioningState: passthroughDeserializer(
+      input["provisioningState"] as any,
+    ) as any,
+    publisher: passthroughDeserializer(input["publisher"]) as any,
+    product: passthroughDeserializer(input["product"]) as any,
+    majorVersion: passthroughDeserializer(input["majorVersion"]) as any,
+    owners: deserializeArray(input["owners"], passthroughDeserializer) as any,
+    redundancy: passthroughDeserializer(input["redundancy"] as any) as any,
+    purviewAccount: passthroughDeserializer(input["purviewAccount"]) as any,
+    purviewCollection: passthroughDeserializer(
+      input["purviewCollection"],
+    ) as any,
+    privateLinksEnabled: passthroughDeserializer(
+      input["privateLinksEnabled"] as any,
+    ) as any,
+    publicNetworkAccess: passthroughDeserializer(
+      input["publicNetworkAccess"] as any,
+    ) as any,
+    customerManagedKeyEncryptionEnabled: passthroughDeserializer(
+      input["customerManagedKeyEncryptionEnabled"] as any,
+    ) as any,
+    customerEncryptionKey: deserializeEncryptionKeyDetails(
+      input["customerEncryptionKey"],
+    ) as any,
+    networkacls: deserializeDataProductNetworkAcls(input["networkacls"]) as any,
+    managedResourceGroupConfiguration:
+      deserializeManagedResourceGroupConfiguration(
+        input["managedResourceGroupConfiguration"],
+      ) as any,
+    availableMinorVersions: deserializeArray(
+      input["availableMinorVersions"],
+      passthroughDeserializer,
+    ) as any,
+    currentMinorVersion: passthroughDeserializer(
+      input["currentMinorVersion"],
+    ) as any,
+    documentation: passthroughDeserializer(input["documentation"]) as any,
+    consumptionEndpoints: deserializeConsumptionEndpointsProperties(
+      input["consumptionEndpoints"],
+    ) as any,
+    keyVaultUrl: passthroughDeserializer(input["keyVaultUrl"]) as any,
+  } as any;
+}
+
+export const deserializeDataProductProperties = withNullChecks(
+  _deserializeDataProductProperties,
+);
+
+function _deserializeEncryptionKeyDetails(
+  input: EncryptionKeyDetailsOutput,
+): EncryptionKeyDetails {
+  return {
+    keyVaultUri: passthroughDeserializer(input["keyVaultUri"]) as any,
+    keyName: passthroughDeserializer(input["keyName"]) as any,
+    keyVersion: passthroughDeserializer(input["keyVersion"]) as any,
+  } as any;
+}
+
+export const deserializeEncryptionKeyDetails = withNullChecks(
+  _deserializeEncryptionKeyDetails,
+);
+
+function _deserializeDataProductNetworkAcls(
+  input: DataProductNetworkAclsOutput,
+): DataProductNetworkAcls {
+  return {
+    virtualNetworkRule: deserializeArray(
+      input["virtualNetworkRule"],
+      deserializeVirtualNetworkRule,
+    ) as any,
+    ipRules: deserializeArray(input["ipRules"], deserializeIPRules) as any,
+    allowedQueryIpRangeList: deserializeArray(
+      input["allowedQueryIpRangeList"],
+      passthroughDeserializer,
+    ) as any,
+    defaultAction: passthroughDeserializer(
+      input["defaultAction"] as any,
+    ) as any,
+  } as any;
+}
+
+export const deserializeDataProductNetworkAcls = withNullChecks(
+  _deserializeDataProductNetworkAcls,
+);
+
+function _deserializeVirtualNetworkRule(
+  input: VirtualNetworkRuleOutput,
+): VirtualNetworkRule {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    action: passthroughDeserializer(input["action"]) as any,
+    state: passthroughDeserializer(input["state"]) as any,
+  } as any;
+}
+
+export const deserializeVirtualNetworkRule = withNullChecks(
+  _deserializeVirtualNetworkRule,
+);
+
+function _deserializeIPRules(input: IPRulesOutput): IPRules {
+  return {
+    value: passthroughDeserializer(input["value"]) as any,
+    action: passthroughDeserializer(input["action"]) as any,
+  } as any;
+}
+
+export const deserializeIPRules = withNullChecks(_deserializeIPRules);
+
+function _deserializeManagedResourceGroupConfiguration(
+  input: ManagedResourceGroupConfigurationOutput,
+): ManagedResourceGroupConfiguration {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    location: passthroughDeserializer(input["location"]) as any,
+  } as any;
+}
+
+export const deserializeManagedResourceGroupConfiguration = withNullChecks(
+  _deserializeManagedResourceGroupConfiguration,
+);
+
+function _deserializeConsumptionEndpointsProperties(
+  input: ConsumptionEndpointsPropertiesOutput,
+): ConsumptionEndpointsProperties {
+  return {
+    ingestionUrl: passthroughDeserializer(input["ingestionUrl"]) as any,
+    ingestionResourceId: passthroughDeserializer(
+      input["ingestionResourceId"],
+    ) as any,
+    fileAccessUrl: passthroughDeserializer(input["fileAccessUrl"]) as any,
+    fileAccessResourceId: passthroughDeserializer(
+      input["fileAccessResourceId"],
+    ) as any,
+    queryUrl: passthroughDeserializer(input["queryUrl"]) as any,
+    queryResourceId: passthroughDeserializer(input["queryResourceId"]) as any,
+  } as any;
+}
+
+export const deserializeConsumptionEndpointsProperties = withNullChecks(
+  _deserializeConsumptionEndpointsProperties,
+);
+
+function _deserializeManagedServiceIdentity(
+  input: ManagedServiceIdentityOutput,
+): ManagedServiceIdentity {
+  return {
+    principalId: passthroughDeserializer(input["principalId"]) as any,
+    tenantId: passthroughDeserializer(input["tenantId"]) as any,
+    type: passthroughDeserializer(input["type"] as any) as any,
+    userAssignedIdentities: deserializeRecord(
+      input["userAssignedIdentities"],
+      deserializeUserAssignedIdentity,
+    ) as any,
+  } as any;
+}
+
+export const deserializeManagedServiceIdentity = withNullChecks(
+  _deserializeManagedServiceIdentity,
+);
+
+function _deserializeUserAssignedIdentity(
+  input: UserAssignedIdentityOutput,
+): UserAssignedIdentity {
+  return {
+    principalId: passthroughDeserializer(input["principalId"]) as any,
+    clientId: passthroughDeserializer(input["clientId"]) as any,
+  } as any;
+}
+
+export const deserializeUserAssignedIdentity = withNullChecks(
+  _deserializeUserAssignedIdentity,
+);
+
+function _deserializeErrorResponse(input: ErrorResponseOutput): ErrorResponse {
+  return {
+    error: deserializeErrorDetail(input["error"]) as any,
+  } as any;
+}
+
+export const deserializeErrorResponse = withNullChecks(
+  _deserializeErrorResponse,
+);
+
+function _deserializeErrorDetail(input: ErrorDetailOutput): ErrorDetail {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+    target: passthroughDeserializer(input["target"]) as any,
+    details: deserializeArray(input["details"], deserializeErrorDetail) as any,
+    additionalInfo: deserializeArray(
+      input["additionalInfo"],
+      deserializeErrorAdditionalInfo,
+    ) as any,
+  } as any;
+}
+
+export const deserializeErrorDetail = withNullChecks(_deserializeErrorDetail);
+
+function _deserializeErrorAdditionalInfo(
+  input: ErrorAdditionalInfoOutput,
+): ErrorAdditionalInfo {
+  return {
+    type: passthroughDeserializer(input["type"]) as any,
+    info: deserializeErrorAdditionalInfoInfo(input["info"]) as any,
+  } as any;
+}
+
+export const deserializeErrorAdditionalInfo = withNullChecks(
+  _deserializeErrorAdditionalInfo,
+);
+
+function _deserializeAccountSasToken(
+  input: AccountSasTokenOutput,
+): AccountSasToken {
+  return {
+    storageAccountSasToken: passthroughDeserializer(
+      input["storageAccountSasToken"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeAccountSasToken = withNullChecks(
+  _deserializeAccountSasToken,
+);
+
+function _deserializeRoleAssignmentDetail(
+  input: RoleAssignmentDetailOutput,
+): RoleAssignmentDetail {
+  return {
+    roleId: passthroughDeserializer(input["roleId"]) as any,
+    principalId: passthroughDeserializer(input["principalId"]) as any,
+    userName: passthroughDeserializer(input["userName"]) as any,
+    dataTypeScope: deserializeArray(
+      input["dataTypeScope"],
+      passthroughDeserializer,
+    ) as any,
+    principalType: passthroughDeserializer(input["principalType"]) as any,
+    role: passthroughDeserializer(input["role"] as any) as any,
+    roleAssignmentId: passthroughDeserializer(input["roleAssignmentId"]) as any,
+  } as any;
+}
+
+export const deserializeRoleAssignmentDetail = withNullChecks(
+  _deserializeRoleAssignmentDetail,
+);
+
+function _deserializeListRoleAssignments(
+  input: ListRoleAssignmentsOutput,
+): ListRoleAssignments {
+  return {
+    count: passthroughDeserializer(input["count"]) as any,
+    roleAssignmentResponse: deserializeArray(
+      input["roleAssignmentResponse"],
+      deserializeRoleAssignmentDetail,
+    ) as any,
+  } as any;
+}
+
+export const deserializeListRoleAssignments = withNullChecks(
+  _deserializeListRoleAssignments,
+);
+
+function _deserializeDataProductListResult(
+  input: DataProductListResultOutput,
+): DataProductListResult {
+  return {
+    value: deserializeArray(input["value"], deserializeDataProduct) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializeDataProductListResult = withNullChecks(
+  _deserializeDataProductListResult,
+);
+
+function _deserializeProxyResource(input: ProxyResourceOutput): ProxyResource {
+  return input as ProxyResource;
+}
+
+export const deserializeProxyResource = withNullChecks(
+  _deserializeProxyResource,
+);
+
+function _deserializeDataType(input: DataTypeOutput): DataType {
+  return {
+    ...deserializeProxyResource(input),
+    properties: deserializeDataTypeProperties(input["properties"]) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+  } as any;
+}
+
+export const deserializeDataType = withNullChecks(_deserializeDataType);
+
+function _deserializeDataTypeProperties(
+  input: DataTypePropertiesOutput,
+): DataTypeProperties {
+  return {
+    provisioningState: passthroughDeserializer(
+      input["provisioningState"] as any,
+    ) as any,
+    state: passthroughDeserializer(input["state"] as any) as any,
+    stateReason: passthroughDeserializer(input["stateReason"]) as any,
+    storageOutputRetention: passthroughDeserializer(
+      input["storageOutputRetention"],
+    ) as any,
+    databaseCacheRetention: passthroughDeserializer(
+      input["databaseCacheRetention"],
+    ) as any,
+    databaseRetention: passthroughDeserializer(
+      input["databaseRetention"],
+    ) as any,
+    visualizationUrl: passthroughDeserializer(input["visualizationUrl"]) as any,
+  } as any;
+}
+
+export const deserializeDataTypeProperties = withNullChecks(
+  _deserializeDataTypeProperties,
+);
+
+function _deserializeContainerSasToken(
+  input: ContainerSasTokenOutput,
+): ContainerSasToken {
+  return {
+    storageContainerSasToken: passthroughDeserializer(
+      input["storageContainerSasToken"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeContainerSasToken = withNullChecks(
+  _deserializeContainerSasToken,
+);
+
+function _deserializeDataTypeListResult(
+  input: DataTypeListResultOutput,
+): DataTypeListResult {
+  return {
+    value: deserializeArray(input["value"], deserializeDataType) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializeDataTypeListResult = withNullChecks(
+  _deserializeDataTypeListResult,
+);
+
+function _deserializeDataProductsCatalog(
+  input: DataProductsCatalogOutput,
+): DataProductsCatalog {
+  return {
+    ...deserializeProxyResource(input),
+    properties: deserializeDataProductsCatalogProperties(
+      input["properties"],
+    ) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+  } as any;
+}
+
+export const deserializeDataProductsCatalog = withNullChecks(
+  _deserializeDataProductsCatalog,
+);
+
+function _deserializeDataProductsCatalogProperties(
+  input: DataProductsCatalogPropertiesOutput,
+): DataProductsCatalogProperties {
+  return {
+    provisioningState: passthroughDeserializer(
+      input["provisioningState"] as any,
+    ) as any,
+    publishers: deserializeArray(
+      input["publishers"],
+      deserializePublisherInformation,
+    ) as any,
+  } as any;
+}
+
+export const deserializeDataProductsCatalogProperties = withNullChecks(
+  _deserializeDataProductsCatalogProperties,
+);
+
+function _deserializePublisherInformation(
+  input: PublisherInformationOutput,
+): PublisherInformation {
+  return {
+    publisherName: passthroughDeserializer(input["publisherName"]) as any,
+    dataProducts: deserializeArray(
+      input["dataProducts"],
+      deserializeDataProductInformation,
+    ) as any,
+  } as any;
+}
+
+export const deserializePublisherInformation = withNullChecks(
+  _deserializePublisherInformation,
+);
+
+function _deserializeDataProductInformation(
+  input: DataProductInformationOutput,
+): DataProductInformation {
+  return {
+    dataProductName: passthroughDeserializer(input["dataProductName"]) as any,
+    description: passthroughDeserializer(input["description"]) as any,
+    dataProductVersions: deserializeArray(
+      input["dataProductVersions"],
+      deserializeDataProductVersion,
+    ) as any,
+  } as any;
+}
+
+export const deserializeDataProductInformation = withNullChecks(
+  _deserializeDataProductInformation,
+);
+
+function _deserializeDataProductVersion(
+  input: DataProductVersionOutput,
+): DataProductVersion {
+  return {
+    version: passthroughDeserializer(input["version"]) as any,
+  } as any;
+}
+
+export const deserializeDataProductVersion = withNullChecks(
+  _deserializeDataProductVersion,
+);
+
+function _deserializeDataProductsCatalogListResult(
+  input: DataProductsCatalogListResultOutput,
+): DataProductsCatalogListResult {
+  return {
+    value: deserializeArray(
+      input["value"],
+      deserializeDataProductsCatalog,
+    ) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializeDataProductsCatalogListResult = withNullChecks(
+  _deserializeDataProductsCatalogListResult,
+);
+
+function _deserializeOperationListResult(
+  input: OperationListResultOutput,
+): OperationListResult {
+  return {
+    value: deserializeArray(input["value"], deserializeOperation) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializeOperationListResult = withNullChecks(
+  _deserializeOperationListResult,
+);
+
+function _deserializeOperation(input: OperationOutput): Operation {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    isDataAction: passthroughDeserializer(input["isDataAction"]) as any,
+    display: deserializeOperationDisplay(input["display"]) as any,
+    origin: passthroughDeserializer(input["origin"] as any) as any,
+    actionType: passthroughDeserializer(input["actionType"] as any) as any,
+  } as any;
+}
+
+export const deserializeOperation = withNullChecks(_deserializeOperation);
+
+function _deserializeOperationDisplay(
+  input: OperationDisplayOutput,
+): OperationDisplay {
+  return {
+    provider: passthroughDeserializer(input["provider"]) as any,
+    resource: passthroughDeserializer(input["resource"]) as any,
+    operation: passthroughDeserializer(input["operation"]) as any,
+    description: passthroughDeserializer(input["description"]) as any,
+  } as any;
+}
+
+export const deserializeOperationDisplay = withNullChecks(
+  _deserializeOperationDisplay,
+);
+
+function _deserializeErrorAdditionalInfoInfo(
+  input: any,
+): ErrorAdditionalInfoInfo {
+  return input as ErrorAdditionalInfoInfo;
+}
+
+export const deserializeErrorAdditionalInfoInfo = withNullChecks(
+  _deserializeErrorAdditionalInfoInfo,
+);

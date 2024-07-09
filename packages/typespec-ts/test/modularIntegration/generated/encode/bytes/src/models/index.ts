@@ -3,12 +3,12 @@
 
 export {
   DefaultBytesProperty,
-  deserializeDefaultBytesProperty,
   Base64BytesProperty,
-  deserializeBase64BytesProperty,
   Base64urlBytesProperty,
-  deserializeBase64urlBytesProperty,
   Base64urlArrayBytesProperty,
+  deserializeDefaultBytesProperty,
+  deserializeBase64BytesProperty,
+  deserializeBase64urlBytesProperty,
   deserializeBase64urlArrayBytesProperty,
 } from "./models.js";
 export {

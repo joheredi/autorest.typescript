@@ -15,6 +15,11 @@ export {
   RejectOptions,
   RejectResult,
   ServiceApiVersions,
+  deserializeCloudEvent,
+  deserializePublishResult,
+  deserializeReceiveDetails,
+  deserializeBrokerProperties,
+  deserializeFailedLockToken,
 } from "./models.js";
 export {
   PublishCloudEventOptionalParams,

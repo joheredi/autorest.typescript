@@ -22,6 +22,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { deserializeUtcDateTime } from "../../helpers/serializerHelpers.js";
 import { stringToUint8Array, uint8ArrayToString } from "@azure/core-util";
 import {
   ImagesCreateOptionalParams,
@@ -56,7 +57,7 @@ export async function _createDeserialize(
   }
 
   return {
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     data: result.body["data"].map((p) => ({
       url: p["url"],
       b64Json:
@@ -111,7 +112,7 @@ export async function _createEditDeserialize(
   }
 
   return {
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     data: result.body["data"].map((p) => ({
       url: p["url"],
       b64Json:
@@ -163,7 +164,7 @@ export async function _createVariationDeserialize(
   }
 
   return {
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     data: result.body["data"].map((p) => ({
       url: p["url"],
       b64Json:

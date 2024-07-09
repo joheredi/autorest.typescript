@@ -2,25 +2,23 @@
 // Licensed under the MIT license.
 
 import {
-  passthroughDeserializer,
-  withNullChecks,
   deserializeRecord,
   serializeRecord,
+  passthroughDeserializer,
+  withNullChecks,
   deserializeArray,
 } from "../helpers/serializerHelpers.js";
-import {
-  FishOutput,
-  GoblinSharkOutput,
-  SalmonOutput,
-  SawSharkOutput,
-  SharkOutput,
-} from "../rest/outputModels.js";
 import {
   Fish as FishRest,
   Shark as SharkRest,
   SawShark as SawSharkRest,
   GoblinShark as GoblinSharkRest,
   Salmon as SalmonRest,
+  FishOutput,
+  GoblinSharkOutput,
+  SalmonOutput,
+  SawSharkOutput,
+  SharkOutput,
 } from "../rest/index.js";
 
 /** This is base model for polymorphic multiple levels inheritance with a discriminator. */
@@ -29,28 +27,6 @@ export interface Fish {
   /** the discriminator possible values: shark, salmon */
   kind: string;
 }
-
-function _deserializeFish(input: FishOutput): Fish {
-  return {
-    kind: passthroughDeserializer(input["kind"]),
-    age: passthroughDeserializer(input["age"]),
-  };
-}
-
-export const deserializeFish = withNullChecks(_deserializeFish);
-
-function _deserializeFishUnion(input: FishOutput): Fish {
-  switch (input["kind"]) {
-    case "shark":
-      return deserializeShark(input as Shark);
-    case "salmon":
-      return deserializeSalmon(input as Salmon);
-    default:
-      return deserializeFish(input);
-  }
-}
-
-export const deserializeFishUnion = withNullChecks(_deserializeFishUnion);
 
 export function fishUnionSerializer(item: FishUnion) {
   switch (item.kind) {
@@ -79,29 +55,6 @@ export interface Shark extends Fish {
   sharktype: string;
 }
 
-function _deserializeShark(input: SharkOutput): Shark {
-  return {
-    ...deserializeFish(input),
-    kind: passthroughDeserializer(input["kind"]),
-    sharktype: passthroughDeserializer(input["sharktype"]),
-  };
-}
-
-export const deserializeShark = withNullChecks(_deserializeShark);
-
-function _deserializeSharkUnion(input: SharkOutput): Shark {
-  switch (input["sharktype"]) {
-    case "saw":
-      return deserializeSawShark(input as SawShark);
-    case "goblin":
-      return deserializeGoblinShark(input as GoblinShark);
-    default:
-      return deserializeShark(input);
-  }
-}
-
-export const deserializeSharkUnion = withNullChecks(_deserializeSharkUnion);
-
 export function sharkUnionSerializer(item: SharkUnion) {
   switch (item.sharktype) {
     case "saw":
@@ -128,15 +81,6 @@ export interface SawShark extends Shark {
   sharktype: "saw";
 }
 
-function _deserializeSawShark(input: SawSharkOutput): SawShark {
-  return {
-    ...deserializeShark(input),
-    sharktype: passthroughDeserializer(input["sharktype"]),
-  };
-}
-
-export const deserializeSawShark = withNullChecks(_deserializeSawShark);
-
 export function sawSharkSerializer(item: SawShark): SawSharkRest {
   return {
     kind: item["kind"],
@@ -149,15 +93,6 @@ export function sawSharkSerializer(item: SawShark): SawSharkRest {
 export interface GoblinShark extends Shark {
   sharktype: "goblin";
 }
-
-function _deserializeGoblinShark(input: GoblinSharkOutput): GoblinShark {
-  return {
-    ...deserializeShark(input),
-    sharktype: passthroughDeserializer(input["sharktype"]),
-  };
-}
-
-export const deserializeGoblinShark = withNullChecks(_deserializeGoblinShark);
 
 export function goblinSharkSerializer(item: GoblinShark): GoblinSharkRest {
   return {
@@ -175,18 +110,6 @@ export interface Salmon extends Fish {
   partner?: FishUnion;
 }
 
-function _deserializeSalmon(input: SalmonOutput): Salmon {
-  return {
-    ...deserializeFish(input),
-    kind: passthroughDeserializer(input["kind"]),
-    friends: deserializeArray(input["friends"], deserializeFishUnion),
-    hate: deserializeRecord(input["hate"], deserializeFishUnion),
-    partner: deserializeFishUnion(input["partner"]),
-  };
-}
-
-export const deserializeSalmon = withNullChecks(_deserializeSalmon);
-
 export function salmonSerializer(item: Salmon): SalmonRest {
   return {
     age: item["age"],
@@ -198,6 +121,81 @@ export function salmonSerializer(item: Salmon): SalmonRest {
     partner: !item.partner ? item.partner : fishUnionSerializer(item.partner),
   };
 }
+
+function _deserializeFish(input: FishOutput): Fish {
+  return {
+    kind: passthroughDeserializer(input["kind"]) as any,
+    age: passthroughDeserializer(input["age"]) as any,
+  } as any;
+}
+
+export const deserializeFish = withNullChecks(_deserializeFish);
+
+function _deserializeFishUnion(input: FishOutput): Fish {
+  switch (input["kind"]) {
+    case "shark":
+      return deserializeShark(input as Shark);
+    case "salmon":
+      return deserializeSalmon(input as Salmon);
+    default:
+      return deserializeFish(input);
+  }
+}
+
+export const deserializeFishUnion = withNullChecks(_deserializeFishUnion);
+
+function _deserializeShark(input: SharkOutput): Shark {
+  return {
+    ...deserializeFish(input),
+    kind: passthroughDeserializer(input["kind"]) as any,
+    sharktype: passthroughDeserializer(input["sharktype"]) as any,
+  } as any;
+}
+
+export const deserializeShark = withNullChecks(_deserializeShark);
+
+function _deserializeSharkUnion(input: SharkOutput): Shark {
+  switch (input["sharktype"]) {
+    case "saw":
+      return deserializeSawShark(input as SawShark);
+    case "goblin":
+      return deserializeGoblinShark(input as GoblinShark);
+    default:
+      return deserializeShark(input);
+  }
+}
+
+export const deserializeSharkUnion = withNullChecks(_deserializeSharkUnion);
+
+function _deserializeSawShark(input: SawSharkOutput): SawShark {
+  return {
+    ...deserializeShark(input),
+    sharktype: passthroughDeserializer(input["sharktype"]) as any,
+  } as any;
+}
+
+export const deserializeSawShark = withNullChecks(_deserializeSawShark);
+
+function _deserializeGoblinShark(input: GoblinSharkOutput): GoblinShark {
+  return {
+    ...deserializeShark(input),
+    sharktype: passthroughDeserializer(input["sharktype"]) as any,
+  } as any;
+}
+
+export const deserializeGoblinShark = withNullChecks(_deserializeGoblinShark);
+
+function _deserializeSalmon(input: SalmonOutput): Salmon {
+  return {
+    ...deserializeFish(input),
+    kind: passthroughDeserializer(input["kind"]) as any,
+    friends: deserializeArray(input["friends"], deserializeFishUnion) as any,
+    hate: deserializeRecord(input["hate"], deserializeFishUnion) as any,
+    partner: deserializeFishUnion(input["partner"]) as any,
+  } as any;
+}
+
+export const deserializeSalmon = withNullChecks(_deserializeSalmon);
 
 /** Alias for FishUnion */
 export type FishUnion = SharkUnion | Salmon | Fish;

@@ -5,8 +5,8 @@ export { UsageClient, UsageClientOptions } from "./usageClient.js";
 export {
   InputRecord,
   OutputRecord,
-  deserializeOutputRecord,
   InputOutputRecord,
+  deserializeOutputRecord,
   deserializeInputOutputRecord,
   InputOptionalParams,
   OutputOptionalParams,

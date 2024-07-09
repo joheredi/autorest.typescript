@@ -2,6 +2,12 @@
 // Licensed under the MIT license.
 
 import {
+  passthroughDeserializer,
+  deserializeUtcDateTime,
+  withNullChecks,
+  deserializeArray,
+} from "../helpers/serializerHelpers.js";
+import {
   MultivariateVariableState as MultivariateVariableStateRest,
   MultivariateMultivariateBatchDetectionOptions as MultivariateMultivariateBatchDetectionOptionsRest,
   MultivariateModelInfo as MultivariateModelInfoRest,
@@ -13,6 +19,25 @@ import {
   UnivariateUnivariateDetectionOptions as UnivariateUnivariateDetectionOptionsRest,
   UnivariateTimeSeriesPoint as UnivariateTimeSeriesPointRest,
   UnivariateUnivariateChangePointDetectionOptions as UnivariateUnivariateChangePointDetectionOptionsRest,
+  MultivariateAlignPolicyOutput,
+  MultivariateAnomalyDetectionModelOutput,
+  MultivariateAnomalyInterpretationOutput,
+  MultivariateAnomalyStateOutput,
+  MultivariateAnomalyValueOutput,
+  MultivariateCorrelationChangesOutput,
+  MultivariateDiagnosticsInfoOutput,
+  MultivariateErrorResponseOutput,
+  MultivariateModelInfoOutput,
+  MultivariateModelListOutput,
+  MultivariateModelStateOutput,
+  MultivariateMultivariateBatchDetectionOptionsOutput,
+  MultivariateMultivariateBatchDetectionResultSummaryOutput,
+  MultivariateMultivariateDetectionResultOutput,
+  MultivariateMultivariateLastDetectionResultOutput,
+  MultivariateVariableStateOutput,
+  UnivariateUnivariateChangePointDetectionResultOutput,
+  UnivariateUnivariateEntireDetectionResultOutput,
+  UnivariateUnivariateLastDetectionResultOutput,
 } from "../rest/index.js";
 
 /** Detection results for the given resultId. */
@@ -346,7 +371,7 @@ export interface MultivariateAnomalyDetectionModel {
 }
 
 /** Response of listing models. */
-export interface _MultivariateModelList {
+export interface MultivariateModelList {
   /** List of models. */
   models: MultivariateAnomalyDetectionModel[];
   /** Number of trained multivariate models. */
@@ -701,3 +726,375 @@ export interface UnivariateUnivariateChangePointDetectionResult {
 
 /** Type of Versions */
 export type Versions = "v1.1";
+
+function _deserializeMultivariateMultivariateDetectionResult(
+  input: MultivariateMultivariateDetectionResultOutput,
+): MultivariateMultivariateDetectionResult {
+  return {
+    resultId: passthroughDeserializer(input["resultId"]) as any,
+    summary: deserializeMultivariateMultivariateBatchDetectionResultSummary(
+      input["summary"],
+    ) as any,
+    results: deserializeArray(
+      input["results"],
+      deserializeMultivariateAnomalyState,
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateMultivariateDetectionResult =
+  withNullChecks(_deserializeMultivariateMultivariateDetectionResult);
+
+function _deserializeMultivariateMultivariateBatchDetectionResultSummary(
+  input: MultivariateMultivariateBatchDetectionResultSummaryOutput,
+): MultivariateMultivariateBatchDetectionResultSummary {
+  return {
+    status: passthroughDeserializer(input["status"]) as any,
+    errors: deserializeArray(
+      input["errors"],
+      deserializeMultivariateErrorResponse,
+    ) as any,
+    variableStates: deserializeArray(
+      input["variableStates"],
+      deserializeMultivariateVariableState,
+    ) as any,
+    setupInfo: deserializeMultivariateMultivariateBatchDetectionOptions(
+      input["setupInfo"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateMultivariateBatchDetectionResultSummary =
+  withNullChecks(
+    _deserializeMultivariateMultivariateBatchDetectionResultSummary,
+  );
+
+function _deserializeMultivariateErrorResponse(
+  input: MultivariateErrorResponseOutput,
+): MultivariateErrorResponse {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+  } as any;
+}
+
+export const deserializeMultivariateErrorResponse = withNullChecks(
+  _deserializeMultivariateErrorResponse,
+);
+
+function _deserializeMultivariateVariableState(
+  input: MultivariateVariableStateOutput,
+): MultivariateVariableState {
+  return {
+    variable: passthroughDeserializer(input["variable"]) as any,
+    filledNARatio: passthroughDeserializer(input["filledNARatio"]) as any,
+    effectiveCount: passthroughDeserializer(input["effectiveCount"]) as any,
+    firstTimestamp: deserializeUtcDateTime(input["firstTimestamp"]) as any,
+    lastTimestamp: deserializeUtcDateTime(input["lastTimestamp"]) as any,
+  } as any;
+}
+
+export const deserializeMultivariateVariableState = withNullChecks(
+  _deserializeMultivariateVariableState,
+);
+
+function _deserializeMultivariateMultivariateBatchDetectionOptions(
+  input: MultivariateMultivariateBatchDetectionOptionsOutput,
+): MultivariateMultivariateBatchDetectionOptions {
+  return {
+    dataSource: passthroughDeserializer(input["dataSource"]) as any,
+    topContributorCount: passthroughDeserializer(
+      input["topContributorCount"],
+    ) as any,
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+  } as any;
+}
+
+export const deserializeMultivariateMultivariateBatchDetectionOptions =
+  withNullChecks(_deserializeMultivariateMultivariateBatchDetectionOptions);
+
+function _deserializeMultivariateAnomalyState(
+  input: MultivariateAnomalyStateOutput,
+): MultivariateAnomalyState {
+  return {
+    timestamp: deserializeUtcDateTime(input["timestamp"]) as any,
+    value: deserializeMultivariateAnomalyValue(input["value"]) as any,
+    errors: deserializeArray(
+      input["errors"],
+      deserializeMultivariateErrorResponse,
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateAnomalyState = withNullChecks(
+  _deserializeMultivariateAnomalyState,
+);
+
+function _deserializeMultivariateAnomalyValue(
+  input: MultivariateAnomalyValueOutput,
+): MultivariateAnomalyValue {
+  return {
+    isAnomaly: passthroughDeserializer(input["isAnomaly"]) as any,
+    severity: passthroughDeserializer(input["severity"]) as any,
+    score: passthroughDeserializer(input["score"]) as any,
+    interpretation: deserializeArray(
+      input["interpretation"],
+      deserializeMultivariateAnomalyInterpretation,
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateAnomalyValue = withNullChecks(
+  _deserializeMultivariateAnomalyValue,
+);
+
+function _deserializeMultivariateAnomalyInterpretation(
+  input: MultivariateAnomalyInterpretationOutput,
+): MultivariateAnomalyInterpretation {
+  return {
+    variable: passthroughDeserializer(input["variable"]) as any,
+    contributionScore: passthroughDeserializer(
+      input["contributionScore"],
+    ) as any,
+    correlationChanges: deserializeMultivariateCorrelationChanges(
+      input["correlationChanges"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateAnomalyInterpretation = withNullChecks(
+  _deserializeMultivariateAnomalyInterpretation,
+);
+
+function _deserializeMultivariateCorrelationChanges(
+  input: MultivariateCorrelationChangesOutput,
+): MultivariateCorrelationChanges {
+  return {
+    changedVariables: deserializeArray(
+      input["changedVariables"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateCorrelationChanges = withNullChecks(
+  _deserializeMultivariateCorrelationChanges,
+);
+
+function _deserializeMultivariateModelInfo(
+  input: MultivariateModelInfoOutput,
+): MultivariateModelInfo {
+  return {
+    dataSource: passthroughDeserializer(input["dataSource"]) as any,
+    dataSchema: passthroughDeserializer(input["dataSchema"]) as any,
+    startTime: deserializeUtcDateTime(input["startTime"]) as any,
+    endTime: deserializeUtcDateTime(input["endTime"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    slidingWindow: passthroughDeserializer(input["slidingWindow"]) as any,
+    alignPolicy: deserializeMultivariateAlignPolicy(
+      input["alignPolicy"],
+    ) as any,
+    status: passthroughDeserializer(input["status"]) as any,
+    errors: deserializeArray(
+      input["errors"],
+      deserializeMultivariateErrorResponse,
+    ) as any,
+    diagnosticsInfo: deserializeMultivariateDiagnosticsInfo(
+      input["diagnosticsInfo"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateModelInfo = withNullChecks(
+  _deserializeMultivariateModelInfo,
+);
+
+function _deserializeMultivariateAlignPolicy(
+  input: MultivariateAlignPolicyOutput,
+): MultivariateAlignPolicy {
+  return {
+    alignMode: passthroughDeserializer(input["alignMode"]) as any,
+    fillNAMethod: passthroughDeserializer(input["fillNAMethod"]) as any,
+    paddingValue: passthroughDeserializer(input["paddingValue"]) as any,
+  } as any;
+}
+
+export const deserializeMultivariateAlignPolicy = withNullChecks(
+  _deserializeMultivariateAlignPolicy,
+);
+
+function _deserializeMultivariateDiagnosticsInfo(
+  input: MultivariateDiagnosticsInfoOutput,
+): MultivariateDiagnosticsInfo {
+  return {
+    modelState: deserializeMultivariateModelState(input["modelState"]) as any,
+    variableStates: deserializeArray(
+      input["variableStates"],
+      deserializeMultivariateVariableState,
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateDiagnosticsInfo = withNullChecks(
+  _deserializeMultivariateDiagnosticsInfo,
+);
+
+function _deserializeMultivariateModelState(
+  input: MultivariateModelStateOutput,
+): MultivariateModelState {
+  return {
+    epochIds: deserializeArray(
+      input["epochIds"],
+      passthroughDeserializer,
+    ) as any,
+    trainLosses: deserializeArray(
+      input["trainLosses"],
+      passthroughDeserializer,
+    ) as any,
+    validationLosses: deserializeArray(
+      input["validationLosses"],
+      passthroughDeserializer,
+    ) as any,
+    latenciesInSeconds: deserializeArray(
+      input["latenciesInSeconds"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateModelState = withNullChecks(
+  _deserializeMultivariateModelState,
+);
+
+function _deserializeMultivariateAnomalyDetectionModel(
+  input: MultivariateAnomalyDetectionModelOutput,
+): MultivariateAnomalyDetectionModel {
+  return {
+    modelId: passthroughDeserializer(input["modelId"]) as any,
+    createdTime: deserializeUtcDateTime(input["createdTime"]) as any,
+    lastUpdatedTime: deserializeUtcDateTime(input["lastUpdatedTime"]) as any,
+    modelInfo: deserializeMultivariateModelInfo(input["modelInfo"]) as any,
+  } as any;
+}
+
+export const deserializeMultivariateAnomalyDetectionModel = withNullChecks(
+  _deserializeMultivariateAnomalyDetectionModel,
+);
+
+function _deserializeMultivariateModelList(
+  input: MultivariateModelListOutput,
+): MultivariateModelList {
+  return {
+    models: deserializeArray(
+      input["models"],
+      deserializeMultivariateAnomalyDetectionModel,
+    ) as any,
+    currentCount: passthroughDeserializer(input["currentCount"]) as any,
+    maxCount: passthroughDeserializer(input["maxCount"]) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializeMultivariateModelList = withNullChecks(
+  _deserializeMultivariateModelList,
+);
+
+function _deserializeMultivariateMultivariateLastDetectionResult(
+  input: MultivariateMultivariateLastDetectionResultOutput,
+): MultivariateMultivariateLastDetectionResult {
+  return {
+    variableStates: deserializeArray(
+      input["variableStates"],
+      deserializeMultivariateVariableState,
+    ) as any,
+    results: deserializeArray(
+      input["results"],
+      deserializeMultivariateAnomalyState,
+    ) as any,
+  } as any;
+}
+
+export const deserializeMultivariateMultivariateLastDetectionResult =
+  withNullChecks(_deserializeMultivariateMultivariateLastDetectionResult);
+
+function _deserializeUnivariateUnivariateEntireDetectionResult(
+  input: UnivariateUnivariateEntireDetectionResultOutput,
+): UnivariateUnivariateEntireDetectionResult {
+  return {
+    period: passthroughDeserializer(input["period"]) as any,
+    expectedValues: deserializeArray(
+      input["expectedValues"],
+      passthroughDeserializer,
+    ) as any,
+    upperMargins: deserializeArray(
+      input["upperMargins"],
+      passthroughDeserializer,
+    ) as any,
+    lowerMargins: deserializeArray(
+      input["lowerMargins"],
+      passthroughDeserializer,
+    ) as any,
+    isAnomaly: deserializeArray(
+      input["isAnomaly"],
+      passthroughDeserializer,
+    ) as any,
+    isNegativeAnomaly: deserializeArray(
+      input["isNegativeAnomaly"],
+      passthroughDeserializer,
+    ) as any,
+    isPositiveAnomaly: deserializeArray(
+      input["isPositiveAnomaly"],
+      passthroughDeserializer,
+    ) as any,
+    severity: deserializeArray(
+      input["severity"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeUnivariateUnivariateEntireDetectionResult =
+  withNullChecks(_deserializeUnivariateUnivariateEntireDetectionResult);
+
+function _deserializeUnivariateUnivariateLastDetectionResult(
+  input: UnivariateUnivariateLastDetectionResultOutput,
+): UnivariateUnivariateLastDetectionResult {
+  return {
+    period: passthroughDeserializer(input["period"]) as any,
+    suggestedWindow: passthroughDeserializer(input["suggestedWindow"]) as any,
+    expectedValue: passthroughDeserializer(input["expectedValue"]) as any,
+    upperMargin: passthroughDeserializer(input["upperMargin"]) as any,
+    lowerMargin: passthroughDeserializer(input["lowerMargin"]) as any,
+    isAnomaly: passthroughDeserializer(input["isAnomaly"]) as any,
+    isNegativeAnomaly: passthroughDeserializer(
+      input["isNegativeAnomaly"],
+    ) as any,
+    isPositiveAnomaly: passthroughDeserializer(
+      input["isPositiveAnomaly"],
+    ) as any,
+    severity: passthroughDeserializer(input["severity"]) as any,
+  } as any;
+}
+
+export const deserializeUnivariateUnivariateLastDetectionResult =
+  withNullChecks(_deserializeUnivariateUnivariateLastDetectionResult);
+
+function _deserializeUnivariateUnivariateChangePointDetectionResult(
+  input: UnivariateUnivariateChangePointDetectionResultOutput,
+): UnivariateUnivariateChangePointDetectionResult {
+  return {
+    period: passthroughDeserializer(input["period"]) as any,
+    isChangePoint: deserializeArray(
+      input["isChangePoint"],
+      passthroughDeserializer,
+    ) as any,
+    confidenceScores: deserializeArray(
+      input["confidenceScores"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeUnivariateUnivariateChangePointDetectionResult =
+  withNullChecks(_deserializeUnivariateUnivariateChangePointDetectionResult);

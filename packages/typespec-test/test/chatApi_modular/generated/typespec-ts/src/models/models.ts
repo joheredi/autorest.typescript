@@ -1,11 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { serializeRecord } from "../helpers/serializerHelpers.js";
+import {
+  deserializeRecord,
+  serializeRecord,
+  passthroughDeserializer,
+  withNullChecks,
+  deserializeArray,
+} from "../helpers/serializerHelpers.js";
 import {
   ChatMessage as ChatMessageRest,
   StreamingChatCompletionOptions as StreamingChatCompletionOptionsRest,
   ChatCompletionOptions as ChatCompletionOptionsRest,
+  ChatChoiceOutput,
+  ChatCompletionChunkOutput,
+  ChatCompletionOutput,
+  ChatMessageDeltaOutput,
+  ChatMessageOutput,
+  ChoiceDeltaOutput,
 } from "../rest/index.js";
 
 /** A single, role-attributed message within a chat completion interaction. */
@@ -176,3 +188,95 @@ export interface ChatChoiceRecord {
 
 /** Type of APIVersion */
 export type APIVersion = "2023-10-01-preview";
+
+function _deserializeChatMessage(input: ChatMessageOutput): ChatMessage {
+  return {
+    content: passthroughDeserializer(input["content"]) as any,
+    role: passthroughDeserializer(input["role"]) as any,
+    sessionState: passthroughDeserializer(input["session_state"]) as any,
+  } as any;
+}
+
+export const deserializeChatMessage = withNullChecks(_deserializeChatMessage);
+
+function _deserializeChatCompletionChunkRecord(
+  input: ChatCompletionChunkOutput,
+): ChatCompletionChunkRecord {
+  return {
+    choices: deserializeArray(
+      input["choices"],
+      deserializeChoiceDeltaRecord,
+    ) as any,
+  } as any;
+}
+
+export const deserializeChatCompletionChunkRecord = withNullChecks(
+  _deserializeChatCompletionChunkRecord,
+);
+
+function _deserializeChoiceDeltaRecord(
+  input: ChoiceDeltaOutput,
+): ChoiceDeltaRecord {
+  return {
+    index: passthroughDeserializer(input["index"]) as any,
+    delta: deserializeChatMessageDelta(input["delta"]) as any,
+    sessionState: passthroughDeserializer(input["session_state"]) as any,
+    context: deserializeRecord(
+      input["context"],
+      passthroughDeserializer,
+    ) as any,
+    finishReason: passthroughDeserializer(input["finish_reason"]) as any,
+  } as any;
+}
+
+export const deserializeChoiceDeltaRecord = withNullChecks(
+  _deserializeChoiceDeltaRecord,
+);
+
+function _deserializeChatMessageDelta(
+  input: ChatMessageDeltaOutput,
+): ChatMessageDelta {
+  return {
+    content: passthroughDeserializer(input["content"]) as any,
+    role: passthroughDeserializer(input["role"]) as any,
+    sessionState: passthroughDeserializer(input["session_state"]) as any,
+  } as any;
+}
+
+export const deserializeChatMessageDelta = withNullChecks(
+  _deserializeChatMessageDelta,
+);
+
+function _deserializeChatCompletionRecord(
+  input: ChatCompletionOutput,
+): ChatCompletionRecord {
+  return {
+    choices: deserializeArray(
+      input["choices"],
+      deserializeChatChoiceRecord,
+    ) as any,
+  } as any;
+}
+
+export const deserializeChatCompletionRecord = withNullChecks(
+  _deserializeChatCompletionRecord,
+);
+
+function _deserializeChatChoiceRecord(
+  input: ChatChoiceOutput,
+): ChatChoiceRecord {
+  return {
+    index: passthroughDeserializer(input["index"]) as any,
+    message: deserializeChatMessage(input["message"]) as any,
+    sessionState: passthroughDeserializer(input["session_state"]) as any,
+    context: deserializeRecord(
+      input["context"],
+      passthroughDeserializer,
+    ) as any,
+    finishReason: passthroughDeserializer(input["finish_reason"]) as any,
+  } as any;
+}
+
+export const deserializeChatChoiceRecord = withNullChecks(
+  _deserializeChatChoiceRecord,
+);

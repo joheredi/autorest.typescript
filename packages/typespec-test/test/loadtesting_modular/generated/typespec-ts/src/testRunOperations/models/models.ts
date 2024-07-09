@@ -1,7 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { serializeRecord } from "../../helpers/serializerHelpers.js";
+import {
+  deserializeRecord,
+  serializeRecord,
+  passthroughDeserializer,
+  withNullChecks,
+  deserializeArray,
+  deserializeOffsetDateTime,
+} from "../../helpers/serializerHelpers.js";
 import {
   Test as TestRest,
   PassFailCriteria as PassFailCriteriaRest,
@@ -19,6 +26,41 @@ import {
   TestRunServerMetricConfig as TestRunServerMetricConfigRest,
   MetricRequestPayload as MetricRequestPayloadRest,
   DimensionFilter as DimensionFilterRest,
+  AppComponentOutput,
+  CertificateMetadataOutput,
+  DimensionValueListOutput,
+  DimensionValueOutput,
+  ErrorDetailsOutput,
+  FileInfoOutput,
+  LoadTestConfigurationOutput,
+  MetricAvailabilityOutput,
+  MetricDefinitionCollectionOutput,
+  MetricDefinitionOutput,
+  MetricNamespaceCollectionOutput,
+  MetricNamespaceOutput,
+  MetricValueOutput,
+  NameAndDescOutput,
+  OptionalLoadTestConfigOutput,
+  PagedFileInfoOutput,
+  PagedTestOutput,
+  PagedTestRunOutput,
+  PagedTimeSeriesElementOutput,
+  PassFailCriteriaOutput,
+  PassFailMetricOutput,
+  ResourceMetricOutput,
+  SecretOutput,
+  TestAppComponentsOutput,
+  TestInputArtifactsOutput,
+  TestOutput,
+  TestRunAppComponentsOutput,
+  TestRunArtifactsOutput,
+  TestRunInputArtifactsOutput,
+  TestRunOutput,
+  TestRunOutputArtifactsOutput,
+  TestRunServerMetricConfigOutput,
+  TestRunStatisticsOutput,
+  TestServerMetricConfigOutput,
+  TimeSeriesElementOutput,
 } from "../../rest/index.js";
 
 /** Load test model */
@@ -447,7 +489,7 @@ export function resourceMetricSerializer(
 }
 
 /** Collection of files. */
-export interface _PagedFileInfo {
+export interface PagedFileInfo {
   /** The FileInfo items on this page */
   value: FileInfo[];
   /** The link to the next page of items */
@@ -455,7 +497,7 @@ export interface _PagedFileInfo {
 }
 
 /** Collection of tests */
-export interface _PagedTest {
+export interface PagedTest {
   /** The Test items on this page */
   value: Test[];
   /** The link to the next page of items */
@@ -828,7 +870,7 @@ export function dimensionFilterSerializer(
 }
 
 /** The response to a metrics query. */
-export interface _PagedTimeSeriesElement {
+export interface PagedTimeSeriesElement {
   /** The TimeSeriesElement items on this page */
   value: TimeSeriesElement[];
   /** The link to the next page of items */
@@ -860,7 +902,7 @@ export interface DimensionValue {
 }
 
 /** Collection of test runs */
-export interface _PagedTestRun {
+export interface PagedTestRun {
   /** The TestRun items on this page */
   value: TestRun[];
   /** The link to the next page of items */
@@ -868,9 +910,613 @@ export interface _PagedTestRun {
 }
 
 /** Paged collection of DimensionValueList items */
-export interface _PagedDimensionValueList {
+export interface PagedDimensionValueList {
   /** The DimensionValueList items on this page */
   value: DimensionValueList[];
   /** The link to the next page of items */
   nextLink?: string;
 }
+
+function _deserializeTest(input: TestOutput): Test {
+  return {
+    passFailCriteria: deserializePassFailCriteria(
+      input["passFailCriteria"],
+    ) as any,
+    secrets: deserializeRecord(input["secrets"], deserializeSecret) as any,
+    certificate: deserializeCertificateMetadata(input["certificate"]) as any,
+    environmentVariables: deserializeRecord(
+      input["environmentVariables"],
+      passthroughDeserializer,
+    ) as any,
+    loadTestConfiguration: deserializeLoadTestConfiguration(
+      input["loadTestConfiguration"],
+    ) as any,
+    inputArtifacts: deserializeTestInputArtifacts(
+      input["inputArtifacts"],
+    ) as any,
+    testId: passthroughDeserializer(input["testId"]) as any,
+    description: passthroughDeserializer(input["description"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    subnetId: passthroughDeserializer(input["subnetId"]) as any,
+    keyvaultReferenceIdentityType: passthroughDeserializer(
+      input["keyvaultReferenceIdentityType"],
+    ) as any,
+    keyvaultReferenceIdentityId: passthroughDeserializer(
+      input["keyvaultReferenceIdentityId"],
+    ) as any,
+    createdDateTime: deserializeOffsetDateTime(input["createdDateTime"]) as any,
+    createdBy: passthroughDeserializer(input["createdBy"]) as any,
+    lastModifiedDateTime: deserializeOffsetDateTime(
+      input["lastModifiedDateTime"],
+    ) as any,
+    lastModifiedBy: passthroughDeserializer(input["lastModifiedBy"]) as any,
+  } as any;
+}
+
+export const deserializeTest = withNullChecks(_deserializeTest);
+
+function _deserializePassFailCriteria(
+  input: PassFailCriteriaOutput,
+): PassFailCriteria {
+  return {
+    passFailMetrics: deserializeRecord(
+      input["passFailMetrics"],
+      deserializePassFailMetric,
+    ) as any,
+  } as any;
+}
+
+export const deserializePassFailCriteria = withNullChecks(
+  _deserializePassFailCriteria,
+);
+
+function _deserializePassFailMetric(
+  input: PassFailMetricOutput,
+): PassFailMetric {
+  return {
+    clientMetric: passthroughDeserializer(input["clientMetric"]) as any,
+    aggregate: passthroughDeserializer(input["aggregate"]) as any,
+    condition: passthroughDeserializer(input["condition"]) as any,
+    requestName: passthroughDeserializer(input["requestName"]) as any,
+    value: passthroughDeserializer(input["value"]) as any,
+    action: passthroughDeserializer(input["action"]) as any,
+    actualValue: passthroughDeserializer(input["actualValue"]) as any,
+    result: passthroughDeserializer(input["result"]) as any,
+  } as any;
+}
+
+export const deserializePassFailMetric = withNullChecks(
+  _deserializePassFailMetric,
+);
+
+function _deserializeSecret(input: SecretOutput): Secret {
+  return {
+    value: passthroughDeserializer(input["value"]) as any,
+    type: passthroughDeserializer(input["type"]) as any,
+  } as any;
+}
+
+export const deserializeSecret = withNullChecks(_deserializeSecret);
+
+function _deserializeCertificateMetadata(
+  input: CertificateMetadataOutput,
+): CertificateMetadata {
+  return {
+    value: passthroughDeserializer(input["value"]) as any,
+    type: passthroughDeserializer(input["type"]) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+  } as any;
+}
+
+export const deserializeCertificateMetadata = withNullChecks(
+  _deserializeCertificateMetadata,
+);
+
+function _deserializeLoadTestConfiguration(
+  input: LoadTestConfigurationOutput,
+): LoadTestConfiguration {
+  return {
+    engineInstances: passthroughDeserializer(input["engineInstances"]) as any,
+    splitAllCSVs: passthroughDeserializer(input["splitAllCSVs"]) as any,
+    quickStartTest: passthroughDeserializer(input["quickStartTest"]) as any,
+    optionalLoadTestConfig: deserializeOptionalLoadTestConfig(
+      input["optionalLoadTestConfig"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeLoadTestConfiguration = withNullChecks(
+  _deserializeLoadTestConfiguration,
+);
+
+function _deserializeOptionalLoadTestConfig(
+  input: OptionalLoadTestConfigOutput,
+): OptionalLoadTestConfig {
+  return {
+    endpointUrl: passthroughDeserializer(input["endpointUrl"]) as any,
+    virtualUsers: passthroughDeserializer(input["virtualUsers"]) as any,
+    rampUpTime: passthroughDeserializer(input["rampUpTime"]) as any,
+    duration: passthroughDeserializer(input["duration"]) as any,
+  } as any;
+}
+
+export const deserializeOptionalLoadTestConfig = withNullChecks(
+  _deserializeOptionalLoadTestConfig,
+);
+
+function _deserializeTestInputArtifacts(
+  input: TestInputArtifactsOutput,
+): TestInputArtifacts {
+  return {
+    configFileInfo: deserializeFileInfo(input["configFileInfo"]) as any,
+    testScriptFileInfo: deserializeFileInfo(input["testScriptFileInfo"]) as any,
+    userPropFileInfo: deserializeFileInfo(input["userPropFileInfo"]) as any,
+    inputArtifactsZipFileInfo: deserializeFileInfo(
+      input["inputArtifactsZipFileInfo"],
+    ) as any,
+    additionalFileInfo: deserializeArray(
+      input["additionalFileInfo"],
+      deserializeFileInfo,
+    ) as any,
+  } as any;
+}
+
+export const deserializeTestInputArtifacts = withNullChecks(
+  _deserializeTestInputArtifacts,
+);
+
+function _deserializeFileInfo(input: FileInfoOutput): FileInfo {
+  return {
+    url: passthroughDeserializer(input["url"]) as any,
+    fileName: passthroughDeserializer(input["fileName"]) as any,
+    fileType: passthroughDeserializer(input["fileType"]) as any,
+    expireDateTime: deserializeOffsetDateTime(input["expireDateTime"]) as any,
+    validationStatus: passthroughDeserializer(input["validationStatus"]) as any,
+    validationFailureDetails: passthroughDeserializer(
+      input["validationFailureDetails"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeFileInfo = withNullChecks(_deserializeFileInfo);
+
+function _deserializeTestAppComponents(
+  input: TestAppComponentsOutput,
+): TestAppComponents {
+  return {
+    components: deserializeRecord(
+      input["components"],
+      deserializeAppComponent,
+    ) as any,
+    testId: passthroughDeserializer(input["testId"]) as any,
+    createdDateTime: deserializeOffsetDateTime(input["createdDateTime"]) as any,
+    createdBy: passthroughDeserializer(input["createdBy"]) as any,
+    lastModifiedDateTime: deserializeOffsetDateTime(
+      input["lastModifiedDateTime"],
+    ) as any,
+    lastModifiedBy: passthroughDeserializer(input["lastModifiedBy"]) as any,
+  } as any;
+}
+
+export const deserializeTestAppComponents = withNullChecks(
+  _deserializeTestAppComponents,
+);
+
+function _deserializeAppComponent(input: AppComponentOutput): AppComponent {
+  return {
+    resourceId: passthroughDeserializer(input["resourceId"]) as any,
+    resourceName: passthroughDeserializer(input["resourceName"]) as any,
+    resourceType: passthroughDeserializer(input["resourceType"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    resourceGroup: passthroughDeserializer(input["resourceGroup"]) as any,
+    subscriptionId: passthroughDeserializer(input["subscriptionId"]) as any,
+    kind: passthroughDeserializer(input["kind"]) as any,
+  } as any;
+}
+
+export const deserializeAppComponent = withNullChecks(_deserializeAppComponent);
+
+function _deserializeTestServerMetricConfig(
+  input: TestServerMetricConfigOutput,
+): TestServerMetricConfig {
+  return {
+    testId: passthroughDeserializer(input["testId"]) as any,
+    metrics: deserializeRecord(
+      input["metrics"],
+      deserializeResourceMetric,
+    ) as any,
+    createdDateTime: deserializeOffsetDateTime(input["createdDateTime"]) as any,
+    createdBy: passthroughDeserializer(input["createdBy"]) as any,
+    lastModifiedDateTime: deserializeOffsetDateTime(
+      input["lastModifiedDateTime"],
+    ) as any,
+    lastModifiedBy: passthroughDeserializer(input["lastModifiedBy"]) as any,
+  } as any;
+}
+
+export const deserializeTestServerMetricConfig = withNullChecks(
+  _deserializeTestServerMetricConfig,
+);
+
+function _deserializeResourceMetric(
+  input: ResourceMetricOutput,
+): ResourceMetric {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    resourceId: passthroughDeserializer(input["resourceId"]) as any,
+    metricNamespace: passthroughDeserializer(input["metricNamespace"]) as any,
+    displayDescription: passthroughDeserializer(
+      input["displayDescription"],
+    ) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+    aggregation: passthroughDeserializer(input["aggregation"]) as any,
+    unit: passthroughDeserializer(input["unit"]) as any,
+    resourceType: passthroughDeserializer(input["resourceType"]) as any,
+  } as any;
+}
+
+export const deserializeResourceMetric = withNullChecks(
+  _deserializeResourceMetric,
+);
+
+function _deserializePagedFileInfo(input: PagedFileInfoOutput): PagedFileInfo {
+  return {
+    value: deserializeArray(input["value"], deserializeFileInfo) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializePagedFileInfo = withNullChecks(
+  _deserializePagedFileInfo,
+);
+
+function _deserializePagedTest(input: PagedTestOutput): PagedTest {
+  return {
+    value: deserializeArray(input["value"], deserializeTest) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializePagedTest = withNullChecks(_deserializePagedTest);
+
+function _deserializeTestRun(input: TestRunOutput): TestRun {
+  return {
+    testRunId: passthroughDeserializer(input["testRunId"]) as any,
+    passFailCriteria: deserializePassFailCriteria(
+      input["passFailCriteria"],
+    ) as any,
+    secrets: deserializeRecord(input["secrets"], deserializeSecret) as any,
+    certificate: deserializeCertificateMetadata(input["certificate"]) as any,
+    environmentVariables: deserializeRecord(
+      input["environmentVariables"],
+      passthroughDeserializer,
+    ) as any,
+    errorDetails: deserializeArray(
+      input["errorDetails"],
+      deserializeErrorDetails,
+    ) as any,
+    testRunStatistics: deserializeRecord(
+      input["testRunStatistics"],
+      deserializeTestRunStatistics,
+    ) as any,
+    loadTestConfiguration: deserializeLoadTestConfiguration(
+      input["loadTestConfiguration"],
+    ) as any,
+    testArtifacts: deserializeTestRunArtifacts(input["testArtifacts"]) as any,
+    testResult: passthroughDeserializer(input["testResult"]) as any,
+    virtualUsers: passthroughDeserializer(input["virtualUsers"]) as any,
+    displayName: passthroughDeserializer(input["displayName"]) as any,
+    testId: passthroughDeserializer(input["testId"]) as any,
+    description: passthroughDeserializer(input["description"]) as any,
+    status: passthroughDeserializer(input["status"]) as any,
+    startDateTime: deserializeOffsetDateTime(input["startDateTime"]) as any,
+    endDateTime: deserializeOffsetDateTime(input["endDateTime"]) as any,
+    executedDateTime: deserializeOffsetDateTime(
+      input["executedDateTime"],
+    ) as any,
+    portalUrl: passthroughDeserializer(input["portalUrl"]) as any,
+    duration: passthroughDeserializer(input["duration"]) as any,
+    subnetId: passthroughDeserializer(input["subnetId"]) as any,
+    createdDateTime: deserializeOffsetDateTime(input["createdDateTime"]) as any,
+    createdBy: passthroughDeserializer(input["createdBy"]) as any,
+    lastModifiedDateTime: deserializeOffsetDateTime(
+      input["lastModifiedDateTime"],
+    ) as any,
+    lastModifiedBy: passthroughDeserializer(input["lastModifiedBy"]) as any,
+  } as any;
+}
+
+export const deserializeTestRun = withNullChecks(_deserializeTestRun);
+
+function _deserializeErrorDetails(input: ErrorDetailsOutput): ErrorDetails {
+  return {
+    message: passthroughDeserializer(input["message"]) as any,
+  } as any;
+}
+
+export const deserializeErrorDetails = withNullChecks(_deserializeErrorDetails);
+
+function _deserializeTestRunStatistics(
+  input: TestRunStatisticsOutput,
+): TestRunStatistics {
+  return {
+    transaction: passthroughDeserializer(input["transaction"]) as any,
+    sampleCount: passthroughDeserializer(input["sampleCount"]) as any,
+    errorCount: passthroughDeserializer(input["errorCount"]) as any,
+    errorPct: passthroughDeserializer(input["errorPct"]) as any,
+    meanResTime: passthroughDeserializer(input["meanResTime"]) as any,
+    medianResTime: passthroughDeserializer(input["medianResTime"]) as any,
+    maxResTime: passthroughDeserializer(input["maxResTime"]) as any,
+    minResTime: passthroughDeserializer(input["minResTime"]) as any,
+    pct1ResTime: passthroughDeserializer(input["pct1ResTime"]) as any,
+    pct2ResTime: passthroughDeserializer(input["pct2ResTime"]) as any,
+    pct3ResTime: passthroughDeserializer(input["pct3ResTime"]) as any,
+    throughput: passthroughDeserializer(input["throughput"]) as any,
+    receivedKBytesPerSec: passthroughDeserializer(
+      input["receivedKBytesPerSec"],
+    ) as any,
+    sentKBytesPerSec: passthroughDeserializer(input["sentKBytesPerSec"]) as any,
+  } as any;
+}
+
+export const deserializeTestRunStatistics = withNullChecks(
+  _deserializeTestRunStatistics,
+);
+
+function _deserializeTestRunArtifacts(
+  input: TestRunArtifactsOutput,
+): TestRunArtifacts {
+  return {
+    inputArtifacts: deserializeTestRunInputArtifacts(
+      input["inputArtifacts"],
+    ) as any,
+    outputArtifacts: deserializeTestRunOutputArtifacts(
+      input["outputArtifacts"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeTestRunArtifacts = withNullChecks(
+  _deserializeTestRunArtifacts,
+);
+
+function _deserializeTestRunInputArtifacts(
+  input: TestRunInputArtifactsOutput,
+): TestRunInputArtifacts {
+  return {
+    configFileInfo: deserializeFileInfo(input["configFileInfo"]) as any,
+    testScriptFileInfo: deserializeFileInfo(input["testScriptFileInfo"]) as any,
+    userPropFileInfo: deserializeFileInfo(input["userPropFileInfo"]) as any,
+    inputArtifactsZipFileInfo: deserializeFileInfo(
+      input["inputArtifactsZipFileInfo"],
+    ) as any,
+    additionalFileInfo: deserializeArray(
+      input["additionalFileInfo"],
+      deserializeFileInfo,
+    ) as any,
+  } as any;
+}
+
+export const deserializeTestRunInputArtifacts = withNullChecks(
+  _deserializeTestRunInputArtifacts,
+);
+
+function _deserializeTestRunOutputArtifacts(
+  input: TestRunOutputArtifactsOutput,
+): TestRunOutputArtifacts {
+  return {
+    resultFileInfo: deserializeFileInfo(input["resultFileInfo"]) as any,
+    logsFileInfo: deserializeFileInfo(input["logsFileInfo"]) as any,
+  } as any;
+}
+
+export const deserializeTestRunOutputArtifacts = withNullChecks(
+  _deserializeTestRunOutputArtifacts,
+);
+
+function _deserializeTestRunAppComponents(
+  input: TestRunAppComponentsOutput,
+): TestRunAppComponents {
+  return {
+    components: deserializeRecord(
+      input["components"],
+      deserializeAppComponent,
+    ) as any,
+    testRunId: passthroughDeserializer(input["testRunId"]) as any,
+    createdDateTime: deserializeOffsetDateTime(input["createdDateTime"]) as any,
+    createdBy: passthroughDeserializer(input["createdBy"]) as any,
+    lastModifiedDateTime: deserializeOffsetDateTime(
+      input["lastModifiedDateTime"],
+    ) as any,
+    lastModifiedBy: passthroughDeserializer(input["lastModifiedBy"]) as any,
+  } as any;
+}
+
+export const deserializeTestRunAppComponents = withNullChecks(
+  _deserializeTestRunAppComponents,
+);
+
+function _deserializeTestRunServerMetricConfig(
+  input: TestRunServerMetricConfigOutput,
+): TestRunServerMetricConfig {
+  return {
+    testRunId: passthroughDeserializer(input["testRunId"]) as any,
+    metrics: deserializeRecord(
+      input["metrics"],
+      deserializeResourceMetric,
+    ) as any,
+    createdDateTime: deserializeOffsetDateTime(input["createdDateTime"]) as any,
+    createdBy: passthroughDeserializer(input["createdBy"]) as any,
+    lastModifiedDateTime: deserializeOffsetDateTime(
+      input["lastModifiedDateTime"],
+    ) as any,
+    lastModifiedBy: passthroughDeserializer(input["lastModifiedBy"]) as any,
+  } as any;
+}
+
+export const deserializeTestRunServerMetricConfig = withNullChecks(
+  _deserializeTestRunServerMetricConfig,
+);
+
+function _deserializeDimensionValueList(
+  input: DimensionValueListOutput,
+): DimensionValueList {
+  return {
+    value: deserializeArray(input["value"], passthroughDeserializer) as any,
+  } as any;
+}
+
+export const deserializeDimensionValueList = withNullChecks(
+  _deserializeDimensionValueList,
+);
+
+function _deserializeMetricDefinitionCollection(
+  input: MetricDefinitionCollectionOutput,
+): MetricDefinitionCollection {
+  return {
+    value: deserializeArray(input["value"], deserializeMetricDefinition) as any,
+  } as any;
+}
+
+export const deserializeMetricDefinitionCollection = withNullChecks(
+  _deserializeMetricDefinitionCollection,
+);
+
+function _deserializeMetricDefinition(
+  input: MetricDefinitionOutput,
+): MetricDefinition {
+  return {
+    dimensions: deserializeArray(
+      input["dimensions"],
+      deserializeNameAndDesc,
+    ) as any,
+    description: passthroughDeserializer(input["description"]) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+    namespace: passthroughDeserializer(input["namespace"]) as any,
+    primaryAggregationType: passthroughDeserializer(
+      input["primaryAggregationType"],
+    ) as any,
+    supportedAggregationTypes: deserializeArray(
+      input["supportedAggregationTypes"],
+      passthroughDeserializer,
+    ) as any,
+    unit: passthroughDeserializer(input["unit"]) as any,
+    metricAvailabilities: deserializeArray(
+      input["metricAvailabilities"],
+      deserializeMetricAvailability,
+    ) as any,
+  } as any;
+}
+
+export const deserializeMetricDefinition = withNullChecks(
+  _deserializeMetricDefinition,
+);
+
+function _deserializeNameAndDesc(input: NameAndDescOutput): NameAndDesc {
+  return {
+    description: passthroughDeserializer(input["description"]) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+  } as any;
+}
+
+export const deserializeNameAndDesc = withNullChecks(_deserializeNameAndDesc);
+
+function _deserializeMetricAvailability(
+  input: MetricAvailabilityOutput,
+): MetricAvailability {
+  return {
+    timeGrain: passthroughDeserializer(input["timeGrain"]) as any,
+  } as any;
+}
+
+export const deserializeMetricAvailability = withNullChecks(
+  _deserializeMetricAvailability,
+);
+
+function _deserializeMetricNamespaceCollection(
+  input: MetricNamespaceCollectionOutput,
+): MetricNamespaceCollection {
+  return {
+    value: deserializeArray(input["value"], deserializeMetricNamespace) as any,
+  } as any;
+}
+
+export const deserializeMetricNamespaceCollection = withNullChecks(
+  _deserializeMetricNamespaceCollection,
+);
+
+function _deserializeMetricNamespace(
+  input: MetricNamespaceOutput,
+): MetricNamespace {
+  return {
+    description: passthroughDeserializer(input["description"]) as any,
+    name: passthroughDeserializer(input["name"]) as any,
+  } as any;
+}
+
+export const deserializeMetricNamespace = withNullChecks(
+  _deserializeMetricNamespace,
+);
+
+function _deserializePagedTimeSeriesElement(
+  input: PagedTimeSeriesElementOutput,
+): PagedTimeSeriesElement {
+  return {
+    value: deserializeArray(
+      input["value"],
+      deserializeTimeSeriesElement,
+    ) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializePagedTimeSeriesElement = withNullChecks(
+  _deserializePagedTimeSeriesElement,
+);
+
+function _deserializeTimeSeriesElement(
+  input: TimeSeriesElementOutput,
+): TimeSeriesElement {
+  return {
+    data: deserializeArray(input["data"], deserializeMetricValue) as any,
+    dimensionValues: deserializeArray(
+      input["dimensionValues"],
+      deserializeDimensionValue,
+    ) as any,
+  } as any;
+}
+
+export const deserializeTimeSeriesElement = withNullChecks(
+  _deserializeTimeSeriesElement,
+);
+
+function _deserializeMetricValue(input: MetricValueOutput): MetricValue {
+  return {
+    timestamp: passthroughDeserializer(input["timestamp"]) as any,
+    value: passthroughDeserializer(input["value"]) as any,
+  } as any;
+}
+
+export const deserializeMetricValue = withNullChecks(_deserializeMetricValue);
+
+function _deserializeDimensionValue(
+  input: DimensionValueOutput,
+): DimensionValue {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    value: passthroughDeserializer(input["value"]) as any,
+  } as any;
+}
+
+export const deserializeDimensionValue = withNullChecks(
+  _deserializeDimensionValue,
+);
+
+function _deserializePagedTestRun(input: PagedTestRunOutput): PagedTestRun {
+  return {
+    value: deserializeArray(input["value"], deserializeTestRun) as any,
+    nextLink: passthroughDeserializer(input["nextLink"]) as any,
+  } as any;
+}
+
+export const deserializePagedTestRun = withNullChecks(_deserializePagedTestRun);

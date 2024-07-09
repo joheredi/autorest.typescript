@@ -11,6 +11,7 @@ import {
   ReleaseResult,
   RejectOptions,
   RejectResult,
+  deserializePublishResult,
 } from "../models/models.js";
 import {
   isUnexpected,
@@ -33,7 +34,8 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
-import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
+import { deserializeUtcDateTime } from "../helpers/serializerHelpers.js";
+import { stringToUint8Array, uint8ArrayToString } from "@azure/core-util";
 import {
   PublishCloudEventOptionalParams,
   PublishCloudEventsOptionalParams,
@@ -87,7 +89,7 @@ export async function _publishCloudEventDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializePublishResult(result.body);
 }
 
 /** Publish Single Cloud Event to namespace topic. In case of success, the server responds with an HTTP 200 status code with an empty JSON object in response. Otherwise, the server can return various error codes. For example, 401: which indicates authorization failure, 403: which indicates quota exceeded or message is too large, 410: which indicates that specific topic is not found, 400: for bad request, and 500: for internal server error. */
@@ -148,7 +150,7 @@ export async function _publishCloudEventsDeserialize(
     throw createRestError(result);
   }
 
-  return result.body;
+  return deserializePublishResult(result.body);
 }
 
 /** Publish Batch Cloud Event to namespace topic. In case of success, the server responds with an HTTP 200 status code with an empty JSON object in response. Otherwise, the server can return various error codes. For example, 401: which indicates authorization failure, 403: which indicates quota exceeded or message is too large, 410: which indicates that specific topic is not found, 400: for bad request, and 500: for internal server error. */
@@ -212,8 +214,7 @@ export async function _receiveCloudEventsDeserialize(
             ? stringToUint8Array(p.event["data_base64"], "base64")
             : p.event["data_base64"],
         type: p.event["type"],
-        time:
-          p.event["time"] !== undefined ? new Date(p.event["time"]) : undefined,
+        time: deserializeUtcDateTime(p.event["time"]),
         specversion: p.event["specversion"],
         dataschema: p.event["dataschema"],
         datacontenttype: p.event["datacontenttype"],

@@ -7,10 +7,10 @@ export {
 } from "./notDiscriminatedClient.js";
 export {
   Pet,
-  deserializePet,
   Cat,
-  deserializeCat,
   Siamese,
+  deserializePet,
+  deserializeCat,
   deserializeSiamese,
   PostValidOptionalParams,
   GetValidOptionalParams,

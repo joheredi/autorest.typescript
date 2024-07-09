@@ -3,18 +3,18 @@
 
 export {
   CollectionsModelProperty,
-  deserializeCollectionsModelProperty,
   InnerModel,
-  deserializeInnerModel,
   CollectionsByteProperty,
-  deserializeCollectionsByteProperty,
   DurationProperty,
-  deserializeDurationProperty,
   DatetimeProperty,
-  deserializeDatetimeProperty,
   BytesProperty,
-  deserializeBytesProperty,
   StringProperty,
+  deserializeCollectionsModelProperty,
+  deserializeInnerModel,
+  deserializeCollectionsByteProperty,
+  deserializeDurationProperty,
+  deserializeDatetimeProperty,
+  deserializeBytesProperty,
   deserializeStringProperty,
 } from "./models.js";
 export {

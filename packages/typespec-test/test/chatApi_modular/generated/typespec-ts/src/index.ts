@@ -17,6 +17,12 @@ export {
   ChatCompletionRecord,
   ChatChoiceRecord,
   APIVersion,
+  deserializeChatMessage,
+  deserializeChatCompletionChunkRecord,
+  deserializeChoiceDeltaRecord,
+  deserializeChatMessageDelta,
+  deserializeChatCompletionRecord,
+  deserializeChatChoiceRecord,
   CreateStreamingOptionalParams,
   CreateOptionalParams,
 } from "./models/index.js";

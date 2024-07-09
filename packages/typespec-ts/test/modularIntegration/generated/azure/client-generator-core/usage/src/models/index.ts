@@ -4,8 +4,8 @@
 export {
   InputModel,
   OutputModel,
-  deserializeOutputModel,
   OrphanModel,
+  deserializeOutputModel,
 } from "./models.js";
 export {
   InputToInputOutputOptionalParams,

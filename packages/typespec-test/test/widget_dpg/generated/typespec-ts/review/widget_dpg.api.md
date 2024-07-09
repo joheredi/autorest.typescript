@@ -50,6 +50,32 @@ export interface CreateWidget {
     weight: number;
 }
 
+// Warning: (ae-forgotten-export) The symbol "AnalyzeResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAnalyzeResult: (input: AnalyzeResultOutput | null | undefined) => AnalyzeResult;
+
+// Warning: (ae-forgotten-export) The symbol "ListWidgetsPagesResultsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeListWidgetsPagesResults: (input: ListWidgetsPagesResultsOutput | null | undefined) => ListWidgetsPagesResults;
+
+// Warning: (ae-forgotten-export) The symbol "WidgetOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeWidget: (input: WidgetOutput | null | undefined) => Widget;
+
+// Warning: (ae-forgotten-export) The symbol "WidgetErrorOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeWidgetError: (input: WidgetErrorOutput | null | undefined) => WidgetError;
+
+// @public (undocumented)
+export interface ListWidgetsPagesResults {
+    "odata.nextLink"?: string;
+    results: Widget[];
+}
+
 // @public (undocumented)
 export interface NonReferencedModel {
     prop1: number;

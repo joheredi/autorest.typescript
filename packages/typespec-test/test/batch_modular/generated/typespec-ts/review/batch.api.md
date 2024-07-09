@@ -13,12 +13,24 @@ import { TokenCredential } from '@azure/core-auth';
 export type AccessScope = "job";
 
 // @public
+export interface AccountListSupportedImagesResult {
+    "odata.nextLink"?: string;
+    value?: ImageInformation[];
+}
+
+// @public
 export interface AffinityInformation {
     affinityId: string;
 }
 
 // @public
 export type AllocationState = "steady" | "resizing" | "stopping";
+
+// @public
+export interface ApplicationListResult {
+    "odata.nextLink"?: string;
+    value?: BatchApplication[];
+}
 
 // @public
 export interface ApplicationPackageReference {
@@ -260,6 +272,18 @@ export interface BatchJobDisableOptions {
 }
 
 // @public
+export interface BatchJobListPreparationAndReleaseTaskStatusResult {
+    "odata.nextLink"?: string;
+    value?: JobPreparationAndReleaseTaskExecutionInformation[];
+}
+
+// @public
+export interface BatchJobListResult {
+    "odata.nextLink"?: string;
+    value?: BatchJob[];
+}
+
+// @public
 export interface BatchJobSchedule {
     readonly creationTime?: Date;
     readonly displayName?: string;
@@ -285,6 +309,12 @@ export interface BatchJobScheduleCreateOptions {
     jobSpecification: JobSpecification;
     metadata?: MetadataItem[];
     schedule: Schedule;
+}
+
+// @public
+export interface BatchJobScheduleListResult {
+    "odata.nextLink"?: string;
+    value?: BatchJobSchedule[];
 }
 
 // @public
@@ -368,6 +398,12 @@ export interface BatchNodeInformation {
     poolId?: string;
     taskRootDirectory?: string;
     taskRootDirectoryUrl?: string;
+}
+
+// @public
+export interface BatchNodeListResult {
+    "odata.nextLink"?: string;
+    value?: BatchNode[];
 }
 
 // @public
@@ -488,6 +524,12 @@ export interface BatchPoolIdentity {
 }
 
 // @public
+export interface BatchPoolListResult {
+    "odata.nextLink"?: string;
+    value?: BatchPool[];
+}
+
+// @public
 export interface BatchPoolReplaceOptions {
     applicationPackageReferences: ApplicationPackageReference[];
     certificateReferences: CertificateReference[];
@@ -570,6 +612,12 @@ export interface BatchTaskCreateOptions {
 }
 
 // @public
+export interface BatchTaskListResult {
+    "odata.nextLink"?: string;
+    value?: BatchTask[];
+}
+
+// @public
 export interface BatchTaskListSubtasksResult {
     value?: SubtaskInformation[];
 }
@@ -585,6 +633,12 @@ export interface CancelCertificateDeletionOptionalParams extends OperationOption
 
 // @public
 export type CertificateFormat = "pfx" | "cer";
+
+// @public
+export interface CertificateListResult {
+    "odata.nextLink"?: string;
+    value?: BatchCertificate[];
+}
 
 // @public
 export interface CertificateReference {
@@ -777,6 +831,581 @@ export interface DeleteTaskOptionalParams extends OperationOptions {
 
 // @public
 export type DependencyAction = "satisfy" | "block";
+
+// Warning: (ae-forgotten-export) The symbol "AffinityInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAffinityInformation: (input: AffinityInformationOutput | null | undefined) => AffinityInformation;
+
+// Warning: (ae-forgotten-export) The symbol "ApplicationPackageReferenceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeApplicationPackageReference: (input: ApplicationPackageReferenceOutput | null | undefined) => ApplicationPackageReference;
+
+// Warning: (ae-forgotten-export) The symbol "AuthenticationTokenSettingsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAuthenticationTokenSettings: (input: AuthenticationTokenSettingsOutput | null | undefined) => AuthenticationTokenSettings;
+
+// Warning: (ae-forgotten-export) The symbol "AutoPoolSpecificationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAutoPoolSpecification: (input: AutoPoolSpecificationOutput | null | undefined) => AutoPoolSpecification;
+
+// Warning: (ae-forgotten-export) The symbol "AutoScaleRunOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAutoScaleRun: (input: AutoScaleRunOutput | null | undefined) => AutoScaleRun;
+
+// Warning: (ae-forgotten-export) The symbol "AutoScaleRunErrorOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAutoScaleRunError: (input: AutoScaleRunErrorOutput | null | undefined) => AutoScaleRunError;
+
+// Warning: (ae-forgotten-export) The symbol "AutoUserSpecificationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAutoUserSpecification: (input: AutoUserSpecificationOutput | null | undefined) => AutoUserSpecification;
+
+// Warning: (ae-forgotten-export) The symbol "AzureBlobFileSystemConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAzureBlobFileSystemConfiguration: (input: AzureBlobFileSystemConfigurationOutput | null | undefined) => AzureBlobFileSystemConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "AzureFileShareConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAzureFileShareConfiguration: (input: AzureFileShareConfigurationOutput | null | undefined) => AzureFileShareConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "BatchApplicationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchApplication: (input: BatchApplicationOutput | null | undefined) => BatchApplication;
+
+// Warning: (ae-forgotten-export) The symbol "BatchCertificateOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchCertificate: (input: BatchCertificateOutput | null | undefined) => BatchCertificate;
+
+// Warning: (ae-forgotten-export) The symbol "BatchErrorOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchError: (input: BatchErrorOutput | null | undefined) => BatchError;
+
+// Warning: (ae-forgotten-export) The symbol "BatchErrorDetailOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchErrorDetail: (input: BatchErrorDetailOutput | null | undefined) => BatchErrorDetail;
+
+// Warning: (ae-forgotten-export) The symbol "BatchJobOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchJob: (input: BatchJobOutput | null | undefined) => BatchJob;
+
+// Warning: (ae-forgotten-export) The symbol "BatchJobScheduleOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchJobSchedule: (input: BatchJobScheduleOutput | null | undefined) => BatchJobSchedule;
+
+// Warning: (ae-forgotten-export) The symbol "BatchNodeOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchNode: (input: BatchNodeOutput | null | undefined) => BatchNode;
+
+// Warning: (ae-forgotten-export) The symbol "BatchNodeEndpointConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchNodeEndpointConfiguration: (input: BatchNodeEndpointConfigurationOutput | null | undefined) => BatchNodeEndpointConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "BatchNodeErrorOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchNodeError: (input: BatchNodeErrorOutput | null | undefined) => BatchNodeError;
+
+// Warning: (ae-forgotten-export) The symbol "BatchNodeIdentityReferenceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchNodeIdentityReference: (input: BatchNodeIdentityReferenceOutput | null | undefined) => BatchNodeIdentityReference;
+
+// Warning: (ae-forgotten-export) The symbol "BatchNodeInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchNodeInformation: (input: BatchNodeInformationOutput | null | undefined) => BatchNodeInformation;
+
+// Warning: (ae-forgotten-export) The symbol "BatchPoolOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchPool: (input: BatchPoolOutput | null | undefined) => BatchPool;
+
+// Warning: (ae-forgotten-export) The symbol "BatchPoolIdentityOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchPoolIdentity: (input: BatchPoolIdentityOutput | null | undefined) => BatchPoolIdentity;
+
+// Warning: (ae-forgotten-export) The symbol "BatchTaskOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBatchTask: (input: BatchTaskOutput | null | undefined) => BatchTask;
+
+// Warning: (ae-forgotten-export) The symbol "CertificateReferenceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCertificateReference: (input: CertificateReferenceOutput | null | undefined) => CertificateReference;
+
+// Warning: (ae-forgotten-export) The symbol "CifsMountConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCifsMountConfiguration: (input: CifsMountConfigurationOutput | null | undefined) => CifsMountConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "CloudServiceConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCloudServiceConfiguration: (input: CloudServiceConfigurationOutput | null | undefined) => CloudServiceConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "ContainerConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContainerConfiguration: (input: ContainerConfigurationOutput | null | undefined) => ContainerConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "ContainerRegistryOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContainerRegistry: (input: ContainerRegistryOutput | null | undefined) => ContainerRegistry;
+
+// Warning: (ae-forgotten-export) The symbol "DataDiskOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataDisk: (input: DataDiskOutput | null | undefined) => DataDisk;
+
+// Warning: (ae-forgotten-export) The symbol "DeleteCertificateErrorOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDeleteCertificateError: (input: DeleteCertificateErrorOutput | null | undefined) => DeleteCertificateError;
+
+// Warning: (ae-forgotten-export) The symbol "DiffDiskSettingsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDiffDiskSettings: (input: DiffDiskSettingsOutput | null | undefined) => DiffDiskSettings;
+
+// Warning: (ae-forgotten-export) The symbol "DiskEncryptionConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDiskEncryptionConfiguration: (input: DiskEncryptionConfigurationOutput | null | undefined) => DiskEncryptionConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "EnvironmentSettingOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeEnvironmentSetting: (input: EnvironmentSettingOutput | null | undefined) => EnvironmentSetting;
+
+// Warning: (ae-forgotten-export) The symbol "ErrorMessageOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeErrorMessage: (input: ErrorMessageOutput | null | undefined) => ErrorMessage;
+
+// Warning: (ae-forgotten-export) The symbol "ExitCodeMappingOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeExitCodeMapping: (input: ExitCodeMappingOutput | null | undefined) => ExitCodeMapping;
+
+// Warning: (ae-forgotten-export) The symbol "ExitCodeRangeMappingOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeExitCodeRangeMapping: (input: ExitCodeRangeMappingOutput | null | undefined) => ExitCodeRangeMapping;
+
+// Warning: (ae-forgotten-export) The symbol "ExitConditionsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeExitConditions: (input: ExitConditionsOutput | null | undefined) => ExitConditions;
+
+// Warning: (ae-forgotten-export) The symbol "ExitOptionsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeExitOptions: (input: ExitOptionsOutput | null | undefined) => ExitOptions;
+
+// Warning: (ae-forgotten-export) The symbol "FilePropertiesOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFileProperties: (input: FilePropertiesOutput | null | undefined) => FileProperties;
+
+// Warning: (ae-forgotten-export) The symbol "HttpHeaderOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeHttpHeader: (input: HttpHeaderOutput | null | undefined) => HttpHeader;
+
+// Warning: (ae-forgotten-export) The symbol "ImageInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeImageInformation: (input: ImageInformationOutput | null | undefined) => ImageInformation;
+
+// Warning: (ae-forgotten-export) The symbol "ImageReferenceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeImageReference: (input: ImageReferenceOutput | null | undefined) => ImageReference;
+
+// Warning: (ae-forgotten-export) The symbol "InboundEndpointOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeInboundEndpoint: (input: InboundEndpointOutput | null | undefined) => InboundEndpoint;
+
+// Warning: (ae-forgotten-export) The symbol "InboundNATPoolOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeInboundNATPool: (input: InboundNATPoolOutput | null | undefined) => InboundNATPool;
+
+// Warning: (ae-forgotten-export) The symbol "InstanceViewStatusOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeInstanceViewStatus: (input: InstanceViewStatusOutput | null | undefined) => InstanceViewStatus;
+
+// Warning: (ae-forgotten-export) The symbol "JobConstraintsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobConstraints: (input: JobConstraintsOutput | null | undefined) => JobConstraints;
+
+// Warning: (ae-forgotten-export) The symbol "JobExecutionInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobExecutionInformation: (input: JobExecutionInformationOutput | null | undefined) => JobExecutionInformation;
+
+// Warning: (ae-forgotten-export) The symbol "JobManagerTaskOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobManagerTask: (input: JobManagerTaskOutput | null | undefined) => JobManagerTask;
+
+// Warning: (ae-forgotten-export) The symbol "JobNetworkConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobNetworkConfiguration: (input: JobNetworkConfigurationOutput | null | undefined) => JobNetworkConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "JobPreparationAndReleaseTaskExecutionInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobPreparationAndReleaseTaskExecutionInformation: (input: JobPreparationAndReleaseTaskExecutionInformationOutput | null | undefined) => JobPreparationAndReleaseTaskExecutionInformation;
+
+// Warning: (ae-forgotten-export) The symbol "JobPreparationTaskOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobPreparationTask: (input: JobPreparationTaskOutput | null | undefined) => JobPreparationTask;
+
+// Warning: (ae-forgotten-export) The symbol "JobPreparationTaskExecutionInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobPreparationTaskExecutionInformation: (input: JobPreparationTaskExecutionInformationOutput | null | undefined) => JobPreparationTaskExecutionInformation;
+
+// Warning: (ae-forgotten-export) The symbol "JobReleaseTaskOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobReleaseTask: (input: JobReleaseTaskOutput | null | undefined) => JobReleaseTask;
+
+// Warning: (ae-forgotten-export) The symbol "JobReleaseTaskExecutionInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobReleaseTaskExecutionInformation: (input: JobReleaseTaskExecutionInformationOutput | null | undefined) => JobReleaseTaskExecutionInformation;
+
+// Warning: (ae-forgotten-export) The symbol "JobScheduleExecutionInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobScheduleExecutionInformation: (input: JobScheduleExecutionInformationOutput | null | undefined) => JobScheduleExecutionInformation;
+
+// Warning: (ae-forgotten-export) The symbol "JobScheduleStatisticsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobScheduleStatistics: (input: JobScheduleStatisticsOutput | null | undefined) => JobScheduleStatistics;
+
+// Warning: (ae-forgotten-export) The symbol "JobSchedulingErrorOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobSchedulingError: (input: JobSchedulingErrorOutput | null | undefined) => JobSchedulingError;
+
+// Warning: (ae-forgotten-export) The symbol "JobSpecificationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobSpecification: (input: JobSpecificationOutput | null | undefined) => JobSpecification;
+
+// Warning: (ae-forgotten-export) The symbol "JobStatisticsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeJobStatistics: (input: JobStatisticsOutput | null | undefined) => JobStatistics;
+
+// Warning: (ae-forgotten-export) The symbol "LinuxUserConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeLinuxUserConfiguration: (input: LinuxUserConfigurationOutput | null | undefined) => LinuxUserConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "MetadataItemOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMetadataItem: (input: MetadataItemOutput | null | undefined) => MetadataItem;
+
+// Warning: (ae-forgotten-export) The symbol "MountConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMountConfiguration: (input: MountConfigurationOutput | null | undefined) => MountConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "MultiInstanceSettingsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultiInstanceSettings: (input: MultiInstanceSettingsOutput | null | undefined) => MultiInstanceSettings;
+
+// Warning: (ae-forgotten-export) The symbol "NameValuePairOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNameValuePair: (input: NameValuePairOutput | null | undefined) => NameValuePair;
+
+// Warning: (ae-forgotten-export) The symbol "NetworkConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNetworkConfiguration: (input: NetworkConfigurationOutput | null | undefined) => NetworkConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "NetworkSecurityGroupRuleOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNetworkSecurityGroupRule: (input: NetworkSecurityGroupRuleOutput | null | undefined) => NetworkSecurityGroupRule;
+
+// Warning: (ae-forgotten-export) The symbol "NFSMountConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNfsMountConfiguration: (input: NFSMountConfigurationOutput | null | undefined) => NfsMountConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "NodeAgentInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNodeAgentInformation: (input: NodeAgentInformationOutput | null | undefined) => NodeAgentInformation;
+
+// Warning: (ae-forgotten-export) The symbol "NodeCountsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNodeCounts: (input: NodeCountsOutput | null | undefined) => NodeCounts;
+
+// Warning: (ae-forgotten-export) The symbol "NodeFileOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNodeFile: (input: NodeFileOutput | null | undefined) => NodeFile;
+
+// Warning: (ae-forgotten-export) The symbol "NodePlacementConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNodePlacementConfiguration: (input: NodePlacementConfigurationOutput | null | undefined) => NodePlacementConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "NodeVMExtensionOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeNodeVMExtension: (input: NodeVMExtensionOutput | null | undefined) => NodeVMExtension;
+
+// Warning: (ae-forgotten-export) The symbol "OSDiskOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOSDisk: (input: OSDiskOutput | null | undefined) => OSDisk;
+
+// Warning: (ae-forgotten-export) The symbol "OutputFileOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOutputFile: (input: OutputFileOutput | null | undefined) => OutputFile;
+
+// Warning: (ae-forgotten-export) The symbol "OutputFileBlobContainerDestinationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOutputFileBlobContainerDestination: (input: OutputFileBlobContainerDestinationOutput | null | undefined) => OutputFileBlobContainerDestination;
+
+// Warning: (ae-forgotten-export) The symbol "OutputFileDestinationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOutputFileDestination: (input: OutputFileDestinationOutput | null | undefined) => OutputFileDestination;
+
+// Warning: (ae-forgotten-export) The symbol "OutputFileUploadOptionsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOutputFileUploadOptions: (input: OutputFileUploadOptionsOutput | null | undefined) => OutputFileUploadOptions;
+
+// Warning: (ae-forgotten-export) The symbol "PoolEndpointConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePoolEndpointConfiguration: (input: PoolEndpointConfigurationOutput | null | undefined) => PoolEndpointConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "PoolInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePoolInformation: (input: PoolInformationOutput | null | undefined) => PoolInformation;
+
+// Warning: (ae-forgotten-export) The symbol "PoolNodeCountsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePoolNodeCounts: (input: PoolNodeCountsOutput | null | undefined) => PoolNodeCounts;
+
+// Warning: (ae-forgotten-export) The symbol "PoolSpecificationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePoolSpecification: (input: PoolSpecificationOutput | null | undefined) => PoolSpecification;
+
+// Warning: (ae-forgotten-export) The symbol "PoolStatisticsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePoolStatistics: (input: PoolStatisticsOutput | null | undefined) => PoolStatistics;
+
+// Warning: (ae-forgotten-export) The symbol "PoolUsageMetricsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePoolUsageMetrics: (input: PoolUsageMetricsOutput | null | undefined) => PoolUsageMetrics;
+
+// Warning: (ae-forgotten-export) The symbol "PublicIPAddressConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePublicIpAddressConfiguration: (input: PublicIPAddressConfigurationOutput | null | undefined) => PublicIpAddressConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "RecentJobOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeRecentJob: (input: RecentJobOutput | null | undefined) => RecentJob;
+
+// Warning: (ae-forgotten-export) The symbol "ResizeErrorOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeResizeError: (input: ResizeErrorOutput | null | undefined) => ResizeError;
+
+// Warning: (ae-forgotten-export) The symbol "ResourceFileOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeResourceFile: (input: ResourceFileOutput | null | undefined) => ResourceFile;
+
+// Warning: (ae-forgotten-export) The symbol "ResourceStatisticsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeResourceStatistics: (input: ResourceStatisticsOutput | null | undefined) => ResourceStatistics;
+
+// Warning: (ae-forgotten-export) The symbol "ScheduleOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeSchedule: (input: ScheduleOutput | null | undefined) => Schedule;
+
+// Warning: (ae-forgotten-export) The symbol "StartTaskOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeStartTask: (input: StartTaskOutput | null | undefined) => StartTask;
+
+// Warning: (ae-forgotten-export) The symbol "StartTaskInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeStartTaskInformation: (input: StartTaskInformationOutput | null | undefined) => StartTaskInformation;
+
+// Warning: (ae-forgotten-export) The symbol "SubtaskInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeSubtaskInformation: (input: SubtaskInformationOutput | null | undefined) => SubtaskInformation;
+
+// Warning: (ae-forgotten-export) The symbol "TaskAddResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskAddResult: (input: TaskAddResultOutput | null | undefined) => TaskAddResult;
+
+// Warning: (ae-forgotten-export) The symbol "TaskConstraintsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskConstraints: (input: TaskConstraintsOutput | null | undefined) => TaskConstraints;
+
+// Warning: (ae-forgotten-export) The symbol "TaskContainerExecutionInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskContainerExecutionInformation: (input: TaskContainerExecutionInformationOutput | null | undefined) => TaskContainerExecutionInformation;
+
+// Warning: (ae-forgotten-export) The symbol "TaskContainerSettingsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskContainerSettings: (input: TaskContainerSettingsOutput | null | undefined) => TaskContainerSettings;
+
+// Warning: (ae-forgotten-export) The symbol "TaskCountsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskCounts: (input: TaskCountsOutput | null | undefined) => TaskCounts;
+
+// Warning: (ae-forgotten-export) The symbol "TaskDependenciesOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskDependencies: (input: TaskDependenciesOutput | null | undefined) => TaskDependencies;
+
+// Warning: (ae-forgotten-export) The symbol "TaskExecutionInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskExecutionInformation: (input: TaskExecutionInformationOutput | null | undefined) => TaskExecutionInformation;
+
+// Warning: (ae-forgotten-export) The symbol "TaskFailureInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskFailureInformation: (input: TaskFailureInformationOutput | null | undefined) => TaskFailureInformation;
+
+// Warning: (ae-forgotten-export) The symbol "TaskIdRangeOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskIdRange: (input: TaskIdRangeOutput | null | undefined) => TaskIdRange;
+
+// Warning: (ae-forgotten-export) The symbol "TaskInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskInformation: (input: TaskInformationOutput | null | undefined) => TaskInformation;
+
+// Warning: (ae-forgotten-export) The symbol "TaskSchedulingPolicyOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskSchedulingPolicy: (input: TaskSchedulingPolicyOutput | null | undefined) => TaskSchedulingPolicy;
+
+// Warning: (ae-forgotten-export) The symbol "TaskSlotCountsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskSlotCounts: (input: TaskSlotCountsOutput | null | undefined) => TaskSlotCounts;
+
+// Warning: (ae-forgotten-export) The symbol "TaskStatisticsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTaskStatistics: (input: TaskStatisticsOutput | null | undefined) => TaskStatistics;
+
+// Warning: (ae-forgotten-export) The symbol "UsageStatisticsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeUsageStatistics: (input: UsageStatisticsOutput | null | undefined) => UsageStatistics;
+
+// Warning: (ae-forgotten-export) The symbol "UserAccountOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeUserAccount: (input: UserAccountOutput | null | undefined) => UserAccount;
+
+// Warning: (ae-forgotten-export) The symbol "UserAssignedIdentityOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeUserAssignedIdentity: (input: UserAssignedIdentityOutput | null | undefined) => UserAssignedIdentity;
+
+// Warning: (ae-forgotten-export) The symbol "UserIdentityOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeUserIdentity: (input: UserIdentityOutput | null | undefined) => UserIdentity;
+
+// Warning: (ae-forgotten-export) The symbol "VirtualMachineConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeVirtualMachineConfiguration: (input: VirtualMachineConfigurationOutput | null | undefined) => VirtualMachineConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "VirtualMachineInfoOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeVirtualMachineInfo: (input: VirtualMachineInfoOutput | null | undefined) => VirtualMachineInfo;
+
+// Warning: (ae-forgotten-export) The symbol "VMExtensionOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeVMExtension: (input: VMExtensionOutput | null | undefined) => VMExtension;
+
+// Warning: (ae-forgotten-export) The symbol "VMExtensionInstanceViewOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeVMExtensionInstanceView: (input: VMExtensionInstanceViewOutput | null | undefined) => VMExtensionInstanceView;
+
+// Warning: (ae-forgotten-export) The symbol "WindowsConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeWindowsConfiguration: (input: WindowsConfigurationOutput | null | undefined) => WindowsConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "WindowsUserConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeWindowsUserConfiguration: (input: WindowsUserConfigurationOutput | null | undefined) => WindowsUserConfiguration;
 
 // @public
 export type DiffDiskPlacement = "cachedisk";
@@ -1565,6 +2194,12 @@ export interface NodeFile {
 }
 
 // @public
+export interface NodeFileListResult {
+    "odata.nextLink"?: string;
+    value?: NodeFile[];
+}
+
+// @public
 export interface NodePlacementConfiguration {
     policy?: NodePlacementPolicyType;
 }
@@ -1594,6 +2229,12 @@ export interface NodeVMExtension {
     instanceView?: VMExtensionInstanceView;
     provisioningState?: string;
     vmExtension?: VMExtension;
+}
+
+// @public
+export interface NodeVMExtensionList {
+    "odata.nextLink"?: string;
+    value?: NodeVMExtension[];
 }
 
 // @public
@@ -1678,10 +2319,22 @@ export interface PoolInformation {
 export type PoolLifetimeOption = "jobschedule" | "job";
 
 // @public
+export interface PoolListUsageMetricsResult {
+    "odata.nextLink"?: string;
+    value?: PoolUsageMetrics[];
+}
+
+// @public
 export interface PoolNodeCounts {
     dedicated?: NodeCounts;
     lowPriority?: NodeCounts;
     poolId: string;
+}
+
+// @public
+export interface PoolNodeCountsListResult {
+    "odata.nextLink"?: string;
+    value?: PoolNodeCounts[];
 }
 
 // @public

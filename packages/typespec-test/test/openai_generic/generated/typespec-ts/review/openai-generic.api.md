@@ -79,6 +79,14 @@ export interface ChatCompletionResponseMessage {
 }
 
 // @public (undocumented)
+export interface ChatCompletionResponseMessage {
+    content: string | null;
+    // Warning: (ae-forgotten-export) The symbol "ChatCompletionResponseMessageFunctionCall" needs to be exported by the entry point index.d.ts
+    functionCall?: ChatCompletionResponseMessageFunctionCall;
+    role: "system" | "user" | "assistant" | "function";
+}
+
+// @public (undocumented)
 export interface ChatCompletionsCreateOptionalParams extends OperationOptions {
 }
 
@@ -383,6 +391,204 @@ export interface DeleteModelResponse {
     // (undocumented)
     object: string;
 }
+
+// Warning: (ae-forgotten-export) The symbol "ChatCompletionResponseMessageOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeChatCompletionResponseMessage: (input: ChatCompletionResponseMessageOutput | null | undefined) => ChatCompletionResponseMessage;
+
+// @public (undocumented)
+export const deserializeChatCompletionResponseMessageFunctionCall: (input: any) => ChatCompletionResponseMessageFunctionCall | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "CompletionUsageOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCompletionUsage: (input: CompletionUsageOutput | null | undefined) => CompletionUsage;
+
+// Warning: (ae-forgotten-export) The symbol "CreateChatCompletionResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateChatCompletionResponse: (input: CreateChatCompletionResponseOutput | null | undefined) => CreateChatCompletionResponse;
+
+// Warning: (ae-forgotten-export) The symbol "CreateChatCompletionResponseChoice" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateChatCompletionResponseChoice: (input: any) => CreateChatCompletionResponseChoice | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "CreateCompletionResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateCompletionResponse: (input: CreateCompletionResponseOutput | null | undefined) => CreateCompletionResponse;
+
+// Warning: (ae-forgotten-export) The symbol "CreateCompletionResponseChoice" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateCompletionResponseChoice: (input: any) => CreateCompletionResponseChoice | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "CreateCompletionResponseChoiceLogprobs" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateCompletionResponseChoiceLogprobs: (input: any) => CreateCompletionResponseChoiceLogprobs | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "CreateEditResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateEditResponse: (input: CreateEditResponseOutput | null | undefined) => CreateEditResponse;
+
+// Warning: (ae-forgotten-export) The symbol "CreateEditResponseChoice" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateEditResponseChoice: (input: any) => CreateEditResponseChoice | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "CreateEmbeddingResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateEmbeddingResponse: (input: CreateEmbeddingResponseOutput | null | undefined) => CreateEmbeddingResponse;
+
+// Warning: (ae-forgotten-export) The symbol "CreateEmbeddingResponseUsage" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateEmbeddingResponseUsage: (input: any) => CreateEmbeddingResponseUsage | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "CreateModerationResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateModerationResponse: (input: CreateModerationResponseOutput | null | undefined) => CreateModerationResponse;
+
+// Warning: (ae-forgotten-export) The symbol "CreateModerationResponseResult" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateModerationResponseResult: (input: any) => CreateModerationResponseResult | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "CreateModerationResponseResultCategories" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateModerationResponseResultCategories: (input: any) => CreateModerationResponseResultCategories | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "CreateModerationResponseResultCategoryScores" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateModerationResponseResultCategoryScores: (input: any) => CreateModerationResponseResultCategoryScores | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "CreateTranscriptionResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateTranscriptionResponse: (input: CreateTranscriptionResponseOutput | null | undefined) => CreateTranscriptionResponse;
+
+// Warning: (ae-forgotten-export) The symbol "CreateTranslationResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCreateTranslationResponse: (input: CreateTranslationResponseOutput | null | undefined) => CreateTranslationResponse;
+
+// Warning: (ae-forgotten-export) The symbol "DeleteFileResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDeleteFileResponse: (input: DeleteFileResponseOutput | null | undefined) => DeleteFileResponse;
+
+// Warning: (ae-forgotten-export) The symbol "DeleteModelResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDeleteModelResponse: (input: DeleteModelResponseOutput | null | undefined) => DeleteModelResponse;
+
+// Warning: (ae-forgotten-export) The symbol "EmbeddingOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeEmbedding: (input: EmbeddingOutput | null | undefined) => Embedding;
+
+// Warning: (ae-forgotten-export) The symbol "ErrorModelOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeErrorModel: (input: ErrorModelOutput | null | undefined) => ErrorModel;
+
+// Warning: (ae-forgotten-export) The symbol "ErrorResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeErrorResponse: (input: ErrorResponseOutput | null | undefined) => ErrorResponse;
+
+// Warning: (ae-forgotten-export) The symbol "FineTuneOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFineTune: (input: FineTuneOutput | null | undefined) => FineTune;
+
+// Warning: (ae-forgotten-export) The symbol "FineTuneEventOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFineTuneEvent: (input: FineTuneEventOutput | null | undefined) => FineTuneEvent;
+
+// Warning: (ae-forgotten-export) The symbol "FineTuneHyperparams" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFineTuneHyperparams: (input: any) => FineTuneHyperparams | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "FineTuningJobOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFineTuningJob: (input: FineTuningJobOutput | null | undefined) => FineTuningJob;
+
+// Warning: (ae-forgotten-export) The symbol "FineTuningJobError" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFineTuningJobError: (input: any) => FineTuningJobError | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "FineTuningJobEventOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFineTuningJobEvent: (input: FineTuningJobEventOutput | null | undefined) => FineTuningJobEvent;
+
+// Warning: (ae-forgotten-export) The symbol "FineTuningJobHyperparameters" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFineTuningJobHyperparameters: (input: any) => FineTuningJobHyperparameters | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "ImageOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeImage: (input: ImageOutput | null | undefined) => Image;
+
+// Warning: (ae-forgotten-export) The symbol "ImagesResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeImagesResponse: (input: ImagesResponseOutput | null | undefined) => ImagesResponse;
+
+// Warning: (ae-forgotten-export) The symbol "ListFilesResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeListFilesResponse: (input: ListFilesResponseOutput | null | undefined) => ListFilesResponse;
+
+// Warning: (ae-forgotten-export) The symbol "ListFineTuneEventsResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeListFineTuneEventsResponse: (input: ListFineTuneEventsResponseOutput | null | undefined) => ListFineTuneEventsResponse;
+
+// Warning: (ae-forgotten-export) The symbol "ListFineTunesResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeListFineTunesResponse: (input: ListFineTunesResponseOutput | null | undefined) => ListFineTunesResponse;
+
+// Warning: (ae-forgotten-export) The symbol "ListFineTuningJobEventsResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeListFineTuningJobEventsResponse: (input: ListFineTuningJobEventsResponseOutput | null | undefined) => ListFineTuningJobEventsResponse;
+
+// Warning: (ae-forgotten-export) The symbol "ListModelsResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeListModelsResponse: (input: ListModelsResponseOutput | null | undefined) => ListModelsResponse;
+
+// Warning: (ae-forgotten-export) The symbol "ListPaginatedFineTuningJobsResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeListPaginatedFineTuningJobsResponse: (input: ListPaginatedFineTuningJobsResponseOutput | null | undefined) => ListPaginatedFineTuningJobsResponse;
+
+// Warning: (ae-forgotten-export) The symbol "ModelOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeModel: (input: ModelOutput | null | undefined) => Model;
+
+// Warning: (ae-forgotten-export) The symbol "OpenAIFileOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOpenAIFile: (input: OpenAIFileOutput | null | undefined) => OpenAIFile;
 
 // @public (undocumented)
 export interface EditsCreateOptionalParams extends OperationOptions {

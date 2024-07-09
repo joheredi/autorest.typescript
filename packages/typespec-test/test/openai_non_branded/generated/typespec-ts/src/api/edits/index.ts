@@ -12,6 +12,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@typespec/ts-http-runtime";
+import { deserializeUtcDateTime } from "../../helpers/serializerHelpers.js";
 import { EditsCreateOptionalParams } from "../../models/options.js";
 
 export function _createSend(
@@ -43,7 +44,7 @@ export async function _createDeserialize(
 
   return {
     object: result.body["object"],
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     choices: result.body["choices"].map((p) => ({
       text: p["text"],
       index: p["index"],

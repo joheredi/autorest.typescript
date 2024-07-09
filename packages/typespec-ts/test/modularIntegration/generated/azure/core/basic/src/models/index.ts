@@ -3,21 +3,21 @@
 
 export {
   User,
-  deserializeUser,
   UserOrder,
-  deserializeUserOrder,
   ListItemInputBody,
   ListItemInputExtensibleEnum,
   UserListResults,
-  deserializeUserListResults,
   FirstItem,
-  deserializeFirstItem,
   SecondItem,
-  deserializeSecondItem,
   Versions,
   PagedUser,
   PagedFirstItem,
   PagedSecondItem,
+  deserializeUser,
+  deserializeUserOrder,
+  deserializeUserListResults,
+  deserializeFirstItem,
+  deserializeSecondItem,
 } from "./models.js";
 export {
   CreateOrUpdateOptionalParams,

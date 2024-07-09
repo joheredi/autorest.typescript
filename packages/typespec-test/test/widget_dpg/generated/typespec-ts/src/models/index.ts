@@ -5,11 +5,16 @@ export {
   User,
   Widget,
   WidgetError,
+  ListWidgetsPagesResults,
   CreateWidget,
   UpdateWidget,
   AnalyzeResult,
   NonReferencedModel,
   Versions,
+  deserializeWidget,
+  deserializeWidgetError,
+  deserializeListWidgetsPagesResults,
+  deserializeAnalyzeResult,
 } from "./models.js";
 export {
   WidgetsListWidgetsOptionalParams,

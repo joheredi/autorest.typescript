@@ -73,19 +73,19 @@ import {
   BatchPoolReplaceOptions,
   NodeRemoveOptions,
   BatchApplication,
-  _AccountListSupportedImagesResult,
-  _ApplicationListResult,
-  _BatchJobListPreparationAndReleaseTaskStatusResult,
-  _BatchJobListResult,
-  _BatchJobScheduleListResult,
-  _BatchNodeListResult,
-  _BatchPoolListResult,
-  _BatchTaskListResult,
-  _CertificateListResult,
-  _NodeFileListResult,
-  _NodeVMExtensionList,
-  _PoolListUsageMetricsResult,
-  _PoolNodeCountsListResult,
+  AccountListSupportedImagesResult,
+  ApplicationListResult,
+  BatchJobListPreparationAndReleaseTaskStatusResult,
+  BatchJobListResult,
+  BatchJobScheduleListResult,
+  BatchNodeListResult,
+  BatchPoolListResult,
+  BatchTaskListResult,
+  CertificateListResult,
+  NodeFileListResult,
+  NodeVMExtensionList,
+  PoolListUsageMetricsResult,
+  PoolNodeCountsListResult,
 } from "../models/models.js";
 import { PagedAsyncIterableIterator } from "../models/pagingTypes.js";
 import { buildPagedAsyncIterator } from "./pagingHelpers.js";
@@ -252,7 +252,13 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
-import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
+import {
+  deserializeRecord,
+  deserializeUtcDateTime,
+  deserializeStringDuration,
+  passthroughDeserializer,
+} from "../helpers/serializerHelpers.js";
+import { stringToUint8Array, uint8ArrayToString } from "@azure/core-util";
 import {
   ListApplicationsOptionalParams,
   GetApplicationOptionalParams,
@@ -352,7 +358,7 @@ export function _listApplicationsSend(
 
 export async function _listApplicationsDeserialize(
   result: ListApplications200Response | ListApplicationsDefaultResponse,
-): Promise<_ApplicationListResult> {
+): Promise<ApplicationListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -458,7 +464,7 @@ export function _listPoolUsageMetricsSend(
 
 export async function _listPoolUsageMetricsDeserialize(
   result: ListPoolUsageMetrics200Response | ListPoolUsageMetricsDefaultResponse,
-): Promise<_PoolListUsageMetricsResult> {
+): Promise<PoolListUsageMetricsResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -469,8 +475,8 @@ export async function _listPoolUsageMetricsDeserialize(
         ? result.body["value"]
         : result.body["value"].map((p) => ({
             poolId: p["poolId"],
-            startTime: new Date(p["startTime"]),
-            endTime: new Date(p["endTime"]),
+            startTime: deserializeUtcDateTime(p["startTime"]),
+            endTime: deserializeUtcDateTime(p["endTime"]),
             vmSize: p["vmSize"],
             totalCoreHours: p["totalCoreHours"],
           })),
@@ -616,7 +622,7 @@ export function _listPoolsSend(
 
 export async function _listPoolsDeserialize(
   result: ListPools200Response | ListPoolsDefaultResponse,
-): Promise<_BatchPoolListResult> {
+): Promise<BatchPoolListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -630,24 +636,16 @@ export async function _listPoolsDeserialize(
             displayName: p["displayName"],
             url: p["url"],
             eTag: p["eTag"],
-            lastModified:
-              p["lastModified"] !== undefined
-                ? new Date(p["lastModified"])
-                : undefined,
-            creationTime:
-              p["creationTime"] !== undefined
-                ? new Date(p["creationTime"])
-                : undefined,
+            lastModified: deserializeUtcDateTime(p["lastModified"]),
+            creationTime: deserializeUtcDateTime(p["creationTime"]),
             state: p["state"],
-            stateTransitionTime:
-              p["stateTransitionTime"] !== undefined
-                ? new Date(p["stateTransitionTime"])
-                : undefined,
+            stateTransitionTime: deserializeUtcDateTime(
+              p["stateTransitionTime"],
+            ),
             allocationState: p["allocationState"],
-            allocationStateTransitionTime:
-              p["allocationStateTransitionTime"] !== undefined
-                ? new Date(p["allocationStateTransitionTime"])
-                : undefined,
+            allocationStateTransitionTime: deserializeUtcDateTime(
+              p["allocationStateTransitionTime"],
+            ),
             vmSize: p["vmSize"],
             cloudServiceConfiguration: !p.cloudServiceConfiguration
               ? undefined
@@ -760,8 +758,14 @@ export async function _listPoolsDeserialize(
                             autoUpgradeMinorVersion:
                               p["autoUpgradeMinorVersion"],
                             enableAutomaticUpgrade: p["enableAutomaticUpgrade"],
-                            settings: p["settings"],
-                            protectedSettings: p["protectedSettings"],
+                            settings: deserializeRecord(
+                              p.settings,
+                              passthroughDeserializer,
+                            ),
+                            protectedSettings: deserializeRecord(
+                              p.protectedSettings,
+                              passthroughDeserializer,
+                            ),
                             provisionAfterExtensions:
                               p["provisionAfterExtensions"],
                           }),
@@ -779,7 +783,7 @@ export async function _listPoolsDeserialize(
                             },
                       },
                 },
-            resizeTimeout: p["resizeTimeout"],
+            resizeTimeout: deserializeStringDuration(p["resizeTimeout"]),
             resizeErrors:
               p["resizeErrors"] === undefined
                 ? p["resizeErrors"]
@@ -800,11 +804,15 @@ export async function _listPoolsDeserialize(
             targetLowPriorityNodes: p["targetLowPriorityNodes"],
             enableAutoScale: p["enableAutoScale"],
             autoScaleFormula: p["autoScaleFormula"],
-            autoScaleEvaluationInterval: p["autoScaleEvaluationInterval"],
+            autoScaleEvaluationInterval: deserializeStringDuration(
+              p["autoScaleEvaluationInterval"],
+            ),
             autoScaleRun: !p.autoScaleRun
               ? undefined
               : {
-                  timestamp: new Date(p.autoScaleRun?.["timestamp"]),
+                  timestamp: deserializeUtcDateTime(
+                    p.autoScaleRun?.["timestamp"],
+                  ),
                   results: p.autoScaleRun?.["results"],
                   error: !p.autoScaleRun?.error
                     ? undefined
@@ -1002,25 +1010,30 @@ export async function _listPoolsDeserialize(
               ? undefined
               : {
                   url: p.stats?.["url"],
-                  startTime: new Date(p.stats?.["startTime"]),
-                  lastUpdateTime: new Date(p.stats?.["lastUpdateTime"]),
+                  startTime: deserializeUtcDateTime(p.stats?.["startTime"]),
+                  lastUpdateTime: deserializeUtcDateTime(
+                    p.stats?.["lastUpdateTime"],
+                  ),
                   usageStats: !p.stats?.usageStats
                     ? undefined
                     : {
-                        startTime: new Date(p.stats?.usageStats?.["startTime"]),
-                        lastUpdateTime: new Date(
+                        startTime: deserializeUtcDateTime(
+                          p.stats?.usageStats?.["startTime"],
+                        ),
+                        lastUpdateTime: deserializeUtcDateTime(
                           p.stats?.usageStats?.["lastUpdateTime"],
                         ),
-                        dedicatedCoreTime:
+                        dedicatedCoreTime: deserializeStringDuration(
                           p.stats?.usageStats?.["dedicatedCoreTime"],
+                        ),
                       },
                   resourceStats: !p.stats?.resourceStats
                     ? undefined
                     : {
-                        startTime: new Date(
+                        startTime: deserializeUtcDateTime(
                           p.stats?.resourceStats?.["startTime"],
                         ),
-                        lastUpdateTime: new Date(
+                        lastUpdateTime: deserializeUtcDateTime(
                           p.stats?.resourceStats?.["lastUpdateTime"],
                         ),
                         avgCpuPercentage:
@@ -1313,24 +1326,16 @@ export async function _getPoolDeserialize(
     displayName: result.body["displayName"],
     url: result.body["url"],
     eTag: result.body["eTag"],
-    lastModified:
-      result.body["lastModified"] !== undefined
-        ? new Date(result.body["lastModified"])
-        : undefined,
-    creationTime:
-      result.body["creationTime"] !== undefined
-        ? new Date(result.body["creationTime"])
-        : undefined,
+    lastModified: deserializeUtcDateTime(result.body["lastModified"]),
+    creationTime: deserializeUtcDateTime(result.body["creationTime"]),
     state: result.body["state"],
-    stateTransitionTime:
-      result.body["stateTransitionTime"] !== undefined
-        ? new Date(result.body["stateTransitionTime"])
-        : undefined,
+    stateTransitionTime: deserializeUtcDateTime(
+      result.body["stateTransitionTime"],
+    ),
     allocationState: result.body["allocationState"],
-    allocationStateTransitionTime:
-      result.body["allocationStateTransitionTime"] !== undefined
-        ? new Date(result.body["allocationStateTransitionTime"])
-        : undefined,
+    allocationStateTransitionTime: deserializeUtcDateTime(
+      result.body["allocationStateTransitionTime"],
+    ),
     vmSize: result.body["vmSize"],
     cloudServiceConfiguration: !result.body.cloudServiceConfiguration
       ? undefined
@@ -1438,8 +1443,14 @@ export async function _getPoolDeserialize(
                     typeHandlerVersion: p["typeHandlerVersion"],
                     autoUpgradeMinorVersion: p["autoUpgradeMinorVersion"],
                     enableAutomaticUpgrade: p["enableAutomaticUpgrade"],
-                    settings: p["settings"],
-                    protectedSettings: p["protectedSettings"],
+                    settings: deserializeRecord(
+                      p.settings,
+                      passthroughDeserializer,
+                    ),
+                    protectedSettings: deserializeRecord(
+                      p.protectedSettings,
+                      passthroughDeserializer,
+                    ),
                     provisionAfterExtensions: p["provisionAfterExtensions"],
                   }),
                 ),
@@ -1456,7 +1467,7 @@ export async function _getPoolDeserialize(
                     },
               },
         },
-    resizeTimeout: result.body["resizeTimeout"],
+    resizeTimeout: deserializeStringDuration(result.body["resizeTimeout"]),
     resizeErrors:
       result.body["resizeErrors"] === undefined
         ? result.body["resizeErrors"]
@@ -1477,11 +1488,15 @@ export async function _getPoolDeserialize(
     targetLowPriorityNodes: result.body["targetLowPriorityNodes"],
     enableAutoScale: result.body["enableAutoScale"],
     autoScaleFormula: result.body["autoScaleFormula"],
-    autoScaleEvaluationInterval: result.body["autoScaleEvaluationInterval"],
+    autoScaleEvaluationInterval: deserializeStringDuration(
+      result.body["autoScaleEvaluationInterval"],
+    ),
     autoScaleRun: !result.body.autoScaleRun
       ? undefined
       : {
-          timestamp: new Date(result.body.autoScaleRun?.["timestamp"]),
+          timestamp: deserializeUtcDateTime(
+            result.body.autoScaleRun?.["timestamp"],
+          ),
           results: result.body.autoScaleRun?.["results"],
           error: !result.body.autoScaleRun?.error
             ? undefined
@@ -1676,27 +1691,30 @@ export async function _getPoolDeserialize(
       ? undefined
       : {
           url: result.body.stats?.["url"],
-          startTime: new Date(result.body.stats?.["startTime"]),
-          lastUpdateTime: new Date(result.body.stats?.["lastUpdateTime"]),
+          startTime: deserializeUtcDateTime(result.body.stats?.["startTime"]),
+          lastUpdateTime: deserializeUtcDateTime(
+            result.body.stats?.["lastUpdateTime"],
+          ),
           usageStats: !result.body.stats?.usageStats
             ? undefined
             : {
-                startTime: new Date(
+                startTime: deserializeUtcDateTime(
                   result.body.stats?.usageStats?.["startTime"],
                 ),
-                lastUpdateTime: new Date(
+                lastUpdateTime: deserializeUtcDateTime(
                   result.body.stats?.usageStats?.["lastUpdateTime"],
                 ),
-                dedicatedCoreTime:
+                dedicatedCoreTime: deserializeStringDuration(
                   result.body.stats?.usageStats?.["dedicatedCoreTime"],
+                ),
               },
           resourceStats: !result.body.stats?.resourceStats
             ? undefined
             : {
-                startTime: new Date(
+                startTime: deserializeUtcDateTime(
                   result.body.stats?.resourceStats?.["startTime"],
                 ),
-                lastUpdateTime: new Date(
+                lastUpdateTime: deserializeUtcDateTime(
                   result.body.stats?.resourceStats?.["lastUpdateTime"],
                 ),
                 avgCpuPercentage:
@@ -2023,7 +2041,7 @@ export async function _evaluatePoolAutoScaleDeserialize(
   }
 
   return {
-    timestamp: new Date(result.body["timestamp"]),
+    timestamp: deserializeUtcDateTime(result.body["timestamp"]),
     results: result.body["results"],
     error: !result.body.error
       ? undefined
@@ -2339,7 +2357,7 @@ export function _listSupportedImagesSend(
 
 export async function _listSupportedImagesDeserialize(
   result: ListSupportedImages200Response | ListSupportedImagesDefaultResponse,
-): Promise<_AccountListSupportedImagesResult> {
+): Promise<AccountListSupportedImagesResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -2360,10 +2378,9 @@ export async function _listSupportedImagesDeserialize(
             },
             osType: p["osType"],
             capabilities: p["capabilities"],
-            batchSupportEndOfLife:
-              p["batchSupportEndOfLife"] !== undefined
-                ? new Date(p["batchSupportEndOfLife"])
-                : undefined,
+            batchSupportEndOfLife: deserializeUtcDateTime(
+              p["batchSupportEndOfLife"],
+            ),
             verificationType: p["verificationType"],
           })),
     "odata.nextLink": result.body["odata.nextLink"],
@@ -2404,7 +2421,7 @@ export function _listPoolNodeCountsSend(
 
 export async function _listPoolNodeCountsDeserialize(
   result: ListPoolNodeCounts200Response | ListPoolNodeCountsDefaultResponse,
-): Promise<_PoolNodeCountsListResult> {
+): Promise<PoolNodeCountsListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -2577,31 +2594,25 @@ export async function _getJobDeserialize(
     usesTaskDependencies: result.body["usesTaskDependencies"],
     url: result.body["url"],
     eTag: result.body["eTag"],
-    lastModified:
-      result.body["lastModified"] !== undefined
-        ? new Date(result.body["lastModified"])
-        : undefined,
-    creationTime:
-      result.body["creationTime"] !== undefined
-        ? new Date(result.body["creationTime"])
-        : undefined,
+    lastModified: deserializeUtcDateTime(result.body["lastModified"]),
+    creationTime: deserializeUtcDateTime(result.body["creationTime"]),
     state: result.body["state"],
-    stateTransitionTime:
-      result.body["stateTransitionTime"] !== undefined
-        ? new Date(result.body["stateTransitionTime"])
-        : undefined,
+    stateTransitionTime: deserializeUtcDateTime(
+      result.body["stateTransitionTime"],
+    ),
     previousState: result.body["previousState"],
-    previousStateTransitionTime:
-      result.body["previousStateTransitionTime"] !== undefined
-        ? new Date(result.body["previousStateTransitionTime"])
-        : undefined,
+    previousStateTransitionTime: deserializeUtcDateTime(
+      result.body["previousStateTransitionTime"],
+    ),
     priority: result.body["priority"],
     allowTaskPreemption: result.body["allowTaskPreemption"],
     maxParallelTasks: result.body["maxParallelTasks"],
     constraints: !result.body.constraints
       ? undefined
       : {
-          maxWallClockTime: result.body.constraints?.["maxWallClockTime"],
+          maxWallClockTime: deserializeStringDuration(
+            result.body.constraints?.["maxWallClockTime"],
+          ),
           maxTaskRetryCount: result.body.constraints?.["maxTaskRetryCount"],
         },
     jobManagerTask: !result.body.jobManagerTask
@@ -2706,10 +2717,12 @@ export async function _getJobDeserialize(
           constraints: !result.body.jobManagerTask?.constraints
             ? undefined
             : {
-                maxWallClockTime:
+                maxWallClockTime: deserializeStringDuration(
                   result.body.jobManagerTask?.constraints?.["maxWallClockTime"],
-                retentionTime:
+                ),
+                retentionTime: deserializeStringDuration(
                   result.body.jobManagerTask?.constraints?.["retentionTime"],
+                ),
                 maxTaskRetryCount:
                   result.body.jobManagerTask?.constraints?.[
                     "maxTaskRetryCount"
@@ -2826,14 +2839,16 @@ export async function _getJobDeserialize(
           constraints: !result.body.jobPreparationTask?.constraints
             ? undefined
             : {
-                maxWallClockTime:
+                maxWallClockTime: deserializeStringDuration(
                   result.body.jobPreparationTask?.constraints?.[
                     "maxWallClockTime"
                   ],
-                retentionTime:
+                ),
+                retentionTime: deserializeStringDuration(
                   result.body.jobPreparationTask?.constraints?.[
                     "retentionTime"
                   ],
+                ),
                 maxTaskRetryCount:
                   result.body.jobPreparationTask?.constraints?.[
                     "maxTaskRetryCount"
@@ -2921,8 +2936,12 @@ export async function _getJobDeserialize(
               : result.body.jobReleaseTask?.["environmentSettings"].map(
                   (p) => ({ name: p["name"], value: p["value"] }),
                 ),
-          maxWallClockTime: result.body.jobReleaseTask?.["maxWallClockTime"],
-          retentionTime: result.body.jobReleaseTask?.["retentionTime"],
+          maxWallClockTime: deserializeStringDuration(
+            result.body.jobReleaseTask?.["maxWallClockTime"],
+          ),
+          retentionTime: deserializeStringDuration(
+            result.body.jobReleaseTask?.["retentionTime"],
+          ),
           userIdentity: !result.body.jobReleaseTask?.userIdentity
             ? undefined
             : {
@@ -3131,8 +3150,14 @@ export async function _getJobDeserialize(
                                   p["autoUpgradeMinorVersion"],
                                 enableAutomaticUpgrade:
                                   p["enableAutomaticUpgrade"],
-                                settings: p["settings"],
-                                protectedSettings: p["protectedSettings"],
+                                settings: deserializeRecord(
+                                  p.settings,
+                                  passthroughDeserializer,
+                                ),
+                                protectedSettings: deserializeRecord(
+                                  p.protectedSettings,
+                                  passthroughDeserializer,
+                                ),
                                 provisionAfterExtensions:
                                   p["provisionAfterExtensions"],
                               })),
@@ -3167,10 +3192,11 @@ export async function _getJobDeserialize(
                           result.body.poolInfo.autoPoolSpecification?.pool
                             ?.taskSchedulingPolicy?.["nodeFillType"],
                       },
-                  resizeTimeout:
+                  resizeTimeout: deserializeStringDuration(
                     result.body.poolInfo.autoPoolSpecification?.pool?.[
                       "resizeTimeout"
                     ],
+                  ),
                   targetDedicatedNodes:
                     result.body.poolInfo.autoPoolSpecification?.pool?.[
                       "targetDedicatedNodes"
@@ -3187,10 +3213,11 @@ export async function _getJobDeserialize(
                     result.body.poolInfo.autoPoolSpecification?.pool?.[
                       "autoScaleFormula"
                     ],
-                  autoScaleEvaluationInterval:
+                  autoScaleEvaluationInterval: deserializeStringDuration(
                     result.body.poolInfo.autoPoolSpecification?.pool?.[
                       "autoScaleEvaluationInterval"
                     ],
+                  ),
                   enableInterNodeCommunication:
                     result.body.poolInfo.autoPoolSpecification?.pool?.[
                       "enableInterNodeCommunication"
@@ -3573,11 +3600,12 @@ export async function _getJobDeserialize(
     executionInfo: !result.body.executionInfo
       ? undefined
       : {
-          startTime: new Date(result.body.executionInfo?.["startTime"]),
-          endTime:
-            result.body.executionInfo?.["endTime"] !== undefined
-              ? new Date(result.body.executionInfo?.["endTime"])
-              : undefined,
+          startTime: deserializeUtcDateTime(
+            result.body.executionInfo?.["startTime"],
+          ),
+          endTime: deserializeUtcDateTime(
+            result.body.executionInfo?.["endTime"],
+          ),
           poolId: result.body.executionInfo?.["poolId"],
           schedulingError: !result.body.executionInfo?.schedulingError
             ? undefined
@@ -3601,11 +3629,19 @@ export async function _getJobDeserialize(
       ? undefined
       : {
           url: result.body.stats?.["url"],
-          startTime: new Date(result.body.stats?.["startTime"]),
-          lastUpdateTime: new Date(result.body.stats?.["lastUpdateTime"]),
-          userCPUTime: result.body.stats?.["userCPUTime"],
-          kernelCPUTime: result.body.stats?.["kernelCPUTime"],
-          wallClockTime: result.body.stats?.["wallClockTime"],
+          startTime: deserializeUtcDateTime(result.body.stats?.["startTime"]),
+          lastUpdateTime: deserializeUtcDateTime(
+            result.body.stats?.["lastUpdateTime"],
+          ),
+          userCPUTime: deserializeStringDuration(
+            result.body.stats?.["userCPUTime"],
+          ),
+          kernelCPUTime: deserializeStringDuration(
+            result.body.stats?.["kernelCPUTime"],
+          ),
+          wallClockTime: deserializeStringDuration(
+            result.body.stats?.["wallClockTime"],
+          ),
           readIOps: result.body.stats?.["readIOps"],
           writeIOps: result.body.stats?.["writeIOps"],
           readIOGiB: result.body.stats?.["readIOGiB"],
@@ -3613,7 +3649,7 @@ export async function _getJobDeserialize(
           numSucceededTasks: result.body.stats?.["numSucceededTasks"],
           numFailedTasks: result.body.stats?.["numFailedTasks"],
           numTaskRetries: result.body.stats?.["numTaskRetries"],
-          waitTime: result.body.stats?.["waitTime"],
+          waitTime: deserializeStringDuration(result.body.stats?.["waitTime"]),
         },
   };
 }
@@ -4070,7 +4106,7 @@ export function _listJobsSend(
 
 export async function _listJobsDeserialize(
   result: ListJobs200Response | ListJobsDefaultResponse,
-): Promise<_BatchJobListResult> {
+): Promise<BatchJobListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -4085,31 +4121,25 @@ export async function _listJobsDeserialize(
             usesTaskDependencies: p["usesTaskDependencies"],
             url: p["url"],
             eTag: p["eTag"],
-            lastModified:
-              p["lastModified"] !== undefined
-                ? new Date(p["lastModified"])
-                : undefined,
-            creationTime:
-              p["creationTime"] !== undefined
-                ? new Date(p["creationTime"])
-                : undefined,
+            lastModified: deserializeUtcDateTime(p["lastModified"]),
+            creationTime: deserializeUtcDateTime(p["creationTime"]),
             state: p["state"],
-            stateTransitionTime:
-              p["stateTransitionTime"] !== undefined
-                ? new Date(p["stateTransitionTime"])
-                : undefined,
+            stateTransitionTime: deserializeUtcDateTime(
+              p["stateTransitionTime"],
+            ),
             previousState: p["previousState"],
-            previousStateTransitionTime:
-              p["previousStateTransitionTime"] !== undefined
-                ? new Date(p["previousStateTransitionTime"])
-                : undefined,
+            previousStateTransitionTime: deserializeUtcDateTime(
+              p["previousStateTransitionTime"],
+            ),
             priority: p["priority"],
             allowTaskPreemption: p["allowTaskPreemption"],
             maxParallelTasks: p["maxParallelTasks"],
             constraints: !p.constraints
               ? undefined
               : {
-                  maxWallClockTime: p.constraints?.["maxWallClockTime"],
+                  maxWallClockTime: deserializeStringDuration(
+                    p.constraints?.["maxWallClockTime"],
+                  ),
                   maxTaskRetryCount: p.constraints?.["maxTaskRetryCount"],
                 },
             jobManagerTask: !p.jobManagerTask
@@ -4224,10 +4254,12 @@ export async function _listJobsDeserialize(
                   constraints: !p.jobManagerTask?.constraints
                     ? undefined
                     : {
-                        maxWallClockTime:
+                        maxWallClockTime: deserializeStringDuration(
                           p.jobManagerTask?.constraints?.["maxWallClockTime"],
-                        retentionTime:
+                        ),
+                        retentionTime: deserializeStringDuration(
                           p.jobManagerTask?.constraints?.["retentionTime"],
+                        ),
                         maxTaskRetryCount:
                           p.jobManagerTask?.constraints?.["maxTaskRetryCount"],
                       },
@@ -4345,12 +4377,14 @@ export async function _listJobsDeserialize(
                   constraints: !p.jobPreparationTask?.constraints
                     ? undefined
                     : {
-                        maxWallClockTime:
+                        maxWallClockTime: deserializeStringDuration(
                           p.jobPreparationTask?.constraints?.[
                             "maxWallClockTime"
                           ],
-                        retentionTime:
+                        ),
+                        retentionTime: deserializeStringDuration(
                           p.jobPreparationTask?.constraints?.["retentionTime"],
+                        ),
                         maxTaskRetryCount:
                           p.jobPreparationTask?.constraints?.[
                             "maxTaskRetryCount"
@@ -4447,8 +4481,12 @@ export async function _listJobsDeserialize(
                           name: p["name"],
                           value: p["value"],
                         })),
-                  maxWallClockTime: p.jobReleaseTask?.["maxWallClockTime"],
-                  retentionTime: p.jobReleaseTask?.["retentionTime"],
+                  maxWallClockTime: deserializeStringDuration(
+                    p.jobReleaseTask?.["maxWallClockTime"],
+                  ),
+                  retentionTime: deserializeStringDuration(
+                    p.jobReleaseTask?.["retentionTime"],
+                  ),
                   userIdentity: !p.jobReleaseTask?.userIdentity
                     ? undefined
                     : {
@@ -4668,9 +4706,14 @@ export async function _listJobsDeserialize(
                                           p["autoUpgradeMinorVersion"],
                                         enableAutomaticUpgrade:
                                           p["enableAutomaticUpgrade"],
-                                        settings: p["settings"],
-                                        protectedSettings:
-                                          p["protectedSettings"],
+                                        settings: deserializeRecord(
+                                          p.settings,
+                                          passthroughDeserializer,
+                                        ),
+                                        protectedSettings: deserializeRecord(
+                                          p.protectedSettings,
+                                          passthroughDeserializer,
+                                        ),
                                         provisionAfterExtensions:
                                           p["provisionAfterExtensions"],
                                       })),
@@ -4707,10 +4750,11 @@ export async function _listJobsDeserialize(
                                   p.poolInfo.autoPoolSpecification?.pool
                                     ?.taskSchedulingPolicy?.["nodeFillType"],
                               },
-                          resizeTimeout:
+                          resizeTimeout: deserializeStringDuration(
                             p.poolInfo.autoPoolSpecification?.pool?.[
                               "resizeTimeout"
                             ],
+                          ),
                           targetDedicatedNodes:
                             p.poolInfo.autoPoolSpecification?.pool?.[
                               "targetDedicatedNodes"
@@ -4728,9 +4772,11 @@ export async function _listJobsDeserialize(
                               "autoScaleFormula"
                             ],
                           autoScaleEvaluationInterval:
-                            p.poolInfo.autoPoolSpecification?.pool?.[
-                              "autoScaleEvaluationInterval"
-                            ],
+                            deserializeStringDuration(
+                              p.poolInfo.autoPoolSpecification?.pool?.[
+                                "autoScaleEvaluationInterval"
+                              ],
+                            ),
                           enableInterNodeCommunication:
                             p.poolInfo.autoPoolSpecification?.pool?.[
                               "enableInterNodeCommunication"
@@ -5169,11 +5215,10 @@ export async function _listJobsDeserialize(
             executionInfo: !p.executionInfo
               ? undefined
               : {
-                  startTime: new Date(p.executionInfo?.["startTime"]),
-                  endTime:
-                    p.executionInfo?.["endTime"] !== undefined
-                      ? new Date(p.executionInfo?.["endTime"])
-                      : undefined,
+                  startTime: deserializeUtcDateTime(
+                    p.executionInfo?.["startTime"],
+                  ),
+                  endTime: deserializeUtcDateTime(p.executionInfo?.["endTime"]),
                   poolId: p.executionInfo?.["poolId"],
                   schedulingError: !p.executionInfo?.schedulingError
                     ? undefined
@@ -5196,11 +5241,19 @@ export async function _listJobsDeserialize(
               ? undefined
               : {
                   url: p.stats?.["url"],
-                  startTime: new Date(p.stats?.["startTime"]),
-                  lastUpdateTime: new Date(p.stats?.["lastUpdateTime"]),
-                  userCPUTime: p.stats?.["userCPUTime"],
-                  kernelCPUTime: p.stats?.["kernelCPUTime"],
-                  wallClockTime: p.stats?.["wallClockTime"],
+                  startTime: deserializeUtcDateTime(p.stats?.["startTime"]),
+                  lastUpdateTime: deserializeUtcDateTime(
+                    p.stats?.["lastUpdateTime"],
+                  ),
+                  userCPUTime: deserializeStringDuration(
+                    p.stats?.["userCPUTime"],
+                  ),
+                  kernelCPUTime: deserializeStringDuration(
+                    p.stats?.["kernelCPUTime"],
+                  ),
+                  wallClockTime: deserializeStringDuration(
+                    p.stats?.["wallClockTime"],
+                  ),
                   readIOps: p.stats?.["readIOps"],
                   writeIOps: p.stats?.["writeIOps"],
                   readIOGiB: p.stats?.["readIOGiB"],
@@ -5208,7 +5261,7 @@ export async function _listJobsDeserialize(
                   numSucceededTasks: p.stats?.["numSucceededTasks"],
                   numFailedTasks: p.stats?.["numFailedTasks"],
                   numTaskRetries: p.stats?.["numTaskRetries"],
-                  waitTime: p.stats?.["waitTime"],
+                  waitTime: deserializeStringDuration(p.stats?.["waitTime"]),
                 },
           })),
     "odata.nextLink": result.body["odata.nextLink"],
@@ -5252,7 +5305,7 @@ export function _listJobsFromScheduleSend(
 
 export async function _listJobsFromScheduleDeserialize(
   result: ListJobsFromSchedule200Response | ListJobsFromScheduleDefaultResponse,
-): Promise<_BatchJobListResult> {
+): Promise<BatchJobListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -5267,31 +5320,25 @@ export async function _listJobsFromScheduleDeserialize(
             usesTaskDependencies: p["usesTaskDependencies"],
             url: p["url"],
             eTag: p["eTag"],
-            lastModified:
-              p["lastModified"] !== undefined
-                ? new Date(p["lastModified"])
-                : undefined,
-            creationTime:
-              p["creationTime"] !== undefined
-                ? new Date(p["creationTime"])
-                : undefined,
+            lastModified: deserializeUtcDateTime(p["lastModified"]),
+            creationTime: deserializeUtcDateTime(p["creationTime"]),
             state: p["state"],
-            stateTransitionTime:
-              p["stateTransitionTime"] !== undefined
-                ? new Date(p["stateTransitionTime"])
-                : undefined,
+            stateTransitionTime: deserializeUtcDateTime(
+              p["stateTransitionTime"],
+            ),
             previousState: p["previousState"],
-            previousStateTransitionTime:
-              p["previousStateTransitionTime"] !== undefined
-                ? new Date(p["previousStateTransitionTime"])
-                : undefined,
+            previousStateTransitionTime: deserializeUtcDateTime(
+              p["previousStateTransitionTime"],
+            ),
             priority: p["priority"],
             allowTaskPreemption: p["allowTaskPreemption"],
             maxParallelTasks: p["maxParallelTasks"],
             constraints: !p.constraints
               ? undefined
               : {
-                  maxWallClockTime: p.constraints?.["maxWallClockTime"],
+                  maxWallClockTime: deserializeStringDuration(
+                    p.constraints?.["maxWallClockTime"],
+                  ),
                   maxTaskRetryCount: p.constraints?.["maxTaskRetryCount"],
                 },
             jobManagerTask: !p.jobManagerTask
@@ -5406,10 +5453,12 @@ export async function _listJobsFromScheduleDeserialize(
                   constraints: !p.jobManagerTask?.constraints
                     ? undefined
                     : {
-                        maxWallClockTime:
+                        maxWallClockTime: deserializeStringDuration(
                           p.jobManagerTask?.constraints?.["maxWallClockTime"],
-                        retentionTime:
+                        ),
+                        retentionTime: deserializeStringDuration(
                           p.jobManagerTask?.constraints?.["retentionTime"],
+                        ),
                         maxTaskRetryCount:
                           p.jobManagerTask?.constraints?.["maxTaskRetryCount"],
                       },
@@ -5527,12 +5576,14 @@ export async function _listJobsFromScheduleDeserialize(
                   constraints: !p.jobPreparationTask?.constraints
                     ? undefined
                     : {
-                        maxWallClockTime:
+                        maxWallClockTime: deserializeStringDuration(
                           p.jobPreparationTask?.constraints?.[
                             "maxWallClockTime"
                           ],
-                        retentionTime:
+                        ),
+                        retentionTime: deserializeStringDuration(
                           p.jobPreparationTask?.constraints?.["retentionTime"],
+                        ),
                         maxTaskRetryCount:
                           p.jobPreparationTask?.constraints?.[
                             "maxTaskRetryCount"
@@ -5629,8 +5680,12 @@ export async function _listJobsFromScheduleDeserialize(
                           name: p["name"],
                           value: p["value"],
                         })),
-                  maxWallClockTime: p.jobReleaseTask?.["maxWallClockTime"],
-                  retentionTime: p.jobReleaseTask?.["retentionTime"],
+                  maxWallClockTime: deserializeStringDuration(
+                    p.jobReleaseTask?.["maxWallClockTime"],
+                  ),
+                  retentionTime: deserializeStringDuration(
+                    p.jobReleaseTask?.["retentionTime"],
+                  ),
                   userIdentity: !p.jobReleaseTask?.userIdentity
                     ? undefined
                     : {
@@ -5850,9 +5905,14 @@ export async function _listJobsFromScheduleDeserialize(
                                           p["autoUpgradeMinorVersion"],
                                         enableAutomaticUpgrade:
                                           p["enableAutomaticUpgrade"],
-                                        settings: p["settings"],
-                                        protectedSettings:
-                                          p["protectedSettings"],
+                                        settings: deserializeRecord(
+                                          p.settings,
+                                          passthroughDeserializer,
+                                        ),
+                                        protectedSettings: deserializeRecord(
+                                          p.protectedSettings,
+                                          passthroughDeserializer,
+                                        ),
                                         provisionAfterExtensions:
                                           p["provisionAfterExtensions"],
                                       })),
@@ -5889,10 +5949,11 @@ export async function _listJobsFromScheduleDeserialize(
                                   p.poolInfo.autoPoolSpecification?.pool
                                     ?.taskSchedulingPolicy?.["nodeFillType"],
                               },
-                          resizeTimeout:
+                          resizeTimeout: deserializeStringDuration(
                             p.poolInfo.autoPoolSpecification?.pool?.[
                               "resizeTimeout"
                             ],
+                          ),
                           targetDedicatedNodes:
                             p.poolInfo.autoPoolSpecification?.pool?.[
                               "targetDedicatedNodes"
@@ -5910,9 +5971,11 @@ export async function _listJobsFromScheduleDeserialize(
                               "autoScaleFormula"
                             ],
                           autoScaleEvaluationInterval:
-                            p.poolInfo.autoPoolSpecification?.pool?.[
-                              "autoScaleEvaluationInterval"
-                            ],
+                            deserializeStringDuration(
+                              p.poolInfo.autoPoolSpecification?.pool?.[
+                                "autoScaleEvaluationInterval"
+                              ],
+                            ),
                           enableInterNodeCommunication:
                             p.poolInfo.autoPoolSpecification?.pool?.[
                               "enableInterNodeCommunication"
@@ -6351,11 +6414,10 @@ export async function _listJobsFromScheduleDeserialize(
             executionInfo: !p.executionInfo
               ? undefined
               : {
-                  startTime: new Date(p.executionInfo?.["startTime"]),
-                  endTime:
-                    p.executionInfo?.["endTime"] !== undefined
-                      ? new Date(p.executionInfo?.["endTime"])
-                      : undefined,
+                  startTime: deserializeUtcDateTime(
+                    p.executionInfo?.["startTime"],
+                  ),
+                  endTime: deserializeUtcDateTime(p.executionInfo?.["endTime"]),
                   poolId: p.executionInfo?.["poolId"],
                   schedulingError: !p.executionInfo?.schedulingError
                     ? undefined
@@ -6378,11 +6440,19 @@ export async function _listJobsFromScheduleDeserialize(
               ? undefined
               : {
                   url: p.stats?.["url"],
-                  startTime: new Date(p.stats?.["startTime"]),
-                  lastUpdateTime: new Date(p.stats?.["lastUpdateTime"]),
-                  userCPUTime: p.stats?.["userCPUTime"],
-                  kernelCPUTime: p.stats?.["kernelCPUTime"],
-                  wallClockTime: p.stats?.["wallClockTime"],
+                  startTime: deserializeUtcDateTime(p.stats?.["startTime"]),
+                  lastUpdateTime: deserializeUtcDateTime(
+                    p.stats?.["lastUpdateTime"],
+                  ),
+                  userCPUTime: deserializeStringDuration(
+                    p.stats?.["userCPUTime"],
+                  ),
+                  kernelCPUTime: deserializeStringDuration(
+                    p.stats?.["kernelCPUTime"],
+                  ),
+                  wallClockTime: deserializeStringDuration(
+                    p.stats?.["wallClockTime"],
+                  ),
                   readIOps: p.stats?.["readIOps"],
                   writeIOps: p.stats?.["writeIOps"],
                   readIOGiB: p.stats?.["readIOGiB"],
@@ -6390,7 +6460,7 @@ export async function _listJobsFromScheduleDeserialize(
                   numSucceededTasks: p.stats?.["numSucceededTasks"],
                   numFailedTasks: p.stats?.["numFailedTasks"],
                   numTaskRetries: p.stats?.["numTaskRetries"],
-                  waitTime: p.stats?.["waitTime"],
+                  waitTime: deserializeStringDuration(p.stats?.["waitTime"]),
                 },
           })),
     "odata.nextLink": result.body["odata.nextLink"],
@@ -6438,7 +6508,7 @@ export async function _listJobPreparationAndReleaseTaskStatusDeserialize(
   result:
     | ListJobPreparationAndReleaseTaskStatus200Response
     | ListJobPreparationAndReleaseTaskStatusDefaultResponse,
-): Promise<_BatchJobListPreparationAndReleaseTaskStatusResult> {
+): Promise<BatchJobListPreparationAndReleaseTaskStatusResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -6454,13 +6524,12 @@ export async function _listJobPreparationAndReleaseTaskStatusDeserialize(
             jobPreparationTaskExecutionInfo: !p.jobPreparationTaskExecutionInfo
               ? undefined
               : {
-                  startTime: new Date(
+                  startTime: deserializeUtcDateTime(
                     p.jobPreparationTaskExecutionInfo?.["startTime"],
                   ),
-                  endTime:
-                    p.jobPreparationTaskExecutionInfo?.["endTime"] !== undefined
-                      ? new Date(p.jobPreparationTaskExecutionInfo?.["endTime"])
-                      : undefined,
+                  endTime: deserializeUtcDateTime(
+                    p.jobPreparationTaskExecutionInfo?.["endTime"],
+                  ),
                   state: p.jobPreparationTaskExecutionInfo?.["state"],
                   taskRootDirectory:
                     p.jobPreparationTaskExecutionInfo?.["taskRootDirectory"],
@@ -6513,25 +6582,20 @@ export async function _listJobPreparationAndReleaseTaskStatusDeserialize(
                               })),
                       },
                   retryCount: p.jobPreparationTaskExecutionInfo?.["retryCount"],
-                  lastRetryTime:
-                    p.jobPreparationTaskExecutionInfo?.["lastRetryTime"] !==
-                    undefined
-                      ? new Date(
-                          p.jobPreparationTaskExecutionInfo?.["lastRetryTime"],
-                        )
-                      : undefined,
+                  lastRetryTime: deserializeUtcDateTime(
+                    p.jobPreparationTaskExecutionInfo?.["lastRetryTime"],
+                  ),
                   result: p.jobPreparationTaskExecutionInfo?.["result"],
                 },
             jobReleaseTaskExecutionInfo: !p.jobReleaseTaskExecutionInfo
               ? undefined
               : {
-                  startTime: new Date(
+                  startTime: deserializeUtcDateTime(
                     p.jobReleaseTaskExecutionInfo?.["startTime"],
                   ),
-                  endTime:
-                    p.jobReleaseTaskExecutionInfo?.["endTime"] !== undefined
-                      ? new Date(p.jobReleaseTaskExecutionInfo?.["endTime"])
-                      : undefined,
+                  endTime: deserializeUtcDateTime(
+                    p.jobReleaseTaskExecutionInfo?.["endTime"],
+                  ),
                   state: p.jobReleaseTaskExecutionInfo?.["state"],
                   taskRootDirectory:
                     p.jobReleaseTaskExecutionInfo?.["taskRootDirectory"],
@@ -6740,7 +6804,7 @@ export function _listCertificatesSend(
 
 export async function _listCertificatesDeserialize(
   result: ListCertificates200Response | ListCertificatesDefaultResponse,
-): Promise<_CertificateListResult> {
+): Promise<CertificateListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -6754,15 +6818,13 @@ export async function _listCertificatesDeserialize(
             thumbprintAlgorithm: p["thumbprintAlgorithm"],
             url: p["url"],
             state: p["state"],
-            stateTransitionTime:
-              p["stateTransitionTime"] !== undefined
-                ? new Date(p["stateTransitionTime"])
-                : undefined,
+            stateTransitionTime: deserializeUtcDateTime(
+              p["stateTransitionTime"],
+            ),
             previousState: p["previousState"],
-            previousStateTransitionTime:
-              p["previousStateTransitionTime"] !== undefined
-                ? new Date(p["previousStateTransitionTime"])
-                : undefined,
+            previousStateTransitionTime: deserializeUtcDateTime(
+              p["previousStateTransitionTime"],
+            ),
             publicData:
               typeof p["publicData"] === "string"
                 ? stringToUint8Array(p["publicData"], "base64")
@@ -6957,15 +7019,13 @@ export async function _getCertificateDeserialize(
     thumbprintAlgorithm: result.body["thumbprintAlgorithm"],
     url: result.body["url"],
     state: result.body["state"],
-    stateTransitionTime:
-      result.body["stateTransitionTime"] !== undefined
-        ? new Date(result.body["stateTransitionTime"])
-        : undefined,
+    stateTransitionTime: deserializeUtcDateTime(
+      result.body["stateTransitionTime"],
+    ),
     previousState: result.body["previousState"],
-    previousStateTransitionTime:
-      result.body["previousStateTransitionTime"] !== undefined
-        ? new Date(result.body["previousStateTransitionTime"])
-        : undefined,
+    previousStateTransitionTime: deserializeUtcDateTime(
+      result.body["previousStateTransitionTime"],
+    ),
     publicData:
       typeof result.body["publicData"] === "string"
         ? stringToUint8Array(result.body["publicData"], "base64")
@@ -7167,35 +7227,29 @@ export async function _getJobScheduleDeserialize(
     displayName: result.body["displayName"],
     url: result.body["url"],
     eTag: result.body["eTag"],
-    lastModified:
-      result.body["lastModified"] !== undefined
-        ? new Date(result.body["lastModified"])
-        : undefined,
-    creationTime:
-      result.body["creationTime"] !== undefined
-        ? new Date(result.body["creationTime"])
-        : undefined,
+    lastModified: deserializeUtcDateTime(result.body["lastModified"]),
+    creationTime: deserializeUtcDateTime(result.body["creationTime"]),
     state: result.body["state"],
-    stateTransitionTime:
-      result.body["stateTransitionTime"] !== undefined
-        ? new Date(result.body["stateTransitionTime"])
-        : undefined,
+    stateTransitionTime: deserializeUtcDateTime(
+      result.body["stateTransitionTime"],
+    ),
     previousState: result.body["previousState"],
-    previousStateTransitionTime:
-      result.body["previousStateTransitionTime"] !== undefined
-        ? new Date(result.body["previousStateTransitionTime"])
-        : undefined,
+    previousStateTransitionTime: deserializeUtcDateTime(
+      result.body["previousStateTransitionTime"],
+    ),
     schedule: {
-      doNotRunUntil:
-        result.body.schedule["doNotRunUntil"] !== undefined
-          ? new Date(result.body.schedule["doNotRunUntil"])
-          : undefined,
-      doNotRunAfter:
-        result.body.schedule["doNotRunAfter"] !== undefined
-          ? new Date(result.body.schedule["doNotRunAfter"])
-          : undefined,
-      startWindow: result.body.schedule["startWindow"],
-      recurrenceInterval: result.body.schedule["recurrenceInterval"],
+      doNotRunUntil: deserializeUtcDateTime(
+        result.body.schedule["doNotRunUntil"],
+      ),
+      doNotRunAfter: deserializeUtcDateTime(
+        result.body.schedule["doNotRunAfter"],
+      ),
+      startWindow: deserializeStringDuration(
+        result.body.schedule["startWindow"],
+      ),
+      recurrenceInterval: deserializeStringDuration(
+        result.body.schedule["recurrenceInterval"],
+      ),
     },
     jobSpecification: {
       priority: result.body.jobSpecification["priority"],
@@ -7215,8 +7269,9 @@ export async function _getJobScheduleDeserialize(
       constraints: !result.body.jobSpecification.constraints
         ? undefined
         : {
-            maxWallClockTime:
+            maxWallClockTime: deserializeStringDuration(
               result.body.jobSpecification.constraints?.["maxWallClockTime"],
+            ),
             maxTaskRetryCount:
               result.body.jobSpecification.constraints?.["maxTaskRetryCount"],
           },
@@ -7336,14 +7391,16 @@ export async function _getJobScheduleDeserialize(
               ?.constraints
               ? undefined
               : {
-                  maxWallClockTime:
+                  maxWallClockTime: deserializeStringDuration(
                     result.body.jobSpecification.jobManagerTask?.constraints?.[
                       "maxWallClockTime"
                     ],
-                  retentionTime:
+                  ),
+                  retentionTime: deserializeStringDuration(
                     result.body.jobSpecification.jobManagerTask?.constraints?.[
                       "retentionTime"
                     ],
+                  ),
                   maxTaskRetryCount:
                     result.body.jobSpecification.jobManagerTask?.constraints?.[
                       "maxTaskRetryCount"
@@ -7481,12 +7538,14 @@ export async function _getJobScheduleDeserialize(
               ?.constraints
               ? undefined
               : {
-                  maxWallClockTime:
+                  maxWallClockTime: deserializeStringDuration(
                     result.body.jobSpecification.jobPreparationTask
                       ?.constraints?.["maxWallClockTime"],
-                  retentionTime:
+                  ),
+                  retentionTime: deserializeStringDuration(
                     result.body.jobSpecification.jobPreparationTask
                       ?.constraints?.["retentionTime"],
+                  ),
                   maxTaskRetryCount:
                     result.body.jobSpecification.jobPreparationTask
                       ?.constraints?.["maxTaskRetryCount"],
@@ -7590,10 +7649,12 @@ export async function _getJobScheduleDeserialize(
                 : result.body.jobSpecification.jobReleaseTask?.[
                     "environmentSettings"
                   ].map((p) => ({ name: p["name"], value: p["value"] })),
-            maxWallClockTime:
+            maxWallClockTime: deserializeStringDuration(
               result.body.jobSpecification.jobReleaseTask?.["maxWallClockTime"],
-            retentionTime:
+            ),
+            retentionTime: deserializeStringDuration(
               result.body.jobSpecification.jobReleaseTask?.["retentionTime"],
+            ),
             userIdentity: !result.body.jobSpecification.jobReleaseTask
               ?.userIdentity
               ? undefined
@@ -7831,8 +7892,14 @@ export async function _getJobScheduleDeserialize(
                                     p["autoUpgradeMinorVersion"],
                                   enableAutomaticUpgrade:
                                     p["enableAutomaticUpgrade"],
-                                  settings: p["settings"],
-                                  protectedSettings: p["protectedSettings"],
+                                  settings: deserializeRecord(
+                                    p.settings,
+                                    passthroughDeserializer,
+                                  ),
+                                  protectedSettings: deserializeRecord(
+                                    p.protectedSettings,
+                                    passthroughDeserializer,
+                                  ),
                                   provisionAfterExtensions:
                                     p["provisionAfterExtensions"],
                                 })),
@@ -7870,9 +7937,10 @@ export async function _getJobScheduleDeserialize(
                               .autoPoolSpecification?.pool
                               ?.taskSchedulingPolicy?.["nodeFillType"],
                         },
-                    resizeTimeout:
+                    resizeTimeout: deserializeStringDuration(
                       result.body.jobSpecification.poolInfo
                         .autoPoolSpecification?.pool?.["resizeTimeout"],
+                    ),
                     targetDedicatedNodes:
                       result.body.jobSpecification.poolInfo
                         .autoPoolSpecification?.pool?.["targetDedicatedNodes"],
@@ -7887,11 +7955,12 @@ export async function _getJobScheduleDeserialize(
                     autoScaleFormula:
                       result.body.jobSpecification.poolInfo
                         .autoPoolSpecification?.pool?.["autoScaleFormula"],
-                    autoScaleEvaluationInterval:
+                    autoScaleEvaluationInterval: deserializeStringDuration(
                       result.body.jobSpecification.poolInfo
                         .autoPoolSpecification?.pool?.[
                         "autoScaleEvaluationInterval"
                       ],
+                    ),
                     enableInterNodeCommunication:
                       result.body.jobSpecification.poolInfo
                         .autoPoolSpecification?.pool?.[
@@ -8312,20 +8381,18 @@ export async function _getJobScheduleDeserialize(
     executionInfo: !result.body.executionInfo
       ? undefined
       : {
-          nextRunTime:
-            result.body.executionInfo?.["nextRunTime"] !== undefined
-              ? new Date(result.body.executionInfo?.["nextRunTime"])
-              : undefined,
+          nextRunTime: deserializeUtcDateTime(
+            result.body.executionInfo?.["nextRunTime"],
+          ),
           recentJob: !result.body.executionInfo?.recentJob
             ? undefined
             : {
                 id: result.body.executionInfo?.recentJob?.["id"],
                 url: result.body.executionInfo?.recentJob?.["url"],
               },
-          endTime:
-            result.body.executionInfo?.["endTime"] !== undefined
-              ? new Date(result.body.executionInfo?.["endTime"])
-              : undefined,
+          endTime: deserializeUtcDateTime(
+            result.body.executionInfo?.["endTime"],
+          ),
         },
     metadata:
       result.body["metadata"] === undefined
@@ -8338,11 +8405,19 @@ export async function _getJobScheduleDeserialize(
       ? undefined
       : {
           url: result.body.stats?.["url"],
-          startTime: new Date(result.body.stats?.["startTime"]),
-          lastUpdateTime: new Date(result.body.stats?.["lastUpdateTime"]),
-          userCPUTime: result.body.stats?.["userCPUTime"],
-          kernelCPUTime: result.body.stats?.["kernelCPUTime"],
-          wallClockTime: result.body.stats?.["wallClockTime"],
+          startTime: deserializeUtcDateTime(result.body.stats?.["startTime"]),
+          lastUpdateTime: deserializeUtcDateTime(
+            result.body.stats?.["lastUpdateTime"],
+          ),
+          userCPUTime: deserializeStringDuration(
+            result.body.stats?.["userCPUTime"],
+          ),
+          kernelCPUTime: deserializeStringDuration(
+            result.body.stats?.["kernelCPUTime"],
+          ),
+          wallClockTime: deserializeStringDuration(
+            result.body.stats?.["wallClockTime"],
+          ),
           readIOps: result.body.stats?.["readIOps"],
           writeIOps: result.body.stats?.["writeIOps"],
           readIOGiB: result.body.stats?.["readIOGiB"],
@@ -8350,7 +8425,7 @@ export async function _getJobScheduleDeserialize(
           numSucceededTasks: result.body.stats?.["numSucceededTasks"],
           numFailedTasks: result.body.stats?.["numFailedTasks"],
           numTaskRetries: result.body.stats?.["numTaskRetries"],
-          waitTime: result.body.stats?.["waitTime"],
+          waitTime: deserializeStringDuration(result.body.stats?.["waitTime"]),
         },
   };
 }
@@ -8755,7 +8830,7 @@ export function _listJobSchedulesSend(
 
 export async function _listJobSchedulesDeserialize(
   result: ListJobSchedules200Response | ListJobSchedulesDefaultResponse,
-): Promise<_BatchJobScheduleListResult> {
+): Promise<BatchJobScheduleListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -8769,35 +8844,27 @@ export async function _listJobSchedulesDeserialize(
             displayName: p["displayName"],
             url: p["url"],
             eTag: p["eTag"],
-            lastModified:
-              p["lastModified"] !== undefined
-                ? new Date(p["lastModified"])
-                : undefined,
-            creationTime:
-              p["creationTime"] !== undefined
-                ? new Date(p["creationTime"])
-                : undefined,
+            lastModified: deserializeUtcDateTime(p["lastModified"]),
+            creationTime: deserializeUtcDateTime(p["creationTime"]),
             state: p["state"],
-            stateTransitionTime:
-              p["stateTransitionTime"] !== undefined
-                ? new Date(p["stateTransitionTime"])
-                : undefined,
+            stateTransitionTime: deserializeUtcDateTime(
+              p["stateTransitionTime"],
+            ),
             previousState: p["previousState"],
-            previousStateTransitionTime:
-              p["previousStateTransitionTime"] !== undefined
-                ? new Date(p["previousStateTransitionTime"])
-                : undefined,
+            previousStateTransitionTime: deserializeUtcDateTime(
+              p["previousStateTransitionTime"],
+            ),
             schedule: {
-              doNotRunUntil:
-                p.schedule["doNotRunUntil"] !== undefined
-                  ? new Date(p.schedule["doNotRunUntil"])
-                  : undefined,
-              doNotRunAfter:
-                p.schedule["doNotRunAfter"] !== undefined
-                  ? new Date(p.schedule["doNotRunAfter"])
-                  : undefined,
-              startWindow: p.schedule["startWindow"],
-              recurrenceInterval: p.schedule["recurrenceInterval"],
+              doNotRunUntil: deserializeUtcDateTime(
+                p.schedule["doNotRunUntil"],
+              ),
+              doNotRunAfter: deserializeUtcDateTime(
+                p.schedule["doNotRunAfter"],
+              ),
+              startWindow: deserializeStringDuration(p.schedule["startWindow"]),
+              recurrenceInterval: deserializeStringDuration(
+                p.schedule["recurrenceInterval"],
+              ),
             },
             jobSpecification: {
               priority: p.jobSpecification["priority"],
@@ -8816,8 +8883,9 @@ export async function _listJobSchedulesDeserialize(
               constraints: !p.jobSpecification.constraints
                 ? undefined
                 : {
-                    maxWallClockTime:
+                    maxWallClockTime: deserializeStringDuration(
                       p.jobSpecification.constraints?.["maxWallClockTime"],
+                    ),
                     maxTaskRetryCount:
                       p.jobSpecification.constraints?.["maxTaskRetryCount"],
                   },
@@ -8951,14 +9019,16 @@ export async function _listJobSchedulesDeserialize(
                     constraints: !p.jobSpecification.jobManagerTask?.constraints
                       ? undefined
                       : {
-                          maxWallClockTime:
+                          maxWallClockTime: deserializeStringDuration(
                             p.jobSpecification.jobManagerTask?.constraints?.[
                               "maxWallClockTime"
                             ],
-                          retentionTime:
+                          ),
+                          retentionTime: deserializeStringDuration(
                             p.jobSpecification.jobManagerTask?.constraints?.[
                               "retentionTime"
                             ],
+                          ),
                           maxTaskRetryCount:
                             p.jobSpecification.jobManagerTask?.constraints?.[
                               "maxTaskRetryCount"
@@ -9107,12 +9177,14 @@ export async function _listJobSchedulesDeserialize(
                       ?.constraints
                       ? undefined
                       : {
-                          maxWallClockTime:
+                          maxWallClockTime: deserializeStringDuration(
                             p.jobSpecification.jobPreparationTask
                               ?.constraints?.["maxWallClockTime"],
-                          retentionTime:
+                          ),
+                          retentionTime: deserializeStringDuration(
                             p.jobSpecification.jobPreparationTask
                               ?.constraints?.["retentionTime"],
+                          ),
                           maxTaskRetryCount:
                             p.jobSpecification.jobPreparationTask
                               ?.constraints?.["maxTaskRetryCount"],
@@ -9225,10 +9297,12 @@ export async function _listJobSchedulesDeserialize(
                             name: p["name"],
                             value: p["value"],
                           })),
-                    maxWallClockTime:
+                    maxWallClockTime: deserializeStringDuration(
                       p.jobSpecification.jobReleaseTask?.["maxWallClockTime"],
-                    retentionTime:
+                    ),
+                    retentionTime: deserializeStringDuration(
                       p.jobSpecification.jobReleaseTask?.["retentionTime"],
+                    ),
                     userIdentity: !p.jobSpecification.jobReleaseTask
                       ?.userIdentity
                       ? undefined
@@ -9487,9 +9561,14 @@ export async function _listJobSchedulesDeserialize(
                                             p["autoUpgradeMinorVersion"],
                                           enableAutomaticUpgrade:
                                             p["enableAutomaticUpgrade"],
-                                          settings: p["settings"],
-                                          protectedSettings:
-                                            p["protectedSettings"],
+                                          settings: deserializeRecord(
+                                            p.settings,
+                                            passthroughDeserializer,
+                                          ),
+                                          protectedSettings: deserializeRecord(
+                                            p.protectedSettings,
+                                            passthroughDeserializer,
+                                          ),
                                           provisionAfterExtensions:
                                             p["provisionAfterExtensions"],
                                         })),
@@ -9528,9 +9607,10 @@ export async function _listJobSchedulesDeserialize(
                                       .autoPoolSpecification?.pool
                                       ?.taskSchedulingPolicy?.["nodeFillType"],
                                 },
-                            resizeTimeout:
+                            resizeTimeout: deserializeStringDuration(
                               p.jobSpecification.poolInfo.autoPoolSpecification
                                 ?.pool?.["resizeTimeout"],
+                            ),
                             targetDedicatedNodes:
                               p.jobSpecification.poolInfo.autoPoolSpecification
                                 ?.pool?.["targetDedicatedNodes"],
@@ -9544,8 +9624,12 @@ export async function _listJobSchedulesDeserialize(
                               p.jobSpecification.poolInfo.autoPoolSpecification
                                 ?.pool?.["autoScaleFormula"],
                             autoScaleEvaluationInterval:
-                              p.jobSpecification.poolInfo.autoPoolSpecification
-                                ?.pool?.["autoScaleEvaluationInterval"],
+                              deserializeStringDuration(
+                                p.jobSpecification.poolInfo
+                                  .autoPoolSpecification?.pool?.[
+                                  "autoScaleEvaluationInterval"
+                                ],
+                              ),
                             enableInterNodeCommunication:
                               p.jobSpecification.poolInfo.autoPoolSpecification
                                 ?.pool?.["enableInterNodeCommunication"],
@@ -10009,20 +10093,16 @@ export async function _listJobSchedulesDeserialize(
             executionInfo: !p.executionInfo
               ? undefined
               : {
-                  nextRunTime:
-                    p.executionInfo?.["nextRunTime"] !== undefined
-                      ? new Date(p.executionInfo?.["nextRunTime"])
-                      : undefined,
+                  nextRunTime: deserializeUtcDateTime(
+                    p.executionInfo?.["nextRunTime"],
+                  ),
                   recentJob: !p.executionInfo?.recentJob
                     ? undefined
                     : {
                         id: p.executionInfo?.recentJob?.["id"],
                         url: p.executionInfo?.recentJob?.["url"],
                       },
-                  endTime:
-                    p.executionInfo?.["endTime"] !== undefined
-                      ? new Date(p.executionInfo?.["endTime"])
-                      : undefined,
+                  endTime: deserializeUtcDateTime(p.executionInfo?.["endTime"]),
                 },
             metadata:
               p["metadata"] === undefined
@@ -10035,11 +10115,19 @@ export async function _listJobSchedulesDeserialize(
               ? undefined
               : {
                   url: p.stats?.["url"],
-                  startTime: new Date(p.stats?.["startTime"]),
-                  lastUpdateTime: new Date(p.stats?.["lastUpdateTime"]),
-                  userCPUTime: p.stats?.["userCPUTime"],
-                  kernelCPUTime: p.stats?.["kernelCPUTime"],
-                  wallClockTime: p.stats?.["wallClockTime"],
+                  startTime: deserializeUtcDateTime(p.stats?.["startTime"]),
+                  lastUpdateTime: deserializeUtcDateTime(
+                    p.stats?.["lastUpdateTime"],
+                  ),
+                  userCPUTime: deserializeStringDuration(
+                    p.stats?.["userCPUTime"],
+                  ),
+                  kernelCPUTime: deserializeStringDuration(
+                    p.stats?.["kernelCPUTime"],
+                  ),
+                  wallClockTime: deserializeStringDuration(
+                    p.stats?.["wallClockTime"],
+                  ),
                   readIOps: p.stats?.["readIOps"],
                   writeIOps: p.stats?.["writeIOps"],
                   readIOGiB: p.stats?.["readIOGiB"],
@@ -10047,7 +10135,7 @@ export async function _listJobSchedulesDeserialize(
                   numSucceededTasks: p.stats?.["numSucceededTasks"],
                   numFailedTasks: p.stats?.["numFailedTasks"],
                   numTaskRetries: p.stats?.["numTaskRetries"],
-                  waitTime: p.stats?.["waitTime"],
+                  waitTime: deserializeStringDuration(p.stats?.["waitTime"]),
                 },
           })),
     "odata.nextLink": result.body["odata.nextLink"],
@@ -10184,7 +10272,7 @@ export function _listTasksSend(
 
 export async function _listTasksDeserialize(
   result: ListTasks200Response | ListTasksDefaultResponse,
-): Promise<_BatchTaskListResult> {
+): Promise<BatchTaskListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -10198,14 +10286,8 @@ export async function _listTasksDeserialize(
             displayName: p["displayName"],
             url: p["url"],
             eTag: p["eTag"],
-            lastModified:
-              p["lastModified"] !== undefined
-                ? new Date(p["lastModified"])
-                : undefined,
-            creationTime:
-              p["creationTime"] !== undefined
-                ? new Date(p["creationTime"])
-                : undefined,
+            lastModified: deserializeUtcDateTime(p["lastModified"]),
+            creationTime: deserializeUtcDateTime(p["creationTime"]),
             exitConditions: !p.exitConditions
               ? undefined
               : {
@@ -10259,15 +10341,13 @@ export async function _listTasksDeserialize(
                       },
                 },
             state: p["state"],
-            stateTransitionTime:
-              p["stateTransitionTime"] !== undefined
-                ? new Date(p["stateTransitionTime"])
-                : undefined,
+            stateTransitionTime: deserializeUtcDateTime(
+              p["stateTransitionTime"],
+            ),
             previousState: p["previousState"],
-            previousStateTransitionTime:
-              p["previousStateTransitionTime"] !== undefined
-                ? new Date(p["previousStateTransitionTime"])
-                : undefined,
+            previousStateTransitionTime: deserializeUtcDateTime(
+              p["previousStateTransitionTime"],
+            ),
             commandLine: p["commandLine"],
             containerSettings: !p.containerSettings
               ? undefined
@@ -10356,8 +10436,12 @@ export async function _listTasksDeserialize(
             constraints: !p.constraints
               ? undefined
               : {
-                  maxWallClockTime: p.constraints?.["maxWallClockTime"],
-                  retentionTime: p.constraints?.["retentionTime"],
+                  maxWallClockTime: deserializeStringDuration(
+                    p.constraints?.["maxWallClockTime"],
+                  ),
+                  retentionTime: deserializeStringDuration(
+                    p.constraints?.["retentionTime"],
+                  ),
                   maxTaskRetryCount: p.constraints?.["maxTaskRetryCount"],
                 },
             requiredSlots: p["requiredSlots"],
@@ -10376,14 +10460,10 @@ export async function _listTasksDeserialize(
             executionInfo: !p.executionInfo
               ? undefined
               : {
-                  startTime:
-                    p.executionInfo?.["startTime"] !== undefined
-                      ? new Date(p.executionInfo?.["startTime"])
-                      : undefined,
-                  endTime:
-                    p.executionInfo?.["endTime"] !== undefined
-                      ? new Date(p.executionInfo?.["endTime"])
-                      : undefined,
+                  startTime: deserializeUtcDateTime(
+                    p.executionInfo?.["startTime"],
+                  ),
+                  endTime: deserializeUtcDateTime(p.executionInfo?.["endTime"]),
                   exitCode: p.executionInfo?.["exitCode"],
                   containerInfo: !p.executionInfo?.containerInfo
                     ? undefined
@@ -10408,15 +10488,13 @@ export async function _listTasksDeserialize(
                               ),
                       },
                   retryCount: p.executionInfo?.["retryCount"],
-                  lastRetryTime:
-                    p.executionInfo?.["lastRetryTime"] !== undefined
-                      ? new Date(p.executionInfo?.["lastRetryTime"])
-                      : undefined,
+                  lastRetryTime: deserializeUtcDateTime(
+                    p.executionInfo?.["lastRetryTime"],
+                  ),
                   requeueCount: p.executionInfo?.["requeueCount"],
-                  lastRequeueTime:
-                    p.executionInfo?.["lastRequeueTime"] !== undefined
-                      ? new Date(p.executionInfo?.["lastRequeueTime"])
-                      : undefined,
+                  lastRequeueTime: deserializeUtcDateTime(
+                    p.executionInfo?.["lastRequeueTime"],
+                  ),
                   result: p.executionInfo?.["result"],
                 },
             nodeInfo: !p.nodeInfo
@@ -10462,16 +10540,24 @@ export async function _listTasksDeserialize(
               ? undefined
               : {
                   url: p.stats?.["url"],
-                  startTime: new Date(p.stats?.["startTime"]),
-                  lastUpdateTime: new Date(p.stats?.["lastUpdateTime"]),
-                  userCPUTime: p.stats?.["userCPUTime"],
-                  kernelCPUTime: p.stats?.["kernelCPUTime"],
-                  wallClockTime: p.stats?.["wallClockTime"],
+                  startTime: deserializeUtcDateTime(p.stats?.["startTime"]),
+                  lastUpdateTime: deserializeUtcDateTime(
+                    p.stats?.["lastUpdateTime"],
+                  ),
+                  userCPUTime: deserializeStringDuration(
+                    p.stats?.["userCPUTime"],
+                  ),
+                  kernelCPUTime: deserializeStringDuration(
+                    p.stats?.["kernelCPUTime"],
+                  ),
+                  wallClockTime: deserializeStringDuration(
+                    p.stats?.["wallClockTime"],
+                  ),
                   readIOps: p.stats?.["readIOps"],
                   writeIOps: p.stats?.["writeIOps"],
                   readIOGiB: p.stats?.["readIOGiB"],
                   writeIOGiB: p.stats?.["writeIOGiB"],
-                  waitTime: p.stats?.["waitTime"],
+                  waitTime: deserializeStringDuration(p.stats?.["waitTime"]),
                 },
             dependsOn: !p.dependsOn
               ? undefined
@@ -10558,10 +10644,7 @@ export async function _createTaskCollectionDeserialize(
             status: p["status"],
             taskId: p["taskId"],
             eTag: p["eTag"],
-            lastModified:
-              p["lastModified"] !== undefined
-                ? new Date(p["lastModified"])
-                : undefined,
+            lastModified: deserializeUtcDateTime(p["lastModified"]),
             location: p["location"],
             error: !p.error
               ? undefined
@@ -10719,14 +10802,8 @@ export async function _getTaskDeserialize(
     displayName: result.body["displayName"],
     url: result.body["url"],
     eTag: result.body["eTag"],
-    lastModified:
-      result.body["lastModified"] !== undefined
-        ? new Date(result.body["lastModified"])
-        : undefined,
-    creationTime:
-      result.body["creationTime"] !== undefined
-        ? new Date(result.body["creationTime"])
-        : undefined,
+    lastModified: deserializeUtcDateTime(result.body["lastModified"]),
+    creationTime: deserializeUtcDateTime(result.body["creationTime"]),
     exitConditions: !result.body.exitConditions
       ? undefined
       : {
@@ -10780,15 +10857,13 @@ export async function _getTaskDeserialize(
               },
         },
     state: result.body["state"],
-    stateTransitionTime:
-      result.body["stateTransitionTime"] !== undefined
-        ? new Date(result.body["stateTransitionTime"])
-        : undefined,
+    stateTransitionTime: deserializeUtcDateTime(
+      result.body["stateTransitionTime"],
+    ),
     previousState: result.body["previousState"],
-    previousStateTransitionTime:
-      result.body["previousStateTransitionTime"] !== undefined
-        ? new Date(result.body["previousStateTransitionTime"])
-        : undefined,
+    previousStateTransitionTime: deserializeUtcDateTime(
+      result.body["previousStateTransitionTime"],
+    ),
     commandLine: result.body["commandLine"],
     containerSettings: !result.body.containerSettings
       ? undefined
@@ -10873,8 +10948,12 @@ export async function _getTaskDeserialize(
     constraints: !result.body.constraints
       ? undefined
       : {
-          maxWallClockTime: result.body.constraints?.["maxWallClockTime"],
-          retentionTime: result.body.constraints?.["retentionTime"],
+          maxWallClockTime: deserializeStringDuration(
+            result.body.constraints?.["maxWallClockTime"],
+          ),
+          retentionTime: deserializeStringDuration(
+            result.body.constraints?.["retentionTime"],
+          ),
           maxTaskRetryCount: result.body.constraints?.["maxTaskRetryCount"],
         },
     requiredSlots: result.body["requiredSlots"],
@@ -10893,14 +10972,12 @@ export async function _getTaskDeserialize(
     executionInfo: !result.body.executionInfo
       ? undefined
       : {
-          startTime:
-            result.body.executionInfo?.["startTime"] !== undefined
-              ? new Date(result.body.executionInfo?.["startTime"])
-              : undefined,
-          endTime:
-            result.body.executionInfo?.["endTime"] !== undefined
-              ? new Date(result.body.executionInfo?.["endTime"])
-              : undefined,
+          startTime: deserializeUtcDateTime(
+            result.body.executionInfo?.["startTime"],
+          ),
+          endTime: deserializeUtcDateTime(
+            result.body.executionInfo?.["endTime"],
+          ),
           exitCode: result.body.executionInfo?.["exitCode"],
           containerInfo: !result.body.executionInfo?.containerInfo
             ? undefined
@@ -10925,15 +11002,13 @@ export async function _getTaskDeserialize(
                       ),
               },
           retryCount: result.body.executionInfo?.["retryCount"],
-          lastRetryTime:
-            result.body.executionInfo?.["lastRetryTime"] !== undefined
-              ? new Date(result.body.executionInfo?.["lastRetryTime"])
-              : undefined,
+          lastRetryTime: deserializeUtcDateTime(
+            result.body.executionInfo?.["lastRetryTime"],
+          ),
           requeueCount: result.body.executionInfo?.["requeueCount"],
-          lastRequeueTime:
-            result.body.executionInfo?.["lastRequeueTime"] !== undefined
-              ? new Date(result.body.executionInfo?.["lastRequeueTime"])
-              : undefined,
+          lastRequeueTime: deserializeUtcDateTime(
+            result.body.executionInfo?.["lastRequeueTime"],
+          ),
           result: result.body.executionInfo?.["result"],
         },
     nodeInfo: !result.body.nodeInfo
@@ -10975,16 +11050,24 @@ export async function _getTaskDeserialize(
       ? undefined
       : {
           url: result.body.stats?.["url"],
-          startTime: new Date(result.body.stats?.["startTime"]),
-          lastUpdateTime: new Date(result.body.stats?.["lastUpdateTime"]),
-          userCPUTime: result.body.stats?.["userCPUTime"],
-          kernelCPUTime: result.body.stats?.["kernelCPUTime"],
-          wallClockTime: result.body.stats?.["wallClockTime"],
+          startTime: deserializeUtcDateTime(result.body.stats?.["startTime"]),
+          lastUpdateTime: deserializeUtcDateTime(
+            result.body.stats?.["lastUpdateTime"],
+          ),
+          userCPUTime: deserializeStringDuration(
+            result.body.stats?.["userCPUTime"],
+          ),
+          kernelCPUTime: deserializeStringDuration(
+            result.body.stats?.["kernelCPUTime"],
+          ),
+          wallClockTime: deserializeStringDuration(
+            result.body.stats?.["wallClockTime"],
+          ),
           readIOps: result.body.stats?.["readIOps"],
           writeIOps: result.body.stats?.["writeIOps"],
           readIOGiB: result.body.stats?.["readIOGiB"],
           writeIOGiB: result.body.stats?.["writeIOGiB"],
-          waitTime: result.body.stats?.["waitTime"],
+          waitTime: deserializeStringDuration(result.body.stats?.["waitTime"]),
         },
     dependsOn: !result.body.dependsOn
       ? undefined
@@ -11129,12 +11212,8 @@ export async function _listSubTasksDeserialize(
                   taskRootDirectory: p.nodeInfo?.["taskRootDirectory"],
                   taskRootDirectoryUrl: p.nodeInfo?.["taskRootDirectoryUrl"],
                 },
-            startTime:
-              p["startTime"] !== undefined
-                ? new Date(p["startTime"])
-                : undefined,
-            endTime:
-              p["endTime"] !== undefined ? new Date(p["endTime"]) : undefined,
+            startTime: deserializeUtcDateTime(p["startTime"]),
+            endTime: deserializeUtcDateTime(p["endTime"]),
             exitCode: p["exitCode"],
             containerInfo: !p.containerInfo
               ? undefined
@@ -11158,15 +11237,13 @@ export async function _listSubTasksDeserialize(
                         })),
                 },
             state: p["state"],
-            stateTransitionTime:
-              p["stateTransitionTime"] !== undefined
-                ? new Date(p["stateTransitionTime"])
-                : undefined,
+            stateTransitionTime: deserializeUtcDateTime(
+              p["stateTransitionTime"],
+            ),
             previousState: p["previousState"],
-            previousStateTransitionTime:
-              p["previousStateTransitionTime"] !== undefined
-                ? new Date(p["previousStateTransitionTime"])
-                : undefined,
+            previousStateTransitionTime: deserializeUtcDateTime(
+              p["previousStateTransitionTime"],
+            ),
             result: p["result"],
           })),
   };
@@ -11498,7 +11575,7 @@ export function _listTaskFilesSend(
 
 export async function _listTaskFilesDeserialize(
   result: ListTaskFiles200Response | ListTaskFilesDefaultResponse,
-): Promise<_NodeFileListResult> {
+): Promise<NodeFileListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -11514,11 +11591,12 @@ export async function _listTaskFilesDeserialize(
             properties: !p.properties
               ? undefined
               : {
-                  creationTime:
-                    p.properties?.["creationTime"] !== undefined
-                      ? new Date(p.properties?.["creationTime"])
-                      : undefined,
-                  lastModified: new Date(p.properties?.["lastModified"]),
+                  creationTime: deserializeUtcDateTime(
+                    p.properties?.["creationTime"],
+                  ),
+                  lastModified: deserializeUtcDateTime(
+                    p.properties?.["lastModified"],
+                  ),
                   contentLength: p.properties?.["contentLength"],
                   contentType: p.properties?.["contentType"],
                   fileMode: p.properties?.["fileMode"],
@@ -11755,18 +11833,11 @@ export async function _getNodeDeserialize(
     url: result.body["url"],
     state: result.body["state"],
     schedulingState: result.body["schedulingState"],
-    stateTransitionTime:
-      result.body["stateTransitionTime"] !== undefined
-        ? new Date(result.body["stateTransitionTime"])
-        : undefined,
-    lastBootTime:
-      result.body["lastBootTime"] !== undefined
-        ? new Date(result.body["lastBootTime"])
-        : undefined,
-    allocationTime:
-      result.body["allocationTime"] !== undefined
-        ? new Date(result.body["allocationTime"])
-        : undefined,
+    stateTransitionTime: deserializeUtcDateTime(
+      result.body["stateTransitionTime"],
+    ),
+    lastBootTime: deserializeUtcDateTime(result.body["lastBootTime"]),
+    allocationTime: deserializeUtcDateTime(result.body["allocationTime"]),
     ipAddress: result.body["ipAddress"],
     affinityId: result.body["affinityId"],
     vmSize: result.body["vmSize"],
@@ -11786,14 +11857,10 @@ export async function _getNodeDeserialize(
             executionInfo: !p.executionInfo
               ? undefined
               : {
-                  startTime:
-                    p.executionInfo?.["startTime"] !== undefined
-                      ? new Date(p.executionInfo?.["startTime"])
-                      : undefined,
-                  endTime:
-                    p.executionInfo?.["endTime"] !== undefined
-                      ? new Date(p.executionInfo?.["endTime"])
-                      : undefined,
+                  startTime: deserializeUtcDateTime(
+                    p.executionInfo?.["startTime"],
+                  ),
+                  endTime: deserializeUtcDateTime(p.executionInfo?.["endTime"]),
                   exitCode: p.executionInfo?.["exitCode"],
                   containerInfo: !p.executionInfo?.containerInfo
                     ? undefined
@@ -11818,15 +11885,13 @@ export async function _getNodeDeserialize(
                               ),
                       },
                   retryCount: p.executionInfo?.["retryCount"],
-                  lastRetryTime:
-                    p.executionInfo?.["lastRetryTime"] !== undefined
-                      ? new Date(p.executionInfo?.["lastRetryTime"])
-                      : undefined,
+                  lastRetryTime: deserializeUtcDateTime(
+                    p.executionInfo?.["lastRetryTime"],
+                  ),
                   requeueCount: p.executionInfo?.["requeueCount"],
-                  lastRequeueTime:
-                    p.executionInfo?.["lastRequeueTime"] !== undefined
-                      ? new Date(p.executionInfo?.["lastRequeueTime"])
-                      : undefined,
+                  lastRequeueTime: deserializeUtcDateTime(
+                    p.executionInfo?.["lastRequeueTime"],
+                  ),
                   result: p.executionInfo?.["result"],
                 },
           })),
@@ -11917,11 +11982,12 @@ export async function _getNodeDeserialize(
       ? undefined
       : {
           state: result.body.startTaskInfo?.["state"],
-          startTime: new Date(result.body.startTaskInfo?.["startTime"]),
-          endTime:
-            result.body.startTaskInfo?.["endTime"] !== undefined
-              ? new Date(result.body.startTaskInfo?.["endTime"])
-              : undefined,
+          startTime: deserializeUtcDateTime(
+            result.body.startTaskInfo?.["startTime"],
+          ),
+          endTime: deserializeUtcDateTime(
+            result.body.startTaskInfo?.["endTime"],
+          ),
           exitCode: result.body.startTaskInfo?.["exitCode"],
           containerInfo: !result.body.startTaskInfo?.containerInfo
             ? undefined
@@ -11946,10 +12012,9 @@ export async function _getNodeDeserialize(
                       ),
               },
           retryCount: result.body.startTaskInfo?.["retryCount"],
-          lastRetryTime:
-            result.body.startTaskInfo?.["lastRetryTime"] !== undefined
-              ? new Date(result.body.startTaskInfo?.["lastRetryTime"])
-              : undefined,
+          lastRetryTime: deserializeUtcDateTime(
+            result.body.startTaskInfo?.["lastRetryTime"],
+          ),
           result: result.body.startTaskInfo?.["result"],
         },
     certificateReferences:
@@ -11995,7 +12060,7 @@ export async function _getNodeDeserialize(
       ? undefined
       : {
           version: result.body.nodeAgentInfo?.["version"],
-          lastUpdateTime: new Date(
+          lastUpdateTime: deserializeUtcDateTime(
             result.body.nodeAgentInfo?.["lastUpdateTime"],
           ),
         },
@@ -12445,7 +12510,7 @@ export function _listNodesSend(
 
 export async function _listNodesDeserialize(
   result: ListNodes200Response | ListNodesDefaultResponse,
-): Promise<_BatchNodeListResult> {
+): Promise<BatchNodeListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -12459,18 +12524,11 @@ export async function _listNodesDeserialize(
             url: p["url"],
             state: p["state"],
             schedulingState: p["schedulingState"],
-            stateTransitionTime:
-              p["stateTransitionTime"] !== undefined
-                ? new Date(p["stateTransitionTime"])
-                : undefined,
-            lastBootTime:
-              p["lastBootTime"] !== undefined
-                ? new Date(p["lastBootTime"])
-                : undefined,
-            allocationTime:
-              p["allocationTime"] !== undefined
-                ? new Date(p["allocationTime"])
-                : undefined,
+            stateTransitionTime: deserializeUtcDateTime(
+              p["stateTransitionTime"],
+            ),
+            lastBootTime: deserializeUtcDateTime(p["lastBootTime"]),
+            allocationTime: deserializeUtcDateTime(p["allocationTime"]),
             ipAddress: p["ipAddress"],
             affinityId: p["affinityId"],
             vmSize: p["vmSize"],
@@ -12490,14 +12548,12 @@ export async function _listNodesDeserialize(
                     executionInfo: !p.executionInfo
                       ? undefined
                       : {
-                          startTime:
-                            p.executionInfo?.["startTime"] !== undefined
-                              ? new Date(p.executionInfo?.["startTime"])
-                              : undefined,
-                          endTime:
-                            p.executionInfo?.["endTime"] !== undefined
-                              ? new Date(p.executionInfo?.["endTime"])
-                              : undefined,
+                          startTime: deserializeUtcDateTime(
+                            p.executionInfo?.["startTime"],
+                          ),
+                          endTime: deserializeUtcDateTime(
+                            p.executionInfo?.["endTime"],
+                          ),
                           exitCode: p.executionInfo?.["exitCode"],
                           containerInfo: !p.executionInfo?.containerInfo
                             ? undefined
@@ -12531,15 +12587,13 @@ export async function _listNodesDeserialize(
                                       })),
                               },
                           retryCount: p.executionInfo?.["retryCount"],
-                          lastRetryTime:
-                            p.executionInfo?.["lastRetryTime"] !== undefined
-                              ? new Date(p.executionInfo?.["lastRetryTime"])
-                              : undefined,
+                          lastRetryTime: deserializeUtcDateTime(
+                            p.executionInfo?.["lastRetryTime"],
+                          ),
                           requeueCount: p.executionInfo?.["requeueCount"],
-                          lastRequeueTime:
-                            p.executionInfo?.["lastRequeueTime"] !== undefined
-                              ? new Date(p.executionInfo?.["lastRequeueTime"])
-                              : undefined,
+                          lastRequeueTime: deserializeUtcDateTime(
+                            p.executionInfo?.["lastRequeueTime"],
+                          ),
                           result: p.executionInfo?.["result"],
                         },
                   })),
@@ -12629,11 +12683,10 @@ export async function _listNodesDeserialize(
               ? undefined
               : {
                   state: p.startTaskInfo?.["state"],
-                  startTime: new Date(p.startTaskInfo?.["startTime"]),
-                  endTime:
-                    p.startTaskInfo?.["endTime"] !== undefined
-                      ? new Date(p.startTaskInfo?.["endTime"])
-                      : undefined,
+                  startTime: deserializeUtcDateTime(
+                    p.startTaskInfo?.["startTime"],
+                  ),
+                  endTime: deserializeUtcDateTime(p.startTaskInfo?.["endTime"]),
                   exitCode: p.startTaskInfo?.["exitCode"],
                   containerInfo: !p.startTaskInfo?.containerInfo
                     ? undefined
@@ -12658,10 +12711,9 @@ export async function _listNodesDeserialize(
                               ),
                       },
                   retryCount: p.startTaskInfo?.["retryCount"],
-                  lastRetryTime:
-                    p.startTaskInfo?.["lastRetryTime"] !== undefined
-                      ? new Date(p.startTaskInfo?.["lastRetryTime"])
-                      : undefined,
+                  lastRetryTime: deserializeUtcDateTime(
+                    p.startTaskInfo?.["lastRetryTime"],
+                  ),
                   result: p.startTaskInfo?.["result"],
                 },
             certificateReferences:
@@ -12707,7 +12759,9 @@ export async function _listNodesDeserialize(
               ? undefined
               : {
                   version: p.nodeAgentInfo?.["version"],
-                  lastUpdateTime: new Date(p.nodeAgentInfo?.["lastUpdateTime"]),
+                  lastUpdateTime: deserializeUtcDateTime(
+                    p.nodeAgentInfo?.["lastUpdateTime"],
+                  ),
                 },
             virtualMachineInfo: !p.virtualMachineInfo
               ? undefined
@@ -12796,8 +12850,14 @@ export async function _getNodeExtensionDeserialize(
             result.body.vmExtension?.["autoUpgradeMinorVersion"],
           enableAutomaticUpgrade:
             result.body.vmExtension?.["enableAutomaticUpgrade"],
-          settings: result.body.vmExtension?.["settings"],
-          protectedSettings: result.body.vmExtension?.["protectedSettings"],
+          settings: deserializeRecord(
+            result.body.vmExtension?.settings,
+            passthroughDeserializer,
+          ),
+          protectedSettings: deserializeRecord(
+            result.body.vmExtension?.protectedSettings,
+            passthroughDeserializer,
+          ),
           provisionAfterExtensions:
             result.body.vmExtension?.["provisionAfterExtensions"],
         },
@@ -12869,7 +12929,7 @@ export function _listNodeExtensionsSend(
 
 export async function _listNodeExtensionsDeserialize(
   result: ListNodeExtensions200Response | ListNodeExtensionsDefaultResponse,
-): Promise<_NodeVMExtensionList> {
+): Promise<NodeVMExtensionList> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -12891,8 +12951,14 @@ export async function _listNodeExtensionsDeserialize(
                     p.vmExtension?.["autoUpgradeMinorVersion"],
                   enableAutomaticUpgrade:
                     p.vmExtension?.["enableAutomaticUpgrade"],
-                  settings: p.vmExtension?.["settings"],
-                  protectedSettings: p.vmExtension?.["protectedSettings"],
+                  settings: deserializeRecord(
+                    p.vmExtension?.settings,
+                    passthroughDeserializer,
+                  ),
+                  protectedSettings: deserializeRecord(
+                    p.vmExtension?.protectedSettings,
+                    passthroughDeserializer,
+                  ),
                   provisionAfterExtensions:
                     p.vmExtension?.["provisionAfterExtensions"],
                 },
@@ -13142,7 +13208,7 @@ export function _listNodeFilesSend(
 
 export async function _listNodeFilesDeserialize(
   result: ListNodeFiles200Response | ListNodeFilesDefaultResponse,
-): Promise<_NodeFileListResult> {
+): Promise<NodeFileListResult> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -13158,11 +13224,12 @@ export async function _listNodeFilesDeserialize(
             properties: !p.properties
               ? undefined
               : {
-                  creationTime:
-                    p.properties?.["creationTime"] !== undefined
-                      ? new Date(p.properties?.["creationTime"])
-                      : undefined,
-                  lastModified: new Date(p.properties?.["lastModified"]),
+                  creationTime: deserializeUtcDateTime(
+                    p.properties?.["creationTime"],
+                  ),
+                  lastModified: deserializeUtcDateTime(
+                    p.properties?.["lastModified"],
+                  ),
                   contentLength: p.properties?.["contentLength"],
                   contentType: p.properties?.["contentType"],
                   fileMode: p.properties?.["fileMode"],

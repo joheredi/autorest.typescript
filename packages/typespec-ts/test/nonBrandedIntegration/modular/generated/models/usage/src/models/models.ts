@@ -1,8 +1,14 @@
 // Licensed under the MIT license.
 
 import {
+  passthroughDeserializer,
+  withNullChecks,
+} from "../helpers/serializerHelpers.js";
+import {
   InputRecord as InputRecordRest,
   InputOutputRecord as InputOutputRecordRest,
+  InputOutputRecordOutput,
+  OutputRecordOutput,
 } from "../rest/index.js";
 
 /** Record used in operation parameters */
@@ -33,3 +39,23 @@ export function inputOutputRecordSerializer(
     requiredProp: item["requiredProp"],
   };
 }
+
+function _deserializeOutputRecord(input: OutputRecordOutput): OutputRecord {
+  return {
+    requiredProp: passthroughDeserializer(input["requiredProp"]) as any,
+  } as any;
+}
+
+export const deserializeOutputRecord = withNullChecks(_deserializeOutputRecord);
+
+function _deserializeInputOutputRecord(
+  input: InputOutputRecordOutput,
+): InputOutputRecord {
+  return {
+    requiredProp: passthroughDeserializer(input["requiredProp"]) as any,
+  } as any;
+}
+
+export const deserializeInputOutputRecord = withNullChecks(
+  _deserializeInputOutputRecord,
+);

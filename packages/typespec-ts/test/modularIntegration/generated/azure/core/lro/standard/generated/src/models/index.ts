@@ -4,8 +4,8 @@
 export {
   User,
   ExportedUser,
-  deserializeExportedUser,
   Versions,
+  deserializeExportedUser,
 } from "./models.js";
 export {
   CreateOrReplaceOptionalParams,

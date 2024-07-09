@@ -7,7 +7,7 @@ export {
 } from "./typeChangedFromClient.js";
 export {
   TestModel,
-  deserializeTestModel,
   Versions,
+  deserializeTestModel,
   TestOptionalParams,
 } from "./models/index.js";

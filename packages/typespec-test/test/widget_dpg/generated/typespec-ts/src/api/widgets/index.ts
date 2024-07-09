@@ -9,7 +9,7 @@ import {
   CreateWidget,
   UpdateWidget,
   AnalyzeResult,
-  _ListWidgetsPagesResults,
+  ListWidgetsPagesResults,
 } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../models/pagingTypes.js";
 import { buildPagedAsyncIterator } from "../pagingHelpers.js";
@@ -165,7 +165,7 @@ export async function _listWidgetsPagesDeserialize(
   result:
     | WidgetsListWidgetsPages200Response
     | WidgetsListWidgetsPagesDefaultResponse,
-): Promise<_ListWidgetsPagesResults> {
+): Promise<ListWidgetsPagesResults> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -214,7 +214,7 @@ export async function _queryWidgetsPagesDeserialize(
   result:
     | WidgetsQueryWidgetsPages200Response
     | WidgetsQueryWidgetsPagesDefaultResponse,
-): Promise<_ListWidgetsPagesResults> {
+): Promise<ListWidgetsPagesResults> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }

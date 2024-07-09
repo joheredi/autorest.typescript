@@ -4,8 +4,8 @@
 export {
   InputRecord,
   OutputRecord,
-  deserializeOutputRecord,
   InputOutputRecord,
+  deserializeOutputRecord,
   deserializeInputOutputRecord,
 } from "./models.js";
 export {

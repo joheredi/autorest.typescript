@@ -23,9 +23,10 @@ import {
 import {
   StreamableMethod,
   operationOptionsToRequestParameters,
-  uint8ArrayToString,
   createRestError,
 } from "@typespec/ts-http-runtime";
+import { deserializeUtcDateTime } from "../../helpers/serializerHelpers.js";
+import { uint8ArrayToString } from "@typespec/ts-http-runtime";
 import {
   FilesListOptionalParams,
   FilesCreateOptionalParams,
@@ -56,7 +57,7 @@ export async function _listDeserialize(
       id: p["id"],
       object: p["object"],
       bytes: p["bytes"],
-      createdAt: new Date(p["createdAt"]),
+      createdAt: deserializeUtcDateTime(p["createdAt"]),
       filename: p["filename"],
       purpose: p["purpose"],
       status: p["status"],
@@ -101,7 +102,7 @@ export async function _createDeserialize(
     id: result.body["id"],
     object: result.body["object"],
     bytes: result.body["bytes"],
-    createdAt: new Date(result.body["createdAt"]),
+    createdAt: deserializeUtcDateTime(result.body["createdAt"]),
     filename: result.body["filename"],
     purpose: result.body["purpose"],
     status: result.body["status"],
@@ -139,7 +140,7 @@ export async function _retrieveDeserialize(
     id: result.body["id"],
     object: result.body["object"],
     bytes: result.body["bytes"],
-    createdAt: new Date(result.body["createdAt"]),
+    createdAt: deserializeUtcDateTime(result.body["createdAt"]),
     filename: result.body["filename"],
     purpose: result.body["purpose"],
     status: result.body["status"],

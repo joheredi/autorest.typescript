@@ -5,8 +5,8 @@ import {
   SchemaGroup,
   SchemaVersion,
   SchemaContentTypeValues,
-  _PagedSchemaGroup,
-  _PagedVersion,
+  PagedSchemaGroup,
+  PagedVersion,
 } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../models/pagingTypes.js";
 import { buildPagedAsyncIterator } from "../pagingHelpers.js";
@@ -31,7 +31,8 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
-import { stringToUint8Array, uint8ArrayToString } from "@azure/core-util";
+import { uint8ArrayToString } from "@azure/core-util";
+import { stringToUint8Array } from "@azure/core-util";
 import {
   SchemaOperationsListSchemaGroupsOptionalParams,
   SchemaOperationsGetSchemaByIdOptionalParams,
@@ -60,7 +61,7 @@ export function _listSchemaGroupsSend(
 
 export async function _listSchemaGroupsDeserialize(
   result: ListSchemaGroups200Response | ListSchemaGroupsDefaultResponse,
-): Promise<_PagedSchemaGroup> {
+): Promise<PagedSchemaGroup> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -135,7 +136,7 @@ export function _listSchemaVersionsSend(
 
 export async function _listSchemaVersionsDeserialize(
   result: ListSchemaVersions200Response | ListSchemaVersionsDefaultResponse,
-): Promise<_PagedVersion> {
+): Promise<PagedVersion> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }

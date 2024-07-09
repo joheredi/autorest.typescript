@@ -1,6 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import {
+  passthroughDeserializer,
+  withNullChecks,
+} from "../helpers/serializerHelpers.js";
+import { SchemaGroupOutput, VersionOutput } from "../rest/outputModels.js";
+
 /** Schema Group resource. */
 export interface SchemaGroup {
   /** Name of schema group. */
@@ -72,7 +78,7 @@ export type ContentTypeEnum =
 export type ServiceApiVersions = "2021-10" | "2022-10" | "2023-07-01";
 
 /** Paged collection of SchemaGroup items */
-export interface _PagedSchemaGroup {
+export interface PagedSchemaGroup {
   /** The SchemaGroup items on this page */
   value: SchemaGroup[];
   /** The link to the next page of items */
@@ -80,9 +86,27 @@ export interface _PagedSchemaGroup {
 }
 
 /** Paged collection of Version items */
-export interface _PagedVersion {
+export interface PagedVersion {
   /** The Version items on this page */
   value: SchemaVersion[];
   /** The link to the next page of items */
   nextLink?: string;
 }
+
+function _deserializeSchemaGroup(input: SchemaGroupOutput): SchemaGroup {
+  return {
+    groupName: passthroughDeserializer(input["groupName"]) as any,
+  } as any;
+}
+
+export const deserializeSchemaGroup = withNullChecks(_deserializeSchemaGroup);
+
+function _deserializeSchemaVersion(input: VersionOutput): SchemaVersion {
+  return {
+    schemaVersion: passthroughDeserializer(input["schemaVersion"]) as any,
+  } as any;
+}
+
+export const deserializeSchemaVersion = withNullChecks(
+  _deserializeSchemaVersion,
+);

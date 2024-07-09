@@ -2,28 +2,21 @@
 // Licensed under the MIT license.
 
 import {
+  passthroughDeserializer,
   withNullChecks,
   deserializeArray,
-  passthroughDeserializer,
 } from "../helpers/serializerHelpers.js";
-import { ElementOutput, ExtensionOutput } from "../rest/outputModels.js";
 import {
   Element as ElementRest,
+  ElementOutput,
   Extension as ExtensionRest,
+  ExtensionOutput,
 } from "../rest/index.js";
 
 /** element */
 export interface Element {
   extension?: Extension[];
 }
-
-function _deserializeElement(input: ElementOutput): Element {
-  return {
-    extension: deserializeArray(input["extension"], deserializeExtension),
-  };
-}
-
-export const deserializeElement = withNullChecks(_deserializeElement);
 
 export function elementSerializer(item: Element): ElementRest {
   return {
@@ -39,15 +32,6 @@ export interface Extension extends Element {
   level: number;
 }
 
-function _deserializeExtension(input: ExtensionOutput): Extension {
-  return {
-    ...deserializeElement(input),
-    level: passthroughDeserializer(input["level"]),
-  };
-}
-
-export const deserializeExtension = withNullChecks(_deserializeExtension);
-
 export function extensionSerializer(item: Extension): ExtensionRest {
   return {
     extension:
@@ -57,3 +41,23 @@ export function extensionSerializer(item: Extension): ExtensionRest {
     level: item["level"],
   };
 }
+
+function _deserializeElement(input: ElementOutput): Element {
+  return {
+    extension: deserializeArray(
+      input["extension"],
+      deserializeExtension,
+    ) as any,
+  } as any;
+}
+
+export const deserializeElement = withNullChecks(_deserializeElement);
+
+function _deserializeExtension(input: ExtensionOutput): Extension {
+  return {
+    ...deserializeElement(input),
+    level: passthroughDeserializer(input["level"]) as any,
+  } as any;
+}
+
+export const deserializeExtension = withNullChecks(_deserializeExtension);

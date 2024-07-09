@@ -4,7 +4,7 @@
 export {
   GenerationOptions,
   GenerationResult,
-  deserializeGenerationResult,
   Versions,
+  deserializeGenerationResult,
 } from "./models.js";
 export { LongRunningRpcOptionalParams } from "./options.js";

@@ -5,24 +5,13 @@ import {
   passthroughDeserializer,
   withNullChecks,
 } from "../helpers/serializerHelpers.js";
-import { NewModelOutput } from "../rest/outputModels.js";
-import { NewModel as NewModelRest } from "../rest/index.js";
+import { NewModel as NewModelRest, NewModelOutput } from "../rest/index.js";
 
 export interface NewModel {
   newProp: string;
   enumProp: NewEnum;
   unionProp: NewUnion;
 }
-
-function _deserializeNewModel(input: NewModelOutput): NewModel {
-  return {
-    newProp: passthroughDeserializer(input["newProp"]),
-    enumProp: passthroughDeserializer(input["enumProp"]),
-    unionProp: passthroughDeserializer(input["unionProp"]),
-  };
-}
-
-export const deserializeNewModel = withNullChecks(_deserializeNewModel);
 
 export function newModelSerializer(item: NewModel): NewModelRest {
   return {
@@ -36,5 +25,16 @@ export function newModelSerializer(item: NewModel): NewModelRest {
 export type NewEnum = "newEnumMember";
 /** The version of the API. */
 export type Versions = "v1" | "v2";
+
+function _deserializeNewModel(input: NewModelOutput): NewModel {
+  return {
+    newProp: passthroughDeserializer(input["newProp"]) as any,
+    enumProp: passthroughDeserializer(input["enumProp"]) as any,
+    unionProp: passthroughDeserializer(input["unionProp"]) as any,
+  } as any;
+}
+
+export const deserializeNewModel = withNullChecks(_deserializeNewModel);
+
 /** Alias for NewUnion */
 export type NewUnion = string | number;

@@ -25,6 +25,11 @@ export interface ConfidentialLedgerOperations {
     listCollections: (apiVersion: string, options?: ConfidentialLedgerListCollectionsOptionalParams) => Promise<Collection[]>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "CollectionOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCollection: (input: CollectionOutput | null | undefined) => Collection;
+
 // @public (undocumented)
 export class ParametrizedHostClient {
     constructor(credential: TokenCredential, options?: ParametrizedHostClientOptions);

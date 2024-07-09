@@ -11,7 +11,7 @@ import {
   MultivariateAnomalyDetectionModel,
   MultivariateMultivariateLastDetectionOptions,
   MultivariateMultivariateLastDetectionResult,
-  _MultivariateModelList,
+  MultivariateModelList,
 } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../models/pagingTypes.js";
 import { buildPagedAsyncIterator } from "../pagingHelpers.js";
@@ -38,6 +38,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { deserializeUtcDateTime } from "../../helpers/serializerHelpers.js";
 import {
   MultivariateGetMultivariateBatchDetectionResultOptionalParams,
   MultivariateTrainMultivariateModelOptionalParams,
@@ -90,25 +91,23 @@ export async function _getMultivariateBatchDetectionResultDeserialize(
               variable: p["variable"],
               filledNARatio: p["filledNARatio"],
               effectiveCount: p["effectiveCount"],
-              firstTimestamp:
-                p["firstTimestamp"] !== undefined
-                  ? new Date(p["firstTimestamp"])
-                  : undefined,
-              lastTimestamp:
-                p["lastTimestamp"] !== undefined
-                  ? new Date(p["lastTimestamp"])
-                  : undefined,
+              firstTimestamp: deserializeUtcDateTime(p["firstTimestamp"]),
+              lastTimestamp: deserializeUtcDateTime(p["lastTimestamp"]),
             })),
       setupInfo: {
         dataSource: result.body.summary.setupInfo["dataSource"],
         topContributorCount:
           result.body.summary.setupInfo["topContributorCount"],
-        startTime: new Date(result.body.summary.setupInfo["startTime"]),
-        endTime: new Date(result.body.summary.setupInfo["endTime"]),
+        startTime: deserializeUtcDateTime(
+          result.body.summary.setupInfo["startTime"],
+        ),
+        endTime: deserializeUtcDateTime(
+          result.body.summary.setupInfo["endTime"],
+        ),
       },
     },
     results: result.body["results"].map((p) => ({
-      timestamp: new Date(p["timestamp"]),
+      timestamp: deserializeUtcDateTime(p["timestamp"]),
       value: !p.value
         ? undefined
         : {
@@ -201,15 +200,17 @@ export async function _trainMultivariateModelDeserialize(
 
   return {
     modelId: result.body["modelId"],
-    createdTime: new Date(result.body["createdTime"]),
-    lastUpdatedTime: new Date(result.body["lastUpdatedTime"]),
+    createdTime: deserializeUtcDateTime(result.body["createdTime"]),
+    lastUpdatedTime: deserializeUtcDateTime(result.body["lastUpdatedTime"]),
     modelInfo: !result.body.modelInfo
       ? undefined
       : {
           dataSource: result.body.modelInfo?.["dataSource"],
           dataSchema: result.body.modelInfo?.["dataSchema"],
-          startTime: new Date(result.body.modelInfo?.["startTime"]),
-          endTime: new Date(result.body.modelInfo?.["endTime"]),
+          startTime: deserializeUtcDateTime(
+            result.body.modelInfo?.["startTime"],
+          ),
+          endTime: deserializeUtcDateTime(result.body.modelInfo?.["endTime"]),
           displayName: result.body.modelInfo?.["displayName"],
           slidingWindow: result.body.modelInfo?.["slidingWindow"],
           alignPolicy: !result.body.modelInfo?.alignPolicy
@@ -262,14 +263,12 @@ export async function _trainMultivariateModelDeserialize(
                         variable: p["variable"],
                         filledNARatio: p["filledNARatio"],
                         effectiveCount: p["effectiveCount"],
-                        firstTimestamp:
-                          p["firstTimestamp"] !== undefined
-                            ? new Date(p["firstTimestamp"])
-                            : undefined,
-                        lastTimestamp:
-                          p["lastTimestamp"] !== undefined
-                            ? new Date(p["lastTimestamp"])
-                            : undefined,
+                        firstTimestamp: deserializeUtcDateTime(
+                          p["firstTimestamp"],
+                        ),
+                        lastTimestamp: deserializeUtcDateTime(
+                          p["lastTimestamp"],
+                        ),
                       })),
               },
         },
@@ -316,7 +315,7 @@ export async function _listMultivariateModelsDeserialize(
   result:
     | ListMultivariateModels200Response
     | ListMultivariateModelsDefaultResponse,
-): Promise<_MultivariateModelList> {
+): Promise<MultivariateModelList> {
   if (isUnexpected(result)) {
     throw createRestError(result);
   }
@@ -324,15 +323,15 @@ export async function _listMultivariateModelsDeserialize(
   return {
     models: result.body["models"].map((p) => ({
       modelId: p["modelId"],
-      createdTime: new Date(p["createdTime"]),
-      lastUpdatedTime: new Date(p["lastUpdatedTime"]),
+      createdTime: deserializeUtcDateTime(p["createdTime"]),
+      lastUpdatedTime: deserializeUtcDateTime(p["lastUpdatedTime"]),
       modelInfo: !p.modelInfo
         ? undefined
         : {
             dataSource: p.modelInfo?.["dataSource"],
             dataSchema: p.modelInfo?.["dataSchema"],
-            startTime: new Date(p.modelInfo?.["startTime"]),
-            endTime: new Date(p.modelInfo?.["endTime"]),
+            startTime: deserializeUtcDateTime(p.modelInfo?.["startTime"]),
+            endTime: deserializeUtcDateTime(p.modelInfo?.["endTime"]),
             displayName: p.modelInfo?.["displayName"],
             slidingWindow: p.modelInfo?.["slidingWindow"],
             alignPolicy: !p.modelInfo?.alignPolicy
@@ -382,14 +381,12 @@ export async function _listMultivariateModelsDeserialize(
                             variable: p["variable"],
                             filledNARatio: p["filledNARatio"],
                             effectiveCount: p["effectiveCount"],
-                            firstTimestamp:
-                              p["firstTimestamp"] !== undefined
-                                ? new Date(p["firstTimestamp"])
-                                : undefined,
-                            lastTimestamp:
-                              p["lastTimestamp"] !== undefined
-                                ? new Date(p["lastTimestamp"])
-                                : undefined,
+                            firstTimestamp: deserializeUtcDateTime(
+                              p["firstTimestamp"],
+                            ),
+                            lastTimestamp: deserializeUtcDateTime(
+                              p["lastTimestamp"],
+                            ),
                           }),
                         ),
                 },
@@ -477,15 +474,17 @@ export async function _getMultivariateModelDeserialize(
 
   return {
     modelId: result.body["modelId"],
-    createdTime: new Date(result.body["createdTime"]),
-    lastUpdatedTime: new Date(result.body["lastUpdatedTime"]),
+    createdTime: deserializeUtcDateTime(result.body["createdTime"]),
+    lastUpdatedTime: deserializeUtcDateTime(result.body["lastUpdatedTime"]),
     modelInfo: !result.body.modelInfo
       ? undefined
       : {
           dataSource: result.body.modelInfo?.["dataSource"],
           dataSchema: result.body.modelInfo?.["dataSchema"],
-          startTime: new Date(result.body.modelInfo?.["startTime"]),
-          endTime: new Date(result.body.modelInfo?.["endTime"]),
+          startTime: deserializeUtcDateTime(
+            result.body.modelInfo?.["startTime"],
+          ),
+          endTime: deserializeUtcDateTime(result.body.modelInfo?.["endTime"]),
           displayName: result.body.modelInfo?.["displayName"],
           slidingWindow: result.body.modelInfo?.["slidingWindow"],
           alignPolicy: !result.body.modelInfo?.alignPolicy
@@ -538,14 +537,12 @@ export async function _getMultivariateModelDeserialize(
                         variable: p["variable"],
                         filledNARatio: p["filledNARatio"],
                         effectiveCount: p["effectiveCount"],
-                        firstTimestamp:
-                          p["firstTimestamp"] !== undefined
-                            ? new Date(p["firstTimestamp"])
-                            : undefined,
-                        lastTimestamp:
-                          p["lastTimestamp"] !== undefined
-                            ? new Date(p["lastTimestamp"])
-                            : undefined,
+                        firstTimestamp: deserializeUtcDateTime(
+                          p["firstTimestamp"],
+                        ),
+                        lastTimestamp: deserializeUtcDateTime(
+                          p["lastTimestamp"],
+                        ),
                       })),
               },
         },
@@ -618,25 +615,23 @@ export async function _detectMultivariateBatchAnomalyDeserialize(
               variable: p["variable"],
               filledNARatio: p["filledNARatio"],
               effectiveCount: p["effectiveCount"],
-              firstTimestamp:
-                p["firstTimestamp"] !== undefined
-                  ? new Date(p["firstTimestamp"])
-                  : undefined,
-              lastTimestamp:
-                p["lastTimestamp"] !== undefined
-                  ? new Date(p["lastTimestamp"])
-                  : undefined,
+              firstTimestamp: deserializeUtcDateTime(p["firstTimestamp"]),
+              lastTimestamp: deserializeUtcDateTime(p["lastTimestamp"]),
             })),
       setupInfo: {
         dataSource: result.body.summary.setupInfo["dataSource"],
         topContributorCount:
           result.body.summary.setupInfo["topContributorCount"],
-        startTime: new Date(result.body.summary.setupInfo["startTime"]),
-        endTime: new Date(result.body.summary.setupInfo["endTime"]),
+        startTime: deserializeUtcDateTime(
+          result.body.summary.setupInfo["startTime"],
+        ),
+        endTime: deserializeUtcDateTime(
+          result.body.summary.setupInfo["endTime"],
+        ),
       },
     },
     results: result.body["results"].map((p) => ({
-      timestamp: new Date(p["timestamp"]),
+      timestamp: deserializeUtcDateTime(p["timestamp"]),
       value: !p.value
         ? undefined
         : {
@@ -734,20 +729,14 @@ export async function _detectMultivariateLastAnomalyDeserialize(
             variable: p["variable"],
             filledNARatio: p["filledNARatio"],
             effectiveCount: p["effectiveCount"],
-            firstTimestamp:
-              p["firstTimestamp"] !== undefined
-                ? new Date(p["firstTimestamp"])
-                : undefined,
-            lastTimestamp:
-              p["lastTimestamp"] !== undefined
-                ? new Date(p["lastTimestamp"])
-                : undefined,
+            firstTimestamp: deserializeUtcDateTime(p["firstTimestamp"]),
+            lastTimestamp: deserializeUtcDateTime(p["lastTimestamp"]),
           })),
     results:
       result.body["results"] === undefined
         ? result.body["results"]
         : result.body["results"].map((p) => ({
-            timestamp: new Date(p["timestamp"]),
+            timestamp: deserializeUtcDateTime(p["timestamp"]),
             value: !p.value
               ? undefined
               : {

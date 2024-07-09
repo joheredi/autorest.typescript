@@ -45,6 +45,43 @@ export interface CloudEvent {
     type: string;
 }
 
+// @public
+export interface CloudEvent {
+    data?: any;
+    dataBase64?: Uint8Array;
+    datacontenttype?: string;
+    dataschema?: string;
+    id: string;
+    source: string;
+    specversion: string;
+    subject?: string;
+    time?: Date;
+    type: string;
+}
+
+// Warning: (ae-forgotten-export) The symbol "BrokerPropertiesOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeBrokerProperties: (input: BrokerPropertiesOutput | null | undefined) => BrokerProperties;
+
+// Warning: (ae-forgotten-export) The symbol "CloudEventOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeCloudEvent: (input: CloudEventOutput | null | undefined) => CloudEvent;
+
+// Warning: (ae-forgotten-export) The symbol "FailedLockTokenOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeFailedLockToken: (input: FailedLockTokenOutput | null | undefined) => FailedLockToken;
+
+// @public (undocumented)
+export const deserializePublishResult: (input: unknown) => PublishResult;
+
+// Warning: (ae-forgotten-export) The symbol "ReceiveDetailsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeReceiveDetails: (input: ReceiveDetailsOutput | null | undefined) => ReceiveDetails;
+
 // @public (undocumented)
 export class EventGridClient {
     constructor(endpointParam: string, credential: KeyCredential, options?: EventGridClientOptions);

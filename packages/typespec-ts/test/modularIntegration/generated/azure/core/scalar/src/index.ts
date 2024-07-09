@@ -4,8 +4,8 @@
 export { ScalarClient, ScalarClientOptions } from "./scalarClient.js";
 export {
   AzureLocationModel,
-  deserializeAzureLocationModel,
   Versions,
+  deserializeAzureLocationModel,
   GetOptionalParams,
   PutOptionalParams,
   PostOptionalParams,

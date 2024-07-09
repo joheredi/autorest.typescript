@@ -36,6 +36,101 @@ export type ContinuablePage<TElement, TPage = TElement[]> = TPage & {
 // @public
 export type DataSchema = "OneTable" | "MultiTable";
 
+// Warning: (ae-forgotten-export) The symbol "MultivariateAlignPolicyOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateAlignPolicy: (input: MultivariateAlignPolicyOutput | null | undefined) => MultivariateAlignPolicy;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateAnomalyDetectionModelOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateAnomalyDetectionModel: (input: MultivariateAnomalyDetectionModelOutput | null | undefined) => MultivariateAnomalyDetectionModel;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateAnomalyInterpretationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateAnomalyInterpretation: (input: MultivariateAnomalyInterpretationOutput | null | undefined) => MultivariateAnomalyInterpretation;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateAnomalyStateOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateAnomalyState: (input: MultivariateAnomalyStateOutput | null | undefined) => MultivariateAnomalyState;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateAnomalyValueOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateAnomalyValue: (input: MultivariateAnomalyValueOutput | null | undefined) => MultivariateAnomalyValue;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateCorrelationChangesOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateCorrelationChanges: (input: MultivariateCorrelationChangesOutput | null | undefined) => MultivariateCorrelationChanges;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateDiagnosticsInfoOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateDiagnosticsInfo: (input: MultivariateDiagnosticsInfoOutput | null | undefined) => MultivariateDiagnosticsInfo;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateErrorResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateErrorResponse: (input: MultivariateErrorResponseOutput | null | undefined) => MultivariateErrorResponse;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateModelInfoOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateModelInfo: (input: MultivariateModelInfoOutput | null | undefined) => MultivariateModelInfo;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateModelListOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateModelList: (input: MultivariateModelListOutput | null | undefined) => MultivariateModelList;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateModelStateOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateModelState: (input: MultivariateModelStateOutput | null | undefined) => MultivariateModelState;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateMultivariateBatchDetectionOptionsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateMultivariateBatchDetectionOptions: (input: MultivariateMultivariateBatchDetectionOptionsOutput | null | undefined) => MultivariateMultivariateBatchDetectionOptions;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateMultivariateBatchDetectionResultSummaryOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateMultivariateBatchDetectionResultSummary: (input: MultivariateMultivariateBatchDetectionResultSummaryOutput | null | undefined) => MultivariateMultivariateBatchDetectionResultSummary;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateMultivariateDetectionResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateMultivariateDetectionResult: (input: MultivariateMultivariateDetectionResultOutput | null | undefined) => MultivariateMultivariateDetectionResult;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateMultivariateLastDetectionResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateMultivariateLastDetectionResult: (input: MultivariateMultivariateLastDetectionResultOutput | null | undefined) => MultivariateMultivariateLastDetectionResult;
+
+// Warning: (ae-forgotten-export) The symbol "MultivariateVariableStateOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeMultivariateVariableState: (input: MultivariateVariableStateOutput | null | undefined) => MultivariateVariableState;
+
+// Warning: (ae-forgotten-export) The symbol "UnivariateUnivariateChangePointDetectionResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeUnivariateUnivariateChangePointDetectionResult: (input: UnivariateUnivariateChangePointDetectionResultOutput | null | undefined) => UnivariateUnivariateChangePointDetectionResult;
+
+// Warning: (ae-forgotten-export) The symbol "UnivariateUnivariateEntireDetectionResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeUnivariateUnivariateEntireDetectionResult: (input: UnivariateUnivariateEntireDetectionResultOutput | null | undefined) => UnivariateUnivariateEntireDetectionResult;
+
+// Warning: (ae-forgotten-export) The symbol "UnivariateUnivariateLastDetectionResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeUnivariateUnivariateLastDetectionResult: (input: UnivariateUnivariateLastDetectionResultOutput | null | undefined) => UnivariateUnivariateLastDetectionResult;
+
 // @public
 export type FillNAMethod = "Previous" | "Subsequent" | "Linear" | "Zero" | "Fixed";
 
@@ -140,6 +235,14 @@ export interface MultivariateModelInfo {
     slidingWindow?: number;
     startTime: Date;
     status?: ModelStatus;
+}
+
+// @public
+export interface MultivariateModelList {
+    currentCount: number;
+    maxCount: number;
+    models: MultivariateAnomalyDetectionModel[];
+    nextLink?: string;
 }
 
 // @public

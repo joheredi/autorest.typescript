@@ -3,8 +3,8 @@
 
 export {
   AzureLocationModel,
-  deserializeAzureLocationModel,
   Versions,
+  deserializeAzureLocationModel,
 } from "./models.js";
 export {
   GetOptionalParams,

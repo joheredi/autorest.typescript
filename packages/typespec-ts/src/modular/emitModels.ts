@@ -21,10 +21,19 @@ import { addImportBySymbol, getCoreUtil } from "../utils/importHelper.js";
 import { SdkModelType } from "@azure-tools/typespec-client-generator-core";
 import { useDeclarations } from "../context/declarations.js";
 import { emitDeserializers } from "./serialization/emitDeserializers.js";
+import { emitAnonymous } from "../experimental/emitAnonymous.js";
+import { useContext } from "../contextManager.js";
 
 // ====== UTILITIES ======
 
 function isAzureCoreErrorSdkType(t: ModularType) {
+  const { tcgcContext } = useContext("emitContext");
+  const rlcOptions = (tcgcContext as any).rlcOptions;
+
+  if (rlcOptions.flavor !== "azure") {
+    return false;
+  }
+
   return (
     t.name &&
     ["error", "errormodel", "innererror", "errorresponse"].includes(
@@ -181,6 +190,7 @@ export function buildModels(
   // We are generating both models and enums here
   const coreClientTypes = new Set<string>();
   const coreLroTypes = new Set<string>();
+  const { tcgcContext } = useContext("emitContext");
   // filter out the models/enums that are anonymous
   const models = extractModels(codeModel).filter((m) => !!m.name);
   const aliases = extractAliases(codeModel);
@@ -277,19 +287,33 @@ export function buildModels(
       addImportBySymbol("deserializeNumericDuration", modelsFile);
       addImportBySymbol("deserializeStringDuration", modelsFile);
       addImportBySymbol("withNullChecks", modelsFile);
-      modelsFile.fixMissingImports(
-        {},
-        {
-          importModuleSpecifierEnding: "js",
-          importModuleSpecifierPreference: "shortest"
-        }
-      );
     }
   }
 
-  const tcgcModels = models
-    .filter((m) => m.tcgcType!.kind === "model")
-    .map((m) => m.tcgcType! as SdkModelType);
+  modelsFile.addImportDeclaration({
+    moduleSpecifier: getCoreUtil(),
+    namedImports: ["stringToUint8Array", "uint8ArrayToString", "EncodingType"]
+  });
+
+  modelsFile.fixMissingImports(
+    {},
+    {
+      importModuleSpecifierEnding: "js",
+      importModuleSpecifierPreference: "shortest"
+    }
+  );
+
+  const anonymousModels = tcgcContext.experimental_sdkPackage.models.filter(
+    (m) => m.isGeneratedName
+  );
+  emitAnonymous(modelsFile);
+
+  const tcgcModels = [
+    ...models
+      .filter((m) => m.tcgcType!.kind === "model")
+      .map((m) => m.tcgcType! as SdkModelType),
+    ...anonymousModels
+  ];
   emitDeserializers(tcgcModels, modelsFile);
 
   const projectRootFromModels = codeModel.clients.length > 1 ? "../.." : "../";
@@ -343,13 +367,6 @@ export function buildModels(
       }
     }
   });
-
-  modelsFile.addImportDeclarations([
-    {
-      moduleSpecifier: getCoreUtil(),
-      namedImports: ["stringToUint8Array", "uint8ArrayToString"]
-    }
-  ]);
 
   cleanupImports(modelsFile);
 

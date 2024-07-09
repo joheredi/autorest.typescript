@@ -2,8 +2,17 @@
 // Licensed under the MIT license.
 
 import {
+  passthroughDeserializer,
+  withNullChecks,
+  deserializeArray,
+} from "../helpers/serializerHelpers.js";
+import {
   User as UserRest,
   CreateWidget as CreateWidgetRest,
+  AnalyzeResultOutput,
+  ListWidgetsPagesResultsOutput,
+  WidgetErrorOutput,
+  WidgetOutput,
 } from "../rest/index.js";
 
 /** Details about a user. */
@@ -39,7 +48,7 @@ export interface WidgetError {
   message: string;
 }
 
-export interface _ListWidgetsPagesResults {
+export interface ListWidgetsPagesResults {
   /** The current page of results. */
   results: Widget[];
   /** The URL to get the next set of results. */
@@ -94,3 +103,45 @@ export function nonReferencedModelSerializer(item: NonReferencedModel) {
 
 /** The Contoso Widget Manager service version. */
 export type Versions = "1.0.0";
+
+function _deserializeWidget(input: WidgetOutput): Widget {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    weight: passthroughDeserializer(input["weight"]) as any,
+    color: passthroughDeserializer(input["color"]) as any,
+  } as any;
+}
+
+export const deserializeWidget = withNullChecks(_deserializeWidget);
+
+function _deserializeWidgetError(input: WidgetErrorOutput): WidgetError {
+  return {
+    code: passthroughDeserializer(input["code"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+  } as any;
+}
+
+export const deserializeWidgetError = withNullChecks(_deserializeWidgetError);
+
+function _deserializeListWidgetsPagesResults(
+  input: ListWidgetsPagesResultsOutput,
+): ListWidgetsPagesResults {
+  return {
+    results: deserializeArray(input["results"], deserializeWidget) as any,
+    "odata.nextLink": passthroughDeserializer(input["odata.nextLink"]) as any,
+  } as any;
+}
+
+export const deserializeListWidgetsPagesResults = withNullChecks(
+  _deserializeListWidgetsPagesResults,
+);
+
+function _deserializeAnalyzeResult(input: AnalyzeResultOutput): AnalyzeResult {
+  return {
+    summary: passthroughDeserializer(input["summary"]) as any,
+  } as any;
+}
+
+export const deserializeAnalyzeResult = withNullChecks(
+  _deserializeAnalyzeResult,
+);

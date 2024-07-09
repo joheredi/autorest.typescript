@@ -17,11 +17,33 @@ export type ContinuablePage<TElement, TPage = TElement[]> = TPage & {
     continuationToken?: string;
 };
 
+// Warning: (ae-forgotten-export) The symbol "SchemaGroupOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeSchemaGroup: (input: SchemaGroupOutput | null | undefined) => SchemaGroup;
+
+// Warning: (ae-forgotten-export) The symbol "VersionOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeSchemaVersion: (input: VersionOutput | null | undefined) => SchemaVersion;
+
 // @public
 export interface PagedAsyncIterableIterator<TElement, TPage = TElement[], TPageSettings extends PageSettings = PageSettings> {
     [Symbol.asyncIterator](): PagedAsyncIterableIterator<TElement, TPage, TPageSettings>;
     byPage: (settings?: TPageSettings) => AsyncIterableIterator<ContinuablePage<TElement, TPage>>;
     next(): Promise<IteratorResult<TElement>>;
+}
+
+// @public
+export interface PagedSchemaGroup {
+    nextLink?: string;
+    value: SchemaGroup[];
+}
+
+// @public
+export interface PagedVersion {
+    nextLink?: string;
+    value: SchemaVersion[];
 }
 
 // @public

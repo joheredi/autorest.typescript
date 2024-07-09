@@ -5,8 +5,8 @@ export { UsageClient, UsageClientOptions } from "./usageClient.js";
 export {
   InputModel,
   OutputModel,
-  deserializeOutputModel,
   OrphanModel,
+  deserializeOutputModel,
   InputToInputOutputOptionalParams,
   OutputToInputOutputOptionalParams,
 } from "./models/index.js";

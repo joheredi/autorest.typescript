@@ -4,8 +4,8 @@
 export { PageableClient, PageableClientOptions } from "./pageableClient.js";
 export {
   User,
-  deserializeUser,
   PagedUser,
+  deserializeUser,
   ListOptionalParams,
   PageSettings,
   ContinuablePage,

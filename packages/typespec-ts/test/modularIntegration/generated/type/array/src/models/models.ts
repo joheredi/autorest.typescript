@@ -6,8 +6,10 @@ import {
   withNullChecks,
   deserializeArray,
 } from "../helpers/serializerHelpers.js";
-import { InnerModelOutput } from "../rest/outputModels.js";
-import { InnerModel as InnerModelRest } from "../rest/index.js";
+import {
+  InnerModel as InnerModelRest,
+  InnerModelOutput,
+} from "../rest/index.js";
 
 /** Array inner model */
 export interface InnerModel {
@@ -15,15 +17,6 @@ export interface InnerModel {
   property: string;
   children?: InnerModel[];
 }
-
-function _deserializeInnerModel(input: InnerModelOutput): InnerModel {
-  return {
-    property: passthroughDeserializer(input["property"]),
-    children: deserializeArray(input["children"], deserializeInnerModel),
-  };
-}
-
-export const deserializeInnerModel = withNullChecks(_deserializeInnerModel);
 
 export function innerModelSerializer(item: InnerModel): InnerModelRest {
   return {
@@ -34,3 +27,12 @@ export function innerModelSerializer(item: InnerModel): InnerModelRest {
         : item["children"].map(innerModelSerializer),
   };
 }
+
+function _deserializeInnerModel(input: InnerModelOutput): InnerModel {
+  return {
+    property: passthroughDeserializer(input["property"]) as any,
+    children: deserializeArray(input["children"], deserializeInnerModel) as any,
+  } as any;
+}
+
+export const deserializeInnerModel = withNullChecks(_deserializeInnerModel);

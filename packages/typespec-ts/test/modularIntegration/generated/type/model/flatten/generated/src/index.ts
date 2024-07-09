@@ -4,12 +4,12 @@
 export { FlattenClient, FlattenClientOptions } from "./flattenClient.js";
 export {
   FlattenModel,
-  deserializeFlattenModel,
   ChildModel,
-  deserializeChildModel,
   NestedFlattenModel,
-  deserializeNestedFlattenModel,
   ChildFlattenModel,
+  deserializeFlattenModel,
+  deserializeChildModel,
+  deserializeNestedFlattenModel,
   deserializeChildFlattenModel,
   PutFlattenModelOptionalParams,
   PutNestedFlattenModelOptionalParams,

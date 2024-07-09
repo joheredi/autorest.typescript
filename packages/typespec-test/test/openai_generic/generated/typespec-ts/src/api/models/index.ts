@@ -21,6 +21,7 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { deserializeUtcDateTime } from "../../helpers/serializerHelpers.js";
 import {
   ModelsListOptionalParams,
   ModelsRetrieveOptionalParams,
@@ -48,7 +49,7 @@ export async function _listDeserialize(
     data: result.body["data"].map((p) => ({
       id: p["id"],
       object: p["object"],
-      created: new Date(p["created"]),
+      created: deserializeUtcDateTime(p["created"]),
       ownedBy: p["owned_by"],
     })),
   };
@@ -82,7 +83,7 @@ export async function _retrieveDeserialize(
   return {
     id: result.body["id"],
     object: result.body["object"],
-    created: new Date(result.body["created"]),
+    created: deserializeUtcDateTime(result.body["created"]),
     ownedBy: result.body["owned_by"],
   };
 }

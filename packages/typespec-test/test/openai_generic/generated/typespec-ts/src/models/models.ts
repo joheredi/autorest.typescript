@@ -1,7 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { serializeRecord } from "../helpers/serializerHelpers.js";
+import {
+  deserializeRecord,
+  serializeRecord,
+  passthroughDeserializer,
+  deserializeUtcDateTime,
+  withNullChecks,
+  deserializeArray,
+  deserializeBytes,
+} from "../helpers/serializerHelpers.js";
 import { uint8ArrayToString } from "@azure/core-util";
 import {
   CreateModerationRequest as CreateModerationRequestRest,
@@ -21,6 +29,34 @@ import {
   CreateChatCompletionRequest as CreateChatCompletionRequestRest,
   CreateTranslationRequest as CreateTranslationRequestRest,
   CreateTranscriptionRequest as CreateTranscriptionRequestRest,
+  ChatCompletionResponseMessageOutput,
+  CompletionUsageOutput,
+  CreateChatCompletionResponseOutput,
+  CreateCompletionResponseOutput,
+  CreateEditResponseOutput,
+  CreateEmbeddingResponseOutput,
+  CreateModerationResponseOutput,
+  CreateTranscriptionResponseOutput,
+  CreateTranslationResponseOutput,
+  DeleteFileResponseOutput,
+  DeleteModelResponseOutput,
+  EmbeddingOutput,
+  ErrorModelOutput,
+  ErrorResponseOutput,
+  FineTuneEventOutput,
+  FineTuneOutput,
+  FineTuningJobEventOutput,
+  FineTuningJobOutput,
+  ImageOutput,
+  ImagesResponseOutput,
+  ListFilesResponseOutput,
+  ListFineTuneEventsResponseOutput,
+  ListFineTunesResponseOutput,
+  ListFineTuningJobEventsResponseOutput,
+  ListModelsResponseOutput,
+  ListPaginatedFineTuningJobsResponseOutput,
+  ModelOutput,
+  OpenAIFileOutput,
 } from "../rest/index.js";
 
 export interface CreateModerationRequest {
@@ -1232,6 +1268,861 @@ export function createTranscriptionRequestSerializer(
 export interface CreateTranscriptionResponse {
   text: string;
 }
+
+/** This interface for an anonymous model */
+interface CreateModerationResponseResult {
+  /** Whether the content violates [OpenAI's usage policies](/policies/usage-policies). */
+  flagged: boolean;
+  /** A list of the categories, and whether they are flagged or not. */
+  categories: CreateModerationResponseResultCategories;
+  /** A list of the categories along with their scores as predicted by model. */
+  categoryScores: CreateModerationResponseResultCategoryScores;
+}
+
+/** This interface for an anonymous model */
+interface CreateModerationResponseResultCategories {
+  /**
+   * Content that expresses, incites, or promotes hate based on race, gender, ethnicity,
+   * religion, nationality, sexual orientation, disability status, or caste. Hateful content
+   * aimed at non-protected groups (e.g., chess players) is harrassment.
+   */
+  hate: boolean;
+  /**
+   * Hateful content that also includes violence or serious harm towards the targeted group
+   * based on race, gender, ethnicity, religion, nationality, sexual orientation, disability
+   * status, or caste.
+   */
+  "hate/threatening": boolean;
+  /** Content that expresses, incites, or promotes harassing language towards any target. */
+  harassment: boolean;
+  /** Harassment content that also includes violence or serious harm towards any target. */
+  "harassment/threatening": boolean;
+  /**
+   * Content that promotes, encourages, or depicts acts of self-harm, such as suicide, cutting,
+   * and eating disorders.
+   */
+  selfHarm: boolean;
+  /**
+   * Content where the speaker expresses that they are engaging or intend to engage in acts of
+   * self-harm, such as suicide, cutting, and eating disorders.
+   */
+  "selfHarm/intent": boolean;
+  /**
+   * Content that encourages performing acts of self-harm, such as suicide, cutting, and eating
+   * disorders, or that gives instructions or advice on how to commit such acts.
+   */
+  "selfHarm/instructive": boolean;
+  /**
+   * Content meant to arouse sexual excitement, such as the description of sexual activity, or
+   * that promotes sexual services (excluding sex education and wellness).
+   */
+  sexual: boolean;
+  /** Sexual content that includes an individual who is under 18 years old. */
+  "sexual/minors": boolean;
+  /** Content that depicts death, violence, or physical injury. */
+  violence: boolean;
+  /** Content that depicts death, violence, or physical injury in graphic detail. */
+  "violence/graphic": boolean;
+}
+
+/** This interface for an anonymous model */
+interface CreateModerationResponseResultCategoryScores {
+  /** The score for the category 'hate'. */
+  hate: number;
+  /** The score for the category 'hate/threatening'. */
+  "hate/threatening": number;
+  /** The score for the category 'harassment'. */
+  harassment: number;
+  /** The score for the category 'harassment/threatening'. */
+  "harassment/threatening": number;
+  /** The score for the category 'self-harm'. */
+  selfHarm: number;
+  /** The score for the category 'self-harm/intent'. */
+  "selfHarm/intent": number;
+  /** The score for the category 'self-harm/instructive'. */
+  "selfHarm/instructive": number;
+  /** The score for the category 'sexual'. */
+  sexual: number;
+  /** The score for the category 'sexual/minors'. */
+  "sexual/minors": number;
+  /** The score for the category 'violence'. */
+  violence: number;
+  /** The score for the category 'violence/graphic'. */
+  "violence/graphic": number;
+}
+
+/** This interface for an anonymous model */
+interface FineTuneHyperparams {
+  /**
+   * The number of epochs to train the model for. An epoch refers to one full cycle through the
+   * training dataset.
+   */
+  nEpochs: number;
+  /**
+   * The batch size to use for training. The batch size is the number of training examples used to
+   * train a single forward and backward pass.
+   */
+  batchSize: number;
+  /** The weight to use for loss on the prompt tokens. */
+  promptLossWeight: number;
+  /** The learning rate multiplier to use for training. */
+  learningRateMultiplier: number;
+  /** The classification metrics to compute using the validation dataset at the end of every epoch. */
+  computeClassificationMetrics?: boolean;
+  /** The positive class to use for computing classification metrics. */
+  classificationPositiveClass?: string;
+  /** The number of classes to use for computing classification metrics. */
+  classificationNClasses?: number;
+}
+
+/** This interface for an anonymous model */
+interface CreateEmbeddingResponseUsage {
+  /** The number of tokens used by the prompt. */
+  promptTokens: number;
+  /** The total number of tokens used by the request. */
+  totalTokens: number;
+}
+
+/** This interface for an anonymous model */
+interface CreateEditResponseChoice {
+  /** The edited result. */
+  text: string;
+  /** The index of the choice in the list of choices. */
+  index: number;
+  /**
+   * The reason the model stopped generating tokens. This will be `stop` if the model hit a
+   * natural stop point or a provided stop sequence, or `length` if the maximum number of tokens
+   * specified in the request was reached.
+   */
+  finishReason: "stop" | "length";
+}
+
+/** This interface for an anonymous model */
+interface CreateCompletionResponseChoice {
+  index: number;
+  text: string;
+  logprobs: CreateCompletionResponseChoiceLogprobs | null;
+  /**
+   * The reason the model stopped generating tokens. This will be `stop` if the model hit a
+   * natural stop point or a provided stop sequence, or `content_filter` if content was omitted
+   * due to a flag from our content filters, `length` if the maximum number of tokens specified
+   * in the request was reached, or `content_filter` if content was omitted due to a flag from our
+   * content filters.
+   */
+  finishReason: "stop" | "length" | "content_filter";
+}
+
+/** This interface for an anonymous model */
+interface CreateCompletionResponseChoiceLogprobs {
+  tokens: string[];
+  tokenLogprobs: number[];
+  topLogprobs: Record<string, number>[];
+  textOffset: number[];
+}
+
+/** This interface for an anonymous model */
+interface FineTuningJobHyperparameters {
+  /**
+   * The number of epochs to train the model for. An epoch refers to one full cycle through the
+   * training dataset.
+   *
+   * "Auto" decides the optimal number of epochs based on the size of the dataset. If setting the
+   * number manually, we support any number between 1 and 50 epochs.
+   */
+  nEpochs?: "auto" | number;
+}
+
+/** This interface for an anonymous model */
+interface FineTuningJobError {
+  /** A human-readable error message. */
+  message?: string;
+  /** A machine-readable error code. */
+  code?: string;
+  /**
+   * The parameter that was invalid, usually `training_file` or `validation_file`. This field
+   * will be null if the failure was not parameter-specific.
+   */
+  param?: string | null;
+}
+
+/** This interface for an anonymous model */
+interface CreateChatCompletionResponseChoice {
+  /** The index of the choice in the list of choices. */
+  index: number;
+  message: ChatCompletionResponseMessage;
+  /**
+   * The reason the model stopped generating tokens. This will be `stop` if the model hit a
+   * natural stop point or a provided stop sequence, `length` if the maximum number of tokens
+   * specified in the request was reached, `content_filter` if the content was omitted due to
+   * a flag from our content filters, or `function_call` if the model called a function.
+   */
+  finishReason: "stop" | "length" | "function_call" | "content_filter";
+}
+
+/** This interface for an anonymous model */
+interface ChatCompletionResponseMessageFunctionCall {
+  /** The name of the function to call. */
+  name: string;
+  /**
+   * The arguments to call the function with, as generated by the model in JSON format. Note that
+   * the model does not always generate valid JSON, and may hallucinate parameters not defined by
+   * your function schema. Validate the arguments in your code before calling your function.
+   */
+  arguments: string;
+}
+
+export interface ChatCompletionResponseMessage {
+  /** The role of the author of this message. */
+  role: "system" | "user" | "assistant" | "function";
+  /** The contents of the message. */
+  content: string | null;
+  /** The name and arguments of a function that should be called, as generated by the model. */
+  functionCall?: ChatCompletionResponseMessageFunctionCall;
+}
+
+function _deserializeCreateModerationResponse(
+  input: CreateModerationResponseOutput,
+): CreateModerationResponse {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    model: passthroughDeserializer(input["model"]) as any,
+    results: deserializeArray(
+      input["results"],
+      deserializeCreateModerationResponseResult,
+    ) as any,
+  } as any;
+}
+
+export const deserializeCreateModerationResponse = withNullChecks(
+  _deserializeCreateModerationResponse,
+);
+
+function _deserializeErrorResponse(input: ErrorResponseOutput): ErrorResponse {
+  return {
+    error: deserializeErrorModel(input["error"]) as any,
+  } as any;
+}
+
+export const deserializeErrorResponse = withNullChecks(
+  _deserializeErrorResponse,
+);
+
+function _deserializeErrorModel(input: ErrorModelOutput): ErrorModel {
+  return {
+    type: passthroughDeserializer(input["type"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+    param: passthroughDeserializer(input["param"]) as any,
+    code: passthroughDeserializer(input["code"]) as any,
+  } as any;
+}
+
+export const deserializeErrorModel = withNullChecks(_deserializeErrorModel);
+
+function _deserializeImagesResponse(
+  input: ImagesResponseOutput,
+): ImagesResponse {
+  return {
+    created: deserializeUtcDateTime(input["created"]) as any,
+    data: deserializeArray(input["data"], deserializeImage) as any,
+  } as any;
+}
+
+export const deserializeImagesResponse = withNullChecks(
+  _deserializeImagesResponse,
+);
+
+function _deserializeImage(input: ImageOutput): Image {
+  return {
+    url: passthroughDeserializer(input["url"]) as any,
+    b64Json: deserializeBytes(input["b64_json"], "base64") as any,
+  } as any;
+}
+
+export const deserializeImage = withNullChecks(_deserializeImage);
+
+function _deserializeListModelsResponse(
+  input: ListModelsResponseOutput,
+): ListModelsResponse {
+  return {
+    object: passthroughDeserializer(input["object"]) as any,
+    data: deserializeArray(input["data"], deserializeModel) as any,
+  } as any;
+}
+
+export const deserializeListModelsResponse = withNullChecks(
+  _deserializeListModelsResponse,
+);
+
+function _deserializeModel(input: ModelOutput): Model {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    created: deserializeUtcDateTime(input["created"]) as any,
+    ownedBy: passthroughDeserializer(input["owned_by"]) as any,
+  } as any;
+}
+
+export const deserializeModel = withNullChecks(_deserializeModel);
+
+function _deserializeDeleteModelResponse(
+  input: DeleteModelResponseOutput,
+): DeleteModelResponse {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    deleted: passthroughDeserializer(input["deleted"]) as any,
+  } as any;
+}
+
+export const deserializeDeleteModelResponse = withNullChecks(
+  _deserializeDeleteModelResponse,
+);
+
+function _deserializeFineTune(input: FineTuneOutput): FineTune {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    createdAt: deserializeUtcDateTime(input["created_at"]) as any,
+    updatedAt: deserializeUtcDateTime(input["updated_at"]) as any,
+    model: passthroughDeserializer(input["model"]) as any,
+    fineTunedModel: passthroughDeserializer(input["fine_tuned_model"]) as any,
+    organizationId: passthroughDeserializer(input["organization_id"]) as any,
+    status: passthroughDeserializer(input["status"]) as any,
+    hyperparams: deserializeFineTuneHyperparams(input["hyperparams"]) as any,
+    trainingFiles: deserializeArray(
+      input["training_files"],
+      deserializeOpenAIFile,
+    ) as any,
+    validationFiles: deserializeArray(
+      input["validation_files"],
+      deserializeOpenAIFile,
+    ) as any,
+    resultFiles: deserializeArray(
+      input["result_files"],
+      deserializeOpenAIFile,
+    ) as any,
+    events: deserializeArray(input["events"], deserializeFineTuneEvent) as any,
+  } as any;
+}
+
+export const deserializeFineTune = withNullChecks(_deserializeFineTune);
+
+function _deserializeOpenAIFile(input: OpenAIFileOutput): OpenAIFile {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    bytes: passthroughDeserializer(input["bytes"]) as any,
+    createdAt: deserializeUtcDateTime(input["createdAt"]) as any,
+    filename: passthroughDeserializer(input["filename"]) as any,
+    purpose: passthroughDeserializer(input["purpose"]) as any,
+    status: passthroughDeserializer(input["status"]) as any,
+    statusDetails: passthroughDeserializer(input["status_details"]) as any,
+  } as any;
+}
+
+export const deserializeOpenAIFile = withNullChecks(_deserializeOpenAIFile);
+
+function _deserializeFineTuneEvent(input: FineTuneEventOutput): FineTuneEvent {
+  return {
+    object: passthroughDeserializer(input["object"]) as any,
+    createdAt: deserializeUtcDateTime(input["created_at"]) as any,
+    level: passthroughDeserializer(input["level"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+  } as any;
+}
+
+export const deserializeFineTuneEvent = withNullChecks(
+  _deserializeFineTuneEvent,
+);
+
+function _deserializeListFineTunesResponse(
+  input: ListFineTunesResponseOutput,
+): ListFineTunesResponse {
+  return {
+    object: passthroughDeserializer(input["object"]) as any,
+    data: deserializeArray(input["data"], deserializeFineTune) as any,
+  } as any;
+}
+
+export const deserializeListFineTunesResponse = withNullChecks(
+  _deserializeListFineTunesResponse,
+);
+
+function _deserializeListFineTuneEventsResponse(
+  input: ListFineTuneEventsResponseOutput,
+): ListFineTuneEventsResponse {
+  return {
+    object: passthroughDeserializer(input["object"]) as any,
+    data: deserializeArray(input["data"], deserializeFineTuneEvent) as any,
+  } as any;
+}
+
+export const deserializeListFineTuneEventsResponse = withNullChecks(
+  _deserializeListFineTuneEventsResponse,
+);
+
+function _deserializeListFilesResponse(
+  input: ListFilesResponseOutput,
+): ListFilesResponse {
+  return {
+    object: passthroughDeserializer(input["object"]) as any,
+    data: deserializeArray(input["data"], deserializeOpenAIFile) as any,
+  } as any;
+}
+
+export const deserializeListFilesResponse = withNullChecks(
+  _deserializeListFilesResponse,
+);
+
+function _deserializeDeleteFileResponse(
+  input: DeleteFileResponseOutput,
+): DeleteFileResponse {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    deleted: passthroughDeserializer(input["deleted"]) as any,
+  } as any;
+}
+
+export const deserializeDeleteFileResponse = withNullChecks(
+  _deserializeDeleteFileResponse,
+);
+
+function _deserializeCreateEmbeddingResponse(
+  input: CreateEmbeddingResponseOutput,
+): CreateEmbeddingResponse {
+  return {
+    object: passthroughDeserializer(input["object"]) as any,
+    model: passthroughDeserializer(input["model"]) as any,
+    data: deserializeArray(input["data"], deserializeEmbedding) as any,
+    usage: deserializeCreateEmbeddingResponseUsage(input["usage"]) as any,
+  } as any;
+}
+
+export const deserializeCreateEmbeddingResponse = withNullChecks(
+  _deserializeCreateEmbeddingResponse,
+);
+
+function _deserializeEmbedding(input: EmbeddingOutput): Embedding {
+  return {
+    index: passthroughDeserializer(input["index"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    embedding: deserializeArray(
+      input["embedding"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeEmbedding = withNullChecks(_deserializeEmbedding);
+
+function _deserializeCreateEditResponse(
+  input: CreateEditResponseOutput,
+): CreateEditResponse {
+  return {
+    object: passthroughDeserializer(input["object"]) as any,
+    created: deserializeUtcDateTime(input["created"]) as any,
+    choices: deserializeArray(
+      input["choices"],
+      deserializeCreateEditResponseChoice,
+    ) as any,
+    usage: deserializeCompletionUsage(input["usage"]) as any,
+  } as any;
+}
+
+export const deserializeCreateEditResponse = withNullChecks(
+  _deserializeCreateEditResponse,
+);
+
+function _deserializeCompletionUsage(
+  input: CompletionUsageOutput,
+): CompletionUsage {
+  return {
+    promptTokens: passthroughDeserializer(input["prompt_tokens"]) as any,
+    completionTokens: passthroughDeserializer(
+      input["completion_tokens"],
+    ) as any,
+    totalTokens: passthroughDeserializer(input["total_tokens"]) as any,
+  } as any;
+}
+
+export const deserializeCompletionUsage = withNullChecks(
+  _deserializeCompletionUsage,
+);
+
+function _deserializeCreateCompletionResponse(
+  input: CreateCompletionResponseOutput,
+): CreateCompletionResponse {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    created: deserializeUtcDateTime(input["created"]) as any,
+    model: passthroughDeserializer(input["model"]) as any,
+    choices: deserializeArray(
+      input["choices"],
+      deserializeCreateCompletionResponseChoice,
+    ) as any,
+    usage: deserializeCompletionUsage(input["usage"]) as any,
+  } as any;
+}
+
+export const deserializeCreateCompletionResponse = withNullChecks(
+  _deserializeCreateCompletionResponse,
+);
+
+function _deserializeFineTuningJob(input: FineTuningJobOutput): FineTuningJob {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    createdAt: deserializeUtcDateTime(input["created_at"]) as any,
+    finishedAt: deserializeUtcDateTime(input["finished_at"]) as any,
+    model: passthroughDeserializer(input["model"]) as any,
+    fineTunedModel: passthroughDeserializer(input["fine_tuned_model"]) as any,
+    organizationId: passthroughDeserializer(input["organization_id"]) as any,
+    status: passthroughDeserializer(input["status"]) as any,
+    hyperparameters: deserializeFineTuningJobHyperparameters(
+      input["hyperparameters"],
+    ) as any,
+    trainingFile: passthroughDeserializer(input["training_file"]) as any,
+    validationFile: passthroughDeserializer(input["validation_file"]) as any,
+    resultFiles: deserializeArray(
+      input["result_files"],
+      passthroughDeserializer,
+    ) as any,
+    trainedTokens: passthroughDeserializer(input["trained_tokens"]) as any,
+    error: deserializeFineTuningJobError(input["error"]) as any,
+  } as any;
+}
+
+export const deserializeFineTuningJob = withNullChecks(
+  _deserializeFineTuningJob,
+);
+
+function _deserializeListPaginatedFineTuningJobsResponse(
+  input: ListPaginatedFineTuningJobsResponseOutput,
+): ListPaginatedFineTuningJobsResponse {
+  return {
+    object: passthroughDeserializer(input["object"]) as any,
+    data: deserializeArray(input["data"], deserializeFineTuningJob) as any,
+    hasMore: passthroughDeserializer(input["has_more"]) as any,
+  } as any;
+}
+
+export const deserializeListPaginatedFineTuningJobsResponse = withNullChecks(
+  _deserializeListPaginatedFineTuningJobsResponse,
+);
+
+function _deserializeListFineTuningJobEventsResponse(
+  input: ListFineTuningJobEventsResponseOutput,
+): ListFineTuningJobEventsResponse {
+  return {
+    object: passthroughDeserializer(input["object"]) as any,
+    data: deserializeArray(input["data"], deserializeFineTuningJobEvent) as any,
+  } as any;
+}
+
+export const deserializeListFineTuningJobEventsResponse = withNullChecks(
+  _deserializeListFineTuningJobEventsResponse,
+);
+
+function _deserializeFineTuningJobEvent(
+  input: FineTuningJobEventOutput,
+): FineTuningJobEvent {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    createdAt: deserializeUtcDateTime(input["created_at"]) as any,
+    level: passthroughDeserializer(input["level"]) as any,
+    message: passthroughDeserializer(input["message"]) as any,
+  } as any;
+}
+
+export const deserializeFineTuningJobEvent = withNullChecks(
+  _deserializeFineTuningJobEvent,
+);
+
+function _deserializeCreateChatCompletionResponse(
+  input: CreateChatCompletionResponseOutput,
+): CreateChatCompletionResponse {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    object: passthroughDeserializer(input["object"]) as any,
+    created: deserializeUtcDateTime(input["created"]) as any,
+    model: passthroughDeserializer(input["model"]) as any,
+    choices: deserializeArray(
+      input["choices"],
+      deserializeCreateChatCompletionResponseChoice,
+    ) as any,
+    usage: deserializeCompletionUsage(input["usage"]) as any,
+  } as any;
+}
+
+export const deserializeCreateChatCompletionResponse = withNullChecks(
+  _deserializeCreateChatCompletionResponse,
+);
+
+function _deserializeChatCompletionResponseMessage(
+  input: ChatCompletionResponseMessageOutput,
+): ChatCompletionResponseMessage {
+  return {
+    role: passthroughDeserializer(input["role"]) as any,
+    content: passthroughDeserializer(input["content"]) as any,
+    functionCall: deserializeChatCompletionResponseMessageFunctionCall(
+      input["function_call"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeChatCompletionResponseMessage = withNullChecks(
+  _deserializeChatCompletionResponseMessage,
+);
+
+function _deserializeCreateTranslationResponse(
+  input: CreateTranslationResponseOutput,
+): CreateTranslationResponse {
+  return {
+    text: passthroughDeserializer(input["text"]) as any,
+  } as any;
+}
+
+export const deserializeCreateTranslationResponse = withNullChecks(
+  _deserializeCreateTranslationResponse,
+);
+
+function _deserializeCreateTranscriptionResponse(
+  input: CreateTranscriptionResponseOutput,
+): CreateTranscriptionResponse {
+  return {
+    text: passthroughDeserializer(input["text"]) as any,
+  } as any;
+}
+
+export const deserializeCreateTranscriptionResponse = withNullChecks(
+  _deserializeCreateTranscriptionResponse,
+);
+
+function _deserializeCreateModerationResponseResult(
+  input: any,
+): CreateModerationResponseResult {
+  return {
+    flagged: passthroughDeserializer(input["flagged"]) as any,
+    categories: deserializeCreateModerationResponseResultCategories(
+      input["categories"],
+    ) as any,
+    categoryScores: deserializeCreateModerationResponseResultCategoryScores(
+      input["category_scores"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeCreateModerationResponseResult = withNullChecks(
+  _deserializeCreateModerationResponseResult,
+);
+
+function _deserializeCreateModerationResponseResultCategories(
+  input: any,
+): CreateModerationResponseResultCategories {
+  return {
+    hate: passthroughDeserializer(input["hate"]) as any,
+    "hate/threatening": passthroughDeserializer(
+      input["hate/threatening"],
+    ) as any,
+    harassment: passthroughDeserializer(input["harassment"]) as any,
+    "harassment/threatening": passthroughDeserializer(
+      input["harassment/threatening"],
+    ) as any,
+    selfHarm: passthroughDeserializer(input["self-harm"]) as any,
+    "selfHarm/intent": passthroughDeserializer(
+      input["self-harm/intent"],
+    ) as any,
+    "selfHarm/instructive": passthroughDeserializer(
+      input["self-harm/instructive"],
+    ) as any,
+    sexual: passthroughDeserializer(input["sexual"]) as any,
+    "sexual/minors": passthroughDeserializer(input["sexual/minors"]) as any,
+    violence: passthroughDeserializer(input["violence"]) as any,
+    "violence/graphic": passthroughDeserializer(
+      input["violence/graphic"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeCreateModerationResponseResultCategories =
+  withNullChecks(_deserializeCreateModerationResponseResultCategories);
+
+function _deserializeCreateModerationResponseResultCategoryScores(
+  input: any,
+): CreateModerationResponseResultCategoryScores {
+  return {
+    hate: passthroughDeserializer(input["hate"]) as any,
+    "hate/threatening": passthroughDeserializer(
+      input["hate/threatening"],
+    ) as any,
+    harassment: passthroughDeserializer(input["harassment"]) as any,
+    "harassment/threatening": passthroughDeserializer(
+      input["harassment/threatening"],
+    ) as any,
+    selfHarm: passthroughDeserializer(input["self-harm"]) as any,
+    "selfHarm/intent": passthroughDeserializer(
+      input["self-harm/intent"],
+    ) as any,
+    "selfHarm/instructive": passthroughDeserializer(
+      input["self-harm/instructive"],
+    ) as any,
+    sexual: passthroughDeserializer(input["sexual"]) as any,
+    "sexual/minors": passthroughDeserializer(input["sexual/minors"]) as any,
+    violence: passthroughDeserializer(input["violence"]) as any,
+    "violence/graphic": passthroughDeserializer(
+      input["violence/graphic"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeCreateModerationResponseResultCategoryScores =
+  withNullChecks(_deserializeCreateModerationResponseResultCategoryScores);
+
+function _deserializeFineTuneHyperparams(input: any): FineTuneHyperparams {
+  return {
+    nEpochs: passthroughDeserializer(input["n_epochs"]) as any,
+    batchSize: passthroughDeserializer(input["batch_size"]) as any,
+    promptLossWeight: passthroughDeserializer(
+      input["prompt_loss_weight"],
+    ) as any,
+    learningRateMultiplier: passthroughDeserializer(
+      input["learning_rate_multiplier"],
+    ) as any,
+    computeClassificationMetrics: passthroughDeserializer(
+      input["compute_classification_metrics"],
+    ) as any,
+    classificationPositiveClass: passthroughDeserializer(
+      input["classification_positive_class"],
+    ) as any,
+    classificationNClasses: passthroughDeserializer(
+      input["classification_n_classes"],
+    ) as any,
+  } as any;
+}
+
+export const deserializeFineTuneHyperparams = withNullChecks(
+  _deserializeFineTuneHyperparams,
+);
+
+function _deserializeCreateEmbeddingResponseUsage(
+  input: any,
+): CreateEmbeddingResponseUsage {
+  return {
+    promptTokens: passthroughDeserializer(input["prompt_tokens"]) as any,
+    totalTokens: passthroughDeserializer(input["total_tokens"]) as any,
+  } as any;
+}
+
+export const deserializeCreateEmbeddingResponseUsage = withNullChecks(
+  _deserializeCreateEmbeddingResponseUsage,
+);
+
+function _deserializeCreateEditResponseChoice(
+  input: any,
+): CreateEditResponseChoice {
+  return {
+    text: passthroughDeserializer(input["text"]) as any,
+    index: passthroughDeserializer(input["index"]) as any,
+    finishReason: passthroughDeserializer(input["finish_reason"]) as any,
+  } as any;
+}
+
+export const deserializeCreateEditResponseChoice = withNullChecks(
+  _deserializeCreateEditResponseChoice,
+);
+
+function _deserializeCreateCompletionResponseChoice(
+  input: any,
+): CreateCompletionResponseChoice {
+  return {
+    index: passthroughDeserializer(input["index"]) as any,
+    text: passthroughDeserializer(input["text"]) as any,
+    logprobs: deserializeCreateCompletionResponseChoiceLogprobs(
+      input["logprobs"],
+    ) as any,
+    finishReason: passthroughDeserializer(input["finish_reason"]) as any,
+  } as any;
+}
+
+export const deserializeCreateCompletionResponseChoice = withNullChecks(
+  _deserializeCreateCompletionResponseChoice,
+);
+
+function _deserializeCreateCompletionResponseChoiceLogprobs(
+  input: any,
+): CreateCompletionResponseChoiceLogprobs {
+  return {
+    tokens: deserializeArray(input["tokens"], passthroughDeserializer) as any,
+    tokenLogprobs: deserializeArray(
+      input["token_logprobs"],
+      passthroughDeserializer,
+    ) as any,
+    topLogprobs: deserializeArray(input["top_logprobs"], (i: any) =>
+      deserializeRecord(i, passthroughDeserializer),
+    ) as any,
+    textOffset: deserializeArray(
+      input["text_offset"],
+      passthroughDeserializer,
+    ) as any,
+  } as any;
+}
+
+export const deserializeCreateCompletionResponseChoiceLogprobs = withNullChecks(
+  _deserializeCreateCompletionResponseChoiceLogprobs,
+);
+
+function _deserializeFineTuningJobHyperparameters(
+  input: any,
+): FineTuningJobHyperparameters {
+  return {
+    nEpochs: passthroughDeserializer(input["n_epochs"]) as any,
+  } as any;
+}
+
+export const deserializeFineTuningJobHyperparameters = withNullChecks(
+  _deserializeFineTuningJobHyperparameters,
+);
+
+function _deserializeFineTuningJobError(input: any): FineTuningJobError {
+  return {
+    message: passthroughDeserializer(input["message"]) as any,
+    code: passthroughDeserializer(input["code"]) as any,
+    param: passthroughDeserializer(input["param"]) as any,
+  } as any;
+}
+
+export const deserializeFineTuningJobError = withNullChecks(
+  _deserializeFineTuningJobError,
+);
+
+function _deserializeCreateChatCompletionResponseChoice(
+  input: any,
+): CreateChatCompletionResponseChoice {
+  return {
+    index: passthroughDeserializer(input["index"]) as any,
+    message: deserializeChatCompletionResponseMessage(input["message"]) as any,
+    finishReason: passthroughDeserializer(input["finish_reason"]) as any,
+  } as any;
+}
+
+export const deserializeCreateChatCompletionResponseChoice = withNullChecks(
+  _deserializeCreateChatCompletionResponseChoice,
+);
+
+function _deserializeChatCompletionResponseMessageFunctionCall(
+  input: any,
+): ChatCompletionResponseMessageFunctionCall {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+    arguments: passthroughDeserializer(input["arguments"]) as any,
+  } as any;
+}
+
+export const deserializeChatCompletionResponseMessageFunctionCall =
+  withNullChecks(_deserializeChatCompletionResponseMessageFunctionCall);
 
 /** Alias for Prompt */
 export type Prompt = string | string[] | number[] | number[][];

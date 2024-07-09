@@ -18,7 +18,11 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
-import { serializeRecord } from "../helpers/serializerHelpers.js";
+import {
+  serializeRecord,
+  deserializeRecord,
+  passthroughDeserializer,
+} from "../helpers/serializerHelpers.js";
 import {
   CreateStreamingOptionalParams,
   CreateOptionalParams,
@@ -60,7 +64,7 @@ export async function _createStreamingDeserialize(
         sessionState: p.delta["session_state"],
       },
       sessionState: p["session_state"],
-      context: p["context"],
+      context: deserializeRecord(p.context, passthroughDeserializer),
       finishReason: p["finish_reason"],
     })),
   };
@@ -112,7 +116,7 @@ export async function _createDeserialize(
         sessionState: p.message["session_state"],
       },
       sessionState: p["session_state"],
-      context: p["context"],
+      context: deserializeRecord(p.context, passthroughDeserializer),
       finishReason: p["finish_reason"],
     })),
   };

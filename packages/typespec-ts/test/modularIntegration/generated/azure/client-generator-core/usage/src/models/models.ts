@@ -5,8 +5,10 @@ import {
   passthroughDeserializer,
   withNullChecks,
 } from "../helpers/serializerHelpers.js";
-import { OutputModelOutput } from "../rest/outputModels.js";
-import { InputModel as InputModelRest } from "../rest/index.js";
+import {
+  InputModel as InputModelRest,
+  OutputModelOutput,
+} from "../rest/index.js";
 
 /** Usage override to roundtrip. */
 export interface InputModel {
@@ -24,14 +26,6 @@ export interface OutputModel {
   name: string;
 }
 
-function _deserializeOutputModel(input: OutputModelOutput): OutputModel {
-  return {
-    name: passthroughDeserializer(input["name"]),
-  };
-}
-
-export const deserializeOutputModel = withNullChecks(_deserializeOutputModel);
-
 export function outputModelSerializer(item: OutputModel) {
   return {
     name: item["name"],
@@ -48,3 +42,11 @@ export function orphanModelSerializer(item: OrphanModel) {
     name: item["name"],
   };
 }
+
+function _deserializeOutputModel(input: OutputModelOutput): OutputModel {
+  return {
+    name: passthroughDeserializer(input["name"]) as any,
+  } as any;
+}
+
+export const deserializeOutputModel = withNullChecks(_deserializeOutputModel);

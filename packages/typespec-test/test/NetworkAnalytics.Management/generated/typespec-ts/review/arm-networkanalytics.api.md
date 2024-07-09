@@ -8,6 +8,7 @@ import { AbortSignalLike } from '@azure/abort-controller';
 import { ClientOptions } from '@azure-rest/core-client';
 import { OperationOptions } from '@azure-rest/core-client';
 import { OperationState } from '@azure/core-lro';
+import { Paged } from '@azure/core-paging';
 import { PathUncheckedResponse } from '@azure-rest/core-client';
 import { Pipeline } from '@azure/core-rest-pipeline';
 import { PollerLike } from '@azure/core-lro';
@@ -75,6 +76,12 @@ export interface DataProductInformation {
 }
 
 // @public
+export interface DataProductListResult {
+    nextLink?: string;
+    value: DataProduct[];
+}
+
+// @public
 export interface DataProductNetworkAcls {
     allowedQueryIpRangeList: string[];
     defaultAction: DefaultAction;
@@ -113,6 +120,12 @@ export interface DataProductsAddUserRoleOptionalParams extends OperationOptions 
 // @public
 export interface DataProductsCatalog extends ProxyResource {
     properties?: DataProductsCatalogProperties;
+}
+
+// @public
+export interface DataProductsCatalogListResult {
+    nextLink?: string;
+    value: DataProductsCatalog[];
 }
 
 // @public
@@ -243,6 +256,12 @@ export interface DataType extends ProxyResource {
 }
 
 // @public
+export interface DataTypeListResult {
+    nextLink?: string;
+    value: DataType[];
+}
+
+// @public
 export interface DataTypeProperties {
     databaseCacheRetention?: number;
     databaseRetention?: number;
@@ -322,6 +341,181 @@ export interface DataTypeUpdateProperties {
 
 // @public
 export type DefaultAction = string;
+
+// Warning: (ae-forgotten-export) The symbol "AccountSasTokenOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeAccountSasToken: (input: AccountSasTokenOutput | null | undefined) => AccountSasToken;
+
+// Warning: (ae-forgotten-export) The symbol "ConsumptionEndpointsPropertiesOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeConsumptionEndpointsProperties: (input: ConsumptionEndpointsPropertiesOutput | null | undefined) => ConsumptionEndpointsProperties;
+
+// Warning: (ae-forgotten-export) The symbol "ContainerSasTokenOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeContainerSasToken: (input: ContainerSasTokenOutput | null | undefined) => ContainerSasToken;
+
+// Warning: (ae-forgotten-export) The symbol "DataProductOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataProduct: (input: DataProductOutput | null | undefined) => DataProduct;
+
+// Warning: (ae-forgotten-export) The symbol "DataProductInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataProductInformation: (input: DataProductInformationOutput | null | undefined) => DataProductInformation;
+
+// Warning: (ae-forgotten-export) The symbol "DataProductListResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataProductListResult: (input: DataProductListResultOutput | null | undefined) => DataProductListResult;
+
+// Warning: (ae-forgotten-export) The symbol "DataProductNetworkAclsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataProductNetworkAcls: (input: DataProductNetworkAclsOutput | null | undefined) => DataProductNetworkAcls;
+
+// Warning: (ae-forgotten-export) The symbol "DataProductPropertiesOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataProductProperties: (input: DataProductPropertiesOutput | null | undefined) => DataProductProperties;
+
+// Warning: (ae-forgotten-export) The symbol "DataProductsCatalogOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataProductsCatalog: (input: DataProductsCatalogOutput | null | undefined) => DataProductsCatalog;
+
+// Warning: (ae-forgotten-export) The symbol "DataProductsCatalogListResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataProductsCatalogListResult: (input: DataProductsCatalogListResultOutput | null | undefined) => DataProductsCatalogListResult;
+
+// Warning: (ae-forgotten-export) The symbol "DataProductsCatalogPropertiesOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataProductsCatalogProperties: (input: DataProductsCatalogPropertiesOutput | null | undefined) => DataProductsCatalogProperties;
+
+// Warning: (ae-forgotten-export) The symbol "DataProductVersionOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataProductVersion: (input: DataProductVersionOutput | null | undefined) => DataProductVersion;
+
+// Warning: (ae-forgotten-export) The symbol "DataTypeOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataType: (input: DataTypeOutput | null | undefined) => DataType;
+
+// Warning: (ae-forgotten-export) The symbol "DataTypeListResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataTypeListResult: (input: DataTypeListResultOutput | null | undefined) => DataTypeListResult;
+
+// Warning: (ae-forgotten-export) The symbol "DataTypePropertiesOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeDataTypeProperties: (input: DataTypePropertiesOutput | null | undefined) => DataTypeProperties;
+
+// Warning: (ae-forgotten-export) The symbol "EncryptionKeyDetailsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeEncryptionKeyDetails: (input: EncryptionKeyDetailsOutput | null | undefined) => EncryptionKeyDetails;
+
+// Warning: (ae-forgotten-export) The symbol "ErrorAdditionalInfoOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeErrorAdditionalInfo: (input: ErrorAdditionalInfoOutput | null | undefined) => ErrorAdditionalInfo;
+
+// Warning: (ae-forgotten-export) The symbol "ErrorAdditionalInfoInfo" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeErrorAdditionalInfoInfo: (input: any) => ErrorAdditionalInfoInfo | null | undefined;
+
+// Warning: (ae-forgotten-export) The symbol "ErrorDetailOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeErrorDetail: (input: ErrorDetailOutput | null | undefined) => ErrorDetail;
+
+// Warning: (ae-forgotten-export) The symbol "ErrorResponseOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeErrorResponse: (input: ErrorResponseOutput | null | undefined) => ErrorResponse;
+
+// Warning: (ae-forgotten-export) The symbol "IPRulesOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeIPRules: (input: IPRulesOutput | null | undefined) => IPRules;
+
+// Warning: (ae-forgotten-export) The symbol "ListRoleAssignmentsOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeListRoleAssignments: (input: ListRoleAssignmentsOutput | null | undefined) => ListRoleAssignments;
+
+// Warning: (ae-forgotten-export) The symbol "ManagedResourceGroupConfigurationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeManagedResourceGroupConfiguration: (input: ManagedResourceGroupConfigurationOutput | null | undefined) => ManagedResourceGroupConfiguration;
+
+// Warning: (ae-forgotten-export) The symbol "ManagedServiceIdentityOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeManagedServiceIdentity: (input: ManagedServiceIdentityOutput | null | undefined) => ManagedServiceIdentity;
+
+// Warning: (ae-forgotten-export) The symbol "OperationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOperation: (input: OperationOutput | null | undefined) => Operation;
+
+// Warning: (ae-forgotten-export) The symbol "OperationDisplayOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOperationDisplay: (input: OperationDisplayOutput | null | undefined) => OperationDisplay;
+
+// Warning: (ae-forgotten-export) The symbol "OperationListResultOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeOperationListResult: (input: OperationListResultOutput | null | undefined) => OperationListResult;
+
+// Warning: (ae-forgotten-export) The symbol "ProxyResourceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeProxyResource: (input: ProxyResourceOutput | null | undefined) => ProxyResource;
+
+// Warning: (ae-forgotten-export) The symbol "PublisherInformationOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializePublisherInformation: (input: PublisherInformationOutput | null | undefined) => PublisherInformation;
+
+// Warning: (ae-forgotten-export) The symbol "ResourceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeResource: (input: ResourceOutput | null | undefined) => Resource;
+
+// Warning: (ae-forgotten-export) The symbol "RoleAssignmentDetailOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeRoleAssignmentDetail: (input: RoleAssignmentDetailOutput | null | undefined) => RoleAssignmentDetail;
+
+// Warning: (ae-forgotten-export) The symbol "SystemDataOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeSystemData: (input: SystemDataOutput | null | undefined) => SystemData;
+
+// Warning: (ae-forgotten-export) The symbol "TrackedResourceOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeTrackedResource: (input: TrackedResourceOutput | null | undefined) => TrackedResource;
+
+// Warning: (ae-forgotten-export) The symbol "UserAssignedIdentityOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeUserAssignedIdentity: (input: UserAssignedIdentityOutput | null | undefined) => UserAssignedIdentity;
+
+// Warning: (ae-forgotten-export) The symbol "VirtualNetworkRuleOutput" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const deserializeVirtualNetworkRule: (input: VirtualNetworkRuleOutput | null | undefined) => VirtualNetworkRule;
 
 // @public
 export interface EncryptionKeyDetails {
@@ -504,6 +698,12 @@ export interface OperationDisplay {
     operation?: string;
     provider?: string;
     resource?: string;
+}
+
+// @public
+export interface OperationListResult {
+    nextLink?: string;
+    value: Operation[];
 }
 
 // @public (undocumented)

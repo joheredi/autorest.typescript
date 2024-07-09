@@ -3,16 +3,16 @@
 
 export {
   DefaultDurationProperty,
-  deserializeDefaultDurationProperty,
   ISO8601DurationProperty,
-  deserializeISO8601DurationProperty,
   Int32SecondsDurationProperty,
-  deserializeInt32SecondsDurationProperty,
   FloatSecondsDurationProperty,
-  deserializeFloatSecondsDurationProperty,
   Float64SecondsDurationProperty,
-  deserializeFloat64SecondsDurationProperty,
   FloatSecondsDurationArrayProperty,
+  deserializeDefaultDurationProperty,
+  deserializeISO8601DurationProperty,
+  deserializeInt32SecondsDurationProperty,
+  deserializeFloatSecondsDurationProperty,
+  deserializeFloat64SecondsDurationProperty,
   deserializeFloatSecondsDurationArrayProperty,
 } from "./models.js";
 export {

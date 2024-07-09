@@ -3,9 +3,9 @@
 
 export {
   NewModel,
-  deserializeNewModel,
   NewEnum,
   Versions,
+  deserializeNewModel,
   NewUnion,
 } from "./models.js";
 export {

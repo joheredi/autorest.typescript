@@ -68,6 +68,7 @@ import { emitContentByBuilder, emitModels } from "./utils/emitUtil.js";
 import { GenerationDirDetail, SdkContext } from "./utils/interfaces.js";
 import { provideContext, useContext } from "./contextManager.js";
 import { emitSerializerHelpersFile } from "./modular/buildHelperSerializers.js";
+import { createOnceQueue } from "./utils/onceQueue.js";
 
 export * from "./lib.js";
 
@@ -90,6 +91,7 @@ export async function $onEmit(context: EmitContext) {
     tcgcContext: dpgContext
   });
   provideContext("declarations", new Map());
+  provideContext("emitQueue", createOnceQueue());
 
   const rlcCodeModels: RLCModel[] = [];
   let modularCodeModel: ModularCodeModel;

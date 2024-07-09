@@ -24,7 +24,7 @@ const calculateMemoryLimit = () => {
     return Math.floor(totalMemory / 1024 / 1024 / 1024 / 2); // in GB
   } else {
     // Default or lower memory limit if free memory is less than 1GB
-    return 512; // 512MB as a fallback
+    return 1; // 1GB  as a fallback
   }
 };
 

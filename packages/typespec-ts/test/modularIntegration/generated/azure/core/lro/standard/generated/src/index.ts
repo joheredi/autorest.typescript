@@ -6,8 +6,8 @@ export { restorePoller, RestorePollerOptions } from "./restorePollerHelpers.js";
 export {
   User,
   ExportedUser,
-  deserializeExportedUser,
   Versions,
+  deserializeExportedUser,
   CreateOrReplaceOptionalParams,
   DeleteOptionalParams,
   ExportOptionalParams,

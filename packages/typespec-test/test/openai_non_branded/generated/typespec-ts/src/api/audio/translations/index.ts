@@ -13,9 +13,9 @@ import {
 import {
   StreamableMethod,
   operationOptionsToRequestParameters,
-  uint8ArrayToString,
   createRestError,
 } from "@typespec/ts-http-runtime";
+import { uint8ArrayToString } from "@typespec/ts-http-runtime";
 import { AudioTranslationsCreateOptionalParams } from "../../../models/options.js";
 
 export function _createSend(

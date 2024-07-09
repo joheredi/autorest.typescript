@@ -1,12 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import {
+  passthroughDeserializer,
+  deserializeUtcDateTime,
+  withNullChecks,
+  deserializeBytes,
+} from "../helpers/serializerHelpers.js";
 import { uint8ArrayToString } from "@azure/core-util";
 import {
   CloudEvent as CloudEventRest,
   AcknowledgeOptions as AcknowledgeOptionsRest,
   ReleaseOptions as ReleaseOptionsRest,
   RejectOptions as RejectOptionsRest,
+  BrokerPropertiesOutput,
+  CloudEventOutput,
+  FailedLockTokenOutput,
+  PublishResultOutput,
+  ReceiveDetailsOutput,
 } from "../rest/index.js";
 
 /** Properties of an event published to an Azure Messaging EventGrid Namespace topic using the CloudEvent 1.0 Schema. */
@@ -154,3 +165,94 @@ export interface RejectResult {
 
 /** Type of ServiceApiVersions */
 export type ServiceApiVersions = "2023-06-01-preview";
+
+/** Properties of an event published to an Azure Messaging EventGrid Namespace topic using the CloudEvent 1.0 Schema. */
+export interface CloudEvent {
+  /** An identifier for the event. The combination of id and source must be unique for each distinct event. */
+  id: string;
+  /** Identifies the context in which an event happened. The combination of id and source must be unique for each distinct event. */
+  source: string;
+  /** Event data specific to the event type. */
+  data?: any;
+  /** Event data specific to the event type, encoded as a base64 string. */
+  dataBase64?: Uint8Array;
+  /** Type of event related to the originating occurrence. */
+  type: string;
+  /** The time (in UTC) the event was generated, in RFC3339 format. */
+  time?: Date;
+  /** The version of the CloudEvents specification which the event uses. */
+  specversion: string;
+  /** Identifies the schema that data adheres to. */
+  dataschema?: string;
+  /** Content type of data value. */
+  datacontenttype?: string;
+  /** This describes the subject of the event in the context of the event producer (identified by source). */
+  subject?: string;
+}
+
+function _deserializeCloudEvent(input: CloudEventOutput): CloudEvent {
+  return {
+    id: passthroughDeserializer(input["id"]) as any,
+    source: passthroughDeserializer(input["source"]) as any,
+    data: passthroughDeserializer(input["data"]) as any,
+    dataBase64: deserializeBytes(input["data_base64"], "base64") as any,
+    type: passthroughDeserializer(input["type"]) as any,
+    time: deserializeUtcDateTime(input["time"]) as any,
+    specversion: passthroughDeserializer(input["specversion"]) as any,
+    dataschema: passthroughDeserializer(input["dataschema"]) as any,
+    datacontenttype: passthroughDeserializer(input["datacontenttype"]) as any,
+    subject: passthroughDeserializer(input["subject"]) as any,
+  } as any;
+}
+
+export const deserializeCloudEvent = withNullChecks(_deserializeCloudEvent);
+
+function _deserializePublishResult(input: PublishResultOutput): PublishResult {
+  return input as PublishResult;
+}
+
+export const deserializePublishResult = withNullChecks(
+  _deserializePublishResult,
+);
+
+function _deserializeReceiveDetails(
+  input: ReceiveDetailsOutput,
+): ReceiveDetails {
+  return {
+    brokerProperties: deserializeBrokerProperties(
+      input["brokerProperties"],
+    ) as any,
+    event: deserializeCloudEvent(input["event"]) as any,
+  } as any;
+}
+
+export const deserializeReceiveDetails = withNullChecks(
+  _deserializeReceiveDetails,
+);
+
+function _deserializeBrokerProperties(
+  input: BrokerPropertiesOutput,
+): BrokerProperties {
+  return {
+    lockToken: passthroughDeserializer(input["lockToken"]) as any,
+    deliveryCount: passthroughDeserializer(input["deliveryCount"]) as any,
+  } as any;
+}
+
+export const deserializeBrokerProperties = withNullChecks(
+  _deserializeBrokerProperties,
+);
+
+function _deserializeFailedLockToken(
+  input: FailedLockTokenOutput,
+): FailedLockToken {
+  return {
+    lockToken: passthroughDeserializer(input["lockToken"]) as any,
+    errorCode: passthroughDeserializer(input["errorCode"]) as any,
+    errorDescription: passthroughDeserializer(input["errorDescription"]) as any,
+  } as any;
+}
+
+export const deserializeFailedLockToken = withNullChecks(
+  _deserializeFailedLockToken,
+);
