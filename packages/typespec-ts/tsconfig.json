@@ -32,5 +32,5 @@
     "esm": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["dist", "node_modules", "typespec-output"]
+  "exclude": ["dist", "node_modules", "typespec-output", "vitest.workspace.js"]
 }

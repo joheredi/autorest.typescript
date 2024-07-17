@@ -3,7 +3,11 @@ import {
   normalizeName,
   ReservedModelNames
 } from "@azure-tools/rlc-common";
-import { SdkClient } from "@azure-tools/typespec-client-generator-core";
+import {
+  SdkClient,
+  SdkHttpOperation,
+  SdkServiceMethod
+} from "@azure-tools/typespec-client-generator-core";
 import * as path from "path";
 import { toCamelCase, toPascalCase } from "../../utils/casingUtils.js";
 import { SdkContext } from "../../utils/interfaces.js";
@@ -14,6 +18,8 @@ import {
   OperationGroup
 } from "../modularCodeModel.js";
 import { isDefined } from "../serialization/util.js";
+import { useContext } from "../../contextManager.js";
+import { getSdkClient } from "../../context/sdkTypes.js";
 
 export function getClientName(client: Client) {
   return client.name.replace(/Client$/, "");
@@ -54,25 +60,51 @@ export function isReservedName(name: string, nameType: NameType): boolean {
 }
 
 export function getClassicalLayerPrefix(
+  operationGroup: SdkServiceMethod<SdkHttpOperation>,
+  nameType: NameType,
+  separator?: string,
+  _layer?: number
+): string;
+export function getClassicalLayerPrefix(
+  operationGroup: SdkServiceMethod<SdkHttpOperation> | Operation,
+  nameType: NameType,
+  separator?: string,
+  _layer?: number
+): string;
+export function getClassicalLayerPrefix(
   operationGroup: OperationGroup | Operation,
   nameType: NameType,
+  separator?: string,
+  _layer?: number
+): string;
+export function getClassicalLayerPrefix(
+  operationGroup: OperationGroup | Operation | SdkServiceMethod<SdkHttpOperation>,
+  nameType: NameType,
   separator: string = "",
-  layer: number = operationGroup.namespaceHierarchies.length - 1
+  _layer?: number
 ): string {
+  let namespaceHierarchies: string[] = [];
+  if ("namespaceHierarchies" in operationGroup) {
+    namespaceHierarchies = operationGroup.namespaceHierarchies;
+  } else {
+    if (operationGroup.__raw) {
+      const { tcgcContext } = useContext("emitContext");
+      namespaceHierarchies = [];
+      const client = getSdkClient(tcgcContext, operationGroup);
+      namespaceHierarchies = [client!.name];
+    }
+  }
+
+  const layer = _layer ?? namespaceHierarchies.length - 1;
   const prefix: string[] = [];
   if (layer < 0) {
     return prefix.join(separator);
   }
   if (layer === 0) {
-    return normalizeName(
-      operationGroup.namespaceHierarchies[0] ?? "",
-      nameType
-    );
+    return normalizeName(namespaceHierarchies[0] ?? "", nameType);
   }
   for (let i = 0; i <= layer; i++) {
-    prefix.push(
-      normalizeName(operationGroup.namespaceHierarchies[i] ?? "", nameType)
-    );
+    prefix.push(normalizeName(namespaceHierarchies[i] ?? "", nameType));
   }
   return prefix.join(separator);
 }

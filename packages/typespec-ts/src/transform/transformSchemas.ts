@@ -61,7 +61,7 @@ export function transformSchemas(client: SdkClient, dpgContext: SdkContext) {
         getGeneratedModels(param.param, SchemaContext.Input);
       }
     }
-    const bodyModel = getBodyType(program, route);
+    const bodyModel = getBodyType(route);
     if (
       bodyModel &&
       (bodyModel.kind === "Model" ||

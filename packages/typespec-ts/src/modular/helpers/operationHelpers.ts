@@ -7,9 +7,21 @@ import {
   OperationResponse
 } from "@azure-tools/rlc-common";
 import {
+  SdkArrayType,
+  SdkBodyParameter,
   SdkContext,
+  SdkDateTimeType,
+  SdkDictionaryType,
+  SdkEnumType,
+  SdkHeaderParameter,
+  SdkHttpOperation,
+  SdkHttpParameter,
   SdkModelType,
-  SdkType
+  SdkQueryParameter,
+  SdkServiceMethod,
+  SdkType,
+  SdkUnionType,
+  isSdkBuiltInKind,
 } from "@azure-tools/typespec-client-generator-core";
 import { NoTarget, Program } from "@typespec/compiler";
 import {
@@ -45,6 +57,8 @@ import {
 } from "./docsHelpers.js";
 import { getClassicalLayerPrefix, getOperationName } from "./namingHelpers.js";
 import { buildType, isTypeNullable } from "./typeHelpers.js";
+import { useSdkTypes } from "../../context/sdkTypes.js";
+import { getJsScalar } from "../../utils/tcgcScalarMap.js";
 
 function getRLCResponseType(rlcResponse?: OperationResponse) {
   if (!rlcResponse?.responses) {
@@ -78,7 +92,9 @@ export function getSendPrivateFunction(
   clientType: string,
   runtimeImports: RuntimeImports
 ): OptionalKind<FunctionDeclarationStructure> {
-  const parameters = getOperationSignatureParameters(operation, clientType);
+  const getSdkType = useSdkTypes();
+  const sdkOperation = getSdkType(operation.__raw);
+  const parameters = getOperationSignatureParameters(sdkOperation, clientType);
   const { name } = getOperationName(operation);
   const returnType = `StreamableMethod<${getRLCResponseType(
     operation.rlcResponse
@@ -104,7 +120,7 @@ export function getSendPrivateFunction(
       operation
     )}).${operationMethod}({...operationOptionsToRequestParameters(${optionalParamName}), ${getRequestParameters(
       dpgContext,
-      operation,
+      { ...sdkOperation, _deprecatedOperation: operation},
       runtimeImports
     )}}) ${operation.isOverload ? `as ${returnType}` : ``} ;`
   );
@@ -257,8 +273,71 @@ export function getDeserializePrivateFunction(
   };
 }
 
+function getReferenceName(type: SdkType): string {
+  switch (type.kind) {
+    case "model":
+      return getModelReference(type);
+    case "union":
+    case "enum":
+      return getEnumReference(type);
+    case "array":
+      return getArrayReference(type);
+    case "dict":
+      return getDictionaryReference(type);
+    case "utcDateTime":
+    case "offsetDateTime":
+      return getDateTimeReference(type);
+
+    default:
+      return getDefaultReference(type);
+  }
+}
+
+function getDateTimeReference(type: SdkDateTimeType) {
+  if (type.encode === "unixTimestamp") {
+    return "number";
+  } else {
+    return "Date";
+  }
+}
+
+function getDefaultReference(type: SdkType) {
+  if (isSdkBuiltInKind(type.kind)) {
+    return getJsScalar(type);
+  }
+
+  if (type.kind === "constant") {
+    return JSON.stringify(type.value);
+  }
+
+  console.warn("Unknown parameter type", type);
+  return "unknown";
+}
+
+function getModelReference(type: SdkModelType) {
+  return type.name;
+}
+
+function getEnumReference(type: SdkEnumType | SdkUnionType) {
+  if (!type.isGeneratedName) {
+    return type.name;
+  }
+
+  const values = type.values.map((v) => getReferenceName(v)).join(" | ");
+
+  return `(${values})`;
+}
+
+function getArrayReference(type: SdkArrayType) {
+  return `${getReferenceName(type.valueType)}[]`;
+}
+
+function getDictionaryReference(type: SdkDictionaryType) {
+  return `Record<string, ${getReferenceName(type.valueType)}>`;
+}
+
 function getOperationSignatureParameters(
-  operation: Operation,
+  operation: SdkServiceMethod<SdkHttpOperation>,
   clientType: string
 ): OptionalKind<ParameterDeclarationStructure>[] {
   const optionsType = getOperationOptionsName(operation, true);
@@ -270,26 +349,29 @@ function getOperationSignatureParameters(
   operation.parameters
     .filter(
       (p) =>
-        p.implementation === "Method" &&
-        p.type.type !== "constant" &&
+        !p.onClient &&
+        p.type.kind !== "constant" &&
         p.clientDefaultValue === undefined &&
         !p.optional
     )
-    .map((p) => buildType(p.clientName, p.type, p.format))
+    .map((p) => ({
+      name: p.name,
+      type: getReferenceName(p.type)
+    }))
     .forEach((p) => {
       parameters.set(p.name, p);
     });
 
-  if (operation.bodyParameter) {
-    parameters.set(operation.bodyParameter?.clientName, {
-      hasQuestionToken: operation.bodyParameter.optional,
-      ...buildType(
-        operation.bodyParameter.clientName,
-        operation.bodyParameter.type,
-        operation.bodyParameter.type.format
-      )
-    });
-  }
+    if(operation.operation.bodyParam) {
+      parameters.set(operation.operation.bodyParam.name, {
+        hasQuestionToken: operation.operation.bodyParam.optional,
+        name: operation.operation.bodyParam.name,
+        type: getReferenceName(operation.operation.bodyParam.type)
+      });
+    } 
+
+    
+
   // Add context as the first parameter
   const contextParam = { name: "context", type: clientType };
 
@@ -323,9 +405,12 @@ export function getOperationFunction(
     // https://github.com/Azure/autorest.typescript/issues/2313
   }
 
+  const getSdkType = useSdkTypes();
+  const sdkOperation = getSdkType(operation.__raw);
+
   // Extract required parameters
   const parameters: OptionalKind<ParameterDeclarationStructure>[] =
-    getOperationSignatureParameters(operation, clientType);
+    getOperationSignatureParameters(sdkOperation, clientType);
   // TODO: Support operation overloads
   const response = operation.responses[0]!;
   let returnType = { name: "", type: "void" };
@@ -363,9 +448,11 @@ export function getOperationFunction(
 }
 
 function getLroOnlyOperationFunction(operation: Operation, clientType: string) {
+  const getSdkType = useSdkTypes();
+  const sdkOperation = getSdkType(operation.__raw);
   // Extract required parameters
   const parameters: OptionalKind<ParameterDeclarationStructure>[] =
-    getOperationSignatureParameters(operation, clientType);
+    getOperationSignatureParameters(sdkOperation, clientType);
   const returnType = buildLroReturnType(operation);
   const { name, fixme = [] } = getOperationName(operation);
   const functionStatement = {
@@ -411,9 +498,11 @@ function getPagingOnlyOperationFunction(
   operation: Operation,
   clientType: string
 ) {
+  const getSdkType = useSdkTypes();
+  const sdkOperation = getSdkType(operation.__raw);
   // Extract required parameters
   const parameters: OptionalKind<ParameterDeclarationStructure>[] =
-    getOperationSignatureParameters(operation, clientType);
+    getOperationSignatureParameters(sdkOperation, clientType);
 
   // TODO: Support operation overloads
   const response = operation.responses[0]!;
@@ -475,7 +564,7 @@ function extractPagingType(type: Type, itemName?: string): Type | undefined {
     : undefined;
 }
 export function getOperationOptionsName(
-  operation: Operation,
+  operation: Operation | SdkServiceMethod<SdkHttpOperation>,
   includeGroupName = false
 ) {
   const prefix =
@@ -486,6 +575,7 @@ export function getOperationOptionsName(
   return optionName;
 }
 
+
 /**
  * This function build the request parameters that we will provide to the
  * RLC internally. This will translate High Level parameters into the RLC ones.
@@ -493,21 +583,30 @@ export function getOperationOptionsName(
  */
 function getRequestParameters(
   dpgContext: SdkContext,
-  operation: Operation,
+  operation: SdkServiceMethod<SdkHttpOperation> & {_deprecatedOperation: Operation},
   runtimeImports: RuntimeImports
 ): string {
+
   if (!operation.parameters) {
     return "";
   }
-  const operationParameters = operation.parameters.filter(
-    (p) => p.implementation !== "Client" && !isContentType(p)
+
+  
+  const httpParameters: SdkHttpParameter[] = operation.operation.parameters;
+
+  if(operation.operation.bodyParam) {
+    httpParameters.push(operation.operation.bodyParam);
+  }
+
+  const operationParameters = httpParameters.filter(
+    (p) => !p.onClient && !isContentType(p)
   );
 
-  const contentTypeParameter = operation.parameters.find(isContentType);
+  const contentTypeParameter = httpParameters.find(isContentType) as SdkHeaderParameter;
 
   const parametersImplementation: Record<
     "header" | "query" | "body",
-    { paramMap: string; param: Parameter }[]
+    { paramMap: string; param: SdkBodyParameter | SdkHeaderParameter | SdkQueryParameter }[]
   > = {
     header: [],
     query: [],
@@ -516,12 +615,13 @@ function getRequestParameters(
 
   for (const param of operationParameters) {
     if (
-      param.location === "header" ||
-      param.location === "query" ||
-      param.location === "body"
+      param.kind === "header" ||
+      param.kind === "query" || 
+      param.kind === "body"
     ) {
-      parametersImplementation[param.location].push({
-        paramMap: getParameterMap(param, runtimeImports),
+      parametersImplementation[param.kind].push({
+        // TODO: FIX
+        paramMap: getParameterMap(param as any, runtimeImports),
         param
       });
     }
@@ -535,7 +635,7 @@ function getRequestParameters(
 
   if (parametersImplementation.header.length) {
     paramStr = `${paramStr}\nheaders: {${parametersImplementation.header
-      .map((i) => buildHeaderParameter(dpgContext.program, i.paramMap, i.param))
+      .map((i) => buildHeaderParameter(dpgContext.program, i.paramMap, i.param as SdkHeaderParameter))
       .join(",\n")}},`;
   }
 
@@ -545,40 +645,43 @@ function getRequestParameters(
       .join(",\n")}},`;
   }
   if (
-    operation.bodyParameter === undefined &&
+    operation.operation.bodyParam === undefined &&
     parametersImplementation.body.length
   ) {
     paramStr = `${paramStr}\nbody: {${parametersImplementation.body
       .map((i) => i.paramMap)
       .join(",\n")}}`;
-  } else if (operation.bodyParameter !== undefined) {
+  } else if (operation.operation.bodyParam !== undefined) {
     paramStr = `${paramStr}${buildBodyParameter(
-      operation.bodyParameter,
+      operation._deprecatedOperation.bodyParameter,
       runtimeImports
     )}`;
   }
   return paramStr;
 }
 
+
 // Specially handle the type for headers because we only allow string/number/boolean values
 function buildHeaderParameter(
   program: Program,
   paramMap: string,
-  param: Parameter
+  param: SdkHeaderParameter
 ): string {
-  if (!param.optional && isTypeNullable(param.type) === true) {
+  
+  if (!param.optional && param.type.kind === "nullable") {
     reportDiagnostic(program, {
       code: "nullable-required-header",
       target: NoTarget
     });
     return paramMap;
   }
+
   const conditions = [];
   if (param.optional) {
-    conditions.push(`options?.${param.clientName} !== undefined`);
+    conditions.push(`options?.${param.name} !== undefined`);
   }
-  if (isTypeNullable(param.type) === true) {
-    conditions.push(`options?.${param.clientName} !== null`);
+  if (param.type.kind === "nullable") {
+    conditions.push(`options?.${param.name} !== null`);
   }
   return conditions.length > 0
     ? `...(${conditions.join(" && ")} ? {${paramMap}} : {})`
@@ -707,6 +810,12 @@ function getEncodingFormat(type: { format?: string }) {
   return type.format;
 }
 
+function isConstant(param: Parameter | Property): param is ConstantType {
+  return (
+    param.type.type === "constant" && param.clientDefaultValue !== undefined
+  );
+}
+
 /**
  * This function helps with renames, translating client names to rest api names
  */
@@ -766,24 +875,33 @@ function getCollectionFormat(param: Parameter, runtimeImports: RuntimeImports) {
   )}${additionalParam}): undefined`;
 }
 
-function isContentType(param: Parameter): boolean {
-  return (
-    param.location === "header" &&
-    param.restApiName.toLowerCase() === "content-type"
-  );
+function isContentType(param: Parameter | SdkHttpParameter): boolean {
+  if("location" in param) {
+    return (
+      param.location === "header" &&
+      param.restApiName.toLowerCase() === "content-type"
+    );
+  }
+
+  return param.kind === "header" && param.serializedName.toLowerCase() === "content-type";
+
 }
 
-function getContentTypeValue(param: Parameter | Property) {
-  const defaultValue =
-    param.clientDefaultValue ?? param.type.clientDefaultValue;
+function getContentTypeValue(param: SdkHeaderParameter) {
+  let defaultValue =
+    param.clientDefaultValue;
+
+  if(!defaultValue && "value" in param.type) {
+    defaultValue = param.type.value
+  }
 
   if (defaultValue) {
-    return `contentType: options.${param.clientName} as any ?? "${defaultValue}"`;
+    return `contentType: options.${param.name} as any ?? "${defaultValue}"`;
   } else {
     return `contentType: ${
       !param.optional
         ? "contentType"
-        : "options." + param.clientName + " as any"
+        : "options." + param.name + " as any"
     }`;
   }
 }
@@ -837,11 +955,6 @@ function getConstantValue(param: ConstantType) {
   return `"${param.restApiName}": "${defaultValue}"`;
 }
 
-function isConstant(param: Parameter | Property): param is ConstantType {
-  return (
-    param.type.type === "constant" && param.clientDefaultValue !== undefined
-  );
-}
 
 type OptionalType = (Parameter | Property) & {
   type: { optional: true };

@@ -1,26 +1,28 @@
 import {
+  SdkClientType,
+  SdkContext,
   SdkHttpOperation,
-  SdkMethod,
   SdkPackage,
+  SdkServiceMethod,
   SdkType
 } from "@azure-tools/typespec-client-generator-core";
 import { Operation, Type } from "@typespec/compiler";
 import { provideContext, useContext } from "../contextManager.js";
 
 export interface SdkTypeContext {
-  operations: Map<Type, SdkMethod<SdkHttpOperation>>;
+  operations: Map<Type, SdkServiceMethod<SdkHttpOperation>>;
   types: Map<Type, SdkType>;
 }
 
 export function useSdkTypes() {
   const sdkTypesContext = useContext("sdkTypes");
 
-  function getSdkType(type: Operation): SdkMethod<SdkHttpOperation>;
+  function getSdkType(type: Operation): SdkServiceMethod<SdkHttpOperation>;
   function getSdkType(type: Type): SdkType;
   function getSdkType(
     type: Type | Operation
-  ): SdkType | SdkMethod<SdkHttpOperation> {
-    let sdkType: SdkType | SdkMethod<SdkHttpOperation> | undefined;
+  ): SdkType | SdkServiceMethod<SdkHttpOperation> {
+    let sdkType: SdkType | SdkServiceMethod<SdkHttpOperation> | undefined;
 
     if (type.kind === "Operation") {
       sdkType = sdkTypesContext.operations.get(type);
@@ -40,7 +42,7 @@ export function useSdkTypes() {
 
 export function provideSdkTypes(sdkPackage: SdkPackage<SdkHttpOperation>) {
   const sdkTypesContext = {
-    operations: new Map<Type, SdkMethod<SdkHttpOperation>>(),
+    operations: new Map<Type, SdkServiceMethod<SdkHttpOperation>>(),
     types: new Map<Type, SdkType>()
   };
 
@@ -61,7 +63,7 @@ export function provideSdkTypes(sdkPackage: SdkPackage<SdkHttpOperation>) {
   }
 
   for (const client of sdkPackage.clients) {
-    for (const method of client.methods) {
+    for (const method of getAllOperationsFromClient(client)) {
       if (!method.__raw) {
         continue;
       }
@@ -71,4 +73,44 @@ export function provideSdkTypes(sdkPackage: SdkPackage<SdkHttpOperation>) {
   }
 
   provideContext("sdkTypes", sdkTypesContext);
+}
+
+function getAllOperationsFromClient(client: SdkClientType<SdkHttpOperation>) {
+  const methodQueue = [...client.methods];
+  const operations: SdkServiceMethod<SdkHttpOperation>[] = [];
+  while (methodQueue.length > 0) {
+    const method = methodQueue.pop()!;
+    if (method.kind === "clientaccessor") {
+      method.response.methods.forEach((m) => methodQueue.push(m));
+    } else {
+      operations.push(method);
+    }
+  }
+
+  return operations;
+}
+
+export function getSdkClient(
+  context: SdkContext,
+  methodToCheck: SdkServiceMethod<SdkHttpOperation>
+): SdkClientType<SdkHttpOperation> | undefined {
+  for (const client of context.experimental_sdkPackage.clients) {
+    for (const method of client.methods) {
+      if (method.kind === "clientaccessor") {
+        for (const serviceMethod of method.response.methods) {
+          if (
+            serviceMethod.__raw &&
+            serviceMethod.__raw === methodToCheck.__raw
+          ) {
+            return method.response;
+          }
+        }
+      } else {
+        if (method.__raw && method.__raw === methodToCheck.__raw) {
+          return client;
+        }
+      }
+    }
+  }
+  return undefined;
 }

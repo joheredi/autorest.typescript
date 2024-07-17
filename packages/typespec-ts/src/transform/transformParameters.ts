@@ -106,7 +106,7 @@ export function transformToParameterTypes(
       outputImportedSet
     );
     // transform body
-    const bodyType = getBodyType(program, route);
+    const bodyType = getBodyType(route);
     let bodyParameter = undefined;
     if (bodyType) {
       bodyParameter = transformBodyParameters(

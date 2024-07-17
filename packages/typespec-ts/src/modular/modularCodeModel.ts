@@ -8,7 +8,11 @@ import {
   SdkBodyParameter,
   SdkType
 } from "@azure-tools/typespec-client-generator-core";
-import { UsageFlags, Type as TypespecType } from "@typespec/compiler";
+import {
+  UsageFlags,
+  Type as TypespecType,
+  Operation as TypeSpecOperation
+} from "@typespec/compiler";
 import { Project } from "ts-morph";
 
 export interface ModularOptions {
@@ -198,6 +202,7 @@ export interface Operation {
   rlcResponse?: OperationResponse;
   namespaceHierarchies: string[];
   lroMetadata?: LroOperationMetadata;
+  __raw: TypeSpecOperation;
 }
 
 export interface LroOperationMetadata {

@@ -115,7 +115,6 @@ import {
   Type as HrlcType
 } from "./modularCodeModel.js";
 import { useContext } from "../contextManager.js";
-import { useSdkTypes } from "../context/sdkTypes.js";
 
 interface HttpServerParameter {
   type: "endpointPath";
@@ -472,14 +471,10 @@ function emitBodyParameter(
     if (contentTypes.length === 0) {
       contentTypes = ["application/json"];
     }
-    const type = getType(
-      context,
-      getBodyType(context.program, httpOperation)!,
-      {
-        disableEffectiveModel: true,
-        usage: UsageFlags.Input
-      }
-    );
+    const type = getType(context, getBodyType(httpOperation)!, {
+      disableEffectiveModel: true,
+      usage: UsageFlags.Input
+    });
 
     return {
       contentTypes,
@@ -755,7 +750,6 @@ function emitBasicOperation(
   rlcModels: RLCModel,
   hierarchies: string[]
 ): HrlcOperation {
-  const getSdkType = useSdkTypes()!;
   // Set up parameters for operation
   const parameters: any[] = [];
   if (endpointPathParameters) {
@@ -843,8 +837,6 @@ function emitBasicOperation(
   } else {
     bodyParameter = emitBodyParameter(context, httpOperation);
     // Flatten the body parameter if it is an anonymous model
-    const sdkOperation = getSdkType(operation);
-    console.log(`Found ${sdkOperation.name} from TypeSpec Operation type`);
     if (
       bodyParameter.type.type === "model" &&
       bodyParameter.type.name === "" &&
@@ -907,7 +899,8 @@ function emitBasicOperation(
     overloads: [],
     apiVersions: [getAddedOnVersion(context.program, operation)],
     rlcResponse: rlcResponses?.[0],
-    namespaceHierarchies
+    namespaceHierarchies,
+    __raw: operation
   };
 }
 
