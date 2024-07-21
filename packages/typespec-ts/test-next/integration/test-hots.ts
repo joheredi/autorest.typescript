@@ -3,16 +3,29 @@ import {
   SdkEmitterOptions,
   SdkHttpOperation,
   SdkServiceOperation,
-  createSdkContext,
+  createSdkContext
 } from "@azure-tools/typespec-client-generator-core";
 import { SdkTestLibrary } from "@azure-tools/typespec-client-generator-core/testing";
 import { EmitContext, Program } from "@typespec/compiler";
-import { createTestHost, createTestWrapper, TypeSpecTestLibrary } from "@typespec/compiler/testing";
+import {
+  createTestHost,
+  createTestWrapper,
+  TypeSpecTestLibrary
+} from "@typespec/compiler/testing";
 import { HttpTestLibrary } from "@typespec/http/testing";
+import { AzureCoreTestLibrary } from "@azure-tools/typespec-azure-core/testing";
+import { RestTestLibrary } from "@typespec/rest/testing";
+import { VersioningTestLibrary } from "@typespec/versioning/testing";
 
 export async function createMyTestHost() {
   return createTestHost({
-    libraries: [HttpTestLibrary, SdkTestLibrary]
+    libraries: [
+      HttpTestLibrary,
+      SdkTestLibrary,
+      AzureCoreTestLibrary,
+      RestTestLibrary,
+      VersioningTestLibrary
+    ]
   });
 }
 
@@ -21,19 +34,53 @@ export interface CreateSdkTestRunnerOptions extends SdkEmitterOptions {
   librariesToAdd?: TypeSpecTestLibrary[];
   autoUsings?: string[];
   packageName?: string;
+  skipServiceSpecPrepend?: boolean;
 }
 
-export async function createSdkContextFromTypespec(code: string, options: CreateSdkTestRunnerOptions = {}): Promise<SdkContext<CreateSdkTestRunnerOptions, SdkHttpOperation>>{
+export async function createSdkContextFromTypespec(
+  code: string,
+  options: CreateSdkTestRunnerOptions = {}
+): Promise<SdkContext<CreateSdkTestRunnerOptions, SdkHttpOperation>> {
   const runner = await createMyTestRunner();
-  await runner.compile(code);
+
+  const prependServiceSpec = `@service({
+      title: "Contoso Widget Manager",
+    })
+    @server(
+      "{endpoint}/widget",
+      "Contoso Widget APIs",
+      {
+        /** 
+    Supported Widget Services endpoints (protocol and hostname, for example:
+    https://westus.api.widget.contoso.com).
+    */
+        endpoint: string,
+      }
+    )
+    @versioned(Contoso.WidgetManager.Versions)
+    namespace Contoso.WidgetManager;
+
+    /** The Contoso Widget Manager service version. */
+    enum Versions {
+      /** Version 2022-08-31 */
+      @useDependency(Azure.Core.Versions.v1_0_Preview_2)
+      \`2022-08-30\`,
+    }`;
+
+  let fullSpec = code;
+
+  if (!options.skipServiceSpecPrepend) {
+    fullSpec = `${prependServiceSpec}\n${code}`;
+  }
+
+  await runner.compile(fullSpec);
 
   return createSdkContextTestHelper(runner.program, options);
 }
 
-
 export function createSdkContextTestHelper<
   TOptions extends Record<string, any> = CreateSdkTestRunnerOptions,
-  TServiceOperation extends SdkServiceOperation = SdkHttpOperation,
+  TServiceOperation extends SdkServiceOperation = SdkHttpOperation
 >(
   program: Program,
   options: TOptions,
@@ -43,11 +90,11 @@ export function createSdkContextTestHelper<
     program: program,
     emitterOutputDir: "dummy",
     options: options,
-    getAssetEmitter: null as any,
+    getAssetEmitter: null as any
   };
   return createSdkContext(
     emitContext,
-    options.emitterName ?? "@azure-tools/typespec-csharp",
+    options.emitterName ?? "@azure-tools/typespec-ts",
     sdkContextOption
   );
 }
@@ -55,7 +102,13 @@ export function createSdkContextTestHelper<
 export async function createMyTestRunner() {
   const host = await createMyTestHost();
   return createTestWrapper(host, {
-    autoUsings: ["TypeSpec.Http", "Azure.ClientGenerator.Core"]
+    autoUsings: [
+      "TypeSpec.Http",
+      "Azure.ClientGenerator.Core",
+      "Azure.Core",
+      "Azure.Core.Traits",
+      "TypeSpec.Versioning"
+    ]
   });
 }
 
