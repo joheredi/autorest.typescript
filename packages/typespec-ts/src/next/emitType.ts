@@ -71,14 +71,16 @@ export function emitType(type: SdkType, options?: EmitTypeOptions): string {
       return JSON.stringify(type.value);
     case "model":
       return emitModel(type, options);
-    case "nullable":
+    case "nullable": {
       const nonNullableType = emitType(type.type, options);
       return `(${nonNullableType}) | null`;
+    }
     case "offsetDateTime":
       return "string";
-    case "tuple":
+    case "tuple": {
       const types = type.values.map((v) => emitType(v, options)).join(", ");
       return `[${types}]`;
+    }
     case "union":
       return emitUnion(type, options);
     case "utcDateTime":

@@ -4,7 +4,7 @@ export function shouldEmitInline(
   type: { isGeneratedName?: boolean },
   options: EmitTypeOptions = {}
 ): boolean {
-  let emitInline = options.emitInline;
+  const emitInline = options.emitInline;
 
   if (emitInline === undefined && "isGeneratedName" in type) {
     // If not explicitly set, default to emitting inline for anonymous types
