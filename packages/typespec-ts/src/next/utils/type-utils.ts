@@ -1,4 +1,4 @@
-import { EmitTypeOptions } from "../emitType.js";
+import { EmitTypeOptions } from "../emit/emitType.js";
 
 export function shouldEmitInline(
   type: { isGeneratedName?: boolean },

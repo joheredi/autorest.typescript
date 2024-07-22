@@ -6,7 +6,7 @@ import {
 import { beforeAll, assert, it, describe, expect } from "vitest";
 import { provideContext } from "../../../src/contextManager.js";
 import { provideSdkTypes } from "../../../src/framework/hooks/sdkTypes.js";
-import { emitType } from "../../../src/next/emitType.js";
+import { emitType } from "../../../src/next/emit/emitType.js";
 import { createSdkContextFromTypespec } from "../test-hots.js";
 import { provideBinder } from "../../../src/framework/hooks/binder.js";
 import { expectEqualCode } from "../../utils/code-utils.js";
