@@ -1,12 +1,4 @@
 import {
-  addImportToSpecifier,
-  getResponseBaseName,
-  getResponseTypeName,
-  Imports as RuntimeImports,
-  NameType,
-  OperationResponse
-} from "@azure-tools/rlc-common";
-import {
   SdkContext,
   SdkModelType,
   SdkType
@@ -18,7 +10,7 @@ import {
   ParameterDeclarationStructure
 } from "ts-morph";
 import { reportDiagnostic } from "../../lib.js";
-import { toCamelCase, toPascalCase } from "../../utils/casingUtils.js";
+import { toCamelCase } from "../../utils/casingUtils.js";
 import {
   getCollectionFormatHelper,
   hasCollectionFormatInfo
@@ -43,70 +35,46 @@ import {
   getDocsFromDescription,
   getFixmeForMultilineDocs
 } from "./docsHelpers.js";
-import { getClassicalLayerPrefix, getOperationName } from "./namingHelpers.js";
+import { getOperationName } from "./namingHelpers.js";
 import { buildType, isTypeNullable } from "./typeHelpers.js";
-
-function getRLCResponseType(rlcResponse?: OperationResponse) {
-  if (!rlcResponse?.responses) {
-    return;
-  }
-  return rlcResponse?.responses
-    .map((resp) => {
-      const baseResponseName = getResponseBaseName(
-        rlcResponse.operationGroup,
-        rlcResponse.operationName,
-        resp.statusCode
-      );
-      // Get the information to build the Response Interface
-      return resp.predefinedName ?? getResponseTypeName(baseResponseName);
-    })
-    .join(" | ");
-}
-
-function getRLCLroLogicalResponse(rlcResponse?: OperationResponse) {
-  const logicalResponse = (rlcResponse?.responses ?? []).filter(
-    (r) => r.predefinedName && r.predefinedName.endsWith(`LogicalResponse`)
-  );
-  return logicalResponse.length > 0
-    ? logicalResponse[0]!.predefinedName!
-    : "any";
-}
+import { resolveReference } from "../../framework/reference.js";
+import { refkey } from "../../framework/refkey.js";
+import {
+  OperationDeclarations,
+  PagingDeclarations
+} from "../../framework/declaration.js";
+import { CoreDependencies } from "../../core/dependencies.js";
+import { LroDependencies } from "../../core/azure-dependencies.js";
+import { LroRefKeys } from "../buildLroFiles.js";
 
 export function getSendPrivateFunction(
   dpgContext: SdkContext,
   operation: Operation,
-  clientType: string,
-  runtimeImports: RuntimeImports
+  clientType: Client
 ): OptionalKind<FunctionDeclarationStructure> {
   const parameters = getOperationSignatureParameters(operation, clientType);
   const { name } = getOperationName(operation);
-  const returnType = `StreamableMethod<${getRLCResponseType(
-    operation.rlcResponse
-  )}>`;
 
   const functionStatement: OptionalKind<FunctionDeclarationStructure> = {
     isAsync: false,
     isExported: true,
     name: `_${name}Send`,
-    parameters,
-    returnType
+    parameters
   };
 
   const operationPath = operation.url;
   const operationMethod = operation.method.toLowerCase();
   const optionalParamName = parameters.filter(
-    (p) => p.type?.toString().endsWith("OptionalParams")
+    (p) => p.type?.toString().includes("OperationOptions")
   )[0]?.name;
 
   const statements: string[] = [];
   statements.push(
     `return context.path("${operationPath}", ${getPathParameters(
       operation
-    )}).${operationMethod}({...operationOptionsToRequestParameters(${optionalParamName}), ${getRequestParameters(
-      dpgContext,
-      operation,
-      runtimeImports
-    )}}) ${operation.isOverload ? `as ${returnType}` : ``} ;`
+    )}).${operationMethod}({...${resolveReference(
+      CoreDependencies.operationOptionsToRequestParameters
+    )}(${optionalParamName}), ${getRequestParameters(dpgContext, operation)}});`
   );
 
   return {
@@ -116,16 +84,13 @@ export function getSendPrivateFunction(
 }
 
 export function getDeserializePrivateFunction(
-  operation: Operation,
-  needSubClient: boolean,
-  needUnexpectedHelper: boolean,
-  runtimeImports: RuntimeImports
+  operation: Operation
 ): OptionalKind<FunctionDeclarationStructure> {
   const { name } = getOperationName(operation);
   const parameters: OptionalKind<ParameterDeclarationStructure>[] = [
     {
       name: "result",
-      type: getRLCResponseType(operation.rlcResponse)
+      type: "any"
     }
   ];
   // TODO: Support LRO + paging operation
@@ -155,32 +120,21 @@ export function getDeserializePrivateFunction(
     returnType: `Promise<${returnType.type}>`
   };
   const statements: string[] = [];
-  if (needUnexpectedHelper) {
+
+  const validStatus = [
+    ...new Set(
+      operation.responses
+        .flatMap((r) => r.statusCodes)
+        .filter((s) => s !== "default")
+    )
+  ];
+
+  if (validStatus.length > 0) {
     statements.push(
-      `if(${needSubClient ? "UnexpectedHelper." : ""}isUnexpected(result)){`,
-      `throw createRestError(result);`,
+      `if(${validStatus.map((s) => `result.status !== "${s}"`).join(" || ")}){`,
+      `throw ${resolveReference(CoreDependencies.createRestError)}(result);`,
       "}"
     );
-    addImportToSpecifier("restClient", runtimeImports, "createRestError");
-  } else {
-    const validStatus = [
-      ...new Set(
-        operation.responses
-          .flatMap((r) => r.statusCodes)
-          .filter((s) => s !== "default")
-      )
-    ];
-
-    if (validStatus.length > 0) {
-      statements.push(
-        `if(${validStatus
-          .map((s) => `result.status !== "${s}"`)
-          .join(" || ")}){`,
-        `throw createRestError(result);`,
-        "}"
-      );
-      addImportToSpecifier("restClient", runtimeImports, "createRestError");
-    }
   }
 
   const deserializedType = isLroOnly
@@ -191,8 +145,6 @@ export function getDeserializePrivateFunction(
     ? `result.body.${operation?.lroMetadata?.finalResultPath}`
     : "result.body";
   if (isLroOnly) {
-    const lroLogicalResponse = getRLCLroLogicalResponse(operation.rlcResponse);
-    statements.push(`result = result as ${lroLogicalResponse};`);
     if (hasLroSubPath) {
       statements.push(
         `if(${deserializedRoot.split(".").join("?.")} === undefined) {
@@ -223,11 +175,7 @@ export function getDeserializePrivateFunction(
   ) {
     statements.push(
       `return {`,
-      getResponseMapping(
-        deserializedType,
-        deserializedRoot,
-        runtimeImports
-      ).join(","),
+      getResponseMapping(deserializedType, deserializedRoot).join(","),
       `}`
     );
   } else if (returnType.type === "void" || deserializedType === undefined) {
@@ -237,7 +185,6 @@ export function getDeserializePrivateFunction(
       `return ${deserializeResponseValue(
         deserializedType,
         deserializedRoot,
-        runtimeImports,
         false, // TODO: Calculate if required
         [deserializedType],
         deserializedType.format
@@ -252,9 +199,11 @@ export function getDeserializePrivateFunction(
 
 function getOperationSignatureParameters(
   operation: Operation,
-  clientType: string
+  _client: Client
 ): OptionalKind<ParameterDeclarationStructure>[] {
-  const optionsType = getOperationOptionsName(operation, true);
+  const optionsType = resolveReference(
+    refkey(operation, OperationDeclarations.OperationOptions)
+  );
   const parameters: Map<
     string,
     OptionalKind<ParameterDeclarationStructure>
@@ -284,7 +233,10 @@ function getOperationSignatureParameters(
     });
   }
   // Add context as the first parameter
-  const contextParam = { name: "context", type: clientType };
+  const contextParam = {
+    name: "context",
+    type: resolveReference(CoreDependencies.clientType)
+  };
 
   // Add the options parameter
   const optionsParam = {
@@ -303,7 +255,7 @@ function getOperationSignatureParameters(
  */
 export function getOperationFunction(
   operation: Operation,
-  clientType: string
+  clientType: Client
 ): OptionalKind<FunctionDeclarationStructure> & { propertyName?: string } {
   if (isPagingOnlyOperation(operation)) {
     // Case 1: paging-only operation
@@ -355,7 +307,7 @@ export function getOperationFunction(
   };
 }
 
-function getLroOnlyOperationFunction(operation: Operation, clientType: string) {
+function getLroOnlyOperationFunction(operation: Operation, clientType: Client) {
   // Extract required parameters
   const parameters: OptionalKind<ParameterDeclarationStructure>[] =
     getOperationSignatureParameters(operation, clientType);
@@ -370,19 +322,22 @@ function getLroOnlyOperationFunction(operation: Operation, clientType: string) {
     isExported: true,
     name,
     propertyName: operation.name,
-    parameters,
-    returnType: `PollerLike<OperationState<${returnType.type}>, ${returnType.type}>`
+    parameters
   };
 
   const statements: string[] = [];
   statements.push(`
-  return getLongRunningPoller(context, _${name}Deserialize, {
+  return ${resolveReference(
+    LroRefKeys.GetLongRunningPollerFunction
+  )}(context, _${name}Deserialize, {
     updateIntervalInMs: options?.updateIntervalInMs,
     abortSignal: options?.abortSignal,
     getInitialResponse: () => _${name}Send(${parameters
       .map((p) => p.name)
       .join(", ")})
-  }) as PollerLike<OperationState<${returnType.type}>, ${returnType.type}>;
+  }) as ${resolveReference(LroDependencies.pollerLike)}<${resolveReference(
+    LroDependencies.operationState
+  )}<${returnType.type}>, ${returnType.type}>;
   `);
 
   return {
@@ -402,20 +357,12 @@ function buildLroReturnType(operation: Operation) {
 
 function getPagingOnlyOperationFunction(
   operation: Operation,
-  clientType: string
+  clientType: Client
 ) {
   // Extract required parameters
   const parameters: OptionalKind<ParameterDeclarationStructure>[] =
     getOperationSignatureParameters(operation, clientType);
 
-  // TODO: Support operation overloads
-  const response = operation.responses[0]!;
-  let returnType = { name: "", type: "void" };
-  if (response.type?.type) {
-    const type =
-      extractPagingType(response.type, operation.itemName) ?? response.type;
-    returnType = buildType(type.name, type, type.format);
-  }
   const { name, fixme = [] } = getOperationName(operation);
   const functionStatement = {
     docs: [
@@ -426,8 +373,7 @@ function getPagingOnlyOperationFunction(
     isExported: true,
     name,
     propertyName: operation.name,
-    parameters,
-    returnType: `PagedAsyncIterableIterator<${returnType.type}>`
+    parameters
   };
 
   const statements: string[] = [];
@@ -439,7 +385,9 @@ function getPagingOnlyOperationFunction(
     options.push(`nextLinkName: "${operation.continuationTokenName}"`);
   }
   statements.push(
-    `return buildPagedAsyncIterator(
+    `return ${resolveReference(
+      PagingDeclarations.BuildPagedAsyncIteratorFunction
+    )}(
       context, 
       () => _${name}Send(${parameters.map((p) => p.name).join(", ")}), 
       _${name}Deserialize,
@@ -467,17 +415,6 @@ function extractPagingType(type: Type, itemName?: string): Type | undefined {
     ? prop[0].elementType
     : undefined;
 }
-export function getOperationOptionsName(
-  operation: Operation,
-  includeGroupName = false
-) {
-  const prefix =
-    includeGroupName && operation.name.indexOf("_") === -1
-      ? getClassicalLayerPrefix(operation, NameType.Interface)
-      : "";
-  const optionName = `${prefix}${toPascalCase(operation.name)}OptionalParams`;
-  return optionName;
-}
 
 /**
  * This function build the request parameters that we will provide to the
@@ -486,8 +423,7 @@ export function getOperationOptionsName(
  */
 function getRequestParameters(
   dpgContext: SdkContext,
-  operation: Operation,
-  runtimeImports: RuntimeImports
+  operation: Operation
 ): string {
   if (!operation.parameters) {
     return "";
@@ -514,7 +450,7 @@ function getRequestParameters(
       param.location === "body"
     ) {
       parametersImplementation[param.location].push({
-        paramMap: getParameterMap(param, runtimeImports),
+        paramMap: getParameterMap(param),
         param
       });
     }
@@ -545,10 +481,7 @@ function getRequestParameters(
       .map((i) => i.paramMap)
       .join(",\n")}}`;
   } else if (operation.bodyParameter !== undefined) {
-    paramStr = `${paramStr}${buildBodyParameter(
-      operation.bodyParameter,
-      runtimeImports
-    )}`;
+    paramStr = `${paramStr}${buildBodyParameter(operation.bodyParameter)}`;
   }
   return paramStr;
 }
@@ -578,10 +511,7 @@ function buildHeaderParameter(
     : paramMap;
 }
 
-function buildBodyParameter(
-  bodyParameter: BodyParameter | undefined,
-  runtimeImports: RuntimeImports
-) {
+function buildBodyParameter(bodyParameter: BodyParameter | undefined) {
   if (!bodyParameter) {
     return "";
   }
@@ -595,7 +525,6 @@ function buildBodyParameter(
     const { propertiesStr: bodyParts } = getRequestModelMapping(
       bodyParameter.type,
       bodyParameter.clientName,
-      runtimeImports,
       [bodyParameter.type]
     );
 
@@ -609,7 +538,6 @@ function buildBodyParameter(
     }
   } else if (isDiscriminatedUnion(bodyParameter.type.tcgcType)) {
     const serializerName = toCamelCase(`${bodyParameter.type.name}Serializer`);
-    addImportToSpecifier("modularModel", runtimeImports, serializerName);
     return `\nbody: ${serializerName}(${bodyParameter.clientName}),`;
   } else if (
     (bodyParameter.type.type === "model" &&
@@ -641,12 +569,9 @@ function buildBodyParameter(
       !bodyParameter.type.elementType.aliasType
     ) {
       const { propertiesStr: bodyParts, directAssignment } =
-        getRequestModelMapping(
-          bodyParameter.type.elementType,
-          "p",
-          runtimeImports,
-          [bodyParameter.type.elementType]
-        );
+        getRequestModelMapping(bodyParameter.type.elementType, "p", [
+          bodyParameter.type.elementType
+        ]);
       const mapBody =
         directAssignment === true
           ? bodyParts.join(", ")
@@ -658,25 +583,27 @@ function buildBodyParameter(
       ) {
         bodyElementStatement = `!p ? p : `;
       }
-      return `\nbody: (${bodyParameter.clientName} ?? []).map((p) => { 
+      return `\nbody: (${bodyParameter.clientName} ?? []).map((p: any) => { 
       return ${bodyElementStatement}${mapBody};
       }),`;
     }
     return `\nbody: ${bodyParameter.clientName},`;
   }
 
+  const uint8ArrayToStringRef = resolveReference(
+    CoreDependencies.uint8ArrayToString
+  );
   if (
     bodyParameter.type.type === "byte-array" &&
     !bodyParameter.isBinaryPayload
   ) {
-    addImportToSpecifier("coreUtil", runtimeImports, "uint8ArrayToString");
     return bodyParameter.optional
       ? `body: typeof ${bodyParameter.clientName} === 'string'
-    ? uint8ArrayToString(${bodyParameter.clientName}, "${getEncodingFormat(
-      bodyParameter
-    )}")
+    ? ${uint8ArrayToStringRef}(${
+      bodyParameter.clientName
+    }, "${getEncodingFormat(bodyParameter)}")
     : ${bodyParameter.clientName}`
-      : `body: uint8ArrayToString(${
+      : `body: ${uint8ArrayToStringRef}(${
           bodyParameter.clientName
         }, "${getEncodingFormat(bodyParameter)}")`;
   } else if (bodyParameter.isBinaryPayload) {
@@ -703,31 +630,28 @@ function getEncodingFormat(type: { format?: string }) {
 /**
  * This function helps with renames, translating client names to rest api names
  */
-export function getParameterMap(
-  param: Parameter | Property,
-  runtimeImports: RuntimeImports
-): string {
+export function getParameterMap(param: Parameter | Property): string {
   if (isConstant(param)) {
     return getConstantValue(param);
   }
 
   if (hasCollectionFormatInfo((param as any).location, (param as any).format)) {
-    return getCollectionFormat(param as Parameter, runtimeImports);
+    return getCollectionFormat(param as Parameter);
   }
 
   // if the parameter or property is optional, we don't need to handle the default value
   if (isOptional(param)) {
-    return getOptional(param, runtimeImports);
+    return getOptional(param);
   }
 
   if (isRequired(param)) {
-    return getRequired(param, runtimeImports);
+    return getRequired(param);
   }
 
   throw new Error(`Parameter ${param.clientName} is not supported`);
 }
 
-function getCollectionFormat(param: Parameter, runtimeImports: RuntimeImports) {
+function getCollectionFormat(param: Parameter) {
   const collectionInfo = getCollectionFormatHelper(
     param.location,
     param.format ?? ""
@@ -741,7 +665,6 @@ function getCollectionFormat(param: Parameter, runtimeImports: RuntimeImports) {
     return `"${param.restApiName}": ${collectionInfo}(${serializeRequestValue(
       param.type,
       param.clientName,
-      runtimeImports,
       true,
       [param.type],
       param.format
@@ -752,7 +675,6 @@ function getCollectionFormat(param: Parameter, runtimeImports: RuntimeImports) {
   } !== undefined ? ${collectionInfo}(${serializeRequestValue(
     param.type,
     "options?." + param.clientName,
-    runtimeImports,
     false,
     [param.type],
     param.format
@@ -789,12 +711,11 @@ function isRequired(param: Parameter | Property): param is RequiredType {
   return !param.optional;
 }
 
-function getRequired(param: RequiredType, runtimeImports: RuntimeImports) {
+function getRequired(param: RequiredType) {
   if (param.type.type === "model") {
     const { propertiesStr } = getRequestModelMapping(
       param.type,
       param.clientName,
-      runtimeImports,
       [param.type]
     );
     return `"${param.restApiName}": { ${propertiesStr.join(",")} }`;
@@ -802,7 +723,6 @@ function getRequired(param: RequiredType, runtimeImports: RuntimeImports) {
   return `"${param.restApiName}": ${serializeRequestValue(
     param.type,
     param.clientName,
-    runtimeImports,
     true,
     [param.type],
     param.format === undefined &&
@@ -844,12 +764,11 @@ function isOptional(param: Parameter | Property): param is OptionalType {
   return Boolean(param.optional);
 }
 
-function getOptional(param: OptionalType, runtimeImports: RuntimeImports) {
+function getOptional(param: OptionalType) {
   if (param.type.type === "model") {
     const { propertiesStr } = getRequestModelMapping(
       param.type,
       "options?." + param.clientName + "?",
-      runtimeImports,
       [param.type]
     );
     return `"${param.restApiName}": { ${propertiesStr.join(", ")} }`;
@@ -867,7 +786,6 @@ function getOptional(param: OptionalType, runtimeImports: RuntimeImports) {
   return `"${param.restApiName}": ${serializeRequestValue(
     param.type,
     `options?.${param.clientName}`,
-    runtimeImports,
     false,
     [param.type],
     param.format === undefined &&
@@ -941,7 +859,6 @@ interface RequestModelMappingResult {
 export function getRequestModelMapping(
   modelPropertyType: Type,
   propertyPath: string = "body",
-  runtimeImports: RuntimeImports,
   typeStack: Type[] = []
 ): RequestModelMappingResult {
   const props: string[] = [];
@@ -1008,7 +925,6 @@ export function getRequestModelMapping(
             `${propertyPath}.${property.clientName}${
               property.optional ? "?" : ""
             }`,
-            runtimeImports,
             [...typeStack, property.type]
           );
 
@@ -1041,13 +957,7 @@ export function getRequestModelMapping(
       serializerName = modelName ? `${toCamelCase(modelName)}Serializer` : "";
       // definition = `"${property.restApiName}": ${nullOrUndefinedPrefix}${serializerName}(${propertyPath}.${property.clientName})`;
       const statement = `"${property.restApiName}": ${nullOrUndefinedPrefix} serializeRecord(${propertyFullName} as any, ${serializerName}) as any`;
-      // addImportToSpecifier(
-      //   "serializerHelpers",
-      //   runtimeImports,
-      //   "serializeRecord"
-      // );
 
-      addImportToSpecifier("modularModel", runtimeImports, serializerName);
       props.push(statement);
     } else if (modelPropertyType.type === "enum") {
       props.push(
@@ -1062,7 +972,6 @@ export function getRequestModelMapping(
         `"${property.restApiName}": ${serializeRequestValue(
           property.type,
           clientValue,
-          runtimeImports,
           !property.optional,
           [...typeStack, property.type],
           property.format
@@ -1081,7 +990,6 @@ export function getRequestModelMapping(
 export function getResponseMapping(
   type: Type,
   propertyPath: string = "result.body",
-  runtimeImports: RuntimeImports,
   typeStack: Type[] = []
 ) {
   const allParents = getAllAncestors(type);
@@ -1132,7 +1040,6 @@ export function getResponseMapping(
           `${propertyPath}.${property.restApiName}${
             property.optional ? "?" : ""
           }`,
-          runtimeImports,
           [...typeStack, property.type]
         )}}`;
       }
@@ -1159,7 +1066,6 @@ export function getResponseMapping(
           `"${property.clientName}": ${deserializeResponseValue(
             property.type,
             restValue,
-            runtimeImports,
             property.optional !== undefined ? !property.optional : false,
             [...typeStack, property.type],
             property.format
@@ -1181,7 +1087,6 @@ export function getResponseMapping(
 export function deserializeResponseValue(
   type: Type,
   restValue: string,
-  runtimeImports: RuntimeImports,
   required: boolean,
   typeStack: Type[] = [],
   format?: string
@@ -1210,10 +1115,9 @@ export function deserializeResponseValue(
             isTypeNullable(type.elementType) || type.elementType.optional
               ? "!p ? p :"
               : "";
-          return `${prefix}.map(p => { return ${elementNullOrUndefinedPrefix}{${getResponseMapping(
+          return `${prefix}.map((p: any) => { return ${elementNullOrUndefinedPrefix}{${getResponseMapping(
             type.elementType,
             "p",
-            runtimeImports,
             [...typeStack, type.elementType]
           )}}})`;
         } else if (isPolymorphicUnion(type.elementType)) {
@@ -1225,7 +1129,7 @@ export function deserializeResponseValue(
             type.elementType,
             "deserialize"
           );
-          return `${prefix}.map(p => ${nullOrUndefinedPrefix}${deserializeFunctionName}(p))`;
+          return `${prefix}.map((p: any) => ${nullOrUndefinedPrefix}${deserializeFunctionName}(p))`;
         }
         return `${prefix}`;
       } else if (
@@ -1235,7 +1139,6 @@ export function deserializeResponseValue(
         return `${prefix}.map(p => ${deserializeResponseValue(
           type.elementType!,
           "p",
-          runtimeImports,
           true,
           [...typeStack, type.elementType!],
           type.elementType?.format
@@ -1246,7 +1149,6 @@ export function deserializeResponseValue(
     }
     case "byte-array":
       if (format !== "binary") {
-        addImportToSpecifier("coreUtil", runtimeImports, "stringToUint8Array");
         return `typeof ${restValue} === 'string'
         ? stringToUint8Array(${restValue}, "${format ?? "base64"}")
         : ${restValue}`;
@@ -1296,11 +1198,13 @@ export function deserializeResponseValue(
 export function serializeRequestValue(
   type: Type,
   clientValue: string,
-  runtimeImports: RuntimeImports,
   required: boolean,
   typeStack: Type[] = [],
   format?: string
 ): string {
+  const uint8ArrayToStringRef = resolveReference(
+    CoreDependencies.uint8ArrayToString
+  );
   const requiredPrefix =
     required === false ? `${clientValue} === undefined` : "";
   const nullablePrefix = isTypeNullable(type) ? `${clientValue} === null` : "";
@@ -1341,11 +1245,10 @@ export function serializeRequestValue(
           const { propertiesStr } = getRequestModelMapping(
             type.elementType,
             "p",
-            runtimeImports,
             [...typeStack, type.elementType]
           );
 
-          return `${prefix}.map(p => { return ${elementNullOrUndefinedPrefix}{${propertiesStr}}})`;
+          return `${prefix}.map((p: any) => { return ${elementNullOrUndefinedPrefix}{${propertiesStr}}})`;
         } else {
           // When it is not anonymous we can hand it off to the serializer function
           return `${prefix}.map(${toCamelCase(
@@ -1356,10 +1259,9 @@ export function serializeRequestValue(
         needsDeserialize(type.elementType) &&
         !type.elementType?.aliasType
       ) {
-        return `${prefix}.map(p => ${serializeRequestValue(
+        return `${prefix}.map((p: any) => ${serializeRequestValue(
           type.elementType!,
           "p",
-          runtimeImports,
           true,
           [...typeStack, type.elementType!],
           type.elementType?.format
@@ -1375,22 +1277,21 @@ export function serializeRequestValue(
         const serializeFunctionName = type.elementType?.name
           ? `${toCamelCase(type.elementType.name)}Serializer`
           : getDeserializeFunctionName(type.elementType, "serialize");
-        return `${prefix}.map(p => ${nullOrUndefinedPrefix}${serializeFunctionName}(p))`;
+        return `${prefix}.map((p: any) => ${nullOrUndefinedPrefix}${serializeFunctionName}(p))`;
       } else {
         return clientValue;
       }
     }
     case "byte-array":
       if (format !== "binary") {
-        addImportToSpecifier("coreUtil", runtimeImports, "uint8ArrayToString");
         return required
           ? `${getNullableCheck(
               clientValue,
               type
-            )} uint8ArrayToString(${clientValue}, "${
+            )} ${uint8ArrayToStringRef}(${clientValue}, "${
               getEncodingFormat({ format }) ?? "base64"
             }")`
-          : `${clientValue} !== undefined ? uint8ArrayToString(${clientValue}, "${
+          : `${clientValue} !== undefined ? ${uint8ArrayToStringRef}(${clientValue}, "${
               getEncodingFormat({ format }) ?? "base64"
             }"): undefined`;
       }

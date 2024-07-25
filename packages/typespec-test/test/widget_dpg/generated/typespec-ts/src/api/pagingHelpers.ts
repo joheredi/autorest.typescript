@@ -14,48 +14,6 @@ import {
   PagedAsyncIterableIterator,
   PagedResult,
 } from "../models/pagingTypes.js";
-import { isUnexpected } from "../rest/index.js";
-
-/**
- * Helper to paginate results in a generic way and return a PagedAsyncIterableIterator
- */
-export function buildPagedAsyncIterator<
-  TElement,
-  TPage = TElement[],
-  TPageSettings extends PageSettings = PageSettings,
-  TResponse extends PathUncheckedResponse = PathUncheckedResponse,
->(
-  client: Client,
-  getInitialResponse: () => PromiseLike<TResponse>,
-  processResponseBody: (result: TResponse) => PromiseLike<unknown>,
-  options: BuildPagedAsyncIteratorOptions = {},
-): PagedAsyncIterableIterator<TElement, TPage, TPageSettings> {
-  const itemName = options.itemName ?? "value";
-  const nextLinkName = options.nextLinkName ?? "nextLink";
-  const pagedResult: PagedResult<TElement, TPage, TPageSettings> = {
-    getPage: async (pageLink?: string) => {
-      const result =
-        pageLink === undefined
-          ? await getInitialResponse()
-          : await client.pathUnchecked(pageLink).get();
-      checkPagingRequest(result);
-      const results = await processResponseBody(result as TResponse);
-      const nextLink = getNextLink(results, nextLinkName);
-      const values = getElements<TElement>(results, itemName) as TPage;
-      return {
-        page: values,
-        nextPageLink: nextLink,
-      };
-    },
-    byPage: (settings?: TPageSettings) => {
-      const { continuationToken } = settings ?? {};
-      return getPageAsyncIterator(pagedResult, {
-        pageLink: continuationToken,
-      });
-    },
-  };
-  return getPagedAsyncIterator(pagedResult);
-}
 
 /**
  * returns an async iterator that iterates over results. It also has a `byPage`
@@ -182,10 +140,63 @@ function getElements<T = unknown>(body: unknown, itemName: string): T[] {
  * Checks if a request failed
  */
 function checkPagingRequest(response: PathUncheckedResponse): void {
-  if (isUnexpected(response)) {
+  const Http2xxStatusCodes = [
+    "200",
+    "201",
+    "202",
+    "203",
+    "204",
+    "205",
+    "206",
+    "207",
+    "208",
+    "226",
+  ];
+  if (!Http2xxStatusCodes.includes(response.status)) {
     throw createRestError(
       `Pagination failed with unexpected statusCode ${response.status}`,
       response,
     );
   }
+}
+
+/**
+ * Helper to paginate results in a generic way and return a PagedAsyncIterableIterator
+ */
+export function buildPagedAsyncIterator<
+  TElement,
+  TPage = TElement[],
+  TPageSettings extends PageSettings = PageSettings,
+  TResponse extends PathUncheckedResponse = PathUncheckedResponse,
+>(
+  client: Client,
+  getInitialResponse: () => PromiseLike<TResponse>,
+  processResponseBody: (result: TResponse) => PromiseLike<unknown>,
+  options: BuildPagedAsyncIteratorOptions = {},
+): PagedAsyncIterableIterator<TElement, TPage, TPageSettings> {
+  const itemName = options.itemName ?? "value";
+  const nextLinkName = options.nextLinkName ?? "nextLink";
+  const pagedResult: PagedResult<TElement, TPage, TPageSettings> = {
+    getPage: async (pageLink?: string) => {
+      const result =
+        pageLink === undefined
+          ? await getInitialResponse()
+          : await client.pathUnchecked(pageLink).get();
+      checkPagingRequest(result);
+      const results = await processResponseBody(result as TResponse);
+      const nextLink = getNextLink(results, nextLinkName);
+      const values = getElements<TElement>(results, itemName) as TPage;
+      return {
+        page: values,
+        nextPageLink: nextLink,
+      };
+    },
+    byPage: (settings?: TPageSettings) => {
+      const { continuationToken } = settings ?? {};
+      return getPageAsyncIterator(pagedResult, {
+        pageLink: continuationToken,
+      });
+    },
+  };
+  return getPagedAsyncIterator(pagedResult);
 }

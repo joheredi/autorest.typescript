@@ -4,19 +4,6 @@
 import { WidgetServiceContext } from "../../api/widgetServiceContext.js";
 import { User, Widget, AnalyzeResult } from "../../models/models.js";
 import {
-  listWidgets,
-  listWidgetsPages,
-  queryWidgetsPages,
-  getWidget,
-  createWidget,
-  createOrReplace,
-  updateWidget,
-  deleteWidget,
-  analyzeWidget,
-} from "../../api/widgets/index.js";
-import { PagedAsyncIterableIterator } from "../../models/pagingTypes.js";
-import { PollerLike, OperationState } from "@azure/core-lro";
-import {
   WidgetsListWidgetsOptionalParams,
   WidgetsListWidgetsPagesOptionalParams,
   WidgetsQueryWidgetsPagesOptionalParams,
@@ -41,22 +28,22 @@ export interface WidgetsOperations {
     value: Uint8Array,
     csvArrayHeader: Uint8Array[],
     utcDateHeader: Date,
-    options?: WidgetsListWidgetsOptionalParams,
+    options: WidgetsListWidgetsOptionalParams,
   ) => Promise<Widget[]>;
   listWidgetsPages: (
     page: number,
     pageSize: number,
-    options?: WidgetsListWidgetsPagesOptionalParams,
-  ) => PagedAsyncIterableIterator<Widget>;
+    options: WidgetsListWidgetsPagesOptionalParams,
+  ) => undefined;
   queryWidgetsPages: (
     page: number,
     pageSize: number,
-    options?: WidgetsQueryWidgetsPagesOptionalParams,
-  ) => PagedAsyncIterableIterator<Widget>;
+    options: WidgetsQueryWidgetsPagesOptionalParams,
+  ) => undefined;
   /** Get a widget by ID. */
   getWidget: (
     id: string,
-    options?: WidgetsGetWidgetOptionalParams,
+    options: WidgetsGetWidgetOptionalParams,
   ) => Promise<Widget>;
   /**
    * Create a new widget.
@@ -67,31 +54,31 @@ export interface WidgetsOperations {
   createWidget: (
     weight: number,
     color: "red" | "blue",
-    options?: WidgetsCreateWidgetOptionalParams,
+    options: WidgetsCreateWidgetOptionalParams,
   ) => Promise<Widget>;
   /** Long-running resource create or replace operation template. */
   createOrReplace: (
     name: string,
     resource: User,
-    options?: WidgetsCreateOrReplaceOptionalParams,
-  ) => PollerLike<OperationState<User>, User>;
+    options: WidgetsCreateOrReplaceOptionalParams,
+  ) => undefined;
   /**
    * Update the contents of the widget. The widget ID is required in the input, but cannot be changed. All other fields
    * are optional and will be updated within the widget if provided.
    */
   updateWidget: (
     id: string,
-    options?: WidgetsUpdateWidgetOptionalParams,
+    options: WidgetsUpdateWidgetOptionalParams,
   ) => Promise<Widget>;
   /** Delete a widget by ID. */
   deleteWidget: (
     id: string,
-    options?: WidgetsDeleteWidgetOptionalParams,
+    options: WidgetsDeleteWidgetOptionalParams,
   ) => Promise<void>;
   /** Analyze a widget. The only guarantee is that this method will return a string containing the results of the analysis. */
   analyzeWidget: (
     id: string,
-    options?: WidgetsAnalyzeWidgetOptionalParams,
+    options: WidgetsAnalyzeWidgetOptionalParams,
   ) => Promise<AnalyzeResult>;
 }
 
@@ -103,7 +90,7 @@ export function getWidgets(context: WidgetServiceContext) {
       value: Uint8Array,
       csvArrayHeader: Uint8Array[],
       utcDateHeader: Date,
-      options?: WidgetsListWidgetsOptionalParams,
+      options: WidgetsListWidgetsOptionalParams,
     ) =>
       listWidgets(
         context,
@@ -117,30 +104,30 @@ export function getWidgets(context: WidgetServiceContext) {
     listWidgetsPages: (
       page: number,
       pageSize: number,
-      options?: WidgetsListWidgetsPagesOptionalParams,
+      options: WidgetsListWidgetsPagesOptionalParams,
     ) => listWidgetsPages(context, page, pageSize, options),
     queryWidgetsPages: (
       page: number,
       pageSize: number,
-      options?: WidgetsQueryWidgetsPagesOptionalParams,
+      options: WidgetsQueryWidgetsPagesOptionalParams,
     ) => queryWidgetsPages(context, page, pageSize, options),
-    getWidget: (id: string, options?: WidgetsGetWidgetOptionalParams) =>
+    getWidget: (id: string, options: WidgetsGetWidgetOptionalParams) =>
       getWidget(context, id, options),
     createWidget: (
       weight: number,
       color: "red" | "blue",
-      options?: WidgetsCreateWidgetOptionalParams,
+      options: WidgetsCreateWidgetOptionalParams,
     ) => createWidget(context, weight, color, options),
     createOrReplace: (
       name: string,
       resource: User,
-      options?: WidgetsCreateOrReplaceOptionalParams,
+      options: WidgetsCreateOrReplaceOptionalParams,
     ) => createOrReplace(context, name, resource, options),
-    updateWidget: (id: string, options?: WidgetsUpdateWidgetOptionalParams) =>
+    updateWidget: (id: string, options: WidgetsUpdateWidgetOptionalParams) =>
       updateWidget(context, id, options),
-    deleteWidget: (id: string, options?: WidgetsDeleteWidgetOptionalParams) =>
+    deleteWidget: (id: string, options: WidgetsDeleteWidgetOptionalParams) =>
       deleteWidget(context, id, options),
-    analyzeWidget: (id: string, options?: WidgetsAnalyzeWidgetOptionalParams) =>
+    analyzeWidget: (id: string, options: WidgetsAnalyzeWidgetOptionalParams) =>
       analyzeWidget(context, id, options),
   };
 }

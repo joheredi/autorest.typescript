@@ -1,3 +1,6 @@
+import { DeclarationKind } from "../../framework/declaration.js";
+import { resolveReference } from "../../framework/reference.js";
+import { refkey } from "../../framework/refkey.js";
 import { Type } from "../modularCodeModel.js";
 
 /**
@@ -140,12 +143,9 @@ function handleEnumType(type: Type): TypeMetadata {
       nullable: isTypeNullable(type)
     };
   }
-  const name = handleNullableTypeName({
-    name: type.name,
-    nullable: isTypeNullable(type)
-  });
+
   return {
-    name,
+    name: resolveReference(refkey(type, DeclarationKind.EnumUnion)),
     nullable: isTypeNullable(type),
     originModule: "models.js"
   };
@@ -189,11 +189,12 @@ function handleListType(type: Type): TypeMetadata {
  * Handles the conversion of model types to TypeScript representation metadata.
  */
 function handleModelType(type: Type): TypeMetadata {
-  let name = !type.name ? handleAnomymousModelName(type) : type.name;
-  name = handleNullableTypeName({
-    name,
-    nullable: isTypeNullable(type)
-  });
+  let name = type.name;
+  if (name) {
+    name = resolveReference(refkey(type, DeclarationKind.Model));
+  } else {
+    name = handleAnomymousModelName(type);
+  }
   return {
     name,
     nullable: isTypeNullable(type),
@@ -221,15 +222,22 @@ function handleCombinedType(type: Type): TypeMetadata {
   if (!type.types) {
     throw new Error("Unable to process combined without combinedTypes");
   }
-  const name =
-    type.name ??
-    type.types
+  let name = type.name;
+
+  if (name) {
+    name = resolveReference(refkey(type, DeclarationKind.ModelUnion));
+  } else {
+    name = type.types
       .map((t) => {
         const sdkType = getType(t, t.format).name;
         return `${sdkType}`;
       })
       .join(" | ");
-  return { name: `(${name})`, nullable: isTypeNullable(type) };
+
+    name = `(${name})`;
+  }
+
+  return { name, nullable: isTypeNullable(type) };
 }
 
 /**
@@ -241,7 +249,7 @@ function handleDictType(type: Type): TypeMetadata {
   }
   if (type.name && type.name !== "Record") {
     return {
-      name: type.name
+      name: handleModelType(type).name
     };
   }
   const elementType = getType(type.elementType, type.elementType.format);

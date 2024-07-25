@@ -3,8 +3,6 @@
 
 import { WidgetServiceContext } from "../../api/widgetServiceContext.js";
 import { User } from "../../models/models.js";
-import { createOrReplace } from "../../api/budgets/index.js";
-import { PollerLike, OperationState } from "@azure/core-lro";
 import { BudgetsCreateOrReplaceOptionalParams } from "../../models/options.js";
 
 /** Interface representing a Budgets operations. */
@@ -13,8 +11,8 @@ export interface BudgetsOperations {
   createOrReplace: (
     name: string,
     resource: User,
-    options?: BudgetsCreateOrReplaceOptionalParams,
-  ) => PollerLike<OperationState<User>, User>;
+    options: BudgetsCreateOrReplaceOptionalParams,
+  ) => undefined;
 }
 
 export function getBudgets(context: WidgetServiceContext) {
@@ -22,7 +20,7 @@ export function getBudgets(context: WidgetServiceContext) {
     createOrReplace: (
       name: string,
       resource: User,
-      options?: BudgetsCreateOrReplaceOptionalParams,
+      options: BudgetsCreateOrReplaceOptionalParams,
     ) => createOrReplace(context, name, resource, options),
   };
 }

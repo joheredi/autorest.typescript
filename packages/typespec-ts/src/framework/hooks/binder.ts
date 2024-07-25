@@ -6,6 +6,7 @@ import {
   Project
 } from "ts-morph";
 import { provideContext, useContext } from "../../contextManager.js";
+import { Dependency, isDependency } from "../dependency.js";
 
 export interface DeclarationInfo {
   name: string;
@@ -30,14 +31,20 @@ export interface Binder {
   applyImports(): void;
 }
 
+interface BinderOptions {
+  dependencies?: Record<string, Dependency>;
+}
+
 class BinderImp implements Binder {
   private declarations = new Map<unknown, DeclarationInfo>();
   private imports = new Map<SourceFile, ImportDeclarationStructure[]>();
   private symbolsBySourceFile = new Map<SourceFile, Set<string>>();
   private project: Project;
+  private externalDependencies: Map<string, Dependency>;
 
-  constructor(project?: Project) {
-    this.project = project ?? new Project();
+  constructor(project: Project, options: BinderOptions = {}) {
+    this.project = project;
+    this.externalDependencies = mapDependencies(options.dependencies ?? {});
   }
 
   trackDeclaration(
@@ -135,7 +142,12 @@ class BinderImp implements Binder {
    * @returns The serialized placeholder string.
    */
   private serializePlaceholder(refkey: unknown): string {
-    return `PLACEHOLDER:${String(refkey)}`;
+    let key = String(refkey);
+
+    if (isDependency(refkey)) {
+      key = refkey.key;
+    }
+    return `"<PLACEHOLDER:${key}>"`;
   }
 
   /**
@@ -147,27 +159,41 @@ class BinderImp implements Binder {
    */
   private addImport(
     fileWhereImportIsAdded: SourceFile,
-    fileWhereImportPointsTo: SourceFile,
+    fileWhereImportPointsTo: SourceFile | string,
     name: string
   ): ImportSpecifierStructure {
     const importAlias = this.generateLocallyUniqueImportName(
       name,
       fileWhereImportIsAdded
     );
-    const relativePath =
-      fileWhereImportIsAdded.getRelativePathAsModuleSpecifierTo(
-        fileWhereImportPointsTo
-      );
+
+    let moduleSpecifier: string = "";
+
+    if (typeof fileWhereImportPointsTo !== "string") {
+      moduleSpecifier =
+        fileWhereImportIsAdded.getRelativePathAsModuleSpecifierTo(
+          fileWhereImportPointsTo
+        );
+
+      if (fileWhereImportPointsTo.getBaseName() === "index.ts") {
+        moduleSpecifier += "/index.js";
+      } else {
+        moduleSpecifier += ".js";
+      }
+    } else {
+      moduleSpecifier = fileWhereImportPointsTo;
+    }
+
     const importStructures = this.imports.get(fileWhereImportIsAdded) || [];
 
     let importStructure = importStructures.find(
-      (imp) => imp.moduleSpecifier === relativePath
+      (imp) => imp.moduleSpecifier === moduleSpecifier
     );
 
     if (!importStructure) {
       importStructure = {
         kind: StructureKind.ImportDeclaration,
-        moduleSpecifier: relativePath,
+        moduleSpecifier,
         namedImports: []
       };
       importStructures.push(importStructure);
@@ -199,15 +225,33 @@ class BinderImp implements Binder {
       for (const [declarationKey, declaration] of this.declarations) {
         const placeholderKey = this.serializePlaceholder(declarationKey);
         let name = declaration.name;
-        if (file !== declaration.sourceFile) {
+        const replaceCount = countPlaceholders(file, placeholderKey);
+        if (replaceCount > 0) {
+          if (file !== declaration.sourceFile) {
+            const importDec = this.addImport(
+              file,
+              declaration.sourceFile,
+              declaration.name
+            );
+            name = importDec.alias ?? declaration.name;
+          }
+
+          replacePlaceholder(file, placeholderKey, name);
+        }
+      }
+
+      for (const [dependencyKey, dependency] of this.externalDependencies) {
+        const placeholderKey = this.serializePlaceholder(dependencyKey);
+        const replaceCount = countPlaceholders(file, placeholderKey);
+        if (replaceCount > 0) {
           const importDec = this.addImport(
             file,
-            declaration.sourceFile,
-            declaration.name
+            dependency.reference.module,
+            dependency.reference.name
           );
-          name = importDec.alias ?? declaration.name;
+          let name = importDec.alias ?? dependency.reference.name;
+          replacePlaceholder(file, placeholderKey, name);
         }
-        replacePlaceholder(file, placeholderKey, name);
       }
     }
 
@@ -220,8 +264,11 @@ class BinderImp implements Binder {
 }
 
 // Provide the binder context to be used globally
-export function provideBinder(project?: Project): void {
-  return provideContext("binder", new BinderImp(project));
+export function provideBinder(
+  project: Project,
+  options: BinderOptions = {}
+): void {
+  return provideContext("binder", new BinderImp(project, options));
 }
 
 /**
@@ -249,6 +296,16 @@ function replacePlaceholder(
   sourceFile.replaceWithText(updatedText);
 }
 
+function countPlaceholders(
+  sourceFile: SourceFile,
+  placeholder: string
+): number {
+  const fileText = sourceFile.getFullText();
+  const regex = new RegExp(escapeRegExp(placeholder), "g");
+  const hits = (fileText.match(regex) ?? []).length;
+  return hits;
+}
+
 /**
  * Escapes special characters in a string to be used in a regular expression.
  * @param string - The input string.
@@ -256,4 +313,19 @@ function replacePlaceholder(
  */
 function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function mapDependencies(
+  dependencies: Record<string, Dependency>
+): Map<string, Dependency> {
+  const map = new Map<string, Dependency>();
+
+  for (const [_, value] of Object.entries(dependencies)) {
+    if (map.has(value.key)) {
+      console.warn(`Duplicate dependency key: ${value.key}`);
+    }
+
+    map.set(value.key, value);
+  }
+  return map;
 }

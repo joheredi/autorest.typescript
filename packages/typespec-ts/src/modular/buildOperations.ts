@@ -1,27 +1,31 @@
+import { NameType, normalizeName } from "@azure-tools/rlc-common";
 import {
-  addImportsToFiles,
-  clearImportSets,
-  getImportSpecifier,
-  NameType,
-  normalizeName
-} from "@azure-tools/rlc-common";
-import { Project, SourceFile } from "ts-morph";
-import { isRLCMultiEndpoint } from "../utils/clientUtils.js";
+  FunctionDeclarationStructure,
+  InterfaceDeclarationStructure,
+  SourceFile,
+  StructureKind
+} from "ts-morph";
 import { SdkContext } from "../utils/interfaces.js";
-import { importLroCoreDependencies } from "./buildLroFiles.js";
 import { getDocsFromDescription } from "./helpers/docsHelpers.js";
-import { getOperationName } from "./helpers/namingHelpers.js";
 import {
   getDeserializePrivateFunction,
   getOperationFunction,
-  getOperationOptionsName,
   getSendPrivateFunction,
   isLroOnlyOperation
 } from "./helpers/operationHelpers.js";
 import { buildType } from "./helpers/typeHelpers.js";
 import { OperationPathAndDeserDetails } from "./interfaces.js";
 import { Client, ModularCodeModel, Operation } from "./modularCodeModel.js";
-import { addImportBySymbol } from "../utils/importHelper.js";
+import {
+  addDeclaration,
+  OperationDeclarations
+} from "../framework/declaration.js";
+import { refkey } from "../framework/refkey.js";
+import { resolveReference } from "../framework/reference.js";
+import { getClassicalLayerPrefix } from "./helpers/namingHelpers.js";
+import { toPascalCase } from "../utils/casingUtils.js";
+import { CoreDependencies } from "../core/dependencies.js";
+
 /**
  * This function creates a file under /api for each operation group.
  * If there is no operation group in the TypeSpec program, we create a single
@@ -30,16 +34,10 @@ import { addImportBySymbol } from "../utils/importHelper.js";
 export function buildOperationFiles(
   client: Client,
   dpgContext: SdkContext,
-  codeModel: ModularCodeModel,
-  needUnexpectedHelper: boolean = true
+  codeModel: ModularCodeModel
 ) {
   const operationFiles = [];
-  const isMultiEndpoint = isRLCMultiEndpoint(dpgContext);
-  const clientType = isMultiEndpoint
-    ? `Client.${client.rlcClientName}`
-    : "Client";
   for (const operationGroup of client.operationGroups) {
-    clearImportSets(codeModel.runtimeImports);
     const operationFileName =
       operationGroup.className && operationGroup.namespaceHierarchies.length > 0
         ? `${operationGroup.namespaceHierarchies
@@ -58,251 +56,52 @@ export function buildOperationFiles(
         subfolder && subfolder !== "" ? subfolder + "/" : ""
       }api/${operationFileName}.ts`
     );
-    // We need to import the lro helpers and types explicitly because ts-morph may not be able to find correct ones.
-    importLroDependencies(
-      operationGroupFile,
-      operationGroup.namespaceHierarchies.length
-    );
 
-    // Import models used from ./models.ts
-    // We SHOULD keep this because otherwise ts-morph will "helpfully" try to import models from the rest layer when we call fixMissingImports().
-    importModels(
-      srcPath,
-      operationGroupFile,
-      codeModel.project,
-      subfolder,
-      operationGroup.namespaceHierarchies.length
-    );
-
-    // Import the deserializeUtils
-    importDeserializeUtils(
-      srcPath,
-      operationGroupFile,
-      codeModel.project,
-      "deserialize",
-      subfolder,
-      operationGroup.namespaceHierarchies.length
-    );
-
-    // Import the serializeUtils
-    importDeserializeUtils(
-      srcPath,
-      operationGroupFile,
-      codeModel.project,
-      "serialize",
-      subfolder,
-      operationGroup.namespaceHierarchies.length
-    );
-
-    // We need to import the paging helpers and types explicitly because ts-morph may not be able to find them.
-    importPagingDependencies(
-      srcPath,
-      operationGroupFile,
-      codeModel.project,
-      subfolder,
-      operationGroup.namespaceHierarchies.length
-    );
-
-    const namedImports: string[] = [];
-    if (isMultiEndpoint) {
-      namedImports.push(`Client`);
-      if (needUnexpectedHelper) {
-        namedImports.push("UnexpectedHelper");
-      }
-      operationGroupFile.addImportDeclarations([
-        {
-          moduleSpecifier: `../${"../".repeat(
-            operationGroup.namespaceHierarchies.length
-          )}rest/${subfolder}/index.js`,
-          namedImports
-        }
-      ]);
-    } else {
-      if (needUnexpectedHelper) {
-        namedImports.push("isUnexpected");
-      }
-      const rlcClientName = client.rlcClientName;
-      namedImports.push(`${rlcClientName} as Client`);
-      operationGroupFile.addImportDeclarations([
-        {
-          moduleSpecifier: `${
-            subfolder && subfolder !== "" ? "../" : ""
-          }${"../".repeat(
-            operationGroup.namespaceHierarchies.length + 1
-          )}rest/index.js`,
-          namedImports
-        }
-      ]);
-    }
     operationGroup.operations.forEach((o) => {
-      const operationDeclaration = getOperationFunction(o, clientType);
-      const sendOperationDeclaration = getSendPrivateFunction(
-        dpgContext,
-        o,
-        clientType,
-        codeModel.runtimeImports
+      const operationDeclaration: FunctionDeclarationStructure = {
+        ...getOperationFunction(o, client),
+        kind: StructureKind.Function
+      };
+      const sendOperationDeclaration: FunctionDeclarationStructure = {
+        ...getSendPrivateFunction(dpgContext, o, client),
+        kind: StructureKind.Function
+      };
+      const deserializeOperationDeclaration: FunctionDeclarationStructure = {
+        ...getDeserializePrivateFunction(o),
+        kind: StructureKind.Function
+      };
+      addDeclaration(
+        operationGroupFile,
+        operationDeclaration,
+        refkey(o, OperationDeclarations.OperationFunction)
       );
-      const deserializeOperationDeclaration = getDeserializePrivateFunction(
-        o,
-        isMultiEndpoint,
-        needUnexpectedHelper,
-        codeModel.runtimeImports
-      );
-      operationGroupFile.addFunctions([
+      addDeclaration(
+        operationGroupFile,
         sendOperationDeclaration,
+        refkey(o, OperationDeclarations.SendOperationFunction)
+      );
+      addDeclaration(
+        operationGroupFile,
         deserializeOperationDeclaration,
-        operationDeclaration
-      ]);
+        refkey(o, OperationDeclarations.DeserializeOperationDeclaration)
+      );
     });
 
-    operationGroupFile.addImportDeclarations([
-      {
-        moduleSpecifier: getImportSpecifier(
-          "restClient",
-          codeModel?.runtimeImports
-        ),
-        namedImports: [
-          "StreamableMethod",
-          "operationOptionsToRequestParameters"
-        ]
-      }
-    ]);
-
-    addImportsToFiles(codeModel.runtimeImports, operationGroupFile);
-    addImportBySymbol("serializeRecord", operationGroupFile);
-
-    operationGroupFile.fixMissingImports();
-    // have to fixUnusedIdentifiers after everything get generated.
-    operationGroupFile.fixUnusedIdentifiers();
     operationFiles.push(operationGroupFile);
   }
   return operationFiles;
 }
 
-export function importModels(
-  srcPath: string,
-  sourceFile: SourceFile,
-  project: Project,
-  subfolder: string = "",
-  importLayer: number = 0
+function getOperationOptionsName(
+  operation: Operation,
+  includeGroupName = false
 ) {
-  const hasModelsImport = sourceFile.getImportDeclarations().some((i) => {
-    return i.getModuleSpecifierValue().endsWith(`models/models.js`);
-  });
-  const modelsFile = project.getSourceFile(
-    `${srcPath}/${
-      subfolder && subfolder !== "" ? subfolder + "/" : ""
-    }models/models.ts`
-  );
-  const models: string[] = [];
-
-  for (const [name] of modelsFile?.getExportedDeclarations().entries() ?? []) {
-    if (name.startsWith("_")) {
-      continue;
-    }
-    models.push(name);
-  }
-
-  if (models.length > 0 && !hasModelsImport) {
-    sourceFile.addImportDeclaration({
-      moduleSpecifier: `${"../".repeat(importLayer + 1)}models/models.js`,
-      namedImports: models
-    });
-  }
-
-  // Import all models and then let ts-morph clean up the unused ones
-  // we can't fixUnusedIdentifiers here because the operaiton files are still being generated.
-  // sourceFile.fixUnusedIdentifiers();
-}
-
-export function importDeserializeUtils(
-  srcPath: string,
-  sourceFile: SourceFile,
-  project: Project,
-  serializeType: string,
-  subfolder: string = "",
-  importLayer: number = 0
-) {
-  const hasModelsImport = sourceFile.getImportDeclarations().some((i) => {
-    return i.getModuleSpecifierValue().endsWith(`utils/${serializeType}.js`);
-  });
-  const modelsFile = project.getSourceFile(
-    `${srcPath}/${
-      subfolder && subfolder !== "" ? subfolder + "/" : ""
-    }utils/${serializeType}Util.ts`
-  );
-  const deserializeUtil: string[] = [];
-
-  for (const entry of modelsFile?.getExportedDeclarations().entries() ?? []) {
-    deserializeUtil.push(entry[0]);
-  }
-
-  if (deserializeUtil.length > 0 && !hasModelsImport) {
-    sourceFile.addImportDeclaration({
-      moduleSpecifier: `${"../".repeat(
-        importLayer + 1
-      )}utils/${serializeType}Util.js`,
-      namedImports: deserializeUtil
-    });
-  }
-}
-// Import all deserializeUtil and then let ts-morph clean up the unused ones
-// we can't fixUnusedIdentifiers here because the operaiton files are still being generated.
-// sourceFile.fixUnusedIdentifiers();
-export function importPagingDependencies(
-  srcPath: string,
-  sourceFile: SourceFile,
-  project: Project,
-  subfolder: string = "",
-  importLayer: number = 0
-) {
-  const pagingTypes = project.getSourceFile(
-    `${srcPath}/${subfolder !== "" ? subfolder + "/" : ""}models/pagingTypes.ts`
-  );
-
-  if (!pagingTypes) {
-    return;
-  }
-
-  const exportedPaingTypes = [...pagingTypes.getExportedDeclarations().keys()];
-
-  sourceFile.addImportDeclaration({
-    moduleSpecifier: `${"../".repeat(importLayer + 1)}models/pagingTypes.js`,
-    namedImports: exportedPaingTypes
-  });
-
-  const pagingHelper = project.getSourceFile(
-    `${srcPath}/${subfolder !== "" ? subfolder + "/" : ""}api/pagingHelpers.ts`
-  );
-
-  if (!pagingHelper) {
-    return;
-  }
-
-  const exportedPaingHelpers = [
-    ...pagingHelper.getExportedDeclarations().keys()
-  ];
-
-  sourceFile.addImportDeclaration({
-    moduleSpecifier: `${
-      importLayer === 0 ? "./" : "../".repeat(importLayer)
-    }pagingHelpers.js`,
-    namedImports: exportedPaingHelpers
-  });
-}
-
-export function importLroDependencies(
-  sourceFile: SourceFile,
-  importLayer: number = 0
-) {
-  sourceFile.addImportDeclaration({
-    moduleSpecifier: `${
-      importLayer === 0 ? "./" : "../".repeat(importLayer)
-    }pollingHelpers.js`,
-    namedImports: ["getLongRunningPoller"]
-  });
-
-  importLroCoreDependencies(sourceFile);
+  const prefix =
+    includeGroupName && operation.name.indexOf("_") === -1
+      ? getClassicalLayerPrefix(operation, NameType.Interface)
+      : "";
+  const optionName = `${prefix}${toPascalCase(operation.name)}OptionalParams`;
+  return optionName;
 }
 
 /**
@@ -325,10 +124,11 @@ export function buildOperationOptions(
     docs: ["Delay to wait until next poll, in milliseconds."]
   };
 
-  sourceFile.addInterface({
+  const operationOptionsInterface: InterfaceDeclarationStructure = {
+    kind: StructureKind.Interface,
     name,
     isExported: true,
-    extends: ["OperationOptions"],
+    extends: [resolveReference(CoreDependencies.operationOptions)],
     properties: (isLroOnlyOperation(operation) ? [lroOptions] : []).concat(
       options.map((p) => {
         return {
@@ -339,7 +139,13 @@ export function buildOperationOptions(
       })
     ),
     docs: [`Optional parameters.`]
-  });
+  };
+
+  addDeclaration(
+    sourceFile,
+    operationOptionsInterface,
+    refkey(operation, OperationDeclarations.OperationOptions)
+  );
 }
 
 /**
@@ -347,7 +153,6 @@ export function buildOperationOptions(
  */
 export function buildLroDeserDetailMap(client: Client) {
   const map = new Map<string, OperationPathAndDeserDetails[]>();
-  const existingNames = new Set<string>();
   for (const operationGroup of client.operationGroups) {
     const operations = operationGroup.operations.filter((o) =>
       isLroOnlyOperation(o)
@@ -370,21 +175,12 @@ export function buildLroDeserDetailMap(client: Client) {
     map.set(
       `./api/${operationFileName}.js`,
       operations.map((o) => {
-        const { name } = getOperationName(o);
-        const deserName = `_${name}Deserialize`;
-        let renamedDeserName = undefined;
-        if (existingNames.has(deserName)) {
-          const newName = `${name}Deserialize_${operationFileName
-            .split("/")
-            .slice(0, -1)
-            .join("_")}`;
-          renamedDeserName = `_${normalizeName(newName, NameType.Method)}`;
-        }
-        existingNames.add(deserName);
+        const deserName = resolveReference(
+          refkey(o, OperationDeclarations.DeserializeOperationDeclaration)
+        );
         return {
           path: `${o.method.toUpperCase()} ${o.url}`,
-          deserName,
-          renamedDeserName
+          deserName
         };
       })
     );

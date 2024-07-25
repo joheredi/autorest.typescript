@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { User as UserRest } from "../rest/index.js";
-
 /** Details about a user. */
 export interface User {
   /** The name of user. */
@@ -13,7 +11,7 @@ export interface User {
   id: string;
 }
 
-export function userSerializer(item: User): UserRest {
+export function userSerializer(item: User) {
   return {
     role: item["role"],
     id: item["id"],

@@ -1,13 +1,8 @@
 import { toCamelCase, toPascalCase } from "../../utils/casingUtils.js";
 import { Type as ModularType } from "../modularCodeModel.js";
 import { getRequestModelMapping } from "../helpers/operationHelpers.js";
-import { useContext } from "../../contextManager.js";
+import { FunctionDeclarationStructure, Project } from "ts-morph";
 
-import {
-  Imports as RuntimeImports,
-  SchemaContext,
-  addImportToSpecifier
-} from "@azure-tools/rlc-common";
 import { UsageFlags } from "@typespec/compiler";
 import {
   SdkModelType,
@@ -21,10 +16,8 @@ function getTcgcType(type: ModularType): SdkType {
   return type.tcgcType!;
 }
 export function buildModelSerializer(
-  type: ModularType,
-  runtimeImports: RuntimeImports
-): string | undefined {
-  const rlcMetadata = useContext("rlcMetaTree");
+  type: ModularType
+): FunctionDeclarationStructure | undefined {
   const modelTcgcType = getTcgcType(type) as SdkModelType;
   if (
     modelTcgcType.usage !== undefined &&
@@ -38,9 +31,6 @@ export function buildModelSerializer(
   }
 
   let serializerName = `${toCamelCase(type.name)}Serializer`;
-
-  const restModel = rlcMetadata.get(type.__raw!);
-  const restModelName = restModel?.rlcType.name;
 
   const output: string[] = [];
 
@@ -87,15 +77,6 @@ export function buildModelSerializer(
 
   let serializerReturnType = "";
 
-  // There are some situations where the type is not present in the REST API,
-  // this can happen when client.tsp overrides visibility to public on an orphan model
-  // In this case we just let TypeScript infer the return type.
-  let restModelNameAlias = "";
-  if (restModelName && restModel.rlcType.usage?.includes(SchemaContext.Input)) {
-    restModelNameAlias = `${restModelName}Rest`;
-    serializerReturnType = `: ${restModelNameAlias}`;
-  }
-
   if (type.type === "model" || type.type === "dict") {
     const nullabilityPrefix = "";
     // getPropertySerializationPrefix({
@@ -110,8 +91,7 @@ export function buildModelSerializer(
 
     const { propertiesStr, directAssignment } = getRequestModelMapping(
       type,
-      "item",
-      runtimeImports
+      "item"
     );
     const propertiesSerialization = propertiesStr.filter((p) => p.trim());
 
@@ -131,14 +111,6 @@ export function buildModelSerializer(
           return ${fnBody}
         }
         `);
-
-      if (serializerReturnType) {
-        addImportToSpecifier(
-          "rlcIndex",
-          runtimeImports,
-          `${restModelName} as ${restModelNameAlias}`
-        );
-      }
     } else {
       output.push(`
         export function ${serializerName}(item: ${toPascalCase(type.name)}) {
@@ -156,7 +128,18 @@ export function buildModelSerializer(
     `);
   }
 
-  return output.join("\n");
+  const dummyProject = new Project();
+  const sourceFile = dummyProject.createSourceFile("dummy.ts");
+  sourceFile.addStatements(output.join("\n"));
+  const declaration = sourceFile.getFunction(
+    (f) => f.getName() === serializerName
+  );
+
+  if (!declaration) {
+    throw new Error(`Failed to create declaration for ${serializerName}`);
+  }
+
+  return declaration.getStructure() as FunctionDeclarationStructure;
 }
 
 function isDiscriminatedUnion(
@@ -187,7 +170,9 @@ function hasAdditionalProperties(type: SdkType | undefined) {
   return false;
 }
 
-function buildPolymorphicSerializer(type: ModularType) {
+function buildPolymorphicSerializer(
+  type: ModularType
+): FunctionDeclarationStructure | undefined {
   if (!type.discriminator) {
     return;
   }
@@ -220,5 +205,12 @@ function buildPolymorphicSerializer(type: ModularType) {
     }
     `);
 
-  return output.join("\n");
+  const dummyProject = new Project();
+  const sourceFile = dummyProject.createSourceFile("dummy.ts");
+  sourceFile.addStatements(output.join("\n"));
+  const declaration = sourceFile.getFunction(
+    (f) => f.getName() === toCamelCase(type.name!)
+  );
+
+  return declaration?.getStructure() as FunctionDeclarationStructure;
 }

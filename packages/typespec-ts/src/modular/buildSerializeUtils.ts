@@ -1,9 +1,3 @@
-import {
-  addImportsToFiles,
-  addImportToSpecifier,
-  clearImportSets,
-  Imports as RuntimeImports
-} from "@azure-tools/rlc-common";
 import { UsageFlags } from "@typespec/compiler";
 import {
   FunctionDeclarationStructure,
@@ -19,6 +13,8 @@ import {
   serializeRequestValue
 } from "./helpers/operationHelpers.js";
 import { ModularCodeModel, Type } from "./modularCodeModel.js";
+import { resolveReference } from "../framework/reference.js";
+import { refkey } from "../framework/refkey.js";
 
 /**
  * This function creates serialize and deserialize utils for special unions and that are used in the operation.
@@ -34,7 +30,6 @@ export function buildSerializeUtils(model: ModularCodeModel) {
     if (specialUnions.length === 0) {
       continue;
     }
-    clearImportSets(model.runtimeImports);
     const utilsFile = model.project.createSourceFile(
       `${model.modularOptions.sourceRoot}/utils/${serializeType}Util.ts`
     );
@@ -55,12 +50,7 @@ export function buildSerializeUtils(model: ModularCodeModel) {
           //   serializeType,
           //   getTypeUnionName(su, false, model.runtimeImports, serializeType)
           // );
-          getTypeSerializeFunction(
-            utilsFile,
-            et,
-            serializeType,
-            model.runtimeImports
-          );
+          getTypeSerializeFunction(utilsFile, et, serializeType);
         } else {
           // getTypePredictFunction(
           //   utilsFile,
@@ -68,18 +58,12 @@ export function buildSerializeUtils(model: ModularCodeModel) {
           //   serializeType,
           //   getTypeUnionName(su, true, model.runtimeImports, serializeType)
           // );
-          getTypeDeserializeFunction(
-            utilsFile,
-            et,
-            serializeType,
-            model.runtimeImports
-          );
+          getTypeDeserializeFunction(utilsFile, et, serializeType);
         }
       });
       const deserializeFunctionName = getDeserializeFunctionName(
         su,
-        serializeType,
-        model.runtimeImports
+        serializeType
       );
       if (serializeType === "serialize") {
         deserializeUnionTypesFunction(
@@ -87,8 +71,8 @@ export function buildSerializeUtils(model: ModularCodeModel) {
           unionDeserializeTypes ?? [],
           deserializeFunctionName,
           serializeType,
-          getTypeUnionName(su, false, model.runtimeImports, serializeType),
-          getTypeUnionName(su, true, model.runtimeImports, serializeType),
+          getTypeUnionName(su, false, serializeType),
+          getTypeUnionName(su, true, serializeType),
           su.discriminator,
           su.isPolymorphicBaseModel
         );
@@ -98,34 +82,20 @@ export function buildSerializeUtils(model: ModularCodeModel) {
           unionDeserializeTypes ?? [],
           deserializeFunctionName,
           serializeType,
-          getTypeUnionName(su, true, model.runtimeImports, serializeType),
-          getTypeUnionName(su, false, model.runtimeImports, serializeType),
+          getTypeUnionName(su, true, serializeType),
+          getTypeUnionName(su, false, serializeType),
           su.discriminator,
           su.isPolymorphicBaseModel
         );
       }
-    });
-    addImportsToFiles(model.runtimeImports, utilsFile, {
-      rlcIndex: "../rest/index.js",
-      modularModel: "../models/models.js",
-      coreUtil: "@azure/core-util"
     });
     serializeUtilFiles.push(utilsFile);
   }
   return serializeUtilFiles;
 }
 
-export function getDeserializeFunctionName(
-  type: Type,
-  serializeType: string,
-  runtimeImports?: RuntimeImports
-) {
-  const typeUnionNames = getTypeUnionName(
-    type,
-    false,
-    runtimeImports,
-    serializeType
-  );
+export function getDeserializeFunctionName(type: Type, serializeType: string) {
+  const typeUnionNames = getTypeUnionName(type, false, serializeType);
   const deserializeFunctionName = `${serializeType}${toPascalCase(
     formalizeTypeUnionName(typeUnionNames ?? "")
   )}`;
@@ -263,7 +233,6 @@ export function isPolymorphicUnion(t: Type): boolean {
 function getTypeUnionName(
   type: Type,
   fromRest: boolean,
-  runtimeImports?: RuntimeImports,
   serializeType?: string
 ) {
   const types = type.types;
@@ -274,39 +243,11 @@ function getTypeUnionName(
     const typeName =
       (fromRest && type.alias ? type.alias : type.name) +
       (fromRest ? (serializeType === "serialize" ? "Rest" : "Output") : "");
-    if (fromRest && runtimeImports) {
-      addImportToSpecifier(
-        "rlcIndex",
-        runtimeImports,
-        (type.alias ?? type.name) +
-          (serializeType === "serialize"
-            ? " as " + (type.alias ?? type.name) + "Rest"
-            : "Output")
-      );
-    } else if (runtimeImports) {
-      addImportToSpecifier("modularModel", runtimeImports, type.name);
-    }
     return typeName;
   }
   return types
     ?.map((t) => {
       if (t.type === "list" && t.elementType?.type === "model") {
-        if (fromRest && t.elementType.name && runtimeImports) {
-          addImportToSpecifier(
-            "rlcIndex",
-            runtimeImports,
-            (t.elementType.alias ?? t.elementType.name) +
-              (serializeType === "serialize"
-                ? " as " + t.elementType.name + "Rest"
-                : "Output")
-          );
-        } else if (t.elementType.name && runtimeImports) {
-          addImportToSpecifier(
-            "modularModel",
-            runtimeImports,
-            t.elementType.name
-          );
-        }
         return (
           (t.elementType.alias ?? t.elementType.name) +
           (fromRest
@@ -316,18 +257,6 @@ function getTypeUnionName(
             : "") +
           "[]"
         );
-      }
-      if (fromRest && t.name && runtimeImports) {
-        addImportToSpecifier(
-          "rlcIndex",
-          runtimeImports,
-          (t.alias ?? t.name) +
-            (serializeType === "serialize"
-              ? " as " + (t.alias ?? t.name) + "Rest"
-              : "Output")
-        );
-      } else if (t.name && runtimeImports) {
-        addImportToSpecifier("modularModel", runtimeImports, t.name);
       }
       return t.name
         ? (fromRest && t.alias ? t.alias : t.name) +
@@ -355,8 +284,7 @@ function getMappedType(modularType: string, fromRest?: boolean) {
 function getTypeDeserializeFunction(
   sourceFile: SourceFile,
   type: Type,
-  serializeType: string,
-  runtimeImports: RuntimeImports
+  serializeType: string
 ) {
   const statements: string[] = [];
 
@@ -364,19 +292,17 @@ function getTypeDeserializeFunction(
     return;
   }
   if (type.type === "model" && type.name) {
-    addImportToSpecifier("rlcIndex", runtimeImports, `${type.name}Output`);
-    addImportToSpecifier("modularModel", runtimeImports, type.name);
     const functionStatement: FunctionDeclarationStructure = {
       kind: StructureKind.Function,
       docs: [`${serializeType} function for ${type.name}`],
       name: `${serializeType}${toPascalCase(type.name)}`,
-      parameters: [{ name: "obj", type: `${type.name}Output` }],
+      parameters: [
+        { name: "obj", type: resolveReference(refkey(type, "Output")) }
+      ],
       returnType: type.name
     };
     if (type.properties) {
-      statements.push(
-        `return {${getResponseMapping(type, "obj", runtimeImports)}};`
-      );
+      statements.push(`return {${getResponseMapping(type, "obj")}};`);
     } else {
       statements.push(`return {};`);
     }
@@ -397,12 +323,6 @@ function getTypeDeserializeFunction(
     type.elementType?.type === "model" &&
     type.elementType.name
   ) {
-    addImportToSpecifier(
-      "rlcIndex",
-      runtimeImports,
-      `${type.elementType.name}Output`
-    );
-    addImportToSpecifier("modularModel", runtimeImports, type.elementType.name);
     const functionStatement: FunctionDeclarationStructure = {
       kind: StructureKind.Function,
       docs: [`${serializeType} function for ${type.elementType.name} array`],
@@ -413,8 +333,7 @@ function getTypeDeserializeFunction(
     statements.push(
       `return (obj || []).map(item => { return {${getResponseMapping(
         type.elementType,
-        "item",
-        runtimeImports
+        "item"
       )}}})`
     );
     functionStatement.statements = statements.join("\n");
@@ -472,7 +391,6 @@ function getTypeDeserializeFunction(
       `return ${deserializeResponseValue(
         type,
         "obj",
-        runtimeImports,
         true,
         [type],
         type.format ?? "base64"
@@ -496,8 +414,7 @@ function getTypeDeserializeFunction(
 function getTypeSerializeFunction(
   sourceFile: SourceFile,
   type: Type,
-  serializeType: string,
-  runtimeImports: RuntimeImports
+  serializeType: string
 ) {
   const statements: string[] = [];
   if (isSpecialHandledUnion(type)) {
@@ -505,12 +422,6 @@ function getTypeSerializeFunction(
   }
   if (type.type === "model" && type.name) {
     const typeName = type.name + "Rest";
-    addImportToSpecifier(
-      "rlcIndex",
-      runtimeImports,
-      `${type.name} as ${typeName}`
-    );
-    addImportToSpecifier("modularModel", runtimeImports, type.name);
     const functionStatement: FunctionDeclarationStructure = {
       kind: StructureKind.Function,
       docs: [`${serializeType} function for ${type.name}`],
@@ -519,11 +430,7 @@ function getTypeSerializeFunction(
       returnType: typeName
     };
     if (type.properties) {
-      const { propertiesStr } = getRequestModelMapping(
-        type,
-        "obj",
-        runtimeImports
-      );
+      const { propertiesStr } = getRequestModelMapping(type, "obj");
       statements.push(`return {
         ${propertiesStr.join(", ")}
         };`);
@@ -548,12 +455,6 @@ function getTypeSerializeFunction(
     type.elementType.name
   ) {
     const typeName = type.elementType.name + "Rest";
-    addImportToSpecifier(
-      "rlcIndex",
-      runtimeImports,
-      `${type.elementType.name} as ${typeName}`
-    );
-    addImportToSpecifier("modularModel", runtimeImports, type.elementType.name);
     const functionStatement: FunctionDeclarationStructure = {
       kind: StructureKind.Function,
       docs: [`${serializeType} function for ${type.elementType.name} array`],
@@ -561,11 +462,7 @@ function getTypeSerializeFunction(
       parameters: [{ name: "obj", type: type.elementType.name + "[]" }],
       returnType: `${typeName}[]`
     };
-    const { propertiesStr } = getRequestModelMapping(
-      type.elementType,
-      "item",
-      runtimeImports
-    );
+    const { propertiesStr } = getRequestModelMapping(type.elementType, "item");
 
     statements.push(
       `return (obj || []).map(item => { 
@@ -595,9 +492,7 @@ function getTypeSerializeFunction(
       parameters: [{ name: "obj", type: "Date" }],
       returnType: "string"
     };
-    statements.push(
-      `return ${serializeRequestValue(type, "obj", runtimeImports, true)}`
-    );
+    statements.push(`return ${serializeRequestValue(type, "obj", true)}`);
     functionStatement.statements = statements.join("\n");
     if (!hasDuplicateFunction(sourceFile, functionStatement)) {
       if (
@@ -621,9 +516,7 @@ function getTypeSerializeFunction(
       parameters: [{ name: "obj", type: "Uint8Array" }],
       returnType: "string"
     };
-    statements.push(
-      `return ${serializeRequestValue(type, "obj", runtimeImports, true)}`
-    );
+    statements.push(`return ${serializeRequestValue(type, "obj", true)}`);
     functionStatement.statements = statements.join("\n");
     if (!hasDuplicateFunction(sourceFile, functionStatement)) {
       if (

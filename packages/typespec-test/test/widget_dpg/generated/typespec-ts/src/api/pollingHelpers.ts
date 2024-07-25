@@ -2,6 +2,12 @@
 // Licensed under the MIT license.
 
 import {
+  Client,
+  PathUncheckedResponse,
+  createRestError,
+} from "@azure-rest/core-client";
+import { AbortSignalLike } from "@azure/abort-controller";
+import {
   PollerLike,
   OperationState,
   ResourceLocationConfig,
@@ -10,39 +16,22 @@ import {
   OperationResponse,
 } from "@azure/core-lro";
 
-import {
-  Client,
-  PathUncheckedResponse,
-  createRestError,
-} from "@azure-rest/core-client";
-import { AbortSignalLike } from "@azure/abort-controller";
-import { isUnexpected } from "../rest/index.js";
-
 export interface GetLongRunningPollerOptions<TResponse> {
   /** Delay to wait until next poll, in milliseconds. */
   updateIntervalInMs?: number;
-  /**
-   * The signal which can be used to abort requests.
-   */
+  /** The signal which can be used to abort requests. */
   abortSignal?: AbortSignalLike;
-  /**
-   * The potential location of the result of the LRO if specified by the LRO extension in the swagger.
-   */
+  /** The potential location of the result of the LRO if specified by the LRO extension in the swagger. */
   resourceLocationConfig?: ResourceLocationConfig;
-  /**
-   * The original url of the LRO
-   * Should not be null when restoreFrom is set
-   */
+  /** The original url of the LRO */
+  /** Should not be null when restoreFrom is set */
   initialRequestUrl?: string;
-  /**
-   * A serialized poller which can be used to resume an existing paused Long-Running-Operation.
-   */
+  /** A serialized poller which can be used to resume an existing paused Long-Running-Operation. */
   restoreFrom?: string;
-  /**
-   * The function to get the initial response
-   */
+  /** The function to get the initial response */
   getInitialResponse?: () => PromiseLike<TResponse>;
 }
+
 export function getLongRunningPoller<
   TResponse extends PathUncheckedResponse,
   TResult = void,
@@ -71,9 +60,7 @@ export function getLongRunningPoller<
     },
     sendPollRequest: async (
       path: string,
-      pollOptions?: {
-        abortSignal?: AbortSignalLike;
-      },
+      pollOptions?: { abortSignal?: AbortSignalLike },
     ) => {
       // The poll request would both listen to the user provided abort signal and the poller's own abort signal
       function abortListener(): void {
@@ -92,6 +79,7 @@ export function getLongRunningPoller<
           once: true,
         });
       }
+
       let response;
       try {
         response = await client.pathUnchecked(path).get({ abortSignal });
@@ -99,6 +87,7 @@ export function getLongRunningPoller<
         options.abortSignal?.removeEventListener("abort", abortListener);
         pollOptions?.abortSignal?.removeEventListener("abort", abortListener);
       }
+
       if (options.initialRequestUrl || initialResponse) {
         response.headers["x-ms-original-url"] =
           options.initialRequestUrl ?? initialResponse!.request.url;
@@ -107,6 +96,31 @@ export function getLongRunningPoller<
       return getLroResponse(response as TResponse);
     },
   };
+
+  /**
+   * Converts a Rest Client response to a response that the LRO implementation understands
+   * @param response - a rest client http response
+   * @param deserializeFn - deserialize function to convert Rest response to modular output
+   * @returns - An LRO response that the LRO implementation understands
+   */
+  function getLroResponse<TResponse extends PathUncheckedResponse>(
+    response: TResponse,
+  ): OperationResponse<TResponse> {
+    if (Number.isNaN(response.status)) {
+      throw createRestError(
+        `Status code of the response is not a number. Value: ${response.status}`,
+        response,
+      );
+    }
+    return {
+      flatResponse: response,
+      rawResponse: {
+        ...response,
+        statusCode: Number.parseInt(response.status),
+        body: response.body,
+      },
+    };
+  }
   return createHttpPoller(poller, {
     intervalInMs: options?.updateIntervalInMs,
     resourceLocationConfig: options?.resourceLocationConfig,
@@ -115,25 +129,4 @@ export function getLongRunningPoller<
       return processResponseBody(result as TResponse);
     },
   });
-}
-/**
- * Converts a Rest Client response to a response that the LRO implementation understands
- * @param response - a rest client http response
- * @param deserializeFn - deserialize function to convert Rest response to modular output
- * @returns - An LRO response that the LRO implementation understands
- */
-function getLroResponse<TResponse extends PathUncheckedResponse>(
-  response: TResponse,
-): OperationResponse<TResponse> {
-  if (isUnexpected(response as PathUncheckedResponse)) {
-    throw createRestError(response);
-  }
-  return {
-    flatResponse: response,
-    rawResponse: {
-      ...response,
-      statusCode: Number.parseInt(response.status),
-      body: response.body,
-    },
-  };
 }

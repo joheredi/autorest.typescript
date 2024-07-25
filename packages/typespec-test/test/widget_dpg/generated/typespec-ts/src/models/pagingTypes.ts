@@ -1,19 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-/**
- * Options for the byPage method
- */
+/** Options for the byPage method */
 export interface PageSettings {
-  /**
-   * A reference to a specific page to start iterating from.
-   */
+  /** A reference to a specific page to start iterating from. */
   continuationToken?: string;
 }
 
-/**
- * An interface that describes a page of results.
- */
+/** An interface that describes a page of results. */
 export type ContinuablePage<TElement, TPage = TElement[]> = TPage & {
   /**
    * The token that keeps track of where to continue the iterator
@@ -21,69 +15,50 @@ export type ContinuablePage<TElement, TPage = TElement[]> = TPage & {
   continuationToken?: string;
 };
 
-/**
- * An interface that allows async iterable iteration both to completion and by page.
- */
+/** An interface that allows async iterable iteration both to completion and by page. */
 export interface PagedAsyncIterableIterator<
   TElement,
   TPage = TElement[],
   TPageSettings extends PageSettings = PageSettings,
 > {
-  /**
-   * The next method, part of the iteration protocol
-   */
+  /** The next method, part of the iteration protocol */
   next(): Promise<IteratorResult<TElement>>;
-  /**
-   * The connection to the async iterator, part of the iteration protocol
-   */
+  /** The connection to the async iterator, part of the iteration protocol */
   [Symbol.asyncIterator](): PagedAsyncIterableIterator<
     TElement,
     TPage,
     TPageSettings
   >;
-  /**
-   * Return an AsyncIterableIterator that works a page at a time
-   */
+  /** Return an AsyncIterableIterator that works a page at a time */
   byPage: (
     settings?: TPageSettings,
   ) => AsyncIterableIterator<ContinuablePage<TElement, TPage>>;
 }
 
-/**
- * An interface that describes how to communicate with the service.
- */
+/** An interface that describes how to communicate with the service. */
 export interface PagedResult<
   TElement,
   TPage = TElement[],
   TPageSettings extends PageSettings = PageSettings,
 > {
-  /**
-   * Link to the first page of results.
-   */
+  /** Link to the first page of results. */
   firstPageLink?: string;
-  /**
-   * A method that returns a page of results.
-   */
+  /** A method that returns a page of results. */
   getPage: (
     pageLink?: string,
   ) => Promise<{ page: TPage; nextPageLink?: string } | undefined>;
-  /**
-   * a function to implement the `byPage` method on the paged async iterator.
-   */
+  /** a function to implement the `byPage` method on the paged async iterator. */
   byPage?: (
     settings?: TPageSettings,
   ) => AsyncIterableIterator<ContinuablePage<TElement, TPage>>;
-
-  /**
-   * A function to extract elements from a page.
-   */
+  /** A function to extract elements from a page. */
   toElements?: (page: TPage) => TElement[];
 }
 
-/**
- * Options for the paging helper
- */
+/** Options for the paging helper */
 export interface BuildPagedAsyncIteratorOptions {
+  /** The name of the property that contains the items. */
   itemName?: string;
+  /** The name of the property that contains the next link. */
   nextLinkName?: string;
 }

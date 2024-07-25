@@ -1,27 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import { WidgetServiceClientOptionalParams } from "./api/widgetServiceContext.js";
+import { Client } from "@azure-rest/core-client";
 import { Pipeline } from "@azure/core-rest-pipeline";
-import {
-  getWidgetsOperations,
-  WidgetsOperations,
-} from "./classic/widgets/index.js";
-import {
-  getBudgetsOperations,
-  BudgetsOperations,
-} from "./classic/budgets/index.js";
-import {
-  createWidgetService,
-  WidgetServiceClientOptionalParams,
-  WidgetServiceContext,
-} from "./api/index.js";
 
 export { WidgetServiceClientOptionalParams } from "./api/widgetServiceContext.js";
 
 export class WidgetServiceClient {
-  private _client: WidgetServiceContext;
+  private _client: Client;
   /** The pipeline used by this client to make requests */
   public readonly pipeline: Pipeline;
+  /** The operation groups for Widgets */
+  public readonly widgets: WidgetsOperations;
+  /** The operation groups for Budgets */
+  public readonly budgets: BudgetsOperations;
 
   constructor(
     endpoint: string,
@@ -40,9 +33,4 @@ export class WidgetServiceClient {
     this.widgets = getWidgetsOperations(this._client);
     this.budgets = getBudgetsOperations(this._client);
   }
-
-  /** The operation groups for Widgets */
-  public readonly widgets: WidgetsOperations;
-  /** The operation groups for Budgets */
-  public readonly budgets: BudgetsOperations;
 }

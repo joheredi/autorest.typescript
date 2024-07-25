@@ -1,30 +1,26 @@
-import { NameType, normalizeName } from "@azure-tools/rlc-common";
 import path from "path";
-import { SourceFile } from "ts-morph";
-import { buildLroDeserDetailMap } from "./buildOperations.js";
-import { getClientName } from "./helpers/namingHelpers.js";
 import { isLroOnlyOperation } from "./helpers/operationHelpers.js";
 import { Client, ModularCodeModel } from "./modularCodeModel.js";
+import { resolveReference } from "../framework/reference.js";
+import { addDeclaration } from "../framework/declaration.js";
+import { buildLroDeserDetailMap } from "./buildOperations.js";
+import {
+  FunctionDeclarationStructure,
+  InterfaceDeclarationStructure,
+  StructureKind
+} from "ts-morph";
+import {
+  AzureCoreDependencies,
+  LroDependencies
+} from "../core/azure-dependencies.js";
+import { CoreDependencies } from "../core/dependencies.js";
 
-/**
- * Always import LRO dependencies and remember to remove if unused.
- * @param clientFile - The file to add the imports to.
- */
-export function importLroCoreDependencies(clientFile: SourceFile) {
-  clientFile.addImportDeclaration({
-    moduleSpecifier: `@azure/core-lro`,
-    namedImports: [
-      "PollerLike",
-      "OperationState",
-      "deserializeState",
-      "ResourceLocationConfig",
-      "RunningOperation",
-      "createHttpPoller",
-      "OperationResponse"
-    ]
-  });
+export enum LroRefKeys {
+  RestorePollerOptions = "RestorePollerOptions",
+  RestorePollerFunction = "RestorePollerFunction",
+  GetLongRunningPollerFunction = "GetLongRunningPollerFunction",
+  GetLongRunningPollerOptions = "GetLongRunningPollerOptions"
 }
-
 /**
  * Generate `restorePollerHelpers.ts` file
  * @param codeModel - The code model.
@@ -56,44 +52,94 @@ export function buildRestorePollerHelper(
     }
   );
 
-  importLroCoreDependencies(restorePollerFile);
-  const clientNames = importClassicalClient(client, restorePollerFile);
-  importGetPollerHelper(restorePollerFile);
-  const deserializeMap = importDeserializeHelpers(client, restorePollerFile);
-  const restorePollerHelperContent = `import {
-        PathUncheckedResponse,
-        OperationOptions
-      } from "@azure-rest/core-client";
-      import { AbortSignalLike } from "@azure/abort-controller";
+  const deserializeMap = getDeserializeMap(client);
 
-      export interface RestorePollerOptions<
-        TResult,
-        TResponse extends PathUncheckedResponse = PathUncheckedResponse
-      > extends OperationOptions {
-        /** Delay to wait until next poll, in milliseconds. */
-        updateIntervalInMs?: number;
-        /**
-         * The signal which can be used to abort requests.
-        */
-        abortSignal?: AbortSignalLike;
-        /** Deserialization function for raw response body */
-        processResponseBody?: (result: TResponse) => Promise<TResult>;
+  const pathUnckeckedResponseRef = resolveReference(
+    AzureCoreDependencies.pathUnckeckedResponse
+  );
+  const restorePollerOptionsInterface: InterfaceDeclarationStructure = {
+    kind: StructureKind.Interface,
+    isExported: true,
+    name: "RestorePollerOptions",
+    typeParameters: [
+      {
+        name: "TResult"
+      },
+      {
+        name: `TResponse extends ${pathUnckeckedResponseRef} = ${pathUnckeckedResponseRef}`
       }
-      
-      /**
-       * Creates a poller from the serialized state of another poller. This can be
-       * useful when you want to create pollers on a different host or a poller
-       * needs to be constructed after the original one is not in scope.
-       */
-      export function restorePoller<TResponse extends PathUncheckedResponse, TResult>(
-        client: ${clientNames.join(" | ")},
-        serializedState: string,
-        sourceOperation: (
-          ...args: any[]
-        ) => PollerLike<OperationState<TResult>, TResult>,
-        options?: RestorePollerOptions<TResult>
-      ): PollerLike<OperationState<TResult>, TResult> {
-        const pollerConfig = deserializeState(serializedState).config;
+    ],
+    extends: [resolveReference(AzureCoreDependencies.operationOptions)],
+    properties: [
+      {
+        name: "updateIntervalInMs",
+        type: "number",
+        hasQuestionToken: true,
+        docs: ["Delay to wait until next poll, in milliseconds."]
+      },
+      {
+        name: "abortSignal",
+        type: resolveReference(AzureCoreDependencies.abortSignalLike),
+        hasQuestionToken: true,
+        docs: ["The signal which can be used to abort requests."]
+      },
+      {
+        name: "processResponseBody",
+        type: "(result: TResponse) => Promise<TResult>",
+        hasQuestionToken: true,
+        docs: ["Deserialization function for raw response body"]
+      }
+    ]
+  };
+
+  addDeclaration(
+    restorePollerFile,
+    restorePollerOptionsInterface,
+    LroRefKeys.RestorePollerOptions
+  );
+
+  const pollerLikeRef = resolveReference(LroDependencies.pollerLike);
+  const operationStateRef = resolveReference(LroDependencies.operationState);
+  const restorePollerFunction: FunctionDeclarationStructure = {
+    kind: StructureKind.Function,
+    isExported: true,
+    docs: [
+      `Creates a poller from the serialized state of another poller. This can be`,
+      `useful when you want to create pollers on a different host or a poller`,
+      `needs to be constructed after the original one is not in scope.`
+    ],
+    name: "restorePoller",
+    typeParameters: [
+      {
+        name: "TResult"
+      },
+      {
+        name: `TResponse extends ${pathUnckeckedResponseRef}`
+      }
+    ],
+    parameters: [
+      {
+        name: "client",
+        type: resolveReference(AzureCoreDependencies.clientType)
+      },
+      {
+        name: "serializedState",
+        type: "string"
+      },
+      {
+        name: "sourceOperation",
+        type: `(...args: any[]) => ${pollerLikeRef}<${operationStateRef}<TResult>, TResult>`
+      },
+      {
+        name: "options",
+        type: `${resolveReference(LroRefKeys.RestorePollerOptions)}<TResult>`
+      }
+    ],
+    returnType: `${pollerLikeRef}<${operationStateRef}<TResult>, TResult>`,
+    statements: `
+        const pollerConfig = ${resolveReference(
+          LroDependencies.deserializeState
+        )}(serializedState).config;
         const { initialRequestUrl, requestMethod, metadata } = pollerConfig;
         if (!initialRequestUrl || !requestMethod) {
           throw new Error(
@@ -101,7 +147,7 @@ export function buildRestorePollerHelper(
           );
         }
         const resourceLocationConfig = metadata?.["resourceLocationConfig"] as
-          | ResourceLocationConfig
+          | ${resolveReference(LroDependencies.resourceLocationConfig)}
           | undefined;
         const deserializeHelper =
           options?.processResponseBody ??
@@ -111,7 +157,7 @@ export function buildRestorePollerHelper(
             \`Please ensure the operation is in this client! We can't find its deserializeHelper for \${sourceOperation?.name}.\`
           );
         }
-        return getLongRunningPoller(
+        return ${resolveReference(LroRefKeys.GetLongRunningPollerFunction)}(
           (client as any)["_client"] ?? client,
           deserializeHelper as (result: TResponse) => Promise<TResult>,
           {
@@ -121,9 +167,16 @@ export function buildRestorePollerHelper(
             restoreFrom: serializedState,
             initialRequestUrl
           }
-        );
-      }
-      
+        );`
+  };
+
+  addDeclaration(
+    restorePollerFile,
+    restorePollerFunction,
+    LroRefKeys.RestorePollerFunction
+  );
+
+  const restorePollerNonExportedStatements = `      
       const deserializeMap: Record<string, Function> = {
         ${deserializeMap.join(",\n")}
       };
@@ -205,42 +258,13 @@ export function buildRestorePollerHelper(
         return mapKey.slice(pathStart);
       }      
     `;
-  restorePollerFile.addStatements(restorePollerHelperContent);
-  restorePollerFile.fixMissingImports();
-  restorePollerFile.fixUnusedIdentifiers();
+  restorePollerFile.addStatements(restorePollerNonExportedStatements);
 }
 
-function importClassicalClient(
-  client: Client,
-  sourceFile: SourceFile
-): string[] {
-  const classicalClientName = `${getClientName(client)}Client`;
-  sourceFile.addImportDeclaration({
-    namedImports: [`${classicalClientName}`],
-    moduleSpecifier: `./${normalizeName(classicalClientName, NameType.File)}.js`
-  });
-  return [classicalClientName];
-}
-
-function importGetPollerHelper(sourceFile: SourceFile) {
-  sourceFile.addImportDeclaration({
-    namedImports: [`getLongRunningPoller`],
-    moduleSpecifier: `./api/pollingHelpers.js`
-  });
-}
-
-function importDeserializeHelpers(client: Client, sourceFile: SourceFile) {
+function getDeserializeMap(client: Client) {
   const deserializeDetails = buildLroDeserDetailMap(client);
   const deserializeMap: string[] = [];
-  for (const [key, value] of deserializeDetails.entries()) {
-    sourceFile.addImportDeclaration({
-      namedImports: value.map((detail) =>
-        detail.renamedDeserName
-          ? `${detail.deserName} as ${detail.renamedDeserName}`
-          : detail.deserName
-      ),
-      moduleSpecifier: key
-    });
+  for (const value of deserializeDetails.values()) {
     value.forEach((detail) => {
       deserializeMap.push(
         `"${detail.path}": ${detail.renamedDeserName ?? detail.deserName}`
@@ -249,7 +273,6 @@ function importDeserializeHelpers(client: Client, sourceFile: SourceFile) {
   }
   return deserializeMap;
 }
-
 /**
  * Generate `api/pollingHelpers.ts` file
  * @param codeModel - The code model.
@@ -260,9 +283,7 @@ function importDeserializeHelpers(client: Client, sourceFile: SourceFile) {
  */
 export function buildGetPollerHelper(
   codeModel: ModularCodeModel,
-  client: Client,
-  needUnexpectedHelper: boolean = true,
-  isMultiClients: boolean = false
+  client: Client
 ) {
   const lroOperstions = client.operationGroups
     .flatMap((op) => op.operations)
@@ -270,138 +291,194 @@ export function buildGetPollerHelper(
   if (lroOperstions.length === 0) {
     return;
   }
-  const checkResponseStatus = needUnexpectedHelper
-    ? `if (isUnexpected(response as PathUncheckedResponse)) {
-        throw createRestError(response);
-      }`
-    : `if (Number.isNaN(response.status)) {
-        throw createRestError(
+
+  const filePath = path.join(
+    codeModel.modularOptions.sourceRoot,
+    client.subfolder ?? "",
+    `api/pollingHelpers.ts`
+  );
+
+  const sourceFile = codeModel.project.createSourceFile(filePath, undefined, {
+    overwrite: true
+  });
+
+  const pathUnckeckedResponseRef = resolveReference(
+    AzureCoreDependencies.pathUnckeckedResponse
+  );
+
+  const pollerLikeRef = resolveReference(LroDependencies.pollerLike);
+  const operationStateRef = resolveReference(LroDependencies.operationState);
+
+  const checkResponseStatus = `if (Number.isNaN(response.status)) {
+        throw ${resolveReference(CoreDependencies.createRestError)}(
           \`Status code of the response is not a number. Value: \${response.status}\`,
           response
         );
       }`;
 
-  const unexpectedHelperImport = needUnexpectedHelper
-    ? `import { isUnexpected } from "${
-        isMultiClients ? "../" : ""
-      }../rest/index.js";`
-    : "";
-  const getLroPollerContent = `
-  import {
-    Client,
-    PathUncheckedResponse,
-    createRestError
-  } from "@azure-rest/core-client";
-  import { AbortSignalLike } from "@azure/abort-controller";
-  ${unexpectedHelperImport}
-  
-  export interface GetLongRunningPollerOptions<TResponse> {
-    /** Delay to wait until next poll, in milliseconds. */
-    updateIntervalInMs?: number;
-    /**
-     * The signal which can be used to abort requests.
-     */
-    abortSignal?: AbortSignalLike;
-    /**
-     * The potential location of the result of the LRO if specified by the LRO extension in the swagger.
-     */
-    resourceLocationConfig?: ResourceLocationConfig;
-    /**
-     * The original url of the LRO
-     * Should not be null when restoreFrom is set
-     */
-    initialRequestUrl?: string;
-    /**
-     * A serialized poller which can be used to resume an existing paused Long-Running-Operation.
-     */
-    restoreFrom?: string;
-    /**
-     * The function to get the initial response
-     */
-    getInitialResponse?: () => PromiseLike<TResponse>;
-  }
-  export function getLongRunningPoller<
-    TResponse extends PathUncheckedResponse,
-    TResult = void
-  >(
-    client: Client,
-    processResponseBody: (result: TResponse) => Promise<TResult>,
-    options: GetLongRunningPollerOptions<TResponse>
-  ): PollerLike<OperationState<TResult>, TResult> {
-    const { restoreFrom, getInitialResponse } = options;
-    if (!restoreFrom && !getInitialResponse) {
-      throw new Error(
-        "Either restoreFrom or getInitialResponse must be specified"
-      );
-    }
-    let initialResponse: TResponse | undefined = undefined;
-    const pollAbortController = new AbortController();
-    const poller: RunningOperation<TResponse> = {
-      sendInitialRequest: async () => {
-        if (!getInitialResponse) {
-          throw new Error(
-            "getInitialResponse is required when initializing a new poller"
-          );
-        }
-        initialResponse = await getInitialResponse();
-        return getLroResponse(initialResponse);
+  const getLongRunningPollerOptions: InterfaceDeclarationStructure = {
+    kind: StructureKind.Interface,
+    isExported: true,
+    name: "GetLongRunningPollerOptions",
+    typeParameters: [
+      {
+        name: "TResponse"
+      }
+    ],
+    properties: [
+      {
+        name: "updateIntervalInMs",
+        type: "number",
+        hasQuestionToken: true,
+        docs: ["Delay to wait until next poll, in milliseconds."]
       },
-      sendPollRequest: async (
-        path: string,
-        pollOptions?: {
-          abortSignal?: AbortSignalLike;
-        }
-      ) => {
-        // The poll request would both listen to the user provided abort signal and the poller's own abort signal
-        function abortListener(): void {
-          pollAbortController.abort();
-        }
-        const abortSignal = pollAbortController.signal;
-        if (options.abortSignal?.aborted) {
-          pollAbortController.abort();
-        } else if (pollOptions?.abortSignal?.aborted) {
-          pollAbortController.abort();
-        } else if (!abortSignal.aborted) {
-          options.abortSignal?.addEventListener("abort", abortListener, {
-            once: true
-          });
-          pollOptions?.abortSignal?.addEventListener("abort", abortListener, {
-            once: true
-          });
-        }
-        let response;
-        try {
-          response = await client.pathUnchecked(path).get({ abortSignal });
-        } finally {
-          options.abortSignal?.removeEventListener("abort", abortListener);
-          pollOptions?.abortSignal?.removeEventListener("abort", abortListener);
-        }
-        if (options.initialRequestUrl || initialResponse) {
-          response.headers["x-ms-original-url"] =
-            options.initialRequestUrl ?? initialResponse!.request.url;
-        }
+      {
+        name: "abortSignal",
+        type: resolveReference(AzureCoreDependencies.abortSignalLike),
+        hasQuestionToken: true,
+        docs: ["The signal which can be used to abort requests."]
+      },
+      {
+        name: "resourceLocationConfig",
+        type: resolveReference(LroDependencies.resourceLocationConfig),
+        hasQuestionToken: true,
+        docs: [
+          "The potential location of the result of the LRO if specified by the LRO extension in the swagger."
+        ]
+      },
+      {
+        name: "initialRequestUrl",
+        type: "string",
+        hasQuestionToken: true,
+        docs: [
+          "The original url of the LRO",
+          "Should not be null when restoreFrom is set"
+        ]
+      },
+      {
+        name: "restoreFrom",
+        type: "string",
+        hasQuestionToken: true,
+        docs: [
+          "A serialized poller which can be used to resume an existing paused Long-Running-Operation."
+        ]
+      },
+      {
+        name: "getInitialResponse",
+        type: `() => PromiseLike<TResponse>`,
+        hasQuestionToken: true,
+        docs: ["The function to get the initial response"]
+      }
+    ]
+  };
 
-        return getLroResponse(response as TResponse);
+  addDeclaration(
+    sourceFile,
+    getLongRunningPollerOptions,
+    LroRefKeys.GetLongRunningPollerOptions
+  );
+
+  // prettier-ignore
+  const gerLroPollerBody = ` 
+     const { restoreFrom, getInitialResponse } = options;
+     if (!restoreFrom && !getInitialResponse) {
+        throw new Error("Either restoreFrom or getInitialResponse must be specified");
+     }
+     let initialResponse: TResponse | undefined = undefined;
+     const pollAbortController = new AbortController();
+     const poller: ${resolveReference(LroDependencies.runningOperation)}<TResponse> = {
+        sendInitialRequest: async () => {
+          if (!getInitialResponse) {
+            throw new Error("getInitialResponse is required when initializing a new poller");
+          }
+          initialResponse = await getInitialResponse();
+          return getLroResponse(initialResponse);
+        },
+        sendPollRequest: async (path: string, pollOptions?: { abortSignal?: ${resolveReference(AzureCoreDependencies.abortSignalLike)}}) => {
+          // The poll request would both listen to the user provided abort signal and the poller's own abort signal
+          function abortListener(): void {
+            pollAbortController.abort();
+          }
+          const abortSignal = pollAbortController.signal;
+          if (options.abortSignal?.aborted) {
+            pollAbortController.abort();
+          } else if (pollOptions?.abortSignal?.aborted) {
+            pollAbortController.abort();
+          } else if (!abortSignal.aborted) {
+            options.abortSignal?.addEventListener("abort", abortListener, { once: true });
+            pollOptions?.abortSignal?.addEventListener("abort", abortListener, { once: true});
+          }
+
+          let response;
+          try {
+            response = await client.pathUnchecked(path).get({ abortSignal });
+          } finally {
+            options.abortSignal?.removeEventListener("abort", abortListener);
+            pollOptions?.abortSignal?.removeEventListener("abort", abortListener);
+          }
+      
+          if (options.initialRequestUrl || initialResponse) {
+            response.headers["x-ms-original-url"] = options.initialRequestUrl ?? initialResponse!.request.url;
+          }
+
+          return getLroResponse(response as TResponse);
+        }
+      }; 
+    
+      return ${resolveReference(LroDependencies.createHttpPoller)}(poller, {
+        intervalInMs: options?.updateIntervalInMs,
+        resourceLocationConfig: options?.resourceLocationConfig,
+        restoreFrom: options?.restoreFrom,
+        processResult: (result: unknown) => {
+            return processResponseBody(result as TResponse);
+        }});`;
+
+  const getLongRunningPollerFunction: FunctionDeclarationStructure = {
+    kind: StructureKind.Function,
+    isExported: true,
+    name: "getLongRunningPoller",
+    typeParameters: [
+      {
+        name: "TResponse extends " + pathUnckeckedResponseRef
+      },
+      {
+        name: "TResult = void"
       }
-    };
-    return createHttpPoller(poller, {
-      intervalInMs: options?.updateIntervalInMs,
-      resourceLocationConfig: options?.resourceLocationConfig,
-      restoreFrom: options?.restoreFrom,
-      processResult: (result: unknown) => {
-        return processResponseBody(result as TResponse);
+    ],
+    parameters: [
+      {
+        name: "client",
+        type: resolveReference(AzureCoreDependencies.clientType)
+      },
+      {
+        name: "processResponseBody",
+        type: `(result: TResponse) => Promise<TResult>`
+      },
+      {
+        name: "options",
+        type: "GetLongRunningPollerOptions<TResponse>"
       }
-    });
-  }
+    ],
+    returnType: `${pollerLikeRef}<${operationStateRef}<TResult>, TResult>`,
+    statements: gerLroPollerBody
+  };
+
+  addDeclaration(
+    sourceFile,
+    getLongRunningPollerFunction,
+    LroRefKeys.GetLongRunningPollerFunction
+  );
+
+  const nonExportedStatements = `
   /**
    * Converts a Rest Client response to a response that the LRO implementation understands
    * @param response - a rest client http response
    * @param deserializeFn - deserialize function to convert Rest response to modular output
    * @returns - An LRO response that the LRO implementation understands
    */
-  function getLroResponse<TResponse extends PathUncheckedResponse>(
+  function getLroResponse<TResponse extends ${pathUnckeckedResponseRef}>(
     response: TResponse
-  ): OperationResponse<TResponse> {
+  ): ${resolveReference(LroDependencies.operationResponse)}<TResponse> {
     ${checkResponseStatus}
     return {
       flatResponse: response,
@@ -413,17 +490,6 @@ export function buildGetPollerHelper(
     };
   }  
   `;
-  const filePath = path.join(
-    codeModel.modularOptions.sourceRoot,
-    client.subfolder ?? "",
-    `api/pollingHelpers.ts`
-  );
 
-  const fileContent = codeModel.project.createSourceFile(filePath, undefined, {
-    overwrite: true
-  });
-  importLroCoreDependencies(fileContent);
-  fileContent.addStatements(getLroPollerContent);
-  fileContent.fixMissingImports();
-  fileContent.fixUnusedIdentifiers();
+  sourceFile.addStatements(nonExportedStatements);
 }

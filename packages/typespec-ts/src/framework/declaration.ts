@@ -28,6 +28,37 @@ export type Declarations =
   | InterfaceDeclaration
   | TypeAliasDeclaration;
 
+export enum DeclarationKind {
+  KnownValues = "knownValues",
+  EnumUnion = "enumUnion",
+  Model = "model",
+  ModelUnion = "modelUnion",
+  ModelSerializer = "modelSerializer",
+  ModelUnionSerializer = "modelUnionSerializer"
+}
+
+export enum PagingDeclarations {
+  PageSettings = "PageSettings",
+  ContinuablePage = "ContinuablePage",
+  PagedAsyncIterableIterator = "PagedAsyncIterableIterator",
+  PagedResult = "PagedResult",
+  BuildPagedAsyncIteratorOptions = "BuildPagedAsyncIteratorOptions",
+  BuildPagedAsyncIteratorFunction = "BuildPagedAsyncIteratorFunction"
+}
+
+export enum ClientDeclarations {
+  ClientContextOptions = "ClientContextOptions",
+  ClientFactory = "ClientFactory",
+  ClientClass = "ClientClass"
+}
+
+export enum OperationDeclarations {
+  OperationOptions = "OperationOptions",
+  OperationFunction = "OperationFunction",
+  SendOperationFunction = "SendOperationFunction",
+  DeserializeOperationDeclaration = "DeserializeOperationDeclaration"
+}
+
 export function addDeclaration(
   sourceFile: SourceFile,
   declaration: ClassDeclarationStructure,

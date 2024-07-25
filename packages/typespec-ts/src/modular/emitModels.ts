@@ -1,9 +1,9 @@
-import { addImportsToFiles, getImportSpecifier } from "@azure-tools/rlc-common";
 import * as path from "path";
 import {
+  EnumDeclarationStructure,
   InterfaceDeclarationStructure,
-  OptionalKind,
   SourceFile,
+  StructureKind,
   TypeAliasDeclarationStructure
 } from "ts-morph";
 import { buildOperationOptions } from "./buildOperations.js";
@@ -17,7 +17,9 @@ import {
 } from "./modularCodeModel.js";
 import { buildModelSerializer } from "./serialization/buildSerializerFunction.js";
 import { toCamelCase } from "../utils/casingUtils.js";
-import { addImportBySymbol } from "../utils/importHelper.js";
+import { addDeclaration, DeclarationKind } from "../framework/declaration.js";
+import { refkey } from "../framework/refkey.js";
+import { resolveReference } from "../framework/reference.js";
 
 // ====== UTILITIES ======
 
@@ -99,11 +101,10 @@ export function extractAliases(codeModel: ModularCodeModel): ModularType[] {
   return models;
 }
 // ====== TYPE BUILDERS ======
-function buildEnumModel(
-  model: ModularType
-): OptionalKind<TypeAliasDeclarationStructure> {
+function buildEnumModel(model: ModularType): TypeAliasDeclarationStructure {
   const valueType = model.valueType?.type === "string" ? "string" : "number";
   return {
+    kind: StructureKind.TypeAlias,
     name: model.name!,
     isExported: true,
     docs: [...getDocsFromDescription(model.description)],
@@ -124,16 +125,13 @@ function buildEnumModel(
   }
 }
 
-type InterfaceStructure = OptionalKind<InterfaceDeclarationStructure> & {
-  extends: string[];
-};
-
 export function buildModelInterface(
   model: ModularType,
   cache: { coreClientTypes: Set<string>; coreLroTypes: Set<string> }
-): InterfaceStructure {
+): InterfaceDeclarationStructure {
   const modelProperties = model.properties ?? [];
-  const modelInterface = {
+  const modelInterface: InterfaceDeclarationStructure = {
+    kind: StructureKind.Interface,
     name: model.alias ?? model.name ?? "FIXMYNAME",
     isExported: true,
     docs: getDocsFromDescription(model.description),
@@ -194,7 +192,8 @@ export function buildModels(
       const enumAlias = buildEnumModel(model);
 
       if (model.isNonExhaustive && model.name) {
-        modelsFile.addEnum({
+        const enumDeclaration: EnumDeclarationStructure = {
+          kind: StructureKind.Enum,
           name: `Known${model.name}`,
           isExported: true,
           members:
@@ -206,22 +205,46 @@ export function buildModels(
           docs: [
             `Known values of {@link ${model.name}} that the service accepts.`
           ]
-        });
+        };
+
+        addDeclaration(
+          modelsFile,
+          enumDeclaration,
+          refkey(model, DeclarationKind.KnownValues)
+        );
+
         const description = getExtensibleEnumDescription(model);
         if (description) {
           enumAlias.docs = [description];
         }
       }
-      modelsFile.addTypeAlias(enumAlias);
-    } else {
-      const modelInterface = buildModelInterface(model, {
-        coreClientTypes,
-        coreLroTypes
-      });
 
-      model.parents?.forEach((p) =>
-        modelInterface.extends.push(p.alias ?? getType(p, p.format).name)
+      addDeclaration(
+        modelsFile,
+        enumAlias,
+        refkey(model, DeclarationKind.EnumUnion)
       );
+    } else {
+      const modelInterface: InterfaceDeclarationStructure = buildModelInterface(
+        model,
+        {
+          coreClientTypes,
+          coreLroTypes
+        }
+      );
+
+      for (const parent of model.parents ?? []) {
+        if (!modelInterface.extends) {
+          modelInterface.extends = [];
+        }
+
+        if (Array.isArray(modelInterface.extends)) {
+          modelInterface.extends.push(
+            resolveReference(refkey(parent, DeclarationKind.Model))
+          );
+        }
+      }
+
       if (isModelWithAdditionalProperties(model)) {
         addExtendedDictInfo(
           model,
@@ -231,74 +254,46 @@ export function buildModels(
       }
 
       if (!modelsFile.getInterface(modelInterface.name)) {
-        modelsFile.addInterface(modelInterface);
+        addDeclaration(
+          modelsFile,
+          modelInterface,
+          refkey(model, DeclarationKind.Model)
+        );
       }
 
       // Generate a serializer function next to each model
-      const serializerFunction = buildModelSerializer(
-        model,
-        codeModel.runtimeImports
-      );
+      const serializerFunction = buildModelSerializer(model);
 
       if (
         serializerFunction &&
         !modelsFile.getFunction(toCamelCase(modelInterface.name + "Serializer"))
       ) {
-        modelsFile.addStatements(serializerFunction);
+        addDeclaration(
+          modelsFile,
+          serializerFunction,
+          refkey(model, DeclarationKind.ModelSerializer)
+        );
       }
-      addImportBySymbol("serializeRecord", modelsFile);
-      modelsFile.fixUnusedIdentifiers();
     }
   }
 
-  const projectRootFromModels = codeModel.clients.length > 1 ? "../.." : "../";
-  addImportsToFiles(codeModel.runtimeImports, modelsFile, {
-    rlcIndex: path.posix.join(projectRootFromModels, "rest", "index.js"),
-    serializerHelpers: path.posix.join(
-      projectRootFromModels,
-      "helpers",
-      "serializerHelpers.js"
-    )
-  });
-
-  if (coreClientTypes.size > 0) {
-    modelsFile.addImportDeclarations([
-      {
-        moduleSpecifier: getImportSpecifier(
-          "restClient",
-          codeModel.runtimeImports
-        ),
-        namedImports: Array.from(coreClientTypes)
-      }
-    ]);
-  }
-
-  if (coreLroTypes.size > 0) {
-    modelsFile.addImportDeclarations([
-      {
-        moduleSpecifier: getImportSpecifier(
-          "azureCoreLro",
-          codeModel.runtimeImports
-        ),
-        namedImports: Array.from(coreLroTypes).map((t) =>
-          t === "CoreOperationStatus"
-            ? "OperationStatus as CoreOperationStatus"
-            : t
-        )
-      }
-    ]);
-  }
-
   aliases.forEach((alias) => {
-    modelsFile.addTypeAlias(buildModelTypeAlias(alias));
+    const modelUnion: TypeAliasDeclarationStructure =
+      buildModelTypeAlias(alias);
+    addDeclaration(
+      modelsFile,
+      modelUnion,
+      refkey(alias, DeclarationKind.ModelUnion)
+    );
     if (!models.includes(alias)) {
       // Generate a serializer function next to each model
-      const serializerFunction = buildModelSerializer(
-        alias,
-        codeModel.runtimeImports
-      );
+      const serializerFunction = buildModelSerializer(alias);
       if (serializerFunction) {
-        modelsFile.addStatements(serializerFunction);
+        addDeclaration(
+          modelsFile,
+          serializerFunction,
+          refkey(alias, DeclarationKind.ModelUnionSerializer)
+        );
       }
     }
   });
@@ -327,7 +322,7 @@ function getExtensibleEnumDescription(model: ModularType): string | undefined {
 
 function addExtendedDictInfo(
   model: ModularType,
-  modelInterface: InterfaceStructure,
+  modelInterface: InterfaceDeclarationStructure,
   compatibilityMode: boolean = false
 ) {
   if (
@@ -339,11 +334,23 @@ function addExtendedDictInfo(
       })) ||
     (model.properties?.length === 0 && model.elementType)
   ) {
-    modelInterface.extends.push(
-      `Record<string, ${getType(model.elementType!).name ?? "any"}>`
-    );
+    if (modelInterface.extends === undefined) {
+      modelInterface.extends = [];
+    }
+
+    if (Array.isArray(modelInterface.extends)) {
+      modelInterface.extends.push(
+        `Record<string, ${getType(model.elementType!).name ?? "any"}>`
+      );
+    }
   } else if (compatibilityMode) {
-    modelInterface.extends.push(`Record<string, any>`);
+    if (modelInterface.extends === undefined) {
+      modelInterface.extends = [];
+    }
+
+    if (Array.isArray(modelInterface.extends)) {
+      modelInterface.extends.push(`Record<string, any>`);
+    }
   } else {
     modelInterface.properties?.push({
       name: "additionalProperties",
@@ -355,8 +362,11 @@ function addExtendedDictInfo(
   }
 }
 
-export function buildModelTypeAlias(model: ModularType) {
+export function buildModelTypeAlias(
+  model: ModularType
+): TypeAliasDeclarationStructure {
   return {
+    kind: StructureKind.TypeAlias,
     name: model.name!,
     isExported: true,
     docs: ["Alias for " + model.name],
@@ -384,23 +394,7 @@ export function buildModelsOptions(
       buildOperationOptions(o, modelOptionsFile);
     });
   }
-  modelOptionsFile.addImportDeclarations([
-    {
-      moduleSpecifier: getImportSpecifier(
-        "restClient",
-        codeModel.runtimeImports
-      ),
-      namedImports: ["OperationOptions"]
-    }
-  ]);
 
-  modelOptionsFile.fixMissingImports(
-    {},
-    {
-      importModuleSpecifierPreference: "shortest",
-      importModuleSpecifierEnding: "js"
-    }
-  );
   modelOptionsFile
     .getImportDeclarations()
     .filter((id) => {

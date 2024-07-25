@@ -1,21 +1,27 @@
+import { NameType, normalizeName } from "@azure-tools/rlc-common";
 import {
-  getImportSpecifier,
-  NameType,
-  normalizeName
-} from "@azure-tools/rlc-common";
-import { SourceFile } from "ts-morph";
+  FunctionDeclarationStructure,
+  InterfaceDeclarationStructure,
+  SourceFile,
+  StructureKind
+} from "ts-morph";
 import { isRLCMultiEndpoint } from "../utils/clientUtils.js";
 import { SdkContext } from "../utils/interfaces.js";
-import { importModels } from "./buildOperations.js";
 import {
   getUserAgentStatements,
-  getClientParameters,
-  importCredential
+  getClientParameters
 } from "./helpers/clientHelpers.js";
 import { getDocsFromDescription } from "./helpers/docsHelpers.js";
 import { getClientName } from "./helpers/namingHelpers.js";
 import { getType } from "./helpers/typeHelpers.js";
 import { Client, ModularCodeModel } from "./modularCodeModel.js";
+import {
+  addDeclaration,
+  ClientDeclarations
+} from "../framework/declaration.js";
+import { refkey } from "../framework/refkey.js";
+import { resolveReference } from "../framework/reference.js";
+import { CoreDependencies } from "../core/dependencies.js";
 
 /**
  * This function creates the file containing the modular client context
@@ -35,18 +41,13 @@ export function buildClientContext(
     }/api/${normalizeName(name, NameType.File)}Context.ts`
   );
 
-  let factoryFunction;
-  importCredential(codeModel.runtimeImports, clientContextFile);
-  importModels(srcPath, clientContextFile, codeModel.project, subfolder);
-  clientContextFile.addImportDeclaration({
-    moduleSpecifier: getImportSpecifier("restClient", codeModel.runtimeImports),
-    namedImports: ["ClientOptions"]
-  });
+  let factoryFunction: FunctionDeclarationStructure;
 
-  clientContextFile.addInterface({
+  const clientContextOptions: InterfaceDeclarationStructure = {
+    kind: StructureKind.Interface,
     name: `${name}ClientOptionalParams`,
     isExported: true,
-    extends: ["ClientOptions"],
+    extends: [resolveReference(CoreDependencies.clientOptionsType)],
     properties: client.parameters
       .filter((p) => {
         return (
@@ -62,32 +63,29 @@ export function buildClientContext(
         };
       }),
     docs: ["Optional parameters for the client."]
-  });
-  if (isRLCMultiEndpoint(dpgContext)) {
-    clientContextFile.addImportDeclaration({
-      moduleSpecifier: `../../rest/${subfolder}/index.js`,
-      namedImports: [`Client`]
-    });
+  };
 
+  addDeclaration(
+    clientContextFile,
+    clientContextOptions,
+    refkey(client, ClientDeclarations.ClientContextOptions)
+  );
+
+  if (isRLCMultiEndpoint(dpgContext)) {
     clientContextFile.addExportDeclaration({
       moduleSpecifier: `../../rest/${subfolder}/index.js`,
       namedExports: [`Client`]
     });
-    factoryFunction = clientContextFile.addFunction({
+    factoryFunction = {
+      kind: StructureKind.Function,
       docs: getDocsFromDescription(description),
       name: `create${name}`,
-      returnType: `Client.${client.name}`,
       parameters: params,
-      isExported: true
-    });
+      isExported: true,
+      statements: []
+    };
   } else {
     const rlcClientName = client.rlcClientName;
-    clientContextFile.addImportDeclaration({
-      moduleSpecifier: `${
-        subfolder && subfolder !== "" ? "../" : ""
-      }../rest/index.js`,
-      namedImports: [`${rlcClientName}`]
-    });
 
     clientContextFile.addExportDeclaration({
       moduleSpecifier: `${
@@ -96,13 +94,14 @@ export function buildClientContext(
       namedExports: [`${rlcClientName}`]
     });
 
-    factoryFunction = clientContextFile.addFunction({
+    factoryFunction = {
+      kind: StructureKind.Function,
       docs: getDocsFromDescription(description),
       name: `create${name}`,
-      returnType: `${rlcClientName}`,
       parameters: params,
-      isExported: true
-    });
+      isExported: true,
+      statements: []
+    };
   }
 
   const paramNames = params.map((p) => p.name);
@@ -111,35 +110,20 @@ export function buildClientContext(
     paramNames
   );
 
-  factoryFunction.addStatements([
+  const functionStatements = factoryFunction.statements! as string[];
+  functionStatements.push(
     userAgentStatements,
-    `const clientContext = getClient(${updatedParamNames});`,
+    `const clientContext = ${resolveReference(
+      CoreDependencies.getClient
+    )}(${updatedParamNames});`,
     `return clientContext;`
-  ]);
-
-  if (isRLCMultiEndpoint(dpgContext)) {
-    clientContextFile.addImportDeclarations([
-      {
-        moduleSpecifier: `../../rest/${subfolder}/index.js`,
-        namedImports: ["createClient as getClient"]
-      }
-    ]);
-  } else {
-    clientContextFile.addImportDeclarations([
-      {
-        moduleSpecifier: `${
-          subfolder && subfolder !== "" ? "../" : ""
-        }../rest/index.js`,
-        defaultImport: "getClient"
-      }
-    ]);
-  }
-
-  clientContextFile.fixMissingImports(
-    {},
-    { importModuleSpecifierEnding: "js" }
   );
 
-  clientContextFile.fixUnusedIdentifiers();
+  addDeclaration(
+    clientContextFile,
+    factoryFunction,
+    refkey(client, ClientDeclarations.ClientFactory)
+  );
+
   return clientContextFile;
 }
