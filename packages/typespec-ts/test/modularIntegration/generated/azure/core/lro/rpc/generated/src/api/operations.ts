@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { getLongRunningPoller } from "./pollingHelpers.js";
-import { PollerLike, OperationState } from "@azure/core-lro";
 import { GenerationOptions, GenerationResult } from "../models/models.js";
 import {
   isUnexpected,
@@ -16,6 +14,8 @@ import {
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import { getLongRunningPoller } from "../static-helpers/pollingHelpers.js";
+import { PollerLike, OperationState } from "@azure/core-lro";
 import { LongRunningRpcOptionalParams } from "../models/options.js";
 
 export function _longRunningRpcSend(

@@ -2,14 +2,16 @@
 // Licensed under the MIT license.
 
 import { _PagedUser, User } from "../models/models.js";
-import { PagedAsyncIterableIterator } from "../models/pagingTypes.js";
-import { buildPagedAsyncIterator } from "./pagingHelpers.js";
 import { PageableContext as Client, List200Response } from "../rest/index.js";
 import {
   StreamableMethod,
   operationOptionsToRequestParameters,
   createRestError,
 } from "@azure-rest/core-client";
+import {
+  PagedAsyncIterableIterator,
+  buildPagedAsyncIterator,
+} from "../static-helpers/pagingHelpers.js";
 import { ListOptionalParams } from "../models/options.js";
 
 export function _listSend(
