@@ -121,10 +121,10 @@ export async function $onEmit(context: EmitContext) {
   );
   const extraDependencies = isAzurePackage({ options: rlcOptions })
     ? {
-        ...AzurePollingDependencies,
-        ...AzureCoreDependencies,
-        ...AzureIdentityDependencies
-      }
+      ...AzurePollingDependencies,
+      ...AzureCoreDependencies,
+      ...AzureIdentityDependencies
+    }
     : { ...DefaultCoreDependencies };
   const binder = provideBinder(outputProject, {
     staticHelpers,
@@ -179,10 +179,11 @@ export async function $onEmit(context: EmitContext) {
     }
     const projectRoot = context.emitterOutputDir ?? "";
     const customizationFolder = join(projectRoot, "generated");
+    const srcFolder = context.options["src-folder"] ?? "src";
     // if customization folder exists, use it as sources root
     const sourcesRoot = (await fsextra.pathExists(customizationFolder))
       ? customizationFolder
-      : join(projectRoot, "src");
+      : join(projectRoot, srcFolder);
     return {
       rootDir: projectRoot,
       metadataDir: projectRoot,
@@ -199,8 +200,8 @@ export async function $onEmit(context: EmitContext) {
   async function clearSrcFolder() {
     await fsextra.emptyDir(
       dpgContext.generationPathDetail?.modularSourcesDir ??
-        dpgContext.generationPathDetail?.rlcSourcesDir ??
-        ""
+      dpgContext.generationPathDetail?.rlcSourcesDir ??
+      ""
     );
   }
 
@@ -242,7 +243,7 @@ export async function $onEmit(context: EmitContext) {
 
   async function generateModularSources() {
     const modularSourcesRoot =
-      dpgContext.generationPathDetail?.modularSourcesDir ?? "src";
+      dpgContext.generationPathDetail?.modularSourcesDir ?? context.options["src-folder"] ?? "src";
     const project = useContext("outputProject");
     emitSerializerHelpersFile(project, modularSourcesRoot);
     modularCodeModel = emitCodeModel(
@@ -416,9 +417,10 @@ export async function $onEmit(context: EmitContext) {
   }
 
   function getRelativeContextPaths(codeModel: ModularCodeModel) {
+    const srcFolder = context.options["src-folder"] ?? "src";
     return codeModel.clients
       .map((subClient) => getClientContextPath(subClient, codeModel))
-      .map((path) => path.substring(path.indexOf("src")));
+      .map((path) => path.substring(path.indexOf(srcFolder)));
   }
 }
 
