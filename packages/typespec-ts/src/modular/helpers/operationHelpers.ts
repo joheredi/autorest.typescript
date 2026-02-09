@@ -1322,7 +1322,7 @@ function getContentTypeValue(
   } else {
     return `contentType: ${
       !param.optional
-        ? "contentType"
+        ? normalizeName(param.name, NameType.Property)
         : `${optionalParamName}.` + param.name + " as any"
     }`;
   }
