@@ -67,9 +67,11 @@ import {
 } from "../type-expressions/get-type-expression.js";
 import { SdkContext } from "../../utils/interfaces.js";
 import {
+  getClientOptions,
   isHttpMetadata,
   isReadOnly,
   SdkBodyParameter,
+  SdkClientType,
   SdkConstantType,
   SdkEnumType,
   SdkHttpOperation,
@@ -92,7 +94,8 @@ import { emitInlineModel } from "../type-expressions/get-model-expression.js";
 export function getSendPrivateFunction(
   dpgContext: SdkContext,
   method: [string[], ServiceOperation],
-  clientType: string
+  clientType: string,
+  client?: SdkClientType<SdkHttpOperation>
 ): OptionalKind<FunctionDeclarationStructure> {
   const operation = method[1];
   const parameters = getOperationSignatureParameters(
@@ -121,7 +124,15 @@ export function getSendPrivateFunction(
     ...getQueryParameters(dpgContext, operation)
   ];
   if (urlTemplateParams.length > 0) {
-    statements.push(`const path = ${resolveReference(UrlTemplateHelpers.parseTemplate)}("${operation.operation.uriTemplate}", {
+    const includeRootSlash = client
+      ? getClientOptions(client, "includeRootSlash") !== false
+      : true;
+
+    const uriTemplate = includeRootSlash
+      ? operation.operation.uriTemplate
+      : operation.operation.uriTemplate.replace(/^\//, "");
+
+    statements.push(`const path = ${resolveReference(UrlTemplateHelpers.parseTemplate)}("${uriTemplate}", {
         ${urlTemplateParams.join(",\n")}
         },{
       allowReserved: ${optionalParamName}?.requestOptions?.skipUrlEncoding
