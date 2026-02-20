@@ -6,11 +6,13 @@ import {
 import { Children } from "@alloy-js/core";
 import { SdkContext } from "../../../utils/interfaces.js";
 import { ModularEmitterOptions } from "../../interfaces.js";
+import { SdkTypeContext } from "../../../framework/hooks/sdkTypes.js";
 
 // ── SdkContext ──────────────────────────────────────────────────────────
 
 export interface SdkContextValue {
   sdkContext: SdkContext;
+  sdkTypes?: SdkTypeContext;
 }
 
 export const SdkContextAlloy: ComponentContext<SdkContextValue> =
@@ -27,6 +29,19 @@ export function useSdkContext(): SdkContext {
     );
   }
   return ctx.sdkContext;
+}
+
+/**
+ * Hook to access the SdkTypeContext (flatten properties, type maps) from within an Alloy component tree.
+ */
+export function useSdkTypes(): SdkTypeContext {
+  const ctx = useContext(SdkContextAlloy);
+  if (!ctx?.sdkTypes) {
+    throw new Error(
+      "SdkTypeContext is not set. Wrap your component tree in <SdkContextProvider> with sdkTypes."
+    );
+  }
+  return ctx.sdkTypes;
 }
 
 // ── EmitterOptions ─────────────────────────────────────────────────────
@@ -52,16 +67,19 @@ export function useEmitterOptions(): ModularEmitterOptions {
 export interface SdkContextProviderProps {
   sdkContext: SdkContext;
   emitterOptions: ModularEmitterOptions;
+  sdkTypes?: SdkTypeContext;
   children?: Children;
 }
 
 /**
- * Provides TCGC SdkContext and ModularEmitterOptions to the Alloy component tree.
- * Wrap your entire output in this provider.
+ * Provides TCGC SdkContext, SdkTypeContext, and ModularEmitterOptions
+ * to the Alloy component tree. Wrap your entire output in this provider.
  */
 export function SdkContextProvider(props: SdkContextProviderProps) {
   return (
-    <SdkContextAlloy.Provider value={{ sdkContext: props.sdkContext }}>
+    <SdkContextAlloy.Provider
+      value={{ sdkContext: props.sdkContext, sdkTypes: props.sdkTypes }}
+    >
       <EmitterOptionsContext.Provider value={props.emitterOptions}>
         {props.children}
       </EmitterOptionsContext.Provider>

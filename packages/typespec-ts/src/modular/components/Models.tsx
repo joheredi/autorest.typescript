@@ -39,11 +39,11 @@ import {
   getAllProperties
 } from "../helpers/operationHelpers.js";
 import { getDirectSubtypes } from "../helpers/typeHelpers.js";
-import { useContext } from "../../contextManager.js";
 import { reportDiagnostic } from "../../lib.js";
 import { NoTarget } from "@typespec/compiler";
 import { isOrExtendsHttpFile } from "@typespec/http";
 import { TypeExpression } from "./TypeExpression.js";
+import { useSdkTypes } from "./context/SdkContextProvider.js";
 
 // ── Refkey helpers ──────────────────────────────────────────────────────
 
@@ -265,7 +265,7 @@ function getModelProperties(
 
   const flattenedProps: SdkModelPropertyType[] = [];
   for (const flatten of flattenPropertySet.keys()) {
-    const sdkTypes = useContext("sdkTypes");
+    const sdkTypes = useSdkTypes();
     const conflictMap = sdkTypes.flattenProperties.get(flatten)?.conflictMap;
     const allProperties = getAllProperties(
       context,

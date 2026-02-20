@@ -310,13 +310,16 @@ export async function $onEmit(context: EmitContext) {
       }
     );
 
-    // Emit logger file via Alloy pipeline (dynamic import to avoid ts-node resolution issues)
+    // Emit logger and models via Alloy pipeline (dynamic import to avoid ts-node resolution issues)
     const { emitAlloyOutput } = await import("./alloy-emitter.js");
+    const sdkTypesCtx = useContext("sdkTypes");
     await emitAlloyOutput(
       program,
       context.emitterOutputDir,
       modularEmitterOptions,
-      modularSourcesRoot
+      modularSourcesRoot,
+      dpgContext,
+      sdkTypesCtx
     );
 
     const rootIndexFile = project.createSourceFile(
@@ -327,6 +330,8 @@ export async function $onEmit(context: EmitContext) {
       }
     );
 
+    // Models are now emitted via Alloy pipeline above, but we still need
+    // the ts-morph emitTypes() for serialization functions until Phase 2
     emitTypes(dpgContext, { sourceRoot: modularSourcesRoot });
     buildSubpathIndexFile(modularEmitterOptions, "models", undefined, {
       recursive: true
