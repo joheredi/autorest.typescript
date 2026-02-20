@@ -344,7 +344,7 @@ function buildXmlValueSerializationExpr(
       // Convert Date to appropriate string format
       const encoding = (type.encode as string) ?? "rfc3339";
       if (encoding === "unixTimestamp") {
-        return `${valueExpr} !== undefined ? ${valueExpr}.getTime() : undefined`;
+        return `${valueExpr} !== undefined ? Math.floor(${valueExpr}.getTime() / 1000) : undefined`;
       } else if (encoding === "rfc7231") {
         return `${valueExpr} !== undefined ? ${valueExpr}.toUTCString() : undefined`;
       }
@@ -502,6 +502,7 @@ function getPropertyTypeInfo(type: SdkType): {
     case "url":
       return { type: "primitive", primitiveSubtype: "string" };
     default:
+      // All remaining numeric kinds (int8/16/32/64, uint8/16/32/64, float32/64, decimal, etc.)
       return { type: "primitive", primitiveSubtype: "number" };
   }
 }
