@@ -25,8 +25,6 @@ export type { OperationOptionsProps } from "./OperationOptions.js";
 export { operationOptionsRefkey } from "./OperationOptions.js";
 
 // Operations
-export { Operations } from "./Operations.js";
-export type { OperationsProps } from "./Operations.js";
 export { operationRefkey } from "./Operations.js";
 
 // Client context

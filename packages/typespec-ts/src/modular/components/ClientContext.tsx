@@ -5,8 +5,6 @@ import {
 } from "@azure-tools/typespec-client-generator-core";
 import { getClientName } from "../helpers/namingHelpers.js";
 
-// ── Refkey helpers ──────────────────────────────────────────────────────
-
 /** Refkey for the client context interface */
 export function clientContextRefkey(
   client: SdkClientType<SdkServiceOperation>
@@ -29,13 +27,11 @@ export function clientOptionalParamsRefkey(
 }
 
 /**
- * Note: The full ClientContext JSX component is deferred to a future phase.
- * The client context generation involves deeply imperative ts-morph code
- * (addStatements, factoryFunction manipulation) that requires a more
- * substantial refactor to express declaratively in JSX.
+ * ClientContext component - placeholder.
  *
- * For now, the existing buildClientContext.ts continues to be used,
- * and these refkeys are exported for other components to reference.
+ * Client context generation is still handled by the ts-morph pipeline
+ * (buildClientContext in index.ts) because it has deep imperative
+ * ts-morph usage. Will be converted to full JSX in Phase 3a.
  */
 export function getClientContextName(
   client: SdkClientType<SdkServiceOperation>
