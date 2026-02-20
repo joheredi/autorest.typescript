@@ -57,8 +57,5 @@ export {
   azureIdentityLib
 } from "./ExternalPackages.js";
 
-// Re-exports of existing (non-JSX) functions for gradual migration
-export { buildRootIndex, buildSubClientIndexFile } from "./IndexFiles.js";
-export { buildSubpathIndexFile } from "./IndexFiles.js";
-export { buildRestorePoller } from "./RestorePoller.js";
-export { emitSamples } from "./Samples.js";
+// Restore poller
+export { restorePollerRefkey } from "./RestorePoller.js";

@@ -1,10 +1,6 @@
 /**
- * Samples component.
+ * Samples component - placeholder.
  *
- * Note: The full Samples JSX component is deferred.
- * Sample generation involves deeply imperative ts-morph code.
- *
- * For now, the existing emitSamples.ts continues to be used.
+ * Sample generation is still handled by the ts-morph pipeline.
+ * Will be converted to full JSX in a later phase.
  */
-
-export { emitSamples } from "../emitSamples.js";
