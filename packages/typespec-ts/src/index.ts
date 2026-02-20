@@ -78,7 +78,6 @@ import {
 } from "./modular/buildClientContext.js";
 import { buildApiOptions } from "./modular/emitModelsOptions.js";
 import { buildOperationFiles } from "./modular/buildOperations.js";
-import { buildRestorePoller } from "./modular/buildRestorePoller.js";
 import { buildSubpathIndexFile } from "./modular/buildSubpathIndex.js";
 import {
   createSdkContext,
@@ -335,7 +334,7 @@ export async function $onEmit(context: EmitContext) {
       buildApiOptions(dpgContext, subClient, modularEmitterOptions);
       buildOperationFiles(dpgContext, subClient, modularEmitterOptions);
       buildClientContext(dpgContext, subClient, modularEmitterOptions);
-      buildRestorePoller(dpgContext, subClient, modularEmitterOptions);
+      // RestorePoller is now handled by the Alloy pipeline
       if (dpgContext.rlcOptions?.hierarchyClient) {
         buildSubpathIndexFile(modularEmitterOptions, "api", subClient, {
           exportIndex: false,
@@ -390,7 +389,8 @@ export async function $onEmit(context: EmitContext) {
       modularSourcesRoot,
       dpgContext,
       sdkTypesCtx,
-      project
+      project,
+      clientMap
     );
   }
 
