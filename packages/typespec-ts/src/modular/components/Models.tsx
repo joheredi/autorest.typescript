@@ -40,10 +40,11 @@ import {
   normalizeModelName,
   getAdditionalPropertiesName
 } from "../emitModels.js";
+import { emitQueue } from "../../framework/hooks/sdkTypes.js";
 import {
-  emitQueue
-} from "../../framework/hooks/sdkTypes.js";
-import { getAllAncestors, getAllProperties } from "../helpers/operationHelpers.js";
+  getAllAncestors,
+  getAllProperties
+} from "../helpers/operationHelpers.js";
 import { getDirectSubtypes } from "../helpers/typeHelpers.js";
 import { useContext } from "../../contextManager.js";
 import { reportDiagnostic } from "../../lib.js";
@@ -268,13 +269,14 @@ function getModelProperties(
   const flattenedProps: SdkModelPropertyType[] = [];
   for (const flatten of flattenPropertySet.keys()) {
     const sdkTypes = useContext("sdkTypes");
-    const conflictMap =
-      sdkTypes.flattenProperties.get(flatten)?.conflictMap;
+    const conflictMap = sdkTypes.flattenProperties.get(flatten)?.conflictMap;
     const allProperties = getAllProperties(
       context,
       flatten.type,
       getAllAncestors(flatten.type)
-    ).filter((p: SdkModelPropertyType) => !isMetadata(context.program, p.__raw!));
+    ).filter(
+      (p: SdkModelPropertyType) => !isMetadata(context.program, p.__raw!)
+    );
     flattenedProps.push(
       ...allProperties.map((p: SdkModelPropertyType) => {
         return getPropertyWithOverrides(p, {
@@ -524,9 +526,7 @@ function EnumMember(props: EnumMemberProps) {
   const doc = member.doc ?? String(member.value);
   const value = member.value;
 
-  return (
-    <ts.EnumMember name={name} doc={doc} jsValue={value} />
-  );
+  return <ts.EnumMember name={name} doc={doc} jsValue={value} />;
 }
 
 // ── Union type alias ────────────────────────────────────────────────────

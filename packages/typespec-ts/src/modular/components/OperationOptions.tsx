@@ -96,7 +96,10 @@ function OperationOptionsInterface(props: OperationOptionsInterfaceProps) {
     .filter(
       (p) =>
         p.onClient === false &&
-        !(p.isGeneratedName && (p.name === "contentType" || p.name !== "accept"))
+        !(
+          p.isGeneratedName &&
+          (p.name === "contentType" || p.name !== "accept")
+        )
     )
     .filter((p) => p.optional || p.clientDefaultValue);
 
