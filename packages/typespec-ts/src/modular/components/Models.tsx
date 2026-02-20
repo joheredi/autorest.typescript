@@ -22,14 +22,7 @@ import { SdkContext } from "../../utils/interfaces.js";
 import { isMetadata } from "@typespec/http";
 import { isAzureCoreErrorType } from "../../utils/modelUtils.js";
 import { isExtensibleEnum } from "../type-expressions/get-enum-expression.js";
-import {
-  getTypeExpression,
-  normalizeModelPropertyName
-} from "../type-expressions/get-type-expression.js";
-import {
-  getModelExpression,
-  getMultipartFileTypeExpression
-} from "../type-expressions/get-model-expression.js";
+import { normalizeModelPropertyName } from "../type-expressions/get-type-expression.js";
 import {
   getAllDiscriminatedValues,
   getPropertyWithOverrides,
@@ -50,6 +43,7 @@ import { useContext } from "../../contextManager.js";
 import { reportDiagnostic } from "../../lib.js";
 import { NoTarget } from "@typespec/compiler";
 import { isOrExtendsHttpFile } from "@typespec/http";
+import { TypeExpression } from "./TypeExpression.js";
 
 // ── Refkey helpers ──────────────────────────────────────────────────────
 
@@ -245,10 +239,13 @@ function getExtendsExpression(
   type: SdkModelType
 ): Children | undefined {
   if (!type.baseModel) return undefined;
-  const parentRef = getModelExpression(context, type.baseModel, {
-    skipPolymorphicUnion: true
-  });
-  return <>{parentRef}</>;
+  return (
+    <TypeExpression
+      context={context}
+      type={type.baseModel}
+      options={{ emitInline: false }}
+    />
+  );
 }
 
 function getModelProperties(
@@ -301,20 +298,26 @@ interface ModelPropertyProps {
 function ModelProperty(props: ModelPropertyProps) {
   const { context, property, model } = props;
   const name = normalizeModelPropertyName(context, property);
-  let typeExpr: string;
 
   const allDiscriminatorValues = getAllDiscriminatedValues(model, property);
+
+  let typeContent: Children;
   if (isDiscriminatedUnion(model) && allDiscriminatorValues.length > 1) {
-    typeExpr = allDiscriminatorValues.map((v) => `"${v}"`).join(" | ");
+    typeContent = allDiscriminatorValues.map((v) => `"${v}"`).join(" | ");
   } else if (
     property.kind === "property" &&
     property.serializationOptions.multipart?.isFilePart
   ) {
-    typeExpr = getMultipartFileTypeExpression(context, property);
+    // TODO: migrate multipart file type to JSX component
+    typeContent = "any"; // placeholder for multipart — will be addressed in Phase E
   } else {
-    typeExpr = getTypeExpression(context, property.type, {
-      isOptional: property.optional
-    });
+    typeContent = (
+      <TypeExpression
+        context={context}
+        type={property.type}
+        options={{ isOptional: property.optional }}
+      />
+    );
   }
 
   const doc = property.doc ?? undefined;
@@ -326,7 +329,7 @@ function ModelProperty(props: ModelPropertyProps) {
       readonly={isReadOnly(property as SdkModelPropertyType)}
       doc={doc}
     >
-      {typeExpr}
+      {typeContent}
     </ts.InterfaceMember>
   );
 }
@@ -341,11 +344,6 @@ interface AdditionalPropertiesProps {
 function AdditionalProperties(props: AdditionalPropertiesProps) {
   const { context, type } = props;
   if (!type.additionalProperties) return null;
-
-  const additionalPropertiesType = getTypeExpression(
-    context,
-    type.additionalProperties
-  );
 
   if (context.rlcOptions?.compatibilityMode) {
     // compatibilityMode handled via extends in getExtendsExpression
@@ -363,7 +361,9 @@ function AdditionalProperties(props: AdditionalPropertiesProps) {
 
   return (
     <ts.InterfaceMember name={name} optional doc="Additional properties">
-      {`Record<string, ${additionalPropertiesType ?? "any"}>`}
+      Record{"<"}string,{" "}
+      <TypeExpression context={context} type={type.additionalProperties} />
+      {">"}
     </ts.InterfaceMember>
   );
 }
@@ -381,18 +381,12 @@ function PolymorphicTypeAlias(props: PolymorphicTypeAliasProps) {
   if (directSubtypes.length === 0) return null;
 
   const name = `${normalizeModelName(context, type, NameType.Interface, true)}Union`;
-  const typeExpr = directSubtypes
-    .filter(
-      (p) =>
-        p.usage !== undefined &&
-        ((p.usage & UsageFlags.Output) === UsageFlags.Output ||
-          (p.usage & UsageFlags.Input) === UsageFlags.Input)
-    )
-    .map((t) => getTypeExpression(context, t))
-    .join(" | ");
-  const baseName = getModelExpression(context, type, {
-    skipPolymorphicUnion: true
-  });
+  const filteredSubtypes = directSubtypes.filter(
+    (p) =>
+      p.usage !== undefined &&
+      ((p.usage & UsageFlags.Output) === UsageFlags.Output ||
+        (p.usage & UsageFlags.Input) === UsageFlags.Input)
+  );
 
   return (
     <ts.TypeDeclaration
@@ -401,7 +395,18 @@ function PolymorphicTypeAlias(props: PolymorphicTypeAliasProps) {
       doc={`Alias for ${name}`}
       refkey={polymorphicTypeRefkey(type)}
     >
-      {typeExpr} | {baseName}
+      {filteredSubtypes.map((t, i) => (
+        <>
+          {i > 0 ? " | " : ""}
+          <TypeExpression context={context} type={t} />
+        </>
+      ))}
+      {" | "}
+      <TypeExpression
+        context={context}
+        type={type}
+        options={{ emitInline: false }}
+      />
     </ts.TypeDeclaration>
   );
 }
@@ -455,9 +460,18 @@ function EnumDeclaration(props: EnumDeclarationComponentProps) {
   );
 
   // Build the type alias (union of string literals or base type)
-  const typeAliasExpr = !isExtensible
-    ? type.values.map((v) => getTypeExpression(context, v)).join(" | ")
-    : getTypeExpression(context, type.valueType);
+  const typeAliasContent = !isExtensible ? (
+    <>
+      {type.values.map((v, i) => (
+        <>
+          {i > 0 ? " | " : ""}
+          <TypeExpression context={context} type={v} />
+        </>
+      ))}
+    </>
+  ) : (
+    <TypeExpression context={context} type={type.valueType} />
+  );
 
   const typeAlias = (
     <ts.TypeDeclaration
@@ -466,7 +480,7 @@ function EnumDeclaration(props: EnumDeclarationComponentProps) {
       doc={getEnumDoc(context, type)}
       refkey={typeRefkey(type)}
     >
-      {typeAliasExpr}
+      {typeAliasContent}
     </ts.TypeDeclaration>
   );
 
@@ -539,9 +553,6 @@ interface UnionDeclarationProps {
 function UnionDeclaration(props: UnionDeclarationProps) {
   const { context, type } = props;
   const name = normalizeModelName(context, type);
-  const typeExpr = type.variantTypes
-    .map((v) => getTypeExpression(context, v))
-    .join(" | ");
 
   return (
     <ts.TypeDeclaration
@@ -550,7 +561,12 @@ function UnionDeclaration(props: UnionDeclarationProps) {
       doc={type.doc ?? `Alias for ${name}`}
       refkey={typeRefkey(type)}
     >
-      {typeExpr}
+      {type.variantTypes.map((v, i) => (
+        <>
+          {i > 0 ? " | " : ""}
+          <TypeExpression context={context} type={v} />
+        </>
+      ))}
     </ts.TypeDeclaration>
   );
 }
@@ -565,7 +581,6 @@ interface NullableDeclarationProps {
 function NullableDeclaration(props: NullableDeclarationProps) {
   const { context, type } = props;
   const name = normalizeModelName(context, type);
-  const typeExpr = getTypeExpression(context, type.type) + " | null";
 
   return (
     <ts.TypeDeclaration
@@ -574,7 +589,7 @@ function NullableDeclaration(props: NullableDeclarationProps) {
       doc={type.doc ?? `Alias for ${name}`}
       refkey={typeRefkey(type)}
     >
-      {typeExpr}
+      <TypeExpression context={context} type={type.type} /> | null
     </ts.TypeDeclaration>
   );
 }
