@@ -516,7 +516,8 @@ function hasPaging(context: SdkContext): boolean {
 function hasMultipartFileContents(context: SdkContext): boolean {
   return context.sdkPackage.models.some((x) =>
     x.properties.some(
-      (y) => y.kind === "property" && y.multipartOptions?.isFilePart
+      (y) =>
+        y.kind === "property" && y.serializationOptions.multipart?.isFilePart
     )
   );
 }

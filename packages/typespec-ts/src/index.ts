@@ -295,20 +295,9 @@ export async function $onEmit(context: EmitContext) {
       }
     );
 
-    // ── Step 1: Run ts-morph generation (existing pipeline) ──
-    // These functions populate the ts-morph Project with source files.
-    // They will be migrated to pure JSX components incrementally.
-
-    emitTypes(dpgContext, { sourceRoot: modularSourcesRoot });
-    // Index files (models, api, classic, root) are now handled by the Alloy pipeline
     const clientMap = getClientHierarchyMap(dpgContext);
     for (const subClient of clientMap) {
       await renameClientName(subClient[1], modularEmitterOptions);
-      buildApiOptions(dpgContext, subClient, modularEmitterOptions);
-      buildOperationFiles(dpgContext, subClient, modularEmitterOptions);
-      // ClientContext is now handled by the Alloy pipeline
-      // RestorePoller is now handled by the Alloy pipeline
-      // ClassicalClient and ClassicalOperationGroups are now handled by the Alloy pipeline
     }
 
     if (emitterOptions["generate-sample"] === true) {
@@ -317,14 +306,15 @@ export async function $onEmit(context: EmitContext) {
       }
     }
 
-    // ── Step 2: Resolve all ts-morph references ──
-    binder.resolveAllReferences(modularSourcesRoot);
     if (program.compilerOptions.noEmit || program.hasError()) {
       return;
     }
 
-    // ── Step 3: Emit everything through Alloy pipeline ──
-    // Pure Alloy components (Logger, Models, RestorePoller) + TsMorphBridge (remaining files)
+    // ── Emit everything through Alloy pipeline ──
+    // Pure Alloy components + TsMorphBridge for remaining ts-morph files.
+    // The tsMorphGenerate callback runs the remaining ts-morph generation
+    // (operations, options, serializers) and resolves binder references
+    // before Alloy renders the output.
     const { emitAlloyOutput } = await import("./alloy-emitter.js");
     const sdkTypesCtx = useContext("sdkTypes");
     // Alloy writeOutput() joins emitterOutputDir + path, so paths must be relative
@@ -344,7 +334,15 @@ export async function $onEmit(context: EmitContext) {
       sdkTypesCtx,
       project,
       clientMap,
-      emitterOptions
+      emitterOptions,
+      async () => {
+        emitTypes(dpgContext, { sourceRoot: modularSourcesRoot });
+        for (const subClient of clientMap) {
+          buildApiOptions(dpgContext, subClient, modularEmitterOptions);
+          buildOperationFiles(dpgContext, subClient, modularEmitterOptions);
+        }
+        binder.resolveAllReferences(modularSourcesRoot);
+      }
     );
   }
 

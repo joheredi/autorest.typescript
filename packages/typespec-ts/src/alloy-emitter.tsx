@@ -48,8 +48,16 @@ export async function emitAlloyOutput(
   sdkTypes: SdkTypeContext,
   tsMorphProject: Project,
   clientMap: [string[], SdkClientType<SdkServiceOperation>][],
-  emitterOptions: EmitterOptions
+  emitterOptions: EmitterOptions,
+  tsMorphGenerate?: () => Promise<void>
 ): Promise<void> {
+  // Run remaining ts-morph generation before Alloy rendering.
+  // This populates the ts-morph Project with operation files, options,
+  // serializers, and resolves binder references.
+  if (tsMorphGenerate) {
+    await tsMorphGenerate();
+  }
+
   // Alloy writeOutput() does joinPaths(emitterOutputDir, path), so all paths
   // in Alloy components must be relative to emitterOutputDir.
   // Create a copy of emitterOptions with a relative sourceRoot.
