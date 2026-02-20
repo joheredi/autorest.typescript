@@ -40,8 +40,14 @@ export type { ClientContextProps } from "./ClientContext.js";
 // Classical client
 export {
   classicalClientRefkey,
-  getClassicalClientDisplayName
+  getClassicalClientDisplayName,
+  ClassicalClient
 } from "./ClassicalClient.js";
+export type { ClassicalClientProps } from "./ClassicalClient.js";
+
+// Classical operation groups
+export { ClassicalOperationGroups } from "./ClassicalOperationGroups.js";
+export type { ClassicalOperationGroupsProps } from "./ClassicalOperationGroups.js";
 
 // Logger
 export { Logger } from "./Logger.js";
@@ -61,3 +67,9 @@ export {
 
 // Restore poller
 export { restorePollerRefkey } from "./RestorePoller.js";
+
+// Index files
+export { RootIndex } from "./RootIndex.js";
+export type { RootIndexProps } from "./RootIndex.js";
+export { SubpathIndex } from "./SubpathIndex.js";
+export type { SubpathIndexProps } from "./SubpathIndex.js";

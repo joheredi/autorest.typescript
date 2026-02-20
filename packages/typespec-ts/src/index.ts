@@ -60,22 +60,15 @@ import {
   buildTsSrcConfig,
   buildTsSampleConfig
 } from "@azure-tools/rlc-common";
-import {
-  buildRootIndex,
-  buildSubClientIndexFile
-} from "./modular/buildRootIndex.js";
 import { emitContentByBuilder, emitModels } from "./utils/emitUtil.js";
 import { provideContext, useContext } from "./contextManager.js";
 
 import { EmitterOptions } from "./lib.js";
 import { ModularEmitterOptions } from "./modular/interfaces.js";
 import { Project } from "ts-morph";
-import { buildClassicOperationFiles } from "./modular/buildClassicalOperationGroups.js";
-import { buildClassicalClient } from "./modular/buildClassicalClient.js";
 import { getClientContextPath } from "./modular/buildClientContext.js";
 import { buildApiOptions } from "./modular/emitModelsOptions.js";
 import { buildOperationFiles } from "./modular/buildOperations.js";
-import { buildSubpathIndexFile } from "./modular/buildSubpathIndex.js";
 import {
   createSdkContext,
   listAllServiceNamespaces,
@@ -86,11 +79,7 @@ import { transformModularEmitterOptions } from "./modular/buildModularOptions.js
 import { emitTypes } from "./modular/emitModels.js";
 import { existsSync } from "fs";
 import { getModuleExports } from "./modular/buildProjectFiles.js";
-import {
-  getClientHierarchyMap,
-  getRLCClients,
-  getModularClientOptions
-} from "./utils/clientUtils.js";
+import { getClientHierarchyMap, getRLCClients } from "./utils/clientUtils.js";
 import { join } from "path";
 import { loadStaticHelpers } from "./framework/load-static-helpers.js";
 import { packageUsesXmlSerialization } from "./modular/serialization/buildXmlSerializerFunction.js";
@@ -310,56 +299,16 @@ export async function $onEmit(context: EmitContext) {
     // These functions populate the ts-morph Project with source files.
     // They will be migrated to pure JSX components incrementally.
 
-    const rootIndexFile = project.createSourceFile(
-      `${modularSourcesRoot}/index.ts`,
-      "",
-      {
-        overwrite: true
-      }
-    );
-
     emitTypes(dpgContext, { sourceRoot: modularSourcesRoot });
-    buildSubpathIndexFile(modularEmitterOptions, "models", undefined, {
-      recursive: true
-    });
+    // Index files (models, api, classic, root) are now handled by the Alloy pipeline
     const clientMap = getClientHierarchyMap(dpgContext);
-    if (clientMap.length === 0) {
-      buildRootIndex(dpgContext, modularEmitterOptions, rootIndexFile);
-    }
     for (const subClient of clientMap) {
       await renameClientName(subClient[1], modularEmitterOptions);
       buildApiOptions(dpgContext, subClient, modularEmitterOptions);
       buildOperationFiles(dpgContext, subClient, modularEmitterOptions);
       // ClientContext is now handled by the Alloy pipeline
       // RestorePoller is now handled by the Alloy pipeline
-      if (dpgContext.rlcOptions?.hierarchyClient) {
-        buildSubpathIndexFile(modularEmitterOptions, "api", subClient, {
-          exportIndex: false,
-          recursive: true
-        });
-      } else {
-        buildSubpathIndexFile(modularEmitterOptions, "api", subClient, {
-          recursive: true,
-          exportIndex: true
-        });
-      }
-
-      buildClassicalClient(dpgContext, subClient, modularEmitterOptions);
-      buildClassicOperationFiles(dpgContext, subClient, modularEmitterOptions);
-      buildSubpathIndexFile(modularEmitterOptions, "classic", subClient, {
-        exportIndex: true,
-        interfaceOnly: true
-      });
-      const { subfolder } = getModularClientOptions(subClient);
-      if (subfolder) {
-        buildSubClientIndexFile(dpgContext, subClient, modularEmitterOptions);
-      }
-      buildRootIndex(
-        dpgContext,
-        modularEmitterOptions,
-        rootIndexFile,
-        subClient
-      );
+      // ClassicalClient and ClassicalOperationGroups are now handled by the Alloy pipeline
     }
 
     if (emitterOptions["generate-sample"] === true) {

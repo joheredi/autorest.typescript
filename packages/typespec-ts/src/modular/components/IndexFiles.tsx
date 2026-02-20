@@ -1,15 +1,11 @@
 /**
- * Index file components - placeholder.
+ * Index file components — pure Alloy JSX.
  *
- * Index file generation is still handled by the ts-morph pipeline because
- * it inspects existing source files in the ts-morph project to determine
- * what to export. Will be converted to JSX in Phase 4.
- *
- * In the Alloy world, this will use:
- * - <ts.BarrelFile> for simple barrel exports
- * - Custom components that track what was emitted via sibling refkeys
+ * RootIndex generates the root index.ts and sub-client index files.
+ * SubpathIndex generates barrel index files for models/, api/, and classic/.
  */
 
-// These re-exports are used by the ts-morph pipeline in index.ts
-export { buildRootIndex, buildSubClientIndexFile } from "../buildRootIndex.js";
-export { buildSubpathIndexFile } from "../buildSubpathIndex.js";
+export { RootIndex } from "./RootIndex.js";
+export type { RootIndexProps } from "./RootIndex.js";
+export { SubpathIndex } from "./SubpathIndex.js";
+export type { SubpathIndexProps } from "./SubpathIndex.js";
