@@ -72,10 +72,7 @@ import { ModularEmitterOptions } from "./modular/interfaces.js";
 import { Project } from "ts-morph";
 import { buildClassicOperationFiles } from "./modular/buildClassicalOperationGroups.js";
 import { buildClassicalClient } from "./modular/buildClassicalClient.js";
-import {
-  getClientContextPath,
-  buildClientContext
-} from "./modular/buildClientContext.js";
+import { getClientContextPath } from "./modular/buildClientContext.js";
 import { buildApiOptions } from "./modular/emitModelsOptions.js";
 import { buildOperationFiles } from "./modular/buildOperations.js";
 import { buildSubpathIndexFile } from "./modular/buildSubpathIndex.js";
@@ -101,7 +98,7 @@ import { provideBinder } from "./framework/hooks/binder.js";
 import { provideSdkTypes } from "./framework/hooks/sdkTypes.js";
 import { transformRLCModel } from "./transform/transform.js";
 import { transformRLCOptions } from "./transform/transfromRLCOptions.js";
-import { emitSamples } from "./modular/emitSamples.js";
+import { hasSamples } from "./modular/components/sampleUtils.js";
 import { generateCrossLanguageDefinitionFile } from "./utils/crossLanguageDef.js";
 
 export * from "./lib.js";
@@ -333,7 +330,7 @@ export async function $onEmit(context: EmitContext) {
       await renameClientName(subClient[1], modularEmitterOptions);
       buildApiOptions(dpgContext, subClient, modularEmitterOptions);
       buildOperationFiles(dpgContext, subClient, modularEmitterOptions);
-      buildClientContext(dpgContext, subClient, modularEmitterOptions);
+      // ClientContext is now handled by the Alloy pipeline
       // RestorePoller is now handled by the Alloy pipeline
       if (dpgContext.rlcOptions?.hierarchyClient) {
         buildSubpathIndexFile(modularEmitterOptions, "api", subClient, {
@@ -366,8 +363,7 @@ export async function $onEmit(context: EmitContext) {
     }
 
     if (emitterOptions["generate-sample"] === true) {
-      const samples = emitSamples(dpgContext);
-      if (samples.length > 0) {
+      if (hasSamples(dpgContext)) {
         dpgContext.rlcOptions!.generateSample = true;
       }
     }
@@ -398,7 +394,8 @@ export async function $onEmit(context: EmitContext) {
       dpgContext,
       sdkTypesCtx,
       project,
-      clientMap
+      clientMap,
+      emitterOptions
     );
   }
 

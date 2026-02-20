@@ -32,8 +32,10 @@ export {
   clientContextRefkey,
   clientContextFactoryRefkey,
   clientOptionalParamsRefkey,
-  getClientContextName
+  getClientContextName,
+  ClientContext
 } from "./ClientContext.js";
+export type { ClientContextProps } from "./ClientContext.js";
 
 // Classical client
 export {

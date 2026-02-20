@@ -9,11 +9,14 @@ import { Output } from "./modular/components/Output.js";
 import { Logger } from "./modular/components/Logger.js";
 import { Models } from "./modular/components/Models.js";
 import { RestorePoller } from "./modular/components/RestorePoller.js";
+import { ClientContext } from "./modular/components/ClientContext.js";
+import { Samples } from "./modular/components/Samples.js";
 import { TsMorphBridge } from "./modular/components/TsMorphBridge.js";
 import { SdkContextProvider } from "./modular/components/context/SdkContextProvider.js";
 import { ModularEmitterOptions } from "./modular/interfaces.js";
 import { SdkContext } from "./utils/interfaces.js";
 import { SdkTypeContext } from "./framework/hooks/sdkTypes.js";
+import { EmitterOptions } from "./lib.js";
 
 /**
  * Emits ALL modular source files using the Alloy JSX pipeline.
@@ -22,10 +25,12 @@ import { SdkTypeContext } from "./framework/hooks/sdkTypes.js";
  *   - Logger
  *   - Models (interfaces, enums, unions, type aliases)
  *   - RestorePoller (LRO restore poller helpers)
+ *   - ClientContext (client interface, options, factory function)
+ *   - Samples (operation example files)
  *
  * TsMorphBridge components (ts-morph output routed through Alloy):
- *   - Operations, OperationOptions, ClientContext, ClassicalClient,
- *     ClassicalOperationGroups, Serializers, SubpathIndex, RootIndex, Samples
+ *   - Operations, OperationOptions, ClassicalClient,
+ *     ClassicalOperationGroups, Serializers, SubpathIndex, RootIndex
  */
 export async function emitAlloyOutput(
   program: Program,
@@ -35,7 +40,8 @@ export async function emitAlloyOutput(
   dpgContext: SdkContext,
   sdkTypes: SdkTypeContext,
   tsMorphProject: Project,
-  clientMap: [string[], SdkClientType<SdkServiceOperation>][]
+  clientMap: [string[], SdkClientType<SdkServiceOperation>][],
+  emitterOptions: EmitterOptions
 ): Promise<void> {
   // Alloy writeOutput() does joinPaths(emitterOutputDir, path), so all paths
   // in Alloy components must be relative to emitterOutputDir.
@@ -63,15 +69,27 @@ export async function emitAlloyOutput(
         />
         <Models context={dpgContext} sourceRoot={modularSourcesRoot} />
         {clientMap.map((subClient) => (
-          <RestorePoller
-            context={dpgContext}
-            clientMap={subClient}
-            emitterOptions={alloyEmitterOptions}
-          />
+          <>
+            <RestorePoller
+              context={dpgContext}
+              clientMap={subClient}
+              emitterOptions={alloyEmitterOptions}
+            />
+            <ClientContext
+              context={dpgContext}
+              clientMap={subClient}
+              emitterOptions={alloyEmitterOptions}
+            />
+          </>
         ))}
 
         {/* Bridge: ts-morph files written directly via emitFile (absolute paths) */}
         <TsMorphBridge project={tsMorphProject} program={program} />
+
+        {/* Samples: conditionally rendered when generate-sample is enabled */}
+        {emitterOptions["generate-sample"] === true && (
+          <Samples context={dpgContext} />
+        )}
       </SdkContextProvider>
     </Output>,
     emitterOutputDir
