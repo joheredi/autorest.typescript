@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 export { AudioOperations } from "./audio/index.js";
 export { ChatOperations } from "./chat/index.js";
 export { CompletionsOperations } from "./completions/index.js";

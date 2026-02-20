@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 export { DataProductsOperations } from "./dataProducts/index.js";
 export { DataProductsCatalogsOperations } from "./dataProductsCatalogs/index.js";
 export { DataTypesOperations } from "./dataTypes/index.js";

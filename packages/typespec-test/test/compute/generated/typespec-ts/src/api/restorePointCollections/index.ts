@@ -1,8 +1,2 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 export { createOrUpdate, get } from "./operations.js";
-export {
-  RestorePointCollectionsCreateOrUpdateOptionalParams,
-  RestorePointCollectionsGetOptionalParams,
-} from "./options.js";
+export { RestorePointCollectionsCreateOrUpdateOptionalParams, RestorePointCollectionsGetOptionalParams } from "./options.js";

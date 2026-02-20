@@ -39,7 +39,7 @@ export interface AudioTranslationsOperations {
 
 // @public
 export interface ChatCompletionFunctionCallOption {
-    name: string;
+    "name": string;
 }
 
 // @public
@@ -49,30 +49,30 @@ export interface ChatCompletionFunctionParameters {
 
 // @public
 export interface ChatCompletionFunctions {
-    description?: string;
-    name: string;
-    parameters: ChatCompletionFunctionParameters;
+    "description"?: string;
+    "name": string;
+    "parameters": ChatCompletionFunctionParameters;
 }
 
 // @public
 export interface ChatCompletionRequestMessage {
-    content: string | null;
-    functionCall?: {
-        name: string;
-        arguments: string;
+    "content": (string) | null;
+    "functionCall"?: {
+        "name": string;
+        "arguments": string;
     };
-    name?: string;
-    role: "system" | "user" | "assistant" | "function";
+    "name"?: string;
+    "role": "system" | "user" | "assistant" | "function";
 }
 
 // @public
 export interface ChatCompletionResponseMessage {
-    content: string | null;
-    functionCall?: {
-        name: string;
-        arguments: string;
+    "content": (string) | null;
+    "functionCall"?: {
+        "name": string;
+        "arguments": string;
     };
-    role: "system" | "user" | "assistant" | "function";
+    "role": "system" | "user" | "assistant" | "function";
 }
 
 // @public
@@ -103,296 +103,296 @@ export interface CompletionsOperations {
 
 // @public
 export interface CompletionUsage {
-    completionTokens: number;
-    promptTokens: number;
-    totalTokens: number;
+    "completionTokens": number;
+    "promptTokens": number;
+    "totalTokens": number;
 }
 
 // @public
 export interface CreateChatCompletionRequest {
-    frequencyPenalty?: number | null;
-    functionCall?: "none" | "auto" | ChatCompletionFunctionCallOption;
-    functions?: ChatCompletionFunctions[];
-    logitBias?: Record<string, number> | null;
-    maxTokens?: number | null;
-    messages: ChatCompletionRequestMessage[];
-    model: "gpt4" | "gpt-4-0314" | "gpt-4-0613" | "gpt-4-32k" | "gpt-4-32k-0314" | "gpt-4-32k-0613" | "gpt-3.5-turbo" | "gpt-3.5-turbo-16k" | "gpt-3.5-turbo-0301" | "gpt-3.5-turbo-0613" | "gpt-3.5-turbo-16k-0613";
-    n?: number | null;
-    presencePenalty?: number | null;
-    stop?: Stop;
-    stream?: boolean | null;
-    temperature?: number | null;
-    topP?: number | null;
-    user?: string;
+    "frequencyPenalty"?: (number) | null;
+    "functionCall"?: ("none" | "auto" | ChatCompletionFunctionCallOption);
+    "functions"?: (ChatCompletionFunctions)[];
+    "logitBias"?: (Record<string, number>) | null;
+    "maxTokens"?: (number) | null;
+    "messages": (ChatCompletionRequestMessage)[];
+    "model": "gpt4" | "gpt-4-0314" | "gpt-4-0613" | "gpt-4-32k" | "gpt-4-32k-0314" | "gpt-4-32k-0613" | "gpt-3.5-turbo" | "gpt-3.5-turbo-16k" | "gpt-3.5-turbo-0301" | "gpt-3.5-turbo-0613" | "gpt-3.5-turbo-16k-0613";
+    "n"?: (number) | null;
+    "presencePenalty"?: (number) | null;
+    "stop"?: Stop;
+    "stream"?: (boolean) | null;
+    "temperature"?: (number) | null;
+    "topP"?: (number) | null;
+    "user"?: string;
 }
 
 // @public
 export interface CreateChatCompletionResponse {
-    choices: {
-        index: number;
-        message: ChatCompletionResponseMessage;
-        finishReason: "stop" | "length" | "function_call" | "content_filter";
-    }[];
-    created: Date;
-    id: string;
-    model: string;
-    object: string;
+    "choices": ({
+        "index": number;
+        "message": ChatCompletionResponseMessage;
+        "finishReason": "stop" | "length" | "function_call" | "content_filter";
+    })[];
+    "created": Date;
+    "id": string;
+    "model": string;
+    "object": string;
     // (undocumented)
-    usage?: CompletionUsage;
+    "usage"?: CompletionUsage;
 }
 
 // @public
 export interface CreateCompletionRequest {
-    bestOf?: number | null;
-    echo?: boolean | null;
-    frequencyPenalty?: number | null;
-    logitBias?: Record<string, number> | null;
-    logprobs?: number | null;
-    maxTokens?: number | null;
-    model: "babbage-002" | "davinci-002" | "text-davinci-003" | "text-davinci-002" | "text-davinci-001" | "code-davinci-002" | "text-curie-001" | "text-babbage-001" | "text-ada-001";
-    n?: number | null;
-    presencePenalty?: number | null;
-    prompt: Prompt;
-    stop?: Stop;
-    stream?: boolean | null;
-    suffix?: string | null;
-    temperature?: number | null;
-    topP?: number | null;
-    user?: string;
+    "bestOf"?: (number) | null;
+    "echo"?: (boolean) | null;
+    "frequencyPenalty"?: (number) | null;
+    "logitBias"?: (Record<string, number>) | null;
+    "logprobs"?: (number) | null;
+    "maxTokens"?: (number) | null;
+    "model": "babbage-002" | "davinci-002" | "text-davinci-003" | "text-davinci-002" | "text-davinci-001" | "code-davinci-002" | "text-curie-001" | "text-babbage-001" | "text-ada-001";
+    "n"?: (number) | null;
+    "presencePenalty"?: (number) | null;
+    "prompt": Prompt;
+    "stop"?: Stop;
+    "stream"?: (boolean) | null;
+    "suffix"?: (string) | null;
+    "temperature"?: (number) | null;
+    "topP"?: (number) | null;
+    "user"?: string;
 }
 
 // @public
 export interface CreateCompletionResponse {
-    choices: {
-        index: number;
-        text: string;
-        logprobs: {
-            tokens: string[];
-            tokenLogprobs: number[];
-            topLogprobs: Record<string, number>[];
-            textOffset: number[];
-        } | null;
-        finishReason: "stop" | "length" | "content_filter";
-    }[];
-    created: Date;
-    id: string;
-    model: string;
-    object: string;
+    "choices": ({
+        "index": number;
+        "text": string;
+        "logprobs": ({
+            "tokens": (string)[];
+            "tokenLogprobs": (number)[];
+            "topLogprobs": (Record<string, number>)[];
+            "textOffset": (number)[];
+        }) | null;
+        "finishReason": "stop" | "length" | "content_filter";
+    })[];
+    "created": Date;
+    "id": string;
+    "model": string;
+    "object": string;
     // (undocumented)
-    usage?: CompletionUsage;
+    "usage"?: CompletionUsage;
 }
 
 // @public
 export interface CreateEditRequest {
-    input?: string | null;
-    instruction: string;
-    model: "text-davinci-edit-001" | "code-davinci-edit-001";
-    n?: number | null;
-    temperature?: number | null;
-    topP?: number | null;
+    "input"?: (string) | null;
+    "instruction": string;
+    "model": "text-davinci-edit-001" | "code-davinci-edit-001";
+    "n"?: (number) | null;
+    "temperature"?: (number) | null;
+    "topP"?: (number) | null;
 }
 
 // @public
 export interface CreateEditResponse {
-    choices: {
-        text: string;
-        index: number;
-        finishReason: "stop" | "length";
-    }[];
-    created: Date;
-    object: "edit";
+    "choices": ({
+        "text": string;
+        "index": number;
+        "finishReason": "stop" | "length";
+    })[];
+    "created": Date;
+    "object": "edit";
     // (undocumented)
-    usage: CompletionUsage;
+    "usage": CompletionUsage;
 }
 
 // @public
 export interface CreateEmbeddingRequest {
-    input: string | string[] | number[] | number[][];
-    model: "text-embedding-ada-002";
+    "input": (string | (string)[] | (number)[] | ((number)[])[]);
+    "model": "text-embedding-ada-002";
     // (undocumented)
-    user?: string;
+    "user"?: string;
 }
 
 // @public
 export interface CreateEmbeddingResponse {
-    data: Embedding[];
-    model: string;
-    object: "embedding";
-    usage: {
-        promptTokens: number;
-        totalTokens: number;
+    "data": (Embedding)[];
+    "model": string;
+    "object": "embedding";
+    "usage": {
+        "promptTokens": number;
+        "totalTokens": number;
     };
 }
 
 // @public
 export interface CreateFileRequest {
-    file: FileContents | {
+    "file": (FileContents) | {
         contents: FileContents;
         contentType?: string;
         filename?: string;
     };
-    purpose: string;
+    "purpose": string;
 }
 
 // @public
 export interface CreateFineTuneRequest {
-    batchSize?: number | null;
-    classificationBetas?: number[] | null;
-    classificationNClasses?: number | null;
-    classificationPositiveClass?: string | null;
-    computeClassificationMetrics?: boolean | null;
-    learningRateMultiplier?: number | null;
-    model?: ("ada" | "babbage" | "curie" | "davinci") | null;
-    nEpochs?: number | null;
-    promptLossRate?: number | null;
-    suffix?: string | null;
-    trainingFile: string;
-    validationFile?: string | null;
+    "batchSize"?: (number) | null;
+    "classificationBetas"?: ((number)[]) | null;
+    "classificationNClasses"?: (number) | null;
+    "classificationPositiveClass"?: (string) | null;
+    "computeClassificationMetrics"?: (boolean) | null;
+    "learningRateMultiplier"?: (number) | null;
+    "model"?: ("ada" | "babbage" | "curie" | "davinci") | null;
+    "nEpochs"?: (number) | null;
+    "promptLossRate"?: (number) | null;
+    "suffix"?: (string) | null;
+    "trainingFile": string;
+    "validationFile"?: (string) | null;
 }
 
 // @public
 export interface CreateFineTuningJobRequest {
-    hyperparameters?: {
-        nEpochs?: "auto" | number;
+    "hyperparameters"?: {
+        "nEpochs"?: ("auto" | number);
     };
-    model: "babbage-002" | "davinci-002" | "gpt-3.5-turbo";
-    suffix?: string | null;
-    trainingFile: string;
-    validationFile?: string | null;
+    "model": "babbage-002" | "davinci-002" | "gpt-3.5-turbo";
+    "suffix"?: (string) | null;
+    "trainingFile": string;
+    "validationFile"?: (string) | null;
 }
 
 // @public
 export interface CreateImageEditRequest {
-    image: FileContents | {
+    "image": (FileContents) | {
         contents: FileContents;
         contentType?: string;
         filename?: string;
     };
-    mask?: FileContents | {
+    "mask"?: (FileContents) | {
         contents: FileContents;
         contentType?: string;
         filename?: string;
     };
-    n?: number | null;
-    prompt: string;
-    responseFormat?: ("url" | "b64_json") | null;
-    size?: ("256x256" | "512x512" | "1024x1024") | null;
+    "n"?: (number) | null;
+    "prompt": string;
+    "responseFormat"?: ("url" | "b64_json") | null;
+    "size"?: ("256x256" | "512x512" | "1024x1024") | null;
     // (undocumented)
-    user?: string;
+    "user"?: string;
 }
 
 // @public
 export interface CreateImageVariationRequest {
-    image: FileContents | {
+    "image": (FileContents) | {
         contents: FileContents;
         contentType?: string;
         filename?: string;
     };
-    n?: number | null;
-    responseFormat?: ("url" | "b64_json") | null;
-    size?: ("256x256" | "512x512" | "1024x1024") | null;
+    "n"?: (number) | null;
+    "responseFormat"?: ("url" | "b64_json") | null;
+    "size"?: ("256x256" | "512x512" | "1024x1024") | null;
     // (undocumented)
-    user?: string;
+    "user"?: string;
 }
 
 // @public
 export interface CreateModerationRequest {
-    input: string | string[];
-    model?: "text-moderation-latest" | "text-moderation-stable";
+    "input": (string | (string)[]);
+    "model"?: "text-moderation-latest" | "text-moderation-stable";
 }
 
 // @public
 export interface CreateModerationResponse {
-    id: string;
-    model: string;
-    results: {
-        flagged: boolean;
-        categories: {
-            hate: boolean;
-            hateThreatening: boolean;
-            harassment: boolean;
-            harassmentThreatening: boolean;
-            selfHarm: boolean;
-            selfHarmIntent: boolean;
-            selfHarmInstructive: boolean;
-            sexual: boolean;
-            sexualMinors: boolean;
-            violence: boolean;
-            violenceGraphic: boolean;
+    "id": string;
+    "model": string;
+    "results": ({
+        "flagged": boolean;
+        "categories": {
+            "hate": boolean;
+            "hateThreatening": boolean;
+            "harassment": boolean;
+            "harassmentThreatening": boolean;
+            "selfHarm": boolean;
+            "selfHarmIntent": boolean;
+            "selfHarmInstructive": boolean;
+            "sexual": boolean;
+            "sexualMinors": boolean;
+            "violence": boolean;
+            "violenceGraphic": boolean;
         };
-        categoryScores: {
-            hate: number;
-            hateThreatening: number;
-            harassment: number;
-            harassmentThreatening: number;
-            selfHarm: number;
-            selfHarmIntent: number;
-            selfHarmInstructive: number;
-            sexual: number;
-            sexualMinors: number;
-            violence: number;
-            violenceGraphic: number;
+        "categoryScores": {
+            "hate": number;
+            "hateThreatening": number;
+            "harassment": number;
+            "harassmentThreatening": number;
+            "selfHarm": number;
+            "selfHarmIntent": number;
+            "selfHarmInstructive": number;
+            "sexual": number;
+            "sexualMinors": number;
+            "violence": number;
+            "violenceGraphic": number;
         };
-    }[];
+    })[];
 }
 
 // @public
 export interface CreateTranscriptionRequest {
-    file: FileContents | {
+    "file": (FileContents) | {
         contents: FileContents;
         contentType?: string;
         filename?: string;
     };
-    language?: string;
-    model: "whisper-1";
-    prompt?: string;
-    responseFormat?: "json" | "text" | "srt" | "verbose_json" | "vtt";
-    temperature?: number;
+    "language"?: string;
+    "model": "whisper-1";
+    "prompt"?: string;
+    "responseFormat"?: "json" | "text" | "srt" | "verbose_json" | "vtt";
+    "temperature"?: number;
 }
 
 // @public
 export interface CreateTranscriptionResponse {
     // (undocumented)
-    text: string;
+    "text": string;
 }
 
 // @public
 export interface CreateTranslationRequest {
-    file: FileContents | {
+    "file": (FileContents) | {
         contents: FileContents;
         contentType?: string;
         filename?: string;
     };
-    model: "whisper-1";
-    prompt?: string;
-    responseFormat?: "json" | "text" | "srt" | "verbose_json" | "vtt";
-    temperature?: number;
+    "model": "whisper-1";
+    "prompt"?: string;
+    "responseFormat"?: "json" | "text" | "srt" | "verbose_json" | "vtt";
+    "temperature"?: number;
 }
 
 // @public
 export interface CreateTranslationResponse {
     // (undocumented)
-    text: string;
+    "text": string;
 }
 
 // @public
 export interface DeleteFileResponse {
     // (undocumented)
-    deleted: boolean;
+    "deleted": boolean;
     // (undocumented)
-    id: string;
+    "id": string;
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
 export interface DeleteModelResponse {
     // (undocumented)
-    deleted: boolean;
+    "deleted": boolean;
     // (undocumented)
-    id: string;
+    "id": string;
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
@@ -407,9 +407,9 @@ export interface EditsOperations {
 
 // @public
 export interface Embedding {
-    embedding: number[];
-    index: number;
-    object: "embedding";
+    "embedding": (number)[];
+    "index": number;
+    "object": "embedding";
 }
 
 // @public
@@ -425,19 +425,19 @@ export interface EmbeddingsOperations {
 // @public
 export interface ErrorModel {
     // (undocumented)
-    code: string | null;
+    "code": (string) | null;
     // (undocumented)
-    message: string;
+    "message": string;
     // (undocumented)
-    param: string | null;
+    "param": (string) | null;
     // (undocumented)
-    type: string;
+    "type": string;
 }
 
 // @public
 export interface ErrorResponse {
     // (undocumented)
-    error: ErrorModel;
+    "error": ErrorModel;
 }
 
 // @public
@@ -478,39 +478,39 @@ export interface FilesRetrieveOptionalParams extends OperationOptions {
 
 // @public
 export interface FineTune {
-    createdAt: Date;
-    events?: FineTuneEvent[];
-    fineTunedModel: string | null;
-    hyperparams: {
-        nEpochs: number;
-        batchSize: number;
-        promptLossWeight: number;
-        learningRateMultiplier: number;
-        computeClassificationMetrics?: boolean;
-        classificationPositiveClass?: string;
-        classificationNClasses?: number;
+    "createdAt": Date;
+    "events"?: (FineTuneEvent)[];
+    "fineTunedModel": (string) | null;
+    "hyperparams": {
+        "nEpochs": number;
+        "batchSize": number;
+        "promptLossWeight": number;
+        "learningRateMultiplier": number;
+        "computeClassificationMetrics"?: boolean;
+        "classificationPositiveClass"?: string;
+        "classificationNClasses"?: number;
     };
-    id: string;
-    model: string;
-    object: "fine-tune";
-    organizationId: string;
-    resultFiles: OpenAIFile[];
-    status: "created" | "running" | "succeeded" | "failed" | "cancelled";
-    trainingFiles: OpenAIFile[];
-    updatedAt: Date;
-    validationFiles: OpenAIFile[];
+    "id": string;
+    "model": string;
+    "object": "fine-tune";
+    "organizationId": string;
+    "resultFiles": (OpenAIFile)[];
+    "status": "created" | "running" | "succeeded" | "failed" | "cancelled";
+    "trainingFiles": (OpenAIFile)[];
+    "updatedAt": Date;
+    "validationFiles": (OpenAIFile)[];
 }
 
 // @public
 export interface FineTuneEvent {
     // (undocumented)
-    createdAt: Date;
+    "createdAt": Date;
     // (undocumented)
-    level: string;
+    "level": string;
     // (undocumented)
-    message: string;
+    "message": string;
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
@@ -550,40 +550,40 @@ export interface FineTunesRetrieveOptionalParams extends OperationOptions {
 
 // @public
 export interface FineTuningJob {
-    createdAt: Date;
-    error: {
-        message?: string;
-        code?: string;
-        param?: string | null;
-    } | null;
-    fineTunedModel: string | null;
-    finishedAt: Date | null;
-    hyperparameters: {
-        nEpochs?: "auto" | number;
+    "createdAt": Date;
+    "error": ({
+        "message"?: string;
+        "code"?: string;
+        "param"?: (string) | null;
+    }) | null;
+    "fineTunedModel": (string) | null;
+    "finishedAt": (Date) | null;
+    "hyperparameters": {
+        "nEpochs"?: ("auto" | number);
     };
-    id: string;
-    model: string;
-    object: "fine_tuning.job";
-    organizationId: string;
-    resultFiles: string[];
-    status: "created" | "pending" | "running" | "succeeded" | "failed" | "cancelled";
-    trainedTokens: number | null;
-    trainingFile: string;
-    validationFile: string | null;
+    "id": string;
+    "model": string;
+    "object": "fine_tuning.job";
+    "organizationId": string;
+    "resultFiles": (string)[];
+    "status": "created" | "pending" | "running" | "succeeded" | "failed" | "cancelled";
+    "trainedTokens": (number) | null;
+    "trainingFile": string;
+    "validationFile": (string) | null;
 }
 
 // @public
 export interface FineTuningJobEvent {
     // (undocumented)
-    createdAt: Date;
+    "createdAt": Date;
     // (undocumented)
-    id: string;
+    "id": string;
     // (undocumented)
-    level: "info" | "warn" | "error";
+    "level": "info" | "warn" | "error";
     // (undocumented)
-    message: string;
+    "message": string;
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
@@ -631,8 +631,8 @@ export interface FineTuningOperations {
 
 // @public
 export interface Image {
-    b64Json?: Uint8Array;
-    url?: string;
+    "b64Json"?: Uint8Array;
+    "url"?: string;
 }
 
 // @public
@@ -654,67 +654,67 @@ export interface ImagesOperations {
 // @public
 export interface ImagesResponse {
     // (undocumented)
-    created: Date;
+    "created": Date;
     // (undocumented)
-    data: Image[];
+    "data": (Image)[];
 }
 
 // @public
 export interface ListFilesResponse {
     // (undocumented)
-    data: OpenAIFile[];
+    "data": (OpenAIFile)[];
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
 export interface ListFineTuneEventsResponse {
     // (undocumented)
-    data: FineTuneEvent[];
+    "data": (FineTuneEvent)[];
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
 export interface ListFineTunesResponse {
     // (undocumented)
-    data: FineTune[];
+    "data": (FineTune)[];
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
 export interface ListFineTuningJobEventsResponse {
     // (undocumented)
-    data: FineTuningJobEvent[];
+    "data": (FineTuningJobEvent)[];
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
 export interface ListModelsResponse {
     // (undocumented)
-    data: Model[];
+    "data": (Model)[];
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
 export interface ListPaginatedFineTuningJobsResponse {
     // (undocumented)
-    data: FineTuningJob[];
+    "data": (FineTuningJob)[];
     // (undocumented)
-    hasMore: boolean;
+    "hasMore": boolean;
     // (undocumented)
-    object: string;
+    "object": string;
 }
 
 // @public
 export interface Model {
-    created: Date;
-    id: string;
-    object: "model";
-    ownedBy: string;
+    "created": Date;
+    "id": string;
+    "object": "model";
+    "ownedBy": string;
 }
 
 // @public
@@ -771,21 +771,21 @@ export interface OpenAIClientOptionalParams extends ClientOptions {
 
 // @public
 export interface OpenAIFile {
-    bytes: number;
-    createdAt: Date;
-    filename: string;
-    id: string;
-    object: "file";
-    purpose: string;
-    status: "uploaded" | "processed" | "pending" | "error" | "deleting" | "deleted";
-    statusDetails?: string | null;
+    "bytes": number;
+    "createdAt": Date;
+    "filename": string;
+    "id": string;
+    "object": "file";
+    "purpose": string;
+    "status": "uploaded" | "processed" | "pending" | "error" | "deleting" | "deleted";
+    "statusDetails"?: (string) | null;
 }
 
 // @public
-export type Prompt = (string | string[] | number[] | number[][]) | null;
+export type Prompt = (string | (string)[] | (number)[] | ((number)[])[]) | null;
 
 // @public
-export type Stop = (string | string[]) | null;
+export type Stop = (string | (string)[]) | null;
 
 // (No @packageDocumentation comment for this package)
 

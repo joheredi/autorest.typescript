@@ -37,17 +37,28 @@ export async function emitAlloyOutput(
   tsMorphProject: Project,
   clientMap: [string[], SdkClientType<SdkServiceOperation>][]
 ): Promise<void> {
+  // Alloy writeOutput() does joinPaths(emitterOutputDir, path), so all paths
+  // in Alloy components must be relative to emitterOutputDir.
+  // Create a copy of emitterOptions with a relative sourceRoot.
+  const alloyEmitterOptions: ModularEmitterOptions = {
+    ...modularEmitterOptions,
+    modularOptions: {
+      ...modularEmitterOptions.modularOptions,
+      sourceRoot: modularSourcesRoot
+    }
+  };
+
   await writeOutput(
     program,
     <Output program={program}>
       <SdkContextProvider
         sdkContext={dpgContext}
-        emitterOptions={modularEmitterOptions}
+        emitterOptions={alloyEmitterOptions}
         sdkTypes={sdkTypes}
       >
-        {/* Pure Alloy components */}
+        {/* Pure Alloy components — paths must be relative to emitterOutputDir */}
         <Logger
-          emitterOptions={modularEmitterOptions}
+          emitterOptions={alloyEmitterOptions}
           srcPath={modularSourcesRoot}
         />
         <Models context={dpgContext} sourceRoot={modularSourcesRoot} />
@@ -55,15 +66,12 @@ export async function emitAlloyOutput(
           <RestorePoller
             context={dpgContext}
             clientMap={subClient}
-            emitterOptions={modularEmitterOptions}
+            emitterOptions={alloyEmitterOptions}
           />
         ))}
 
-        {/* Bridge: ts-morph generated files rendered through Alloy */}
-        <TsMorphBridge
-          project={tsMorphProject}
-          emitterOutputDir={emitterOutputDir}
-        />
+        {/* Bridge: ts-morph files written directly via emitFile (absolute paths) */}
+        <TsMorphBridge project={tsMorphProject} program={program} />
       </SdkContextProvider>
     </Output>,
     emitterOutputDir

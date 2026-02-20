@@ -1,5 +1,3 @@
-// Licensed under the MIT License.
-
 // ---------------------
 // interfaces
 // ---------------------
@@ -36,7 +34,7 @@ function encodeReservedComponent(str: string): string {
 function encodeRFC3986URIComponent(str: string): string {
   return encodeURIComponent(str).replace(
     /[!'()*]/g,
-    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`
   );
 }
 
@@ -45,7 +43,10 @@ function isDefined(val: any): boolean {
 }
 
 function getNamedAndIfEmpty(op?: string): [boolean, string] {
-  return [!!op && [";", "?", "&"].includes(op), !!op && ["?", "&"].includes(op) ? "=" : ""];
+  return [
+    !!op && [";", "?", "&"].includes(op),
+    !!op && ["?", "&"].includes(op) ? "=" : ""
+  ];
 }
 
 function getFirstOrSep(op?: string, isFirst = false): string {
@@ -174,7 +175,7 @@ function getVarValue(option: ValueOptions): string | undefined {
 export function expandUrlTemplate(
   template: string,
   context: Record<string, any>,
-  option?: UrlTemplateOptions,
+  option?: UrlTemplateOptions
 ): string {
   const result = template.replace(/\{([^{}]+)\}|([^{}]+)/g, (_, expr, text) => {
     if (!expr) {
@@ -198,7 +199,7 @@ export function expandUrlTemplate(
         varValue: context[varMatch[1]],
         varName: varMatch[1],
         modifier: varMatch[2] || varMatch[3],
-        reserved: option?.allowReserved,
+        reserved: option?.allowReserved
       });
       if (varValue) {
         innerResult.push(varValue);

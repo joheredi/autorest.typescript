@@ -379,14 +379,22 @@ export async function $onEmit(context: EmitContext) {
     }
 
     // ── Step 3: Emit everything through Alloy pipeline ──
-    // Pure Alloy components (Logger, Models) + TsMorphBridge (remaining files)
+    // Pure Alloy components (Logger, Models, RestorePoller) + TsMorphBridge (remaining files)
     const { emitAlloyOutput } = await import("./alloy-emitter.js");
     const sdkTypesCtx = useContext("sdkTypes");
+    // Alloy writeOutput() joins emitterOutputDir + path, so paths must be relative
+    const relativeSourcesRoot = modularSourcesRoot.startsWith(
+      context.emitterOutputDir
+    )
+      ? modularSourcesRoot
+          .slice(context.emitterOutputDir.length)
+          .replace(/^\//, "")
+      : modularSourcesRoot;
     await emitAlloyOutput(
       program,
       context.emitterOutputDir,
       modularEmitterOptions,
-      modularSourcesRoot,
+      relativeSourcesRoot,
       dpgContext,
       sdkTypesCtx,
       project,

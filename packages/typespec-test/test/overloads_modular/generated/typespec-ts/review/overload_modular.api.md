@@ -31,7 +31,7 @@ export enum KnownVersions {
 
 // @public (undocumented)
 export class WidgetManagerClient {
-    constructor(endpointParam: string, credential: KeyCredential | TokenCredential, options?: WidgetManagerClientOptionalParams);
+    constructor(endpointParam: string, credential: (KeyCredential | TokenCredential), options?: WidgetManagerClientOptionalParams);
     readonly fooOperations: FooOperationsOperations;
     readonly pipeline: Pipeline;
 }

@@ -1,21 +1,2 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
-export {
-  detectMultivariateLastAnomaly,
-  detectMultivariateBatchAnomaly,
-  getMultivariateModel,
-  deleteMultivariateModel,
-  listMultivariateModels,
-  trainMultivariateModel,
-  getMultivariateBatchDetectionResult,
-} from "./operations.js";
-export {
-  MultivariateDetectMultivariateLastAnomalyOptionalParams,
-  MultivariateDetectMultivariateBatchAnomalyOptionalParams,
-  MultivariateGetMultivariateModelOptionalParams,
-  MultivariateDeleteMultivariateModelOptionalParams,
-  MultivariateListMultivariateModelsOptionalParams,
-  MultivariateTrainMultivariateModelOptionalParams,
-  MultivariateGetMultivariateBatchDetectionResultOptionalParams,
-} from "./options.js";
+export { detectMultivariateLastAnomaly, detectMultivariateBatchAnomaly, getMultivariateModel, deleteMultivariateModel, listMultivariateModels, trainMultivariateModel, getMultivariateBatchDetectionResult } from "./operations.js";
+export { MultivariateDetectMultivariateLastAnomalyOptionalParams, MultivariateDetectMultivariateBatchAnomalyOptionalParams, MultivariateGetMultivariateModelOptionalParams, MultivariateDeleteMultivariateModelOptionalParams, MultivariateListMultivariateModelsOptionalParams, MultivariateTrainMultivariateModelOptionalParams, MultivariateGetMultivariateBatchDetectionResultOptionalParams } from "./options.js";

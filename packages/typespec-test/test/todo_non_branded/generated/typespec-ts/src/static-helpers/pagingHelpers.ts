@@ -1,6 +1,8 @@
-// Licensed under the MIT License.
-
-import { Client, createRestError, PathUncheckedResponse } from "@typespec/ts-http-runtime";
+import {
+  Client,
+  createRestError,
+  PathUncheckedResponse
+} from "@typespec/ts-http-runtime";
 import { RestError } from "@typespec/ts-http-runtime";
 
 /**
@@ -29,7 +31,7 @@ export type ContinuablePage<TElement, TPage = TElement[]> = TPage & {
 export interface PagedAsyncIterableIterator<
   TElement,
   TPage = TElement[],
-  TPageSettings extends PageSettings = PageSettings,
+  TPageSettings extends PageSettings = PageSettings
 > {
   /**
    * The next method, part of the iteration protocol
@@ -38,11 +40,17 @@ export interface PagedAsyncIterableIterator<
   /**
    * The connection to the async iterator, part of the iteration protocol
    */
-  [Symbol.asyncIterator](): PagedAsyncIterableIterator<TElement, TPage, TPageSettings>;
+  [Symbol.asyncIterator](): PagedAsyncIterableIterator<
+    TElement,
+    TPage,
+    TPageSettings
+  >;
   /**
    * Return an AsyncIterableIterator that works a page at a time
    */
-  byPage: (settings?: TPageSettings) => AsyncIterableIterator<ContinuablePage<TElement, TPage>>;
+  byPage: (
+    settings?: TPageSettings
+  ) => AsyncIterableIterator<ContinuablePage<TElement, TPage>>;
 }
 
 /**
@@ -51,7 +59,7 @@ export interface PagedAsyncIterableIterator<
 export interface PagedResult<
   TElement,
   TPage = TElement[],
-  TPageSettings extends PageSettings = PageSettings,
+  TPageSettings extends PageSettings = PageSettings
 > {
   /**
    * Link to the first page of results.
@@ -60,11 +68,15 @@ export interface PagedResult<
   /**
    * A method that returns a page of results.
    */
-  getPage: (pageLink?: string) => Promise<{ page: TPage; nextPageLink?: string } | undefined>;
+  getPage: (
+    pageLink?: string
+  ) => Promise<{ page: TPage; nextPageLink?: string } | undefined>;
   /**
    * a function to implement the `byPage` method on the paged async iterator.
    */
-  byPage?: (settings?: TPageSettings) => AsyncIterableIterator<ContinuablePage<TElement, TPage>>;
+  byPage?: (
+    settings?: TPageSettings
+  ) => AsyncIterableIterator<ContinuablePage<TElement, TPage>>;
 
   /**
    * A function to extract elements from a page.
@@ -89,13 +101,13 @@ export function buildPagedAsyncIterator<
   TElement,
   TPage = TElement[],
   TPageSettings extends PageSettings = PageSettings,
-  TResponse extends PathUncheckedResponse = PathUncheckedResponse,
+  TResponse extends PathUncheckedResponse = PathUncheckedResponse
 >(
   client: Client,
   getInitialResponse: () => PromiseLike<TResponse>,
   processResponseBody: (result: TResponse) => PromiseLike<unknown>,
   expectedStatuses: string[],
-  options: BuildPagedAsyncIteratorOptions = {},
+  options: BuildPagedAsyncIteratorOptions = {}
 ): PagedAsyncIterableIterator<TElement, TPage, TPageSettings> {
   const itemName = options.itemName ?? "value";
   const nextLinkName = options.nextLinkName ?? "nextLink";
@@ -107,7 +119,9 @@ export function buildPagedAsyncIterator<
       if (pageLink === undefined) {
         result = await getInitialResponse();
       } else {
-        const resolvedPageLink = apiVersion ? addApiVersionToUrl(pageLink, apiVersion) : pageLink;
+        const resolvedPageLink = apiVersion
+          ? addApiVersionToUrl(pageLink, apiVersion)
+          : pageLink;
         result =
           nextLinkMethod === "POST"
             ? await client.pathUnchecked(resolvedPageLink).post()
@@ -119,15 +133,15 @@ export function buildPagedAsyncIterator<
       const values = getElements<TElement>(results, itemName) as TPage;
       return {
         page: values,
-        nextPageLink: nextLink,
+        nextPageLink: nextLink
       };
     },
     byPage: (settings?: TPageSettings) => {
       const { continuationToken } = settings ?? {};
       return getPageAsyncIterator(pagedResult, {
-        pageLink: continuationToken,
+        pageLink: continuationToken
       });
-    },
+    }
   };
   return getPagedAsyncIterator(pagedResult);
 }
@@ -143,11 +157,13 @@ export function buildPagedAsyncIterator<
 function getPagedAsyncIterator<
   TElement,
   TPage = TElement[],
-  TPageSettings extends PageSettings = PageSettings,
+  TPageSettings extends PageSettings = PageSettings
 >(
-  pagedResult: PagedResult<TElement, TPage, TPageSettings>,
+  pagedResult: PagedResult<TElement, TPage, TPageSettings>
 ): PagedAsyncIterableIterator<TElement, TPage, TPageSettings> {
-  const iter = getItemAsyncIterator<TElement, TPage, TPageSettings>(pagedResult);
+  const iter = getItemAsyncIterator<TElement, TPage, TPageSettings>(
+    pagedResult
+  );
   return {
     next() {
       return iter.next();
@@ -160,14 +176,18 @@ function getPagedAsyncIterator<
       ((settings?: TPageSettings) => {
         const { continuationToken } = settings ?? {};
         return getPageAsyncIterator(pagedResult, {
-          pageLink: continuationToken,
+          pageLink: continuationToken
         });
-      }),
+      })
   };
 }
 
-async function* getItemAsyncIterator<TElement, TPage, TPageSettings extends PageSettings>(
-  pagedResult: PagedResult<TElement, TPage, TPageSettings>,
+async function* getItemAsyncIterator<
+  TElement,
+  TPage,
+  TPageSettings extends PageSettings
+>(
+  pagedResult: PagedResult<TElement, TPage, TPageSettings>
 ): AsyncIterableIterator<TElement> {
   const pages = getPageAsyncIterator(pagedResult);
   for await (const page of pages) {
@@ -175,14 +195,20 @@ async function* getItemAsyncIterator<TElement, TPage, TPageSettings extends Page
   }
 }
 
-async function* getPageAsyncIterator<TElement, TPage, TPageSettings extends PageSettings>(
+async function* getPageAsyncIterator<
+  TElement,
+  TPage,
+  TPageSettings extends PageSettings
+>(
   pagedResult: PagedResult<TElement, TPage, TPageSettings>,
   options: {
     pageLink?: string;
-  } = {},
+  } = {}
 ): AsyncIterableIterator<ContinuablePage<TElement, TPage>> {
   const { pageLink } = options;
-  let response = await pagedResult.getPage(pageLink ?? pagedResult.firstPageLink);
+  let response = await pagedResult.getPage(
+    pageLink ?? pagedResult.firstPageLink
+  );
   if (!response) {
     return;
   }
@@ -210,9 +236,13 @@ function getNextLink(body: unknown, nextLinkName?: string): string | undefined {
 
   const nextLink = (body as Record<string, unknown>)[nextLinkName];
 
-  if (typeof nextLink !== "string" && typeof nextLink !== "undefined" && nextLink !== null) {
+  if (
+    typeof nextLink !== "string" &&
+    typeof nextLink !== "undefined" &&
+    nextLink !== null
+  ) {
     throw new RestError(
-      `Body Property ${nextLinkName} should be a string or undefined or null but got ${typeof nextLink}`,
+      `Body Property ${nextLinkName} should be a string or undefined or null but got ${typeof nextLink}`
     );
   }
 
@@ -230,7 +260,7 @@ function getElements<T = unknown>(body: unknown, itemName: string): T[] {
   const value = (body as Record<string, unknown>)[itemName] as T[];
   if (!Array.isArray(value)) {
     throw new RestError(
-      `Couldn't paginate response\n Body doesn't contain an array property with name: ${itemName}`,
+      `Couldn't paginate response\n Body doesn't contain an array property with name: ${itemName}`
     );
   }
 
@@ -240,11 +270,14 @@ function getElements<T = unknown>(body: unknown, itemName: string): T[] {
 /**
  * Checks if a request failed
  */
-function checkPagingRequest(response: PathUncheckedResponse, expectedStatuses: string[]): void {
+function checkPagingRequest(
+  response: PathUncheckedResponse,
+  expectedStatuses: string[]
+): void {
   if (!expectedStatuses.includes(response.status)) {
     throw createRestError(
       `Pagination failed with unexpected statusCode ${response.status}`,
-      response,
+      response
     );
   }
 }

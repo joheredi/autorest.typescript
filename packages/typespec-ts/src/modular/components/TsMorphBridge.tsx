@@ -1,6 +1,6 @@
 import { Children } from "@alloy-js/core";
-import * as ts from "@alloy-js/typescript";
 import { Project } from "ts-morph";
+import { emitFile, type Program } from "@typespec/compiler";
 
 export interface TsMorphBridgeProps {
   /**
@@ -9,43 +9,33 @@ export interface TsMorphBridgeProps {
   project?: Project;
 
   /**
-   * The emitter output directory. File paths from ts-morph will be
-   * made relative to this directory to avoid path doubling when
-   * writeOutput() joins emitterOutputDir + filePath.
+   * The TypeSpec Program for writing files.
    */
-  emitterOutputDir: string;
+  program?: Program;
 
   children?: Children;
 }
 
 /**
- * Bridge component that takes pre-generated ts-morph source files and emits
- * them through the Alloy pipeline. File paths are made relative to
- * emitterOutputDir to work correctly with writeOutput().
+ * Bridge component that writes pre-generated ts-morph source files directly
+ * using the TypeSpec compiler's emitFile. ts-morph files have absolute paths
+ * that can't be joined with emitterOutputDir, so they bypass the Alloy
+ * rendering pipeline and are written as a side-effect during construction.
+ *
+ * Pure Alloy children are still rendered normally.
  */
 export function TsMorphBridge(props: TsMorphBridgeProps): Children {
-  if (!props.project) return props.children ?? null;
+  if (props.project && props.program) {
+    const files = props.project.getSourceFiles();
+    for (const file of files) {
+      // Write ts-morph files directly — they have absolute paths
+      // that the Alloy pipeline can't handle (writeOutput would double them)
+      void emitFile(props.program, {
+        content: file.getFullText(),
+        path: file.getFilePath()
+      });
+    }
+  }
 
-  const files = props.project.getSourceFiles();
-  const baseDir = props.emitterOutputDir.replace(/\/$/, "");
-
-  return (
-    <>
-      {files.map((file) => {
-        let filePath = file.getFilePath();
-        // Make path relative to emitterOutputDir to avoid doubling
-        if (filePath.startsWith(baseDir)) {
-          filePath = filePath.slice(baseDir.length) as any;
-          // Remove leading slash
-          if (filePath.startsWith("/")) {
-            filePath = filePath.slice(1) as any;
-          }
-        }
-        return (
-          <ts.SourceFile path={filePath}>{file.getFullText()}</ts.SourceFile>
-        );
-      })}
-      {props.children}
-    </>
-  );
+  return props.children ?? null;
 }

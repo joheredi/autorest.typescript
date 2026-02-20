@@ -1,18 +1,21 @@
-// Licensed under the MIT License.
-
 import { OperationOptions } from "@typespec/ts-http-runtime";
 
 /** Optional parameters. */
-export interface FilesDownloadOptionalParams extends OperationOptions {}
+export interface FilesDownloadOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface FilesDeleteOptionalParams extends OperationOptions {}
+export interface FilesDeleteOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface FilesRetrieveOptionalParams extends OperationOptions {}
+export interface FilesRetrieveOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface FilesCreateOptionalParams extends OperationOptions {}
+export interface FilesCreateOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface FilesListOptionalParams extends OperationOptions {}
+export interface FilesListOptionalParams extends OperationOptions {
+}

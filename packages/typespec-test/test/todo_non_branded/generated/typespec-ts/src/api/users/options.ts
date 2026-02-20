@@ -1,6 +1,5 @@
-// Licensed under the MIT License.
-
 import { OperationOptions } from "@typespec/ts-http-runtime";
 
 /** Optional parameters. */
-export interface UsersCreateOptionalParams extends OperationOptions {}
+export interface UsersCreateOptionalParams extends OperationOptions {
+}

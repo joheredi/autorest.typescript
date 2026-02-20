@@ -1,13 +1,11 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 import { OperationOptions } from "@azure-rest/core-client";
 
 /** Optional parameters. */
 export interface DiskAccessesCreateOrUpdateOptionalParams extends OperationOptions {
-  /** Delay to wait until next poll, in milliseconds. */
-  updateIntervalInMs?: number;
+    /** Delay to wait until next poll, in milliseconds. */
+    updateIntervalInMs?: number;
 }
 
 /** Optional parameters. */
-export interface DiskAccessesGetOptionalParams extends OperationOptions {}
+export interface DiskAccessesGetOptionalParams extends OperationOptions {
+}

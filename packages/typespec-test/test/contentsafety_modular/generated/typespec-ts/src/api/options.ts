@@ -1,47 +1,55 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 import { OperationOptions } from "@azure-rest/core-client";
 
 /** Optional parameters. */
 export interface ListTextBlocklistItemsOptionalParams extends OperationOptions {
-  /** The number of result items to return. */
-  top?: number;
-  /** The number of result items to skip. */
-  skip?: number;
-  /** The maximum number of result items per page. */
-  maxpagesize?: number;
+    /** The number of result items to return. */
+    top?: number;
+    /** The number of result items to skip. */
+    skip?: number;
+    /** The maximum number of result items per page. */
+    maxpagesize?: number;
 }
 
 /** Optional parameters. */
-export interface GetTextBlocklistItemOptionalParams extends OperationOptions {}
+export interface GetTextBlocklistItemOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface RemoveBlocklistItemsOptionalParams extends OperationOptions {}
+export interface RemoveBlocklistItemsOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface AddOrUpdateBlocklistItemsOptionalParams extends OperationOptions {}
+export interface AddOrUpdateBlocklistItemsOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface ListTextBlocklistsOptionalParams extends OperationOptions {}
+export interface ListTextBlocklistsOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface DeleteTextBlocklistOptionalParams extends OperationOptions {}
+export interface DeleteTextBlocklistOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface CreateOrUpdateTextBlocklistOptionalParams extends OperationOptions {}
+export interface CreateOrUpdateTextBlocklistOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface GetTextBlocklistOptionalParams extends OperationOptions {}
+export interface GetTextBlocklistOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface AnalyzeImageOptionalParams extends OperationOptions {}
+export interface AnalyzeImageOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface DetectTextProtectedMaterialOptionalParams extends OperationOptions {}
+export interface DetectTextProtectedMaterialOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface ShieldPromptOptionalParams extends OperationOptions {}
+export interface ShieldPromptOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
-export interface AnalyzeTextOptionalParams extends OperationOptions {}
+export interface AnalyzeTextOptionalParams extends OperationOptions {
+}

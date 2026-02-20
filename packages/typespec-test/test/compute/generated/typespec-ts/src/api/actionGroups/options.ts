@@ -1,12 +1,10 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 import { OperationOptions } from "@azure-rest/core-client";
 
 /** Optional parameters. */
-export interface ActionGroupsListOptionalParams extends OperationOptions {}
+export interface ActionGroupsListOptionalParams extends OperationOptions {
+}
 
 /** Optional parameters. */
 export interface ActionGroupsGetOptionalParams extends OperationOptions {
-  expand?: string;
+    expand?: string;
 }
