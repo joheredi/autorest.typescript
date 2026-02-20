@@ -27,8 +27,9 @@
     "allowUnreachableCode": false,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "@alloy-js/core"
+    "jsx": "preserve",
+    "jsxImportSource": "@alloy-js/core",
+    "emitDeclarationOnly": true
   },
   "ts-node": {
     "esm": true
