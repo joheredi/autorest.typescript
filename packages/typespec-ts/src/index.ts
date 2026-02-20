@@ -310,17 +310,9 @@ export async function $onEmit(context: EmitContext) {
       }
     );
 
-    // Emit logger and models via Alloy pipeline (dynamic import to avoid ts-node resolution issues)
-    const { emitAlloyOutput } = await import("./alloy-emitter.js");
-    const sdkTypesCtx = useContext("sdkTypes");
-    await emitAlloyOutput(
-      program,
-      context.emitterOutputDir,
-      modularEmitterOptions,
-      modularSourcesRoot,
-      dpgContext,
-      sdkTypesCtx
-    );
+    // ── Step 1: Run ts-morph generation (existing pipeline) ──
+    // These functions populate the ts-morph Project with source files.
+    // They will be migrated to pure JSX components incrementally.
 
     const rootIndexFile = project.createSourceFile(
       `${modularSourcesRoot}/index.ts`,
@@ -330,15 +322,12 @@ export async function $onEmit(context: EmitContext) {
       }
     );
 
-    // Models are now emitted via Alloy pipeline above, but we still need
-    // the ts-morph emitTypes() for serialization functions until Phase 2
     emitTypes(dpgContext, { sourceRoot: modularSourcesRoot });
     buildSubpathIndexFile(modularEmitterOptions, "models", undefined, {
       recursive: true
     });
     const clientMap = getClientHierarchyMap(dpgContext);
     if (clientMap.length === 0) {
-      // If no clients, we still need to build the root index file
       buildRootIndex(dpgContext, modularEmitterOptions, rootIndexFile);
     }
     for (const subClient of clientMap) {
@@ -366,7 +355,6 @@ export async function $onEmit(context: EmitContext) {
         interfaceOnly: true
       });
       const { subfolder } = getModularClientOptions(subClient);
-      // Generate index file for clients with subfolders (multi-client scenarios and nested clients)
       if (subfolder) {
         buildSubClientIndexFile(dpgContext, subClient, modularEmitterOptions);
       }
@@ -377,28 +365,33 @@ export async function $onEmit(context: EmitContext) {
         subClient
       );
     }
-    // Enable modular sample generation when explicitly set to true or MPG
+
     if (emitterOptions["generate-sample"] === true) {
       const samples = emitSamples(dpgContext);
-      // Refine the rlc sample generation logic
-      // TODO: remember to remove this out when RLC is splitted from Modular
       if (samples.length > 0) {
         dpgContext.rlcOptions!.generateSample = true;
       }
     }
 
+    // ── Step 2: Resolve all ts-morph references ──
     binder.resolveAllReferences(modularSourcesRoot);
     if (program.compilerOptions.noEmit || program.hasError()) {
       return;
     }
 
-    for (const file of project.getSourceFiles()) {
-      await emitContentByBuilder(
-        program,
-        () => ({ content: file.getFullText(), path: file.getFilePath() }),
-        modularEmitterOptions as any
-      );
-    }
+    // ── Step 3: Emit everything through Alloy pipeline ──
+    // Pure Alloy components (Logger, Models) + TsMorphBridge (remaining files)
+    const { emitAlloyOutput } = await import("./alloy-emitter.js");
+    const sdkTypesCtx = useContext("sdkTypes");
+    await emitAlloyOutput(
+      program,
+      context.emitterOutputDir,
+      modularEmitterOptions,
+      modularSourcesRoot,
+      dpgContext,
+      sdkTypesCtx,
+      project
+    );
   }
 
   interface Metadata {
@@ -436,7 +429,6 @@ export async function $onEmit(context: EmitContext) {
   }
 
   async function generateMetadataAndTest(context: SdkContext) {
-    const project = useContext("outputProject");
     if (rlcCodeModels.length === 0 || !rlcCodeModels[0]) {
       return;
     }
@@ -555,13 +547,8 @@ export async function $onEmit(context: EmitContext) {
       );
 
       if (option.isModularLibrary) {
-        for (const file of project.getSourceFiles()) {
-          await emitContentByBuilder(
-            program,
-            () => ({ content: file.getFullText(), path: file.getFilePath() }),
-            modularEmitterOptions as any
-          );
-        }
+        // Modular source files are now emitted via the Alloy pipeline
+        // in generateModularSources() → emitAlloyOutput()
       }
     } else if (hasPackageFile) {
       // update existing package.json file with correct dependencies

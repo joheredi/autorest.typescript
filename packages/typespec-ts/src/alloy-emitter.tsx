@@ -1,54 +1,29 @@
-import { SourceDirectory } from "@alloy-js/core";
 import { writeOutput } from "@typespec/emitter-framework";
 import { Program } from "@typespec/compiler";
+import { Project } from "ts-morph";
 import { Output } from "./modular/components/Output.js";
 import { Logger } from "./modular/components/Logger.js";
 import { Models } from "./modular/components/Models.js";
+import { TsMorphBridge } from "./modular/components/TsMorphBridge.js";
 import { SdkContextProvider } from "./modular/components/context/SdkContextProvider.js";
 import { ModularEmitterOptions } from "./modular/interfaces.js";
 import { SdkContext } from "./utils/interfaces.js";
 import { SdkTypeContext } from "./framework/hooks/sdkTypes.js";
 
 /**
- * Emits files using the Alloy JSX pipeline.
+ * Emits ALL modular source files using the Alloy JSX pipeline.
  *
- * Currently wired components (rendered via Alloy):
- *   - Logger (logger.ts)
- *   - Models (model interfaces, enums, unions, type aliases)
+ * Pure Alloy components (no ts-morph):
+ *   - Logger
+ *   - Models (interfaces, enums, unions, type aliases)
  *
- * Still on ts-morph pipeline (in index.ts generateModularSources):
- *   - Operations (buildOperationFiles)
- *   - OperationOptions (buildApiOptions)
- *   - ClientContext (buildClientContext)
- *   - ClassicalClient (buildClassicalClient)
- *   - ClassicalOperationGroups (buildClassicOperationFiles)
- *   - RestorePoller (buildRestorePoller)
- *   - Serializers (emitTypes - serialization portion)
- *   - SubpathIndex (buildSubpathIndexFile)
- *   - RootIndex (buildRootIndex)
- *   - Samples (emitSamples)
+ * TsMorphBridge components (ts-morph output routed through Alloy):
+ *   - Operations, OperationOptions, ClientContext, ClassicalClient,
+ *     ClassicalOperationGroups, RestorePoller, Serializers,
+ *     SubpathIndex, RootIndex, Samples
  *
- * Target state (once all phases complete):
- *   <Output program={program} externals={[httpRuntimeLib, ...]}>
- *     <SdkContextProvider ...>
- *       <SourceDirectory path={srcRoot}>
- *         <Logger />
- *         <Models />
- *         {clients.map(c => (
- *           <ClientDirectory>
- *             <OperationOptions />
- *             <Operations />
- *             <ClientContext />
- *             <ClassicalClient />
- *             <ClassicalOperationGroups />
- *             <RestorePoller />
- *           </ClientDirectory>
- *         ))}
- *         <RootIndex />
- *         <Samples />
- *       </SourceDirectory>
- *     </SdkContextProvider>
- *   </Output>
+ * As each bridged component is converted to pure JSX, it moves from
+ * the bridge into the native component tree.
  */
 export async function emitAlloyOutput(
   program: Program,
@@ -56,7 +31,8 @@ export async function emitAlloyOutput(
   modularEmitterOptions: ModularEmitterOptions,
   modularSourcesRoot: string,
   dpgContext: SdkContext,
-  sdkTypes: SdkTypeContext
+  sdkTypes: SdkTypeContext,
+  tsMorphProject: Project
 ): Promise<void> {
   await writeOutput(
     program,
@@ -66,13 +42,15 @@ export async function emitAlloyOutput(
         emitterOptions={modularEmitterOptions}
         sdkTypes={sdkTypes}
       >
-        <SourceDirectory path={modularSourcesRoot}>
-          <Logger
-            emitterOptions={modularEmitterOptions}
-            srcPath={modularSourcesRoot}
-          />
-          <Models context={dpgContext} sourceRoot={modularSourcesRoot} />
-        </SourceDirectory>
+        {/* Pure Alloy components */}
+        <Logger
+          emitterOptions={modularEmitterOptions}
+          srcPath={modularSourcesRoot}
+        />
+        <Models context={dpgContext} sourceRoot={modularSourcesRoot} />
+
+        {/* Bridge: ts-morph generated files rendered through Alloy */}
+        <TsMorphBridge project={tsMorphProject} />
       </SdkContextProvider>
     </Output>,
     emitterOutputDir
