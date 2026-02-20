@@ -8,35 +8,43 @@ export interface TsMorphBridgeProps {
    */
   project?: Project;
 
+  /**
+   * The emitter output directory. File paths from ts-morph will be
+   * made relative to this directory to avoid path doubling when
+   * writeOutput() joins emitterOutputDir + filePath.
+   */
+  emitterOutputDir: string;
+
   children?: Children;
 }
 
 /**
  * Bridge component that takes pre-generated ts-morph source files and emits
- * them through the Alloy pipeline. This allows incremental migration — ts-morph
- * generation runs first, then TsMorphBridge renders the results as Alloy
- * SourceFile nodes alongside pure Alloy components.
+ * them through the Alloy pipeline. File paths are made relative to
+ * emitterOutputDir to work correctly with writeOutput().
  */
 export function TsMorphBridge(props: TsMorphBridgeProps): Children {
-  // The bridge is designed to be called during the Alloy render phase.
-  // It extracts files from the ts-morph project and returns them as
-  // raw SourceFile content children.
-  //
-  // Note: This component cannot actually call generate() during render
-  // because Alloy rendering is synchronous. The generation must happen
-  // BEFORE the component tree is constructed. The caller should pass
-  // pre-generated project files.
-
   if (!props.project) return props.children ?? null;
 
   const files = props.project.getSourceFiles();
+  const baseDir = props.emitterOutputDir.replace(/\/$/, "");
+
   return (
     <>
-      {files.map((file) => (
-        <ts.SourceFile path={file.getFilePath()}>
-          {file.getFullText()}
-        </ts.SourceFile>
-      ))}
+      {files.map((file) => {
+        let filePath = file.getFilePath();
+        // Make path relative to emitterOutputDir to avoid doubling
+        if (filePath.startsWith(baseDir)) {
+          filePath = filePath.slice(baseDir.length) as any;
+          // Remove leading slash
+          if (filePath.startsWith("/")) {
+            filePath = filePath.slice(1) as any;
+          }
+        }
+        return (
+          <ts.SourceFile path={filePath}>{file.getFullText()}</ts.SourceFile>
+        );
+      })}
       {props.children}
     </>
   );

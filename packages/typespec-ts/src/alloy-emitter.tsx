@@ -60,7 +60,10 @@ export async function emitAlloyOutput(
         ))}
 
         {/* Bridge: ts-morph generated files rendered through Alloy */}
-        <TsMorphBridge project={tsMorphProject} />
+        <TsMorphBridge
+          project={tsMorphProject}
+          emitterOutputDir={emitterOutputDir}
+        />
       </SdkContextProvider>
     </Output>,
     emitterOutputDir
