@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/**/*.ts", "src/**/*.tsx", "static/**/*.ts"],
+  "include": ["src/**/*.ts", "static/**/*.ts"],
+  "exclude": ["src/**/*.tsx"],
   "compilerOptions": {
     "module": "node16",
     "moduleResolution": "node16"

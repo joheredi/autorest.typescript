@@ -87,7 +87,6 @@ import {
   SdkServiceOperation
 } from "@azure-tools/typespec-client-generator-core";
 import { transformModularEmitterOptions } from "./modular/buildModularOptions.js";
-import { emitLoggerFile } from "./modular/emitLoggerFile.js";
 import { emitTypes } from "./modular/emitModels.js";
 import { existsSync } from "fs";
 import { getModuleExports } from "./modular/buildProjectFiles.js";
@@ -311,7 +310,14 @@ export async function $onEmit(context: EmitContext) {
       }
     );
 
-    emitLoggerFile(modularEmitterOptions, modularSourcesRoot);
+    // Emit logger file via Alloy pipeline (dynamic import to avoid ts-node resolution issues)
+    const { emitAlloyOutput } = await import("./alloy-emitter.js");
+    await emitAlloyOutput(
+      program,
+      context.emitterOutputDir,
+      modularEmitterOptions,
+      modularSourcesRoot
+    );
 
     const rootIndexFile = project.createSourceFile(
       `${modularSourcesRoot}/index.ts`,
