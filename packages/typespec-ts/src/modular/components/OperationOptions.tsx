@@ -1,11 +1,16 @@
 import { For, refkey, Refkey } from "@alloy-js/core";
 import * as ts from "@alloy-js/typescript";
+import { Reference } from "@alloy-js/typescript";
 import {
   SdkClientType,
   SdkMethodParameter,
   SdkServiceOperation
 } from "@azure-tools/typespec-client-generator-core";
-import { NameType, normalizeName } from "@azure-tools/rlc-common";
+import {
+  NameType,
+  normalizeName,
+  isAzurePackage
+} from "@azure-tools/rlc-common";
 import { SdkContext } from "../../utils/interfaces.js";
 import { ModularEmitterOptions } from "../interfaces.js";
 import {
@@ -20,9 +25,8 @@ import {
   isLroAndPagingOperation
 } from "../helpers/operationHelpers.js";
 import { getDocsFromDescription } from "../helpers/docsHelpers.js";
-import { getTypeExpression } from "../type-expressions/get-type-expression.js";
-import { resolveReference } from "../../framework/reference.js";
-import { useDependencies } from "../../framework/hooks/useDependencies.js";
+import { TypeExpression } from "./TypeExpression.js";
+import { httpRuntimeLib, azureCoreClientLib } from "./ExternalPackages.js";
 
 // ── Refkey helpers ──────────────────────────────────────────────────────
 
@@ -89,7 +93,6 @@ interface OperationOptionsInterfaceProps {
 
 function OperationOptionsInterface(props: OperationOptionsInterfaceProps) {
   const { context, method } = props;
-  const dependencies = useDependencies();
   const operation = method[1];
 
   const optionalParameters = operation.parameters
@@ -104,9 +107,10 @@ function OperationOptionsInterface(props: OperationOptionsInterfaceProps) {
     .filter((p) => p.optional || p.clientDefaultValue);
 
   const name = getOperationOptionsName(method, true);
-  const operationOptionsReference = resolveReference(
-    dependencies.OperationOptions
-  );
+  const isAzure = isAzurePackage({ options: context.rlcOptions ?? {} });
+  const operationOptionsRefkeyValue = isAzure
+    ? azureCoreClientLib.OperationOptions
+    : httpRuntimeLib.OperationOptions;
 
   // Additional options (LRO, dual-format)
   const additionalOptions: {
@@ -137,7 +141,7 @@ function OperationOptionsInterface(props: OperationOptionsInterfaceProps) {
       export
       name={name}
       doc="Optional parameters."
-      extends={operationOptionsReference}
+      extends={<Reference refkey={operationOptionsRefkeyValue} />}
       refkey={operationOptionsRefkey(operation)}
     >
       <For each={additionalOptions} semicolon hardline>
@@ -154,7 +158,11 @@ function OperationOptionsInterface(props: OperationOptionsInterfaceProps) {
             optional
             doc={getDocsFromDescription(p.doc)?.join("\n")}
           >
-            {getTypeExpression(context, p.type, { isOptional: true })}
+            <TypeExpression
+              context={context}
+              type={p.type}
+              options={{ isOptional: true }}
+            />
           </ts.InterfaceMember>
         )}
       </For>
