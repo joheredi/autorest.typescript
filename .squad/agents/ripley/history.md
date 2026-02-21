@@ -61,3 +61,34 @@
 - Type-safe name parameters using string literal union types
 - All exports flow through `StaticHelpers.tsx` → `index.ts` for clean barrel exports
 - RestorePoller computes relative import path dynamically based on subfolder depth
+
+### 2026-02-20: Last-Mile Dependency Audit (Phases 7-9 Planning)
+
+**Key findings from full audit:**
+- Production `tsMorphGenerate` callback does only 2 things: `emitTypes()` (model interfaces + serializers via addDeclaration) and `binder.resolveAllReferences()`.
+- `buildOperationFiles`, `buildClassicalClient`, `buildClientContext`, `buildRootIndex`, `buildSubpathIndexFile`, `buildApiOptions`, `emitSamples` — all have Alloy components and are NO LONGER called from production `index.ts`. They only survive because `test/util/emitUtil.ts` uses them.
+- 17 source files + 1 test utility still import old framework (`resolveReference`, `addDeclaration`, `refkey`, `useDependencies`).
+- ~85 `resolveReference()` calls remain, ~20 `addDeclaration()` calls, ~8 `useDependencies()` calls.
+- `static-helpers-metadata.ts` has 12 consumer files — most widely imported old-framework artifact.
+- `contextManager.ts` has 20 consumer files but cannot be removed until ts-morph pipeline is fully eliminated.
+
+**Critical ordering constraint:** `operationHelpers.ts` shared functions (4 `resolveReference` calls) can ONLY be removed after serializer builders (`buildSerializerFunction.ts`, `buildDeserializerFunction.ts`, `buildXmlSerializerFunction.ts`) stop using the old framework. Otherwise 120+ unit test failures.
+
+**Architectural decision:** Extract pure utility functions from `emitModels.ts` (`normalizeModelName`, `getModelNamespaces`, etc.) to a standalone `model-utils.ts` module as the FIRST step. This decouples Alloy components from the ts-morph-heavy `emitModels.ts`.
+
+**Plan delivered:** `.squad/decisions/inbox/ripley-last-mile-plan.md` — 4-phase work breakdown across Dallas, Kane, Lambert, Parker, and Ripley with exact files, line numbers, dependencies, and risk assessment.
+
+### 2026-02-20: R1 — Extract pure utility functions from emitModels.ts
+
+**What was done:**
+- Created `src/modular/model-utils.ts` with 6 pure utility functions extracted from `emitModels.ts`: `normalizeModelName`, `getModelNamespaces`, `getModelsPath`, `getAdditionalPropertiesName`, `getApiVersionEnum`, `buildEnumTypes`.
+- Also extracted 2 private helpers (`getExtensibleEnumDescription`, `emitEnumMember`) that `buildEnumTypes` depends on.
+- Updated `emitModels.ts` to re-export all 6 functions from `model-utils.ts` (backward compatibility for any transitive importers) and import them locally for its own use.
+- Updated 10 consumer files to import directly from `model-utils.ts` instead of `emitModels.ts`:
+  - `serialization/buildSerializerFunction.ts`, `serialization/buildDeserializerFunction.ts`, `serialization/buildXmlSerializerFunction.ts`
+  - `buildClientContext.ts`
+  - `components/Models.tsx`, `components/Serializers.tsx`, `components/XmlSerializers.tsx`, `components/SubpathIndex.tsx`, `components/RootIndex.tsx`, `components/ClientContext.tsx`
+
+**Key constraint verified:** `model-utils.ts` has ZERO imports from `src/framework/` or `contextManager.ts`. All imports are from npm packages (`ts-morph`, `@azure-tools/rlc-common`, `@azure-tools/typespec-client-generator-core`, `@typespec/compiler`), sibling utility modules, or Node.js built-ins (`path`).
+
+**Validation:** `npx tsc --noEmit` passes, `npx alloy build` passes, `pnpm build` passes.

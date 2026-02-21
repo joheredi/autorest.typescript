@@ -59,3 +59,31 @@
 **Why:** These functions are called from **both** the operation generation (now Alloy JSX) **and** the serializer generation (still ts-morph + binder). Removing `resolveReference()` from them breaks serializer import tracking, causing 120+ unit test failures.
 **Cleanup Path:** When the serializer pipeline migrates to Alloy (later phases), the remaining 9 `resolveReference()` calls can be removed from these shared functions. The serializer migration should include replacing these calls with Alloy Refkeys in code templates.
 **Import Strategy for Operations:** Operation files use **explicit import computation** (not Alloy auto-import) because function bodies are rendered as raw strings from Category A/B helpers. The `collectFileImports` function in Operations.tsx analyzes operations to determine required imports. When the full code-template conversion happens (Phase 9), this can switch to Alloy auto-import.
+
+## 2026-02-20: Phases 7-9 Cleanup Blocked
+**By:** Parker (Tester)
+**Status:** Blocked
+**What:** Phases 7-9 (delete emitModels.ts, remove tsMorphGenerate callback, delete old framework) cannot proceed. Every target file is still actively imported by production code and/or test infrastructure.
+**Evidence:** Full audit in .squad/decisions/inbox/ shows:
+- emitModels.ts: 8 exported utility functions imported by 10 production files. emitTypes() still called in tsMorphGenerate callback.
+- tsMorphGenerate callback: Still runs emitTypes + binder.resolveAllReferences. 60+ resolveReference() calls across 15+ files depend on the old binder.
+- framework/: resolveReference (15+ files), addDeclaration (3 files), old refkey (10 files). Not removable.
+- 14/14 test helpers ACTIVE, all use old ts-morph pipeline. Zero Alloy coverage in test infrastructure.
+- 267 scenario tests ACTIVE, valuable as regression guards, but no tests validate Alloy rendering output.
+**Recommendation:** Assign prerequisite migration to Dallas/Kane/Lambert/Ripley before re-attempting Phases 7-9. The cleanup is the final step, not the next step.
+
+## 2026-02-20: Test Infrastructure Status — All Helpers Active
+**By:** Parker (Tester)
+**Status:** Analysis complete
+**What:** All 14 emitUtil test helpers are ACTIVE and use the old ts-morph pipeline. 267 scenario-level test assertions exist covering Modular SDK. Zero tests validate Alloy rendering output.
+**Why:** Helpers are actively imported by test files. They are only deletable when their corresponding old builders are deleted AND new Alloy-based test coverage exists.
+**Helpers breakdown:** RLC (8 helpers) for transform-based code generation, Modular (6 helpers) for ts-morph pipeline. All 14 have active test users.
+**When deletable:** A helper becomes deletable when its output domain is fully migrated to Alloy AND a new test validates Alloy output. Likely deletion order: Operations → Models → Client → ClassicalClient → RootIndex → Samples → RLC helpers.
+**Critical gap:** Zero tests validate Alloy rendering output against expected code. Before deleting any old helper, create parallel scenario tests that run the Alloy pipeline and compare output.
+
+## 2026-02-20: Extract Pure Utility Functions
+**By:** Ripley (Lead)
+**Status:** Implemented (R1)
+**What:** Created src/modular/model-utils.ts containing 6 pure utility functions extracted from emitModels.ts: normalizeModelName, getModelNamespaces, getModelsPath, getAdditionalPropertiesName, getApiVersionEnum, buildEnumTypes.
+**Why:** These functions are imported by 10+ files but have zero dependency on the old framework. Extracting them decouples Alloy components from the ts-morph-heavy emitModels.ts, a prerequisite for eventually deleting emitModels.ts.
+**Impact:** emitModels.ts re-exports all 6 functions for backward compatibility. model-utils.ts has ZERO imports from src/framework/ or contextManager.ts. Unblocks future deletion of emitModels.ts.
