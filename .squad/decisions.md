@@ -87,3 +87,19 @@
 **What:** Created src/modular/model-utils.ts containing 6 pure utility functions extracted from emitModels.ts: normalizeModelName, getModelNamespaces, getModelsPath, getAdditionalPropertiesName, getApiVersionEnum, buildEnumTypes.
 **Why:** These functions are imported by 10+ files but have zero dependency on the old framework. Extracting them decouples Alloy components from the ts-morph-heavy emitModels.ts, a prerequisite for eventually deleting emitModels.ts.
 **Impact:** emitModels.ts re-exports all 6 functions for backward compatibility. model-utils.ts has ZERO imports from src/framework/ or contextManager.ts. Unblocks future deletion of emitModels.ts.
+
+## 2026-02-20: Remove tsMorphGenerate callback from production codepath
+**By:** Ripley (Lead)
+**Status:** Implemented (Phase 8, R7-R8)
+**What:** Removed the `tsMorphGenerate` callback from the production emitter pipeline. This callback previously called `emitTypes()` (model interfaces + serializer functions via ts-morph) and `binder.resolveAllReferences()` (old binder placeholder resolution). Both are now unnecessary:
+- Model interfaces are rendered by `Models.tsx` (Alloy)
+- Serializers are rendered by `Serializers.tsx` + `XmlSerializers.tsx` (Alloy)
+- Zero `resolveReference()` calls remain in production code
+
+Also removed the binder initialization (`provideBinder`) and external dependency imports from `index.ts`, since the binder was only consumed by the callback.
+**Why:** The tsMorphGenerate callback was the last piece connecting the old ts-morph/binder pipeline to the production codepath. With all model interfaces, serializers, and operations now rendered through Alloy components, the callback was generating output that Alloy immediately overwrote. The binder's `resolveAllReferences()` had nothing to resolve since all `resolveReference` calls were already removed.
+**Impact:**
+- **Production codepath:** Cleaner and faster — no longer runs `emitTypes()` or binder resolution during generation.
+- **Test infrastructure:** Unaffected — `testUtil.ts` has its own `provideBinder` setup independent of `index.ts`.
+- **TsMorphBridge:** Still operational — static helpers loaded via `loadStaticHelpers()` are still written through it.
+- **Next step:** Phase 9 can now render static helpers as Alloy `<ts.SourceFile>` components, which would eliminate TsMorphBridge entirely.

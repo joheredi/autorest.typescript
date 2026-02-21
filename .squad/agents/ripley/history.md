@@ -92,3 +92,34 @@
 **Key constraint verified:** `model-utils.ts` has ZERO imports from `src/framework/` or `contextManager.ts`. All imports are from npm packages (`ts-morph`, `@azure-tools/rlc-common`, `@azure-tools/typespec-client-generator-core`, `@typespec/compiler`), sibling utility modules, or Node.js built-ins (`path`).
 
 **Validation:** `npx tsc --noEmit` passes, `npx alloy build` passes, `pnpm build` passes.
+
+### 2026-02-20: R3-R6 — Remove resolveReference from assigned files
+
+**What was done:**
+- **clientHelpers.ts (R6):** Removed `resolveReference(CloudSettingHelpers.getArmEndpoint)` → literal `"getArmEndpoint"`. Removed `CloudSettingHelpers` and `resolveReference` imports.
+- **buildClientContext.ts (R3):** Removed `resolveReference`, `useDependencies`, `refkey`, `CloudSettingHelpers` imports. Replaced 5 `resolveReference(dependencies.X)` calls with literal strings (`"Client"`, `"ClientOptions"`, `"getClient"`, `"isKeyCredential"`, `"AzureSupportedClouds"`). Replaced `resolveReference(refkey(knownValuesEnum.name, "knownValues"))` with `knownValuesEnum.name`. Kept `useContext` (still needed for ts-morph Project in test pipeline).
+- **buildRootIndex.ts (R4):** Removed `resolveReference` import and `CloudSettingHelpers`, `MultipartHelpers`, `PagingHelpers` imports from `static-helpers-metadata.ts`. Replaced 6 `resolveReference` calls with literal strings (`"AzureClouds"`, `"AzureSupportedClouds"`, `"PageSettings"`, `"ContinuablePage"`, `"PagedAsyncIterableIterator"`, `"FileContents"`). Kept `useContext`.
+- **emitSamples.ts (R5):** Removed `resolveReference` import and `AzureIdentityDependencies` import from `external-dependencies.js`. Replaced `resolveReference(AzureIdentityDependencies.DefaultAzureCredential)` with literal `"DefaultAzureCredential"`. Added manual import statement (`sourceFile.addImportDeclaration`) for `DefaultAzureCredential` from `@azure/identity` when Azure + credential conditions are met.
+- **Serializers.tsx:** No actual `resolveReference` call found — only a comment on line 641. The only old framework import is `emitQueue` from `../../framework/hooks/sdkTypes.js` (used for type iteration, not a resolveReference concern).
+
+**Key finding:** `useContext` from `contextManager.js` cannot be removed from these files while tests still call them through the old pipeline. It provides the ts-morph Project needed to create source files. This is a separate cleanup from `resolveReference` removal.
+
+**Validation:** `npx alloy build` passes (~2.5s), `npx tsc --noEmit` passes.
+
+### 2026-02-20: Phase 8 — Remove tsMorphGenerate callback (R7-R8)
+
+**What was done:**
+- **R7 — Removed tsMorphGenerate callback:** The `async () => { emitTypes(...); binder.resolveAllReferences(...); }` callback passed to `emitAlloyOutput()` was eliminated. The `tsMorphGenerate` parameter was removed from `emitAlloyOutput()` entirely — no callers remain.
+- **R8 — Simplified index.ts:** Removed `provideBinder` call and `binder` variable from the production codepath. Removed `emitTypes` import. Removed `extraDependencies` computation and imports (`AzureCoreDependencies`, `AzureIdentityDependencies`, `AzurePollingDependencies`, `DefaultCoreDependencies`). Changed `loadStaticHelpers` from assigning to a variable to fire-and-forget (return value was only used by `provideBinder`).
+
+**What was kept:**
+- `loadStaticHelpers()` — still needed to load static helper files into the ts-morph Project for TsMorphBridge to write.
+- `provideSdkTypes()` — Alloy components depend on it.
+- All `provideContext` calls for `rlcMetaTree`, `symbolMap`, `outputProject`, `emitContext` — still used.
+- All `src/framework/` files — tests depend on them.
+- `contextManager.ts` — tests depend on it.
+- Test infrastructure (`emitUtil.ts`, `testUtil.ts`) — untouched, has its own `provideBinder` call.
+
+**Key finding:** Test infrastructure is fully independent of the production binder. `testUtil.ts` calls its own `provideBinder` via `provideBinderWithAzureDependencies()`. Removing `provideBinder` from `index.ts` had zero test impact.
+
+**Validation:** `npx alloy build` passes (~1.5s), `npx tsc --noEmit` passes, 835 unit tests pass (309 RLC + 526 Modular, 0 failing).

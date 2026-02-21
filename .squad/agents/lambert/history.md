@@ -64,3 +64,43 @@ Successfully migrated operation generation from ts-morph to Alloy JSX pipeline.
 - 120 scenario test baselines were regenerated to match new import format
 
 **Test results:** 526 modular + 309 RLC + 144 next — all passing. Build + format + lint clean.
+
+### L1+L3+L4+L5 Complete — All resolveReference removed from operation files (2026-02-21)
+
+Removed ALL `resolveReference`, `addDeclaration`, `refkey`, `useDependencies`, `useSdkTypes`, and `frameworkRefkey` calls from 4 operation files:
+
+**operationHelpers.ts (L1) — 4 calls removed:**
+- `resolveReference(SerializationHelpers.areAllPropsUndefined)` → literal `"areAllPropsUndefined"`
+- `resolveReference(dependencies.uint8ArrayToString)` → literal `"uint8ArrayToString"`
+- `resolveReference(frameworkRefkey(sdkType, "serializer"))` → `normalizeModelName(context, type, NameType.Operation) + "Serializer"`
+- `resolveReference(dependencies.stringToUint8Array)` → literal `"stringToUint8Array"`
+- Removed imports: `resolveReference`, `useDependencies`, `useSdkTypes`, `SerializationHelpers`, `frameworkRefkey`
+- Added import: `normalizeModelName` from `../model-utils.js`
+
+**buildOperations.ts (L3) — 3 calls removed:**
+- `resolveReference(dependencies.OperationOptions)` → literal `"OperationOptions"`
+- `addDeclaration(sourceFile, operationDeclaration, refkey(op, "api"))` → `operationGroupFile.addFunction(operationDeclaration)`
+- `addDeclaration(sourceFile, operationOptionsInterface, refkey(...))` → `sourceFile.addInterface(operationOptionsInterface)`
+- Removed imports: `resolveReference`, `useDependencies`, `addDeclaration`, `refkey`
+
+**classicalOperationHelpers.ts (L4) — 12 calls removed:**
+- All `resolveReference(refkey(X, layer, "classicOperations"))` → direct name string (e.g. `interfaceName`, `nextLayerInterfaceName`, `functionName`)
+- `resolveReference(AzurePollingDependencies.OperationState)` → `"OperationState"`
+- `resolveReference(SimplePollerHelpers.SimplePollerLike)` → `"SimplePollerLike"`
+- `resolveReference(SimplePollerHelpers.getSimplePoller)` → `"getSimplePoller"`
+- All `addDeclaration(file, decl, refkey(...))` → `file.addInterface(decl)` / `file.addFunction(decl)`
+- Removed imports: `refkey`, `resolveReference`, `addDeclaration`, `SimplePollerHelpers`, `AzurePollingDependencies`
+
+**buildClassicalClient.ts (L5) — 8 calls removed:**
+- `resolveReference(dependencies.Pipeline)` → `"Pipeline"`
+- `resolveReference(refkey(method[1], "api"))` → `declaration.name ?? "FIXME"`
+- `resolveReference(AzurePollingDependencies.OperationState)` → `"OperationState"`
+- `resolveReference(SimplePollerHelpers.*)` → literal names
+- `resolveReference(refkey(propertyType, layer, ...))` → `propertyType`
+- `resolveReference(refkey(operationName, layer, ...))` → `operationName`
+- Removed unused `layer` variable
+- Removed imports: `resolveReference`, `useDependencies`, `refkey`, `SimplePollerHelpers`, `AzurePollingDependencies`
+
+**Key learning:** Removing `resolveReference` from shared functions (operationHelpers.ts) means the binder no longer tracks imports for symbols like `areAllPropsUndefined` in the ts-morph serializer output path. This requires regenerating modular unit test baselines (`SCENARIOS_UPDATE=true`). The Alloy pipeline handles these imports independently, so final emitter output remains correct.
+
+**Test results:** 526 modular + 309 RLC + 144 next — all passing. Build + format + lint clean.
