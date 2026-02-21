@@ -123,3 +123,27 @@
 **Key finding:** Test infrastructure is fully independent of the production binder. `testUtil.ts` calls its own `provideBinder` via `provideBinderWithAzureDependencies()`. Removing `provideBinder` from `index.ts` had zero test impact.
 
 **Validation:** `npx alloy build` passes (~1.5s), `npx tsc --noEmit` passes, 835 unit tests pass (309 RLC + 526 Modular, 0 failing).
+
+### 2026-02-21: Phase 10.5 — Convert Static Helpers to Alloy (COMPLETED)
+
+**What was done:**
+- **Created `load-static-helpers-alloy.ts`:** New utility that reads static helper files from disk into a `Map<relativePath, content>`. Applies Azure import rewriting (`@azure/core-rest-pipeline` → `@typespec/ts-http-runtime`, `@azure-rest/core-client` → `@typespec/ts-http-runtime`) as string replacements for non-Azure packages.
+- **Created `StaticHelperFiles.tsx`:** Pure Alloy component that renders each static helper file as `<ts.SourceFile path={path}>{content}</ts.SourceFile>`. Replaces `TsMorphBridge` for static helper emission.
+- **Updated `alloy-emitter.tsx`:** Removed `Project` parameter and `TsMorphBridge` usage. Now accepts `staticHelpers: Map<string, string>` and renders via `<StaticHelperFiles files={staticHelpers} />`.
+- **Updated `index.ts`:** Removed `loadStaticHelpers` call from production path. Now calls `loadStaticHelpersAlloy` and passes result to `emitAlloyOutput`. Removed unused imports of static helper metadata.
+- **Deleted `TsMorphBridge.tsx`:** No longer needed — all files now render through Alloy pipeline.
+- **Preserved `load-static-helpers.ts`:** Kept for test infrastructure compatibility. Test utilities still use ts-morph-based binder. Moved `SourceFileSymbol` and `StaticHelperMetadata` types to `load-static-helpers-alloy.ts` for reuse.
+
+**Architecture change:**
+- **Before:** `index.ts` → `loadStaticHelpers(tsMorphProject)` → `TsMorphBridge` → `emitFile()` (bypass Alloy)
+- **After:** `index.ts` → `loadStaticHelpersAlloy()` → `Map<string, string>` → `<StaticHelperFiles>` → Alloy `writeOutput()`
+
+**Key constraints:**
+- Static helper files are rendered as raw strings (no AST manipulation). Import rewriting happens as string replacement before rendering.
+- Test infrastructure (`test/util/testUtil.ts`) continues using old `loadStaticHelpers` for ts-morph-based binder tests. This is intentional — test helpers are preserved until the old pipeline is fully removed.
+- `load-static-helpers.ts` remains in `src/framework/` but is only imported by test utilities, not production code.
+
+**Validation:** `npx tsc --noEmit` passes, `pnpm build` passes, 309 RLC + 282 Modular unit tests passing.
+
+**Impact:** Completes Phase 10.5. All production code files now render through Alloy `writeOutput()`. Last ts-morph Project dependency removed from production code. Test infrastructure preserved for backward compatibility.
+

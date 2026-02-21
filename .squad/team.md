@@ -16,5 +16,6 @@
 | Kane | XML Serializer Dev | XML serializer/deserializer conversion (Phase 4) | 🔧 |
 | Lambert | Operations Dev | Operation helpers, wiring, component integration (Phases 5-6) | ⚛️ |
 | Parker | Tester | Validation, tests, edge cases, cleanup (Phases 7-9) | 🧪 |
+| Ash | Alloy Architect & Reviewer | Alloy API expert, code review, idiomatic patterns enforcement | 🔬 |
 | Scribe | Session Logger | Memory, decisions, session logs | 📋 |
 | Ralph | Work Monitor | — | 🔄 |

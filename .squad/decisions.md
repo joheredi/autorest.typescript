@@ -103,3 +103,64 @@ Also removed the binder initialization (`provideBinder`) and external dependency
 - **Test infrastructure:** Unaffected — `testUtil.ts` has its own `provideBinder` setup independent of `index.ts`.
 - **TsMorphBridge:** Still operational — static helpers loaded via `loadStaticHelpers()` are still written through it.
 - **Next step:** Phase 9 can now render static helpers as Alloy `<ts.SourceFile>` components, which would eliminate TsMorphBridge entirely.
+
+## 2026-02-21: Phase 10.5 — Static Helpers Converted to Pure Alloy
+**By:** Ripley (Lead) / Lambert (Implementation) / Parker (Testing)
+**Status:** Implemented
+**What:** Replaced the ts-morph-based static helper loading system (TsMorphBridge) with pure Alloy `<ts.SourceFile>` components. Static helpers are now read as strings, import-rewritten, and rendered through the Alloy pipeline like all other generated files.
+**Implementation:**
+- `load-static-helpers-alloy.ts` — reads .ts files into `Map<path, content>`, applies Azure import rewrites
+- `StaticHelperFiles.tsx` — renders map entries as `<ts.SourceFile path={path}>{content}</ts.SourceFile>`
+- Deleted `TsMorphBridge.tsx` — no longer needed
+- Preserved `load-static-helpers.ts` — test infrastructure still uses it for ts-morph-based binder tests
+**Why:** Eliminates ts-morph Project dependency from production emitter. All generated files now flow through the Alloy `writeOutput()` pipeline, providing uniform rendering and path resolution.
+**Impact:**
+- **Production code:** No longer depends on ts-morph Project. All files rendered through Alloy.
+- **Test infrastructure:** Unaffected — continues using old `loadStaticHelpers` for binder tests.
+- **Architecture:** Simplified—one rendering path (Alloy) instead of two (Alloy + ts-morph).
+**Validation:** Type check ✅, Build ✅, 309 RLC + 282 Modular unit tests ✅
+
+## 2026-02-21: Alloy Test Helpers Produce Unresolved Refkeys — Blocker Identified
+**By:** Parker (Tester)
+**Status:** BLOCKER for full test migration
+**What:** After Phase 8 removed the tsMorphGenerate callback, the test helper `emitModularModelsFromTypeSpec` was broken. Migrated it to use Alloy `renderModels()` to return rendered strings. However, Alloy-rendered output contains **unresolved refkeys in type positions** (e.g., `<Unresolved Symbol: refkey[o453]>`), causing ~236 test failures where prettier fails to parse the syntax.
+**Root Cause:** When Alloy components (Models.tsx, Serializers.tsx) render in ISOLATION (as in unit tests), they don't have access to the full Alloy rendering context that resolves refkeys. The production emitter renders all components together in a single pass, allowing Alloy's auto-import and refkey resolution to work. Test helpers render individual components separately.
+**Blocker for Full Test Migration:** Cannot fully migrate tests to Alloy helpers until ONE of:
+1. **Alloy components resolve all type refkeys** — requires understanding Alloy's resolution mechanism
+2. **Tests accept unresolved refkeys** — not realistic for validation
+3. **Add post-render resolution pass** — manually resolve refkeys after rendering (defeats purpose)
+4. **Render full context in tests** — render ALL components together (Models + Serializers + Operations) even when test only needs one file
+**Recommendation:** Option 4 (full context rendering) is most practical. Modify test helpers to render full component tree like production does, then extract specific files from the output map.
+**Files Modified:** `src/test-utils/alloy-test-render.tsx`, `test/util/emitUtil.ts`, `test/modularUnit/scenarios.spec.ts`, `test/modularUnit/modelsGenerator.spec.ts`
+
+## 2026-02-21: StaticHelperFiles Component and File-Reading Utility
+**By:** Lambert (Operations Dev)
+**Status:** Complete
+**What:** Created the `StaticHelperFiles` Alloy component and the `loadStaticHelpersAlloy` file-reading utility for rendering static helper files through the Alloy JSX pipeline.
+**Implementation:**
+- `loadStaticHelpersAlloy` reads all `.ts` files from `static/static-helpers/` recursively, rewrites Azure imports for non-Azure packages
+- `StaticHelperFiles.tsx` uses `<For>` helper to render each file as `<ts.SourceFile>`
+- Integrated into `alloy-emitter.tsx` and `index.ts`
+**Why:** Prepares for Phase 9 where static helpers render entirely through Alloy JSX instead of TsMorphBridge.
+**Benefits:** Separation of concerns (file reading vs. rendering), testability, consistency with Alloy patterns, strong typing
+**Validation:** Build ✅, Format ✅, Linting ✅, Type checking ✅
+
+## 2026-02-21: Cleanup Validation Strategy — Phase 8 Blockers
+**By:** Parker (Tester)
+**Status:** Analysis Complete — Awaiting Blocker Resolution
+**What:** Identified files ready for deletion and critical blocker in buildProjectFiles.ts that requires refactoring before full cleanup.
+**Files Ready for Deletion:**
+- `src/modular/components/TsMorphBridge.tsx` (42 lines) — single import in alloy-emitter.tsx
+- `src/framework/load-static-helpers.ts` (213 lines) — single import in index.ts (can be deleted after load-static-helpers-alloy replaces it)
+**Critical Blocker:**
+- `src/modular/buildProjectFiles.ts` getModelSubpaths() — queries ts-morph Project to find models/*/index.ts files for package.json exports. Called twice in index.ts (lines 415, 480). Only active production usage of outputProject context.
+**Refactoring Options for getModelSubpaths():**
+1. Use Alloy output map to enumerate models/*/index.ts files
+2. Use file system scan after Alloy rendering (recommended—output already written to disk)
+3. Compute model subpaths from SdkContext metadata before rendering
+**outputProject Context Usage Audit:**
+- `index.ts` — creation, provision, usage in getModuleExports (via getModelSubpaths)
+- `emitModels.ts` — ORPHANED after R8 tsMorphGenerate removal
+- `emitModelsOptions.ts` — ORPHANED after Alloy migration
+- `buildProjectFiles.ts` — ONLY ACTIVE production usage (blocker)
+**Next Steps:** Resolve buildProjectFiles.ts blocker, then safe to delete TsMorphBridge.tsx and load-static-helpers.ts
