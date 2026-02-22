@@ -281,3 +281,46 @@ Successfully converted the `getDeserializePrivateFunction` helper to a full JSX 
 **Test results:** 526 modular unit tests passing. Build + format + lint clean. No breaking API surface changes.
 
 **Remaining work in operationHelpers.ts:** The `getDeserializePrivateFunction` function is kept for now but unused. Will be removed in future cleanup once all consumers are verified to use the JSX component.
+
+### Phase 11.4 Complete — `getOperationFunction` → `<PublicOperation>` JSX Component (2026-02-22) [COMPLETED]
+
+Successfully converted the public operation function rendering from the bridge pattern (`getOperationFunction` → `OperationFunction`/`FunctionBody` with `resolveReferences` string scanning) to native JSX components using `code` tagged templates with refkeys.
+
+**What changed:**
+
+1. **Five new JSX components in `Operations.tsx`:**
+   - `<PublicOperation>` — Dispatcher that checks `operation.kind` and renders the appropriate specialized component
+   - `<StandardOperation>` — Async exported function for regular operations. Uses `sendFunctionRefkey`, `deserializeFunctionRefkey`, `deserializeHeadersRefkey` in `code` templates. Handles binary responses, composite response types (model + headers), header-only responses
+   - `<PagingOperation>` — Non-async function using `buildPagedAsyncIterator` static helper. Return type `PagedAsyncIterableIterator<T>` with `modelTypeRefkey` for element type
+   - `<LroOperation>` — Non-async function using `getLongRunningPoller` static helper. Return type `PollerLike<OperationState<T>, T>` using `azureCoreLroLib` refkeys
+   - `<LroPagingOperation>` — Non-async function combining LRO + paging patterns. Uses `runtimeLib.PathUncheckedResponse` for intermediate type
+
+2. **Two new helper functions:**
+   - `buildOperationParams()` — Converts raw parameter arrays to `ts.ParameterDescriptor[]` with `operationOptionsRefkey` for options type
+   - `getReturnTypeChildren()` — Recursively builds return type `Children` with `modelTypeRefkey` for named types, handling arrays and nullable types
+
+3. **Removed bridge infrastructure:**
+   - Deleted `buildTypeRefkeys()` — 120-line function that built name→refkey map for post-render string scanning
+   - Deleted `OperationFunction`, `FunctionBody`, `resolveType`, `resolveReferences`, `childrenToText` — bridge components that scanned raw strings for symbol names
+   - Removed `typeRefkeys` from `OperationGroupProps` and the `<For>` loop
+
+4. **Exported three helpers from `operationHelpers.ts`:**
+   - `getApiVersionExpression()` — Used by paging/LRO/LRO+paging components
+   - `buildCompositeResponseType()` — Used by StandardOperation for model + headers return types
+   - `buildLroPagingReturnType()` — Exported for completeness
+
+5. **Cleaned up imports in `Operations.tsx`:**
+   - Removed: `getOperationFunction`, `getOperationOptionsName`, `normalizeModelName`, `azureCoreUtilLib`
+   - Added: `getApiVersionExpression`, `buildCompositeResponseType`, `getDocsFromDescription`, `getFixmeForMultilineDocs`
+
+**Architecture patterns:**
+- Each operation type owns its full rendering: parameters, return type, function body, docs
+- Refkeys are used directly in `code` templates — no post-render string scanning
+- Type narrowing via `operation.kind` discriminant eliminates need for explicit type assertions
+- `<ts.FunctionDeclaration>` automatically generates `@param` JSDoc tags from parameters
+
+**Key insight:** The `buildTypeRefkeys` function was the core of the old bridge — it pre-computed a name→refkey map by walking all types referenced by operations, then `resolveReferences` scanned raw strings to find matching names. The new approach eliminates both: refkeys are placed directly where they're used.
+
+**Other consumers preserved:** `getOperationFunction` remains in `operationHelpers.ts` and is still used by `ClassicalClient.tsx`, `ClassicalOperationGroups.tsx`, and `Samples.tsx`. These will be updated separately.
+
+**Test results:** 526 modular unit tests passing. Build + format + lint clean. 99 scenario baselines updated (import ordering, JSDoc formatting, whitespace — no API surface changes).

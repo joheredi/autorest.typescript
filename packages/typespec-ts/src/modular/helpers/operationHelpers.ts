@@ -1106,7 +1106,7 @@ function buildLroReturnType(
 
 export { buildLroReturnType };
 
-function buildLroPagingReturnType(
+export function buildLroPagingReturnType(
   context: SdkContext,
   operation: SdkLroPagingServiceMethod<SdkHttpOperation>
 ) {
@@ -2565,6 +2565,8 @@ function getApiVersionExpression(
   return `${paramAccess}${defaultValueSuffix}`;
 }
 
+export { getApiVersionExpression };
+
 /**
  * Extracts and deduplicates all response headers from operation responses.
  * @param responses - The operation responses
@@ -2620,6 +2622,8 @@ function buildCompositeResponseType(
 
   return emitInlineModel(context, modelProps);
 }
+
+export { buildCompositeResponseType };
 
 /**
  * Builds an inline type string for header-only responses.

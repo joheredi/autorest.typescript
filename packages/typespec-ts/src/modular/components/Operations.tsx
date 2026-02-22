@@ -27,8 +27,6 @@ import {
   isRLCMultiEndpoint
 } from "../../utils/clientUtils.js";
 import {
-  getOperationFunction,
-  getOperationOptionsName,
   getOperationSignatureParameters,
   getOptionalParamsName,
   getPathParameters,
@@ -53,18 +51,23 @@ import {
   getExceptionDetails,
   buildLroReturnType,
   getExpectedStatuses,
-  deserializeResponseValue
+  deserializeResponseValue,
+  getApiVersionExpression,
+  buildCompositeResponseType
 } from "../helpers/operationHelpers.js";
 import {
   getOperationName,
   generateLocallyUniqueName
 } from "../helpers/namingHelpers.js";
+import {
+  getDocsFromDescription,
+  getFixmeForMultilineDocs
+} from "../helpers/docsHelpers.js";
 import { getTypeExpression } from "../type-expressions/get-type-expression.js";
 import {
   httpRuntimeLib,
   azureCoreClientLib,
-  azureCoreLroLib,
-  azureCoreUtilLib
+  azureCoreLroLib
 } from "./ExternalPackages.js";
 import { operationOptionsRefkey } from "./OperationOptions.js";
 import { typeRefkey as modelTypeRefkey } from "./Models.js";
@@ -73,7 +76,6 @@ import {
   xmlSerializerRefkey,
   xmlDeserializerRefkey
 } from "./XmlSerializers.js";
-import { normalizeModelName } from "../model-utils.js";
 import { buildModelSerializer } from "../serialization/buildSerializerFunction.js";
 import { buildModelDeserializer } from "../serialization/buildDeserializerFunction.js";
 import {
@@ -218,129 +220,6 @@ function addStaticHelper(
 }
 
 /**
- * Builds the type refkey map for replacing hardcoded type strings
- * in generated function structures with Alloy refkeys.
- * Alloy resolves these refkeys against declarations from Models,
- * Serializers, OperationOptions, and ExternalPackages components
- * and generates imports automatically.
- */
-function buildTypeRefkeys(
-  context: SdkContext,
-  operations: ServiceOperation[],
-  prefixes: string[]
-): Record<string, Refkey> {
-  const isAzure = isAzurePackage({ options: context.rlcOptions ?? {} });
-  const runtimeLib = isAzure ? azureCoreClientLib : httpRuntimeLib;
-  const utilLib = isAzure ? azureCoreUtilLib : httpRuntimeLib;
-
-  const map: Record<string, Refkey> = {
-    // Runtime symbols from external npm packages
-    StreamableMethod: runtimeLib.StreamableMethod,
-    PathUncheckedResponse: runtimeLib.PathUncheckedResponse,
-    createRestError: runtimeLib.createRestError,
-    operationOptionsToRequestParameters:
-      runtimeLib.operationOptionsToRequestParameters,
-    uint8ArrayToString: utilLib.uint8ArrayToString,
-    stringToUint8Array: utilLib.stringToUint8Array
-  };
-
-  // Add LRO refkeys only when needed
-  const hasLro = operations.some(
-    (op) => isLroOnlyOperation(op) || isLroAndPagingOperation(op)
-  );
-  if (hasLro) {
-    map["PollerLike"] = azureCoreLroLib.PollerLike;
-    map["OperationState"] = azureCoreLroLib.OperationState;
-  }
-
-  // Add model type, serializer/deserializer, and operation options refkeys
-  const visited = new Set<SdkType>();
-
-  function visitType(type: SdkType): void {
-    if (visited.has(type)) return;
-    visited.add(type);
-
-    if (type.kind === "array") {
-      visitType(type.valueType);
-      return;
-    }
-    if (type.kind === "dict") {
-      visitType(type.valueType);
-      return;
-    }
-    if (type.kind === "nullable") {
-      visitType(type.type);
-      return;
-    }
-
-    if (
-      (type.kind !== "model" &&
-        type.kind !== "enum" &&
-        type.kind !== "union") ||
-      !type.name
-    ) {
-      return;
-    }
-
-    // Model type name → refkey for the type declaration
-    const name = normalizeModelName(context, type);
-    if (name && !map[name]) {
-      map[name] = modelTypeRefkey(type);
-    }
-
-    // Serializer function name → refkey for the serializer declaration
-    const serName = buildModelSerializer(context, type, {
-      nameOnly: true,
-      skipDiscriminatedUnionSuffix: false
-    });
-    if (typeof serName === "string" && !map[serName]) {
-      map[serName] = serializerRefkey(type);
-    }
-
-    // Deserializer function name → refkey for the deserializer declaration
-    const desName = buildModelDeserializer(context, type, {
-      nameOnly: true,
-      skipDiscriminatedUnionSuffix: false
-    });
-    if (typeof desName === "string" && !map[desName]) {
-      map[desName] = deserializerRefkey(type);
-    }
-
-    // Walk model properties to find nested types referenced in serializer calls
-    if (type.kind === "model" && type.properties) {
-      for (const prop of type.properties) {
-        visitType(prop.type);
-      }
-    }
-  }
-
-  for (const op of operations) {
-    for (const param of op.parameters) {
-      visitType(param.type);
-    }
-    if (op.operation.bodyParam?.type) {
-      visitType(op.operation.bodyParam.type);
-    }
-    for (const resp of op.operation.responses) {
-      if (resp.type) {
-        visitType(resp.type);
-      }
-    }
-    if (op.response?.type) {
-      visitType(op.response.type);
-    }
-
-    // Operation options type name → refkey
-    const optName = getOperationOptionsName([prefixes, op], true);
-    if (optName && !map[optName]) {
-      map[optName] = operationOptionsRefkey(op);
-    }
-  }
-
-  return map;
-}
-
-/**
  * Builds static helper import statements as raw strings.
  * These are internal relative imports that can't use Alloy auto-import yet.
  */
@@ -404,11 +283,6 @@ export function Operations(props: OperationsProps) {
           "../".repeat(prefixKey === "" ? 0 : prefixes.length) || "./";
         const clientImport = `import { ${rlcClientName} as Client } from "${indexPathPrefix}index.js";`;
 
-        // Refkey map: maps symbol name strings found in generated function text
-        // to Alloy refkeys. Alloy resolves these against declarations from
-        // Models, Serializers, OperationOptions, and ExternalPackages.
-        const typeRefkeys = buildTypeRefkeys(context, operations, prefixes);
-
         return (
           <ts.SourceFile path={filepath}>
             {clientImport}
@@ -422,7 +296,6 @@ export function Operations(props: OperationsProps) {
                   operation={operation}
                   clientType={clientType}
                   client={client}
-                  typeRefkeys={typeRefkeys}
                 />
               )}
             </For>
@@ -441,14 +314,10 @@ interface OperationGroupProps {
   operation: ServiceOperation;
   clientType: string;
   client: SdkClientType<SdkServiceOperation>;
-  typeRefkeys: Record<string, Refkey>;
 }
 
 function OperationGroup(props: OperationGroupProps): Children {
-  const { context, prefixes, operation, clientType, client, typeRefkeys } =
-    props;
-
-  const opFn = getOperationFunction(context, [prefixes, operation], clientType);
+  const { context, prefixes, operation, clientType, client } = props;
 
   return (
     <>
@@ -464,19 +333,414 @@ function OperationGroup(props: OperationGroupProps): Children {
       <DeserializeHeaders context={context} operation={operation} />
       <DeserializeExceptionHeaders context={context} operation={operation} />
       {"\n"}
-      <OperationFunction
-        name={opFn.name}
-        export={opFn.isExported}
-        async={opFn.isAsync}
-        returnType={opFn.returnType}
-        parameters={opFn.parameters}
-        docs={opFn.docs}
-        refkey={operationRefkey(operation)}
-        typeRefkeys={typeRefkeys}
-      >
-        <FunctionBody typeRefkeys={typeRefkeys}>{opFn.statements}</FunctionBody>
-      </OperationFunction>
+      <PublicOperation
+        context={context}
+        operation={operation}
+        prefixes={prefixes}
+        clientType={clientType}
+      />
     </>
+  );
+}
+
+// ── Public operation components ─────────────────────────────────────────
+// These replace the getOperationFunction/OperationFunction/FunctionBody bridge
+// with native JSX components using `code` tagged templates and refkeys.
+
+interface PublicOperationProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+  prefixes: string[];
+  clientType: string;
+}
+
+/** Converts raw parameter list to ts.ParameterDescriptor[] with refkeys for typed params. */
+function buildOperationParams(
+  rawParams: Array<{
+    name: string;
+    type?: string;
+    initializer?: string;
+    hasQuestionToken?: boolean;
+  }>,
+  operation: ServiceOperation,
+  optionalParamName: string
+): ts.ParameterDescriptor[] {
+  return rawParams.map((p) => {
+    if (p.name === optionalParamName) {
+      return {
+        name: p.name,
+        type: operationOptionsRefkey(operation),
+        default: p.initializer
+      };
+    }
+    return { name: p.name, type: p.type };
+  });
+}
+
+/** Builds return type Children with refkeys for named types. */
+function getReturnTypeChildren(context: SdkContext, type: SdkType): Children {
+  if (
+    (type.kind === "model" || type.kind === "enum" || type.kind === "union") &&
+    (type as any).name
+  ) {
+    return modelTypeRefkey(type);
+  }
+  if (type.kind === "array") {
+    return code`${getReturnTypeChildren(context, type.valueType)}[]`;
+  }
+  if (type.kind === "nullable") {
+    return code`${getReturnTypeChildren(context, type.type)} | null`;
+  }
+  return getTypeExpression(context, type);
+}
+
+/** Dispatcher: renders the appropriate public operation component based on operation kind. */
+function PublicOperation(props: PublicOperationProps): Children {
+  const { operation } = props;
+  if (isPagingOnlyOperation(operation)) {
+    return <PagingOperation {...props} />;
+  } else if (isLroOnlyOperation(operation)) {
+    return <LroOperation {...props} />;
+  } else if (isLroAndPagingOperation(operation)) {
+    return <LroPagingOperation {...props} />;
+  }
+  return <StandardOperation {...props} />;
+}
+
+/** Renders the public operation function for standard (non-LRO, non-paging) operations. */
+function StandardOperation(props: PublicOperationProps): Children {
+  const { context, operation, prefixes, clientType } = props;
+  const rawParams = getOperationSignatureParameters(
+    context,
+    [prefixes, operation],
+    clientType
+  );
+  const optionalParamName = getOptionalParamsName(rawParams);
+  const params = buildOperationParams(rawParams, operation, optionalParamName);
+  const { name, fixme = [] } = getOperationName(operation);
+
+  const response = operation.response;
+  const responseHeaders = getResponseHeaders(operation.operation.responses);
+  const hasHeaderOnlyResponse = !response.type && responseHeaders.length > 0;
+  const isResponseHeadersEnabled =
+    context.rlcOptions?.includeHeadersInResponse === true;
+
+  // Compute return type
+  let returnType: Children = "void";
+  if (response.type) {
+    if (
+      response.type.kind === "model" &&
+      responseHeaders.length > 0 &&
+      isResponseHeadersEnabled
+    ) {
+      returnType = buildCompositeResponseType(
+        context,
+        response.type,
+        responseHeaders
+      );
+    } else {
+      returnType = getReturnTypeChildren(context, response.type);
+    }
+  } else if (hasHeaderOnlyResponse && isResponseHeadersEnabled) {
+    returnType = buildHeaderOnlyResponseType(context, responseHeaders);
+  }
+
+  const docs = [
+    ...getDocsFromDescription(operation.doc),
+    ...getFixmeForMultilineDocs(fixme)
+  ];
+  const docStr = docs.length > 0 ? docs.join("\n") : undefined;
+
+  const paramNames = new Set(rawParams.map((p) => p.name));
+  const resultVarName = generateLocallyUniqueName("result", paramNames);
+  const parameterList = rawParams.map((p) => p.name).join(", ");
+
+  const sendRef = sendFunctionRefkey(operation);
+  const deserializeRef = deserializeFunctionRefkey(operation);
+  const isBinaryResponse =
+    response?.type?.kind === "bytes" && response.type.encode === "bytes";
+
+  // Build send statement
+  let sendStmt: Children;
+  if (isBinaryResponse) {
+    const streamVarName = generateLocallyUniqueName(
+      "streamableMethod",
+      paramNames
+    );
+    sendStmt = code`const ${streamVarName} = ${sendRef}(${parameterList});
+const ${resultVarName} = await getBinaryResponse(${streamVarName});`;
+  } else {
+    sendStmt = code`const ${resultVarName} = await ${sendRef}(${parameterList});`;
+  }
+
+  // Build return statement
+  let returnStmt: Children;
+  if (responseHeaders.length > 0 && isResponseHeadersEnabled) {
+    const headersVarName = generateLocallyUniqueName("headers", paramNames);
+    const headersRef = deserializeHeadersRefkey(operation);
+    if (hasHeaderOnlyResponse) {
+      returnStmt = code`const ${headersVarName} = ${headersRef}(${resultVarName});
+await ${deserializeRef}(${resultVarName});
+return {...${headersVarName} };`;
+    } else {
+      const payloadVarName = generateLocallyUniqueName("payload", paramNames);
+      returnStmt = code`const ${headersVarName} = ${headersRef}(${resultVarName});
+const ${payloadVarName} = await ${deserializeRef}(${resultVarName});
+return { ...${payloadVarName}, ...${headersVarName} };`;
+    }
+  } else {
+    returnStmt = code`return ${deserializeRef}(${resultVarName});`;
+  }
+
+  return (
+    <ts.FunctionDeclaration
+      export
+      async
+      name={name}
+      parameters={params}
+      returnType={returnType}
+      doc={docStr}
+      refkey={operationRefkey(operation)}
+    >
+      {sendStmt}
+      {"\n"}
+      {returnStmt}
+    </ts.FunctionDeclaration>
+  );
+}
+
+/** Renders the public operation function for paging-only operations. */
+function PagingOperation(props: PublicOperationProps): Children {
+  const { context, operation, prefixes, clientType } = props;
+  if (operation.kind !== "paging") return null;
+
+  const rawParams = getOperationSignatureParameters(
+    context,
+    [prefixes, operation],
+    clientType
+  );
+  const optionalParamName = getOptionalParamsName(rawParams);
+  const params = buildOperationParams(rawParams, operation, optionalParamName);
+  const { name, fixme = [] } = getOperationName(operation);
+
+  // Element type for PagedAsyncIterableIterator<T>
+  const response = operation.response;
+  let elementTypeChildren: Children = "void";
+  if (response.type && response.type.kind === "array") {
+    elementTypeChildren = getReturnTypeChildren(
+      context,
+      response.type.valueType
+    );
+  }
+
+  const docs = [
+    ...getDocsFromDescription(operation.doc),
+    ...getFixmeForMultilineDocs(fixme)
+  ];
+  const docStr = docs.length > 0 ? docs.join("\n") : undefined;
+
+  // Paging options
+  const pagingOptions: string[] = [];
+  const itemSegments = operation.response.resultSegments;
+  const itemName = itemSegments?.map((p) => p.name).join(".");
+  const nextLinkSegments = operation.pagingMetadata.nextLinkSegments;
+  const nextLinkName = nextLinkSegments?.map((p) => p.name).join(".");
+  const nextLinkMethod = operation.pagingMetadata.nextLinkVerb;
+  const apiVersion = getApiVersionExpression(context, operation);
+
+  if (itemName) pagingOptions.push(`itemName: "${itemName}"`);
+  if (nextLinkName) pagingOptions.push(`nextLinkName: "${nextLinkName}"`);
+  if (nextLinkMethod && nextLinkMethod !== "GET")
+    pagingOptions.push(`nextLinkMethod: "${nextLinkMethod}"`);
+  if (apiVersion) pagingOptions.push(`apiVersion: ${apiVersion}`);
+
+  const parameterList = rawParams.map((p) => p.name).join(", ");
+  const sendRef = sendFunctionRefkey(operation);
+  const deserializeRef = deserializeFunctionRefkey(operation);
+  const expectedStatuses = getExpectedStatuses(operation);
+  const optionsStr =
+    pagingOptions.length > 0 ? `,\n      {${pagingOptions.join(", ")}}` : "";
+
+  return (
+    <ts.FunctionDeclaration
+      export
+      name={name}
+      parameters={params}
+      returnType={code`PagedAsyncIterableIterator<${elementTypeChildren}>`}
+      doc={docStr}
+      refkey={operationRefkey(operation)}
+    >
+      {code`return buildPagedAsyncIterator(
+      context, 
+      () => ${sendRef}(${parameterList}), 
+      ${deserializeRef},
+      ${expectedStatuses}${optionsStr}
+      );`}
+    </ts.FunctionDeclaration>
+  );
+}
+
+/** Renders the public operation function for LRO-only operations. */
+function LroOperation(props: PublicOperationProps): Children {
+  const { context, operation, prefixes, clientType } = props;
+  if (operation.kind !== "lro") return null;
+
+  const rawParams = getOperationSignatureParameters(
+    context,
+    [prefixes, operation],
+    clientType
+  );
+  const optionalParamName = getOptionalParamsName(rawParams);
+  const params = buildOperationParams(rawParams, operation, optionalParamName);
+  const { name, fixme = [] } = getOperationName(operation);
+
+  // Final result type for PollerLike<OperationState<T>, T>
+  let finalTypeChildren: Children = "void";
+  const lroType = operation.lroMetadata?.finalResponse?.result;
+  if (lroType) {
+    finalTypeChildren = getReturnTypeChildren(context, lroType);
+  }
+
+  const docs = [
+    ...getDocsFromDescription(operation.doc),
+    ...getFixmeForMultilineDocs(fixme)
+  ];
+  const docStr = docs.length > 0 ? docs.join("\n") : undefined;
+
+  // LRO metadata
+  const lroMetadata = operation.lroMetadata;
+  const allowedFinalLocation = [
+    "azure-async-operation",
+    "location",
+    "original-uri",
+    "operation-location"
+  ];
+  const resourceLocationConfig =
+    lroMetadata?.finalStateVia &&
+    allowedFinalLocation.includes(lroMetadata.finalStateVia)
+      ? `resourceLocationConfig: "${lroMetadata.finalStateVia}",`
+      : "";
+  const apiVersion = getApiVersionExpression(context, operation);
+
+  const parameterList = rawParams.map((p) => p.name).join(", ");
+  const sendRef = sendFunctionRefkey(operation);
+  const deserializeRef = deserializeFunctionRefkey(operation);
+  const expectedStatuses = getExpectedStatuses(operation);
+
+  return (
+    <ts.FunctionDeclaration
+      export
+      name={name}
+      parameters={params}
+      returnType={code`${azureCoreLroLib.PollerLike}<${azureCoreLroLib.OperationState}<${finalTypeChildren}>, ${finalTypeChildren}>`}
+      doc={docStr}
+      refkey={operationRefkey(operation)}
+    >
+      {code`
+
+  return getLongRunningPoller(context, ${deserializeRef}, ${expectedStatuses}, {
+    updateIntervalInMs: ${optionalParamName}?.updateIntervalInMs,
+    abortSignal: ${optionalParamName}?.abortSignal,
+    getInitialResponse: () => ${sendRef}(${parameterList}),
+    ${resourceLocationConfig}
+    ${apiVersion ? `apiVersion: ${apiVersion}` : ""}
+  }) as ${azureCoreLroLib.PollerLike}<${azureCoreLroLib.OperationState}<${finalTypeChildren}>, ${finalTypeChildren}>;
+  `}
+    </ts.FunctionDeclaration>
+  );
+}
+
+/** Renders the public operation function for combined LRO + paging operations. */
+function LroPagingOperation(props: PublicOperationProps): Children {
+  const { context, operation, prefixes, clientType } = props;
+  if (operation.kind !== "lropaging") return null;
+
+  const rawParams = getOperationSignatureParameters(
+    context,
+    [prefixes, operation],
+    clientType
+  );
+  const optionalParamName = getOptionalParamsName(rawParams);
+  const params = buildOperationParams(rawParams, operation, optionalParamName);
+  const { name, fixme = [] } = getOperationName(operation);
+
+  // Element type for PagedAsyncIterableIterator<T>
+  let elementTypeChildren: Children = "void";
+  if (operation.response.type?.kind === "array") {
+    elementTypeChildren = getReturnTypeChildren(
+      context,
+      operation.response.type.valueType
+    );
+  }
+
+  const docs = [
+    ...getDocsFromDescription(operation.doc),
+    ...getFixmeForMultilineDocs(fixme)
+  ];
+  const docStr = docs.length > 0 ? docs.join("\n") : undefined;
+
+  const apiVersion = getApiVersionExpression(context, operation);
+
+  // Build paging options
+  const pagingOptions = [
+    operation.response.resultSegments &&
+      `itemName: "${operation.response.resultSegments.map((p) => p.name).join(".")}"`,
+    operation.pagingMetadata.nextLinkSegments &&
+      `nextLinkName: "${operation.pagingMetadata.nextLinkSegments.map((p) => p.name).join(".")}"`,
+    operation.pagingMetadata.nextLinkVerb !== "GET" &&
+      `nextLinkMethod: "${operation.pagingMetadata.nextLinkVerb}"`,
+    apiVersion && `apiVersion: ${apiVersion}`
+  ].filter(Boolean);
+
+  // LRO metadata
+  const allowedLocations = [
+    "azure-async-operation",
+    "location",
+    "original-uri",
+    "operation-location"
+  ];
+  const resourceLocationConfig =
+    operation.lroMetadata?.finalStateVia &&
+    allowedLocations.includes(operation.lroMetadata.finalStateVia)
+      ? `resourceLocationConfig: "${operation.lroMetadata.finalStateVia}",`
+      : "";
+
+  const parameterList = rawParams.map((p) => p.name).join(", ");
+  const sendRef = sendFunctionRefkey(operation);
+  const deserializeRef = deserializeFunctionRefkey(operation);
+  const expectedStatuses = getExpectedStatuses(operation);
+  const runtimeLib = getRuntimeLib(context);
+  const pagingOptionsStr =
+    pagingOptions.length > 0 ? `,\n    {${pagingOptions.join(", ")}}` : "";
+
+  return (
+    <ts.FunctionDeclaration
+      export
+      name={name}
+      parameters={params}
+      returnType={code`PagedAsyncIterableIterator<${elementTypeChildren}>`}
+      doc={docStr}
+      refkey={operationRefkey(operation)}
+    >
+      {code`
+  const initialPagingPoller = getLongRunningPoller(context,
+    async (result: ${runtimeLib.PathUncheckedResponse}) => result,
+    ${expectedStatuses}, {
+    updateIntervalInMs: ${optionalParamName}?.updateIntervalInMs,
+    abortSignal: ${optionalParamName}?.abortSignal,
+    getInitialResponse: () => ${sendRef}(${parameterList}),
+    ${resourceLocationConfig}
+    ${apiVersion ? `apiVersion: ${apiVersion}` : ""}
+  }) as ${azureCoreLroLib.PollerLike}<${azureCoreLroLib.OperationState}<${runtimeLib.PathUncheckedResponse}>, ${runtimeLib.PathUncheckedResponse}>;
+  
+  return buildPagedAsyncIterator(
+    context,
+    async () => await initialPagingPoller,
+    ${deserializeRef},
+    ${expectedStatuses}${pagingOptionsStr}
+  );
+  `}
+    </ts.FunctionDeclaration>
   );
 }
 
@@ -1454,146 +1718,4 @@ function BodyParam(props: BodyParamProps): Children {
     true
   );
   return `\nbody: ${serializedBody.startsWith(nullOrUndefinedPrefix) ? "" : nullOrUndefinedPrefix}${serializedBody},`;
-}
-
-// ── Bridge components (temporary — for functions not yet converted to JSX) ──
-
-interface OperationFunctionProps {
-  name: string;
-  export?: boolean;
-  async?: boolean;
-  returnType?: string;
-  parameters: Array<{
-    name: string;
-    type?: string;
-    initializer?: string;
-    hasQuestionToken?: boolean;
-  }>;
-  docs?: string[];
-  refkey?: Refkey;
-  typeRefkeys: Record<string, Refkey>;
-  children?: Children;
-}
-
-/**
- * Renders a single operation function declaration.
- * Resolves type strings in parameters and return type against
- * the typeRefkeys map so Alloy can auto-import referenced symbols.
- */
-function OperationFunction(props: OperationFunctionProps): Children {
-  // Strip Promise<...> wrapper when async — TypeScript adds it automatically
-  let rt = props.returnType;
-  if (props.async && rt?.startsWith("Promise<") && rt.endsWith(">")) {
-    rt = rt.slice("Promise<".length, -1);
-  }
-
-  const params = props.parameters.map((p) => ({
-    name: p.name,
-    type: resolveType(p.type, props.typeRefkeys),
-    default: p.initializer,
-    optional: p.hasQuestionToken
-  }));
-
-  const docs =
-    props.docs && props.docs.length > 0 ? props.docs.join("\n") : undefined;
-
-  return (
-    <ts.FunctionDeclaration
-      export={props.export}
-      name={props.name}
-      async={props.async}
-      returnType={rt ? resolveType(rt, props.typeRefkeys) : undefined}
-      parameters={params}
-      doc={docs}
-      refkey={props.refkey}
-    >
-      {props.children}
-    </ts.FunctionDeclaration>
-  );
-}
-
-interface FunctionBodyProps {
-  typeRefkeys: Record<string, Refkey>;
-  children?: Children;
-}
-
-/**
- * Resolves symbol references within function body text.
- * Scans the text children for known symbol names and replaces them
- * with Alloy refkeys so auto-imports are generated.
- */
-function FunctionBody(props: FunctionBodyProps): Children {
-  const text = childrenToText(props.children);
-  return resolveReferences(text, props.typeRefkeys);
-}
-
-/** Flattens children (string or string[]) into a single text block. */
-function childrenToText(children: Children): string {
-  if (typeof children === "string") return children;
-  if (Array.isArray(children)) {
-    return children.filter((c) => typeof c === "string").join("\n");
-  }
-  return "";
-}
-
-/**
- * Resolves a type string against the refkey map.
- * Exact match returns the refkey directly; otherwise scans for
- * known names within complex type expressions.
- */
-function resolveType(
-  typeStr: string | undefined,
-  typeRefkeys: Record<string, Refkey>
-): Children {
-  if (!typeStr) return undefined;
-  if (typeRefkeys[typeStr]) return typeRefkeys[typeStr];
-  return resolveReferences(typeStr, typeRefkeys);
-}
-
-/**
- * Scans text for known symbol names from typeRefkeys and replaces
- * them with Alloy refkeys so auto-imports are triggered.
- * Works for both type expressions and function body text.
- */
-function resolveReferences(
-  text: string,
-  typeRefkeys: Record<string, Refkey>
-): Children {
-  if (!text || Object.keys(typeRefkeys).length === 0) return text;
-
-  // Build regex matching any known symbol name
-  const names = Object.keys(typeRefkeys).filter((n) => text.includes(n));
-  if (names.length === 0) return text;
-
-  // Sort by length descending so longer names match first
-  // (e.g., "BarSerializer" before "Bar")
-  names.sort((a, b) => b.length - a.length);
-
-  const pattern = new RegExp(
-    `\\b(${names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
-    "g"
-  );
-
-  const parts: Children[] = [];
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = pattern.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
-    }
-    const rk = typeRefkeys[match[1]!];
-    if (rk != null) {
-      parts.push(rk);
-    } else {
-      parts.push(match[0]);
-    }
-    lastIndex = pattern.lastIndex;
-  }
-
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
-  }
-
-  return <>{parts}</>;
 }
