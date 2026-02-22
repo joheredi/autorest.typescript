@@ -245,3 +245,39 @@ const template = code`
   const result = ${serializerRef}(data); // Alloy resolves during rendering
 `;
 ```
+
+### Phase 11 Complete — `getDeserializePrivateFunction` JSX Decomposition (2026-02-21) [COMPLETED]
+
+Successfully converted the `getDeserializePrivateFunction` helper to a full JSX component hierarchy in `Operations.tsx`.
+
+**What changed:**
+
+1. **New refkey helper:** Added `deserializeFunctionRefkey(operation)` for deserialize function references
+2. **Four new JSX components in `Operations.tsx`:**
+   - `<DeserializeFunction>` — Main component wrapping the private deserialize function. Uses `runtimeLib.PathUncheckedResponse` for parameter type and `getTypeExpression()` for return type.
+   - `<StatusCheck>` — Renders status code validation with `getExpectedStatuses(operation)`
+   - `<ExceptionHandling>` + `<CustomizedExceptions>` + `<DefaultException>` — Decomposed exception handling using `deserializerRefkey()` and `xmlDeserializerRefkey()` directly in `code` templates
+   - `<LroSubPathCheck>` — Renders LRO sub-path validation (only for LRO operations)
+   - `<ResponseBody>` — Renders return statement with deserializer refkeys for JSON/XML/dual-format/binary/void cases
+3. **Updated `<OperationGroup>`:** Replaced the bridge pattern (`<OperationFunction>/<FunctionBody>` with `getDeserializePrivateFunction`) with direct `<DeserializeFunction>` usage
+4. **Exported helpers from operationHelpers.ts:** Made `getExceptionDetails()` and `buildLroReturnType()` public for component reuse
+5. **Added imports:** `buildXmlModelDeserializer`, `xmlDeserializerRefkey`, `getExceptionDetails`, `buildLroReturnType`, `getExpectedStatuses`, `deserializeResponseValue`, `getTypeExpression`
+
+**Architecture patterns established:**
+
+- **Exception handling decomposition:** Separate components for customized vs. default exceptions, with runtime content-type detection for dual-format (XML+JSON) responses
+- **Refkey-native exception deserialization:** Uses `deserializerRefkey(type)` and `xmlDeserializerRefkey(type)` directly in `code` templates without post-render string scanning
+- **Return type handling:** Uses `getTypeExpression()` for string-based return types (required by `<ts.FunctionDeclaration>` signature), not refkeys
+- **Static helpers remain as strings:** `isXmlContentType`, `getBinaryResponse`, etc. don't have refkeys yet, so they're rendered as literal strings in `code` templates
+- **Control flow in JSX:** The components own the branching logic (LRO check, dual-format check, exception handling) rather than computing everything upfront in a helper function
+
+**Key learnings:**
+
+- `<ts.FunctionDeclaration>`'s `returnType` prop expects a string, not a Refkey — use `getTypeExpression(context, type)` for model types
+- `code` tagged templates can mix refkeys and strings — Alloy resolves refkeys during rendering while preserving string literals
+- Exception handling requires finding the original exception response object to get the type for refkey generation (can't just use deserializer name strings)
+- The `<For>` component from `@alloy-js/core` works with arrays but needs explicit type casting for TypeScript to recognize array element properties
+
+**Test results:** 526 modular unit tests passing. Build + format + lint clean. No breaking API surface changes.
+
+**Remaining work in operationHelpers.ts:** The `getDeserializePrivateFunction` function is kept for now but unused. Will be removed in future cleanup once all consumers are verified to use the JSX component.

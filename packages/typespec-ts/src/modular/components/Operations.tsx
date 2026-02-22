@@ -19,14 +19,14 @@ import {
   ServiceOperation,
   hasDualFormatSupport,
   isBinaryPayload,
-  isXmlPayload
+  isXmlPayload,
+  isMultipartPayload
 } from "../../utils/operationUtil.js";
 import {
   getModularClientOptions,
   isRLCMultiEndpoint
 } from "../../utils/clientUtils.js";
 import {
-  getDeserializePrivateFunction,
   getOperationFunction,
   getOperationOptionsName,
   getOperationSignatureParameters,
@@ -49,12 +49,17 @@ import {
   buildHeaderOnlyResponseValue,
   isLroOnlyOperation,
   isLroAndPagingOperation,
-  isPagingOnlyOperation
+  isPagingOnlyOperation,
+  getExceptionDetails,
+  buildLroReturnType,
+  getExpectedStatuses,
+  deserializeResponseValue
 } from "../helpers/operationHelpers.js";
 import {
   getOperationName,
   generateLocallyUniqueName
 } from "../helpers/namingHelpers.js";
+import { getTypeExpression } from "../type-expressions/get-type-expression.js";
 import {
   httpRuntimeLib,
   azureCoreClientLib,
@@ -64,12 +69,16 @@ import {
 import { operationOptionsRefkey } from "./OperationOptions.js";
 import { typeRefkey as modelTypeRefkey } from "./Models.js";
 import { serializerRefkey, deserializerRefkey } from "./Serializers.js";
-import { xmlSerializerRefkey } from "./XmlSerializers.js";
+import {
+  xmlSerializerRefkey,
+  xmlDeserializerRefkey
+} from "./XmlSerializers.js";
 import { normalizeModelName } from "../model-utils.js";
 import { buildModelSerializer } from "../serialization/buildSerializerFunction.js";
 import { buildModelDeserializer } from "../serialization/buildDeserializerFunction.js";
 import {
   buildXmlModelSerializer,
+  buildXmlModelDeserializer,
   hasXmlSerialization
 } from "../serialization/buildXmlSerializerFunction.js";
 import {
@@ -100,6 +109,11 @@ export function deserializeExceptionHeadersRefkey(
   operation: ServiceOperation
 ): Refkey {
   return refkey(operation, "deserializeExceptionHeaders");
+}
+
+/** Refkey for the deserialize private function. */
+export function deserializeFunctionRefkey(operation: ServiceOperation): Refkey {
+  return refkey(operation, "deserialize");
 }
 
 /** Returns the appropriate Alloy external package for runtime imports. */
@@ -434,7 +448,6 @@ function OperationGroup(props: OperationGroupProps): Children {
   const { context, prefixes, operation, clientType, client, typeRefkeys } =
     props;
 
-  const deserFn = getDeserializePrivateFunction(context, operation);
   const opFn = getOperationFunction(context, [prefixes, operation], clientType);
 
   return (
@@ -447,19 +460,7 @@ function OperationGroup(props: OperationGroupProps): Children {
         client={client as SdkClientType<SdkHttpOperation>}
       />
       {"\n"}
-      <OperationFunction
-        name={deserFn.name}
-        export={deserFn.isExported}
-        async={deserFn.isAsync}
-        returnType={deserFn.returnType}
-        parameters={deserFn.parameters}
-        docs={deserFn.docs}
-        typeRefkeys={typeRefkeys}
-      >
-        <FunctionBody typeRefkeys={typeRefkeys}>
-          {deserFn.statements}
-        </FunctionBody>
-      </OperationFunction>
+      <DeserializeFunction context={context} operation={operation} />
       <DeserializeHeaders context={context} operation={operation} />
       <DeserializeExceptionHeaders context={context} operation={operation} />
       {"\n"}
@@ -560,6 +561,565 @@ function DeserializeExceptionHeaders(props: DeserializeHeadersProps): Children {
       </ts.FunctionDeclaration>
     </>
   );
+}
+
+// ── Deserialize function components ─────────────────────────────────────
+
+interface DeserializeFunctionProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+}
+
+/**
+ * Renders the private `_${name}Deserialize` function that deserializes the HTTP response.
+ * Handles status code validation, exception handling, LRO sub-path checks, and response body deserialization.
+ */
+function DeserializeFunction(props: DeserializeFunctionProps): Children {
+  const { context, operation } = props;
+  const { name } = getOperationName(operation);
+  const runtimeLib = getRuntimeLib(context);
+
+  const isLroOnly = isLroOnlyOperation(operation);
+  const isLroAndPaging = isLroAndPagingOperation(operation);
+  const isPagingOnly = isPagingOnlyOperation(operation);
+
+  const response = operation.response;
+  const restResponse = operation.operation.responses[0];
+  let returnType: string;
+
+  if (isLroOnly || isLroAndPaging) {
+    const lroReturn = buildLroReturnType(context, operation);
+    returnType = lroReturn.type;
+  } else if (isPagingOnly && restResponse?.type) {
+    // For paging operations, use the full response model
+    returnType = getTypeExpression(context, restResponse.type);
+  } else if (response.type) {
+    returnType = getTypeExpression(context, response.type);
+  } else {
+    returnType = "void";
+  }
+
+  return (
+    <>
+      {"\n"}
+      <ts.FunctionDeclaration
+        export
+        async
+        name={`_${name}Deserialize`}
+        parameters={[
+          { name: "result", type: runtimeLib.PathUncheckedResponse }
+        ]}
+        returnType={returnType}
+        refkey={deserializeFunctionRefkey(operation)}
+      >
+        <StatusCheck context={context} operation={operation} />
+        <LroSubPathCheck context={context} operation={operation} />
+        <ResponseBody context={context} operation={operation} />
+      </ts.FunctionDeclaration>
+    </>
+  );
+}
+
+interface StatusCheckProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+}
+
+/**
+ * Renders the status code check and exception handling logic.
+ * Throws an error if the response status is not in the expected statuses.
+ */
+function StatusCheck(props: StatusCheckProps): Children {
+  const { context, operation } = props;
+  const expectedStatuses = getExpectedStatuses(operation);
+
+  return (
+    <>
+      {code`const expectedStatuses = ${expectedStatuses};`}
+      {code`
+if (!expectedStatuses.includes(result.status)) {
+`}
+      <ExceptionHandling context={context} operation={operation} />
+      {code`
+}
+`}
+    </>
+  );
+}
+
+interface ExceptionHandlingProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+}
+
+/**
+ * Renders the exception handling logic (both customized and default).
+ */
+function ExceptionHandling(props: ExceptionHandlingProps): Children {
+  const { context, operation } = props;
+  const runtimeLib = getRuntimeLib(context);
+  const exceptionDetails = getExceptionDetails(context, operation);
+
+  const {
+    customized,
+    defaultDeserializer,
+    defaultXmlDeserializer,
+    defaultIsXmlOnly
+  } = exceptionDetails;
+
+  if (customized.length === 0 && !defaultDeserializer) {
+    // No custom exception handling — just throw a generic error
+    return code`throw ${runtimeLib.createRestError}(result);`;
+  }
+
+  return (
+    <>
+      <CustomizedExceptions
+        context={context}
+        operation={operation}
+        customized={customized}
+        defaultDeserializer={defaultDeserializer}
+        defaultXmlDeserializer={defaultXmlDeserializer}
+        defaultIsXmlOnly={defaultIsXmlOnly}
+      />
+    </>
+  );
+}
+
+interface CustomizedExceptionsProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+  customized: Array<{
+    start: number;
+    end?: number;
+    deserializer: string;
+    xmlDeserializer?: string;
+    isXmlOnly?: boolean;
+  }>;
+  defaultDeserializer?: string;
+  defaultXmlDeserializer?: string;
+  defaultIsXmlOnly?: boolean;
+}
+
+/**
+ * Renders per-status-code exception handling with deserializer refkeys.
+ */
+function CustomizedExceptions(props: CustomizedExceptionsProps): Children {
+  const {
+    context,
+    operation,
+    customized,
+    defaultDeserializer,
+    defaultXmlDeserializer,
+    defaultIsXmlOnly
+  } = props;
+  const runtimeLib = getRuntimeLib(context);
+
+  const isResponseHeadersEnabled =
+    context.rlcOptions?.includeHeadersInResponse === true;
+  const exceptionHeaders = getExceptionResponseHeaders(
+    operation.operation.exceptions
+  );
+  const hasExceptionHeaders =
+    isResponseHeadersEnabled && exceptionHeaders.length > 0;
+  const { name: opName } = getOperationName(operation);
+
+  // Check if any exception has dual-format XML (requires runtime content-type check)
+  const hasAnyDualFormatXml =
+    (defaultXmlDeserializer !== undefined && !defaultIsXmlOnly) ||
+    customized.some((e) => e.xmlDeserializer !== undefined && !e.isXmlOnly);
+
+  if (customized.length > 0) {
+    return (
+      <>
+        {code`const error = ${runtimeLib.createRestError}(result);`}
+        {hasAnyDualFormatXml && (
+          <>
+            {code`const responseContentType = result.headers?.["content-type"] ?? "";`}
+            {code`const isXml = isXmlContentType(responseContentType);`}
+          </>
+        )}
+        {code`const statusCode = Number.parseInt(result.status);`}
+        <For each={customized}>
+          {(exception, index) => {
+            const exceptionObj = exception as {
+              start: number;
+              end?: number;
+              deserializer: string;
+              xmlDeserializer?: string;
+              isXmlOnly?: boolean;
+            };
+
+            // Find the exception type for refkey
+            const exceptionResponse = operation.operation.exceptions.find(
+              (ex) => {
+                if (ex.statusCodes === "*") return false;
+                if (typeof ex.statusCodes === "number") {
+                  return ex.statusCodes === exceptionObj.start;
+                } else {
+                  return (
+                    ex.statusCodes.start === exceptionObj.start &&
+                    ex.statusCodes.end === exceptionObj.end
+                  );
+                }
+              }
+            );
+
+            let deserializeExpr;
+            if (!exceptionObj.xmlDeserializer) {
+              // JSON-only
+              if (
+                exceptionResponse?.type &&
+                exceptionResponse.type.kind === "model"
+              ) {
+                deserializeExpr = code`${deserializerRefkey(exceptionResponse.type)}(result.body)`;
+              } else {
+                deserializeExpr = `${exceptionObj.deserializer}(result.body)`;
+              }
+            } else if (exceptionObj.isXmlOnly) {
+              // XML-only
+              if (
+                exceptionResponse?.type &&
+                exceptionResponse.type.kind === "model"
+              ) {
+                deserializeExpr = code`${xmlDeserializerRefkey(exceptionResponse.type)}(result.body)`;
+              } else {
+                deserializeExpr = `${exceptionObj.xmlDeserializer}(result.body)`;
+              }
+            } else {
+              // Dual-format (runtime check)
+              if (
+                exceptionResponse?.type &&
+                exceptionResponse.type.kind === "model"
+              ) {
+                deserializeExpr = code`isXml ? ${xmlDeserializerRefkey(exceptionResponse.type)}(result.body) : ${deserializerRefkey(exceptionResponse.type)}(result.body)`;
+              } else {
+                deserializeExpr = `isXml ? ${exceptionObj.xmlDeserializer}(result.body) : ${exceptionObj.deserializer}(result.body)`;
+              }
+            }
+
+            const headerStmt = hasExceptionHeaders
+              ? `error.details = {...(error.details as any), ..._${opName}DeserializeExceptionHeaders(result)};`
+              : "";
+
+            const elsePrefix = index === 0 ? "" : "else ";
+
+            if (exceptionObj.end) {
+              return code`
+${elsePrefix}if (statusCode >= ${exceptionObj.start} && statusCode <= ${exceptionObj.end}) {
+  error.details = ${deserializeExpr};
+  ${headerStmt}
+}`;
+            } else {
+              return code`
+${elsePrefix}if (statusCode === ${exceptionObj.start}) {
+  error.details = ${deserializeExpr};
+  ${headerStmt}
+}`;
+            }
+          }}
+        </For>
+        <DefaultException
+          context={context}
+          operation={operation}
+          defaultDeserializer={defaultDeserializer}
+          defaultXmlDeserializer={defaultXmlDeserializer}
+          defaultIsXmlOnly={defaultIsXmlOnly}
+          hasCustomized={true}
+        />
+        {code`throw error;`}
+      </>
+    );
+  }
+
+  // No customized exceptions, only default
+  return (
+    <DefaultException
+      context={context}
+      operation={operation}
+      defaultDeserializer={defaultDeserializer}
+      defaultXmlDeserializer={defaultXmlDeserializer}
+      defaultIsXmlOnly={defaultIsXmlOnly}
+      hasCustomized={false}
+    />
+  );
+}
+
+interface DefaultExceptionProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+  defaultDeserializer?: string;
+  defaultXmlDeserializer?: string;
+  defaultIsXmlOnly?: boolean;
+  hasCustomized: boolean;
+}
+
+/**
+ * Renders the default (wildcard) exception handling.
+ */
+function DefaultException(props: DefaultExceptionProps): Children {
+  const {
+    context,
+    operation,
+    defaultDeserializer,
+    defaultXmlDeserializer,
+    defaultIsXmlOnly,
+    hasCustomized
+  } = props;
+  const runtimeLib = getRuntimeLib(context);
+
+  const isResponseHeadersEnabled =
+    context.rlcOptions?.includeHeadersInResponse === true;
+  const exceptionHeaders = getExceptionResponseHeaders(
+    operation.operation.exceptions
+  );
+  const hasExceptionHeaders =
+    isResponseHeadersEnabled && exceptionHeaders.length > 0;
+  const { name: opName } = getOperationName(operation);
+
+  if (!defaultDeserializer) {
+    // No default deserializer
+    return null;
+  }
+
+  // Find the wildcard exception for refkey
+  const defaultException = operation.operation.exceptions.find(
+    (ex) => ex.statusCodes === "*"
+  );
+
+  let deserializeExpr;
+  if (!defaultXmlDeserializer) {
+    // JSON-only
+    if (defaultException?.type && defaultException.type.kind === "model") {
+      deserializeExpr = code`${deserializerRefkey(defaultException.type)}(result.body)`;
+    } else {
+      deserializeExpr = `${defaultDeserializer}(result.body)`;
+    }
+  } else if (defaultIsXmlOnly) {
+    // XML-only
+    if (defaultException?.type && defaultException.type.kind === "model") {
+      deserializeExpr = code`${xmlDeserializerRefkey(defaultException.type)}(result.body)`;
+    } else {
+      deserializeExpr = `${defaultXmlDeserializer}(result.body)`;
+    }
+  } else {
+    // Dual-format (runtime check)
+    if (defaultException?.type && defaultException.type.kind === "model") {
+      deserializeExpr = code`isXml ? ${xmlDeserializerRefkey(defaultException.type)}(result.body) : ${deserializerRefkey(defaultException.type)}(result.body)`;
+    } else {
+      deserializeExpr = `isXml ? ${defaultXmlDeserializer}(result.body) : ${defaultDeserializer}(result.body)`;
+    }
+  }
+
+  const headerStmt = hasExceptionHeaders
+    ? `error.details = {...(error.details as any), ..._${opName}DeserializeExceptionHeaders(result)};`
+    : "";
+
+  if (hasCustomized) {
+    // This is an "else" branch after customized exceptions
+    return code`
+else {
+  error.details = ${deserializeExpr};
+  ${headerStmt}
+}`;
+  } else {
+    // Standalone default exception handling
+    if (!defaultXmlDeserializer || defaultIsXmlOnly) {
+      // No runtime content-type check needed
+      return (
+        <>
+          {code`const error = ${runtimeLib.createRestError}(result);`}
+          {code`error.details = ${deserializeExpr};`}
+          {headerStmt && code`${headerStmt}`}
+          {code`throw error;`}
+        </>
+      );
+    } else {
+      // Dual-format with runtime check
+      return (
+        <>
+          {code`const error = ${runtimeLib.createRestError}(result);`}
+          {code`const responseContentType = result.headers?.["content-type"] ?? "";`}
+          {code`error.details = isXmlContentType(responseContentType) ? ${defaultXmlDeserializer}(result.body) : ${defaultDeserializer}(result.body);`}
+          {headerStmt && code`${headerStmt}`}
+          {code`throw error;`}
+        </>
+      );
+    }
+  }
+}
+
+interface LroSubPathCheckProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+}
+
+/**
+ * Renders the LRO sub-path validation (only for LRO operations).
+ */
+function LroSubPathCheck(props: LroSubPathCheckProps): Children {
+  const { context, operation } = props;
+  const runtimeLib = getRuntimeLib(context);
+
+  const isLroOnly = isLroOnlyOperation(operation);
+  if (!isLroOnly) return null;
+
+  const lroSubSegments = operation?.lroMetadata?.finalResponse?.resultSegments;
+  if (!lroSubSegments || lroSubSegments.length === 0) return null;
+
+  const lroSubPath = lroSubSegments.map((property) => property.name).join(".");
+  const deserializedRoot = `result.body.${lroSubPath}`;
+  const deserializedRootSafe = deserializedRoot.split(".").join("?.");
+
+  return code`
+if (${deserializedRootSafe} === undefined) {
+  throw ${runtimeLib.createRestError}(\`Expected a result in the response at position "${deserializedRoot}"\`, result);
+}
+`;
+}
+
+interface ResponseBodyProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+}
+
+/**
+ * Renders the return statement with deserializer refkeys.
+ * Handles JSON/XML/dual-format/binary/void cases.
+ */
+function ResponseBody(props: ResponseBodyProps): Children {
+  const { context, operation } = props;
+
+  const isLroOnly = isLroOnlyOperation(operation);
+  const isLroAndPaging = isLroAndPagingOperation(operation);
+  const isPagingOnly = isPagingOnlyOperation(operation);
+
+  const response = operation.response;
+  const restResponse = operation.operation.responses[0];
+
+  const deserializedType =
+    isLroOnly || isLroAndPaging
+      ? operation?.lroMetadata?.finalResponse?.result
+      : isPagingOnly && restResponse?.type
+        ? restResponse.type
+        : response.type;
+
+  const lroSubSegments = isLroOnly
+    ? operation?.lroMetadata?.finalResponse?.resultSegments
+    : undefined;
+
+  let lroSubPath;
+  if (lroSubSegments && lroSubSegments.length > 0) {
+    lroSubPath = lroSubSegments.map((property) => property.name).join(".");
+  }
+
+  const deserializePrefix = "result.body";
+  const deserializedRoot = `${deserializePrefix}${lroSubPath ? "." + lroSubPath : ""}`;
+
+  if (!deserializedType) {
+    // Void response
+    return code`return;`;
+  }
+
+  const contentTypes = operation.operation.responses[0]?.contentTypes ?? [];
+  const isXml = isXmlPayload(contentTypes);
+  const isDualFormat = hasDualFormatSupport(contentTypes);
+  const isMultipart = isMultipartPayload(contentTypes);
+  const useXmlDeserialization =
+    isXml &&
+    deserializedType.kind === "model" &&
+    hasXmlSerialization(deserializedType);
+
+  const multipartCastSuffix = isMultipart ? " as any" : "";
+
+  // Dual-format response (XML + JSON)
+  if (
+    isDualFormat &&
+    deserializedType.kind === "model" &&
+    hasXmlSerialization(deserializedType)
+  ) {
+    const xmlDeserializerName = buildXmlModelDeserializer(
+      context,
+      deserializedType,
+      { nameOnly: true, skipDiscriminatedUnionSuffix: false }
+    ) as string | undefined;
+    const jsonDeserializerName = buildModelDeserializer(
+      context,
+      deserializedType,
+      { nameOnly: true, skipDiscriminatedUnionSuffix: false }
+    );
+
+    if (xmlDeserializerName && jsonDeserializerName) {
+      return code`
+const responseContentType = result.headers?.["content-type"] ?? "";
+if (isXmlContentType(responseContentType)) {
+  return ${xmlDeserializerRefkey(deserializedType)}(${deserializedRoot});
+}
+return ${deserializerRefkey(deserializedType)}(${deserializedRoot});
+`;
+    } else {
+      // Fall back to JSON deserializer
+      const deserializeFunctionName = buildModelDeserializer(
+        context,
+        deserializedType,
+        { nameOnly: true, skipDiscriminatedUnionSuffix: false }
+      );
+      if (deserializeFunctionName) {
+        return code`return ${deserializerRefkey(deserializedType)}(${deserializedRoot});`;
+      }
+    }
+  } else if (useXmlDeserialization) {
+    // XML-only response
+    const xmlDeserializerName = buildXmlModelDeserializer(
+      context,
+      deserializedType,
+      { nameOnly: true, skipDiscriminatedUnionSuffix: false }
+    ) as string | undefined;
+
+    if (xmlDeserializerName) {
+      return code`return ${xmlDeserializerRefkey(deserializedType)}(${deserializedRoot});`;
+    } else {
+      // Fall back to JSON deserializer if XML deserializer is not available
+      const deserializeFunctionName = buildModelDeserializer(
+        context,
+        deserializedType,
+        { nameOnly: true, skipDiscriminatedUnionSuffix: false }
+      );
+      if (deserializeFunctionName) {
+        return code`return ${deserializerRefkey(deserializedType)}(${deserializedRoot});`;
+      } else {
+        return code`return ${deserializedRoot};`;
+      }
+    }
+  } else {
+    // JSON response (default) - also handles multipart responses
+    const deserializeFunctionName = buildModelDeserializer(
+      context,
+      deserializedType,
+      { nameOnly: true, skipDiscriminatedUnionSuffix: false }
+    );
+
+    if (deserializeFunctionName) {
+      return code`return ${deserializerRefkey(deserializedType)}(${deserializedRoot})${multipartCastSuffix};`;
+    } else if (isAzureCoreErrorType(context.program, deserializedType.__raw)) {
+      return code`return ${deserializedRoot}${multipartCastSuffix};`;
+    } else {
+      const isBinary = isBinaryPayload(
+        context,
+        response.type!.__raw!,
+        contentTypes
+      );
+      const encode = isBinary ? "binary" : getEncodeForType(deserializedType);
+      const deserializedValue = deserializeResponseValue(
+        context,
+        deserializedType,
+        deserializedRoot,
+        true,
+        encode
+      );
+      return code`return ${deserializedValue}${multipartCastSuffix};`;
+    }
+  }
 }
 
 // ── Send function component ─────────────────────────────────────────────

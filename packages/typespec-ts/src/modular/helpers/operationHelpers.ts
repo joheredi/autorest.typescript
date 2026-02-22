@@ -458,7 +458,7 @@ interface OperationExceptionDetails {
   defaultIsXmlOnly?: boolean;
 }
 
-function getExceptionDetails(
+export function getExceptionDetails(
   context: SdkContext,
   operation: ServiceOperation
 ): OperationExceptionDetails {
@@ -1103,6 +1103,8 @@ function buildLroReturnType(
   }
   return { name: "", type: "void" };
 }
+
+export { buildLroReturnType };
 
 function buildLroPagingReturnType(
   context: SdkContext,
