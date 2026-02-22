@@ -124,7 +124,7 @@ function getModelsPath(
 
 // ── Per-model component ─────────────────────────────────────────────────
 
-interface XmlModelSerializersProps {
+export interface XmlModelSerializersProps {
   context: SdkContext;
   type: SdkModelType;
 }
@@ -136,7 +136,7 @@ interface XmlModelSerializersProps {
  * - XmlDeserializer (takes XML string)
  * - XmlObjectDeserializer (takes parsed object)
  */
-function XmlModelSerializers(props: XmlModelSerializersProps) {
+export function XmlModelSerializers(props: XmlModelSerializersProps) {
   const { context, type } = props;
 
   return (

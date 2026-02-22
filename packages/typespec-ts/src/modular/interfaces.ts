@@ -1,4 +1,5 @@
 import { RLCOptions } from "@azure-tools/rlc-common";
+import { ServiceOperation } from "../utils/operationUtil.js";
 
 export interface ModularOptions {
   sourceRoot: string;
@@ -20,4 +21,5 @@ export interface OperationPathAndDeserDetails {
   expectedStatusesExpression: string;
   deserName: string;
   renamedDeserName?: string;
+  operation: ServiceOperation;
 }

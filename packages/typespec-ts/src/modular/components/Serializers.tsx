@@ -121,7 +121,7 @@ export function Serializers(props: SerializersProps) {
 
 // ── File grouping ───────────────────────────────────────────────────────
 
-function isGenerableSerializeType(type: SdkType): boolean {
+export function isGenerableSerializeType(type: SdkType): boolean {
   return (
     type.kind === "model" ||
     type.kind === "union" ||
@@ -161,12 +161,12 @@ function getModelsPath(
 
 // ── Per-type component ──────────────────────────────────────────────────
 
-interface TypeSerializersComponentProps {
+export interface TypeSerializersComponentProps {
   context: SdkContext;
   typeOrProp: SdkType | SdkModelPropertyType;
 }
 
-function TypeSerializers(props: TypeSerializersComponentProps) {
+export function TypeSerializers(props: TypeSerializersComponentProps) {
   const { context, typeOrProp } = props;
 
   if (typeOrProp.kind === "property") {

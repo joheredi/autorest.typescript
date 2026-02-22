@@ -127,7 +127,7 @@ function groupTypesByFile(
   return groups;
 }
 
-function isGenerableType(
+export function isGenerableType(
   type: SdkType
 ): type is
   | SdkModelType
@@ -149,7 +149,7 @@ function isGenerableType(
   );
 }
 
-function getModelsPath(
+export function getModelsPath(
   sourceRoot: string,
   modelNamespace: string[] = []
 ): string {
@@ -163,12 +163,12 @@ function getModelsPath(
 
 // ── Individual type component ───────────────────────────────────────────
 
-interface ModelTypeProps {
+export interface ModelTypeProps {
   context: SdkContext;
   type: SdkType;
 }
 
-function ModelType(props: ModelTypeProps) {
+export function ModelType(props: ModelTypeProps) {
   const { context, type } = props;
 
   switch (type.kind) {

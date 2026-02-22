@@ -31,6 +31,7 @@ import {
   azureAbortControllerLib
 } from "./ExternalPackages.js";
 import { getStaticHelperFileInfo } from "./StaticHelperRefkeys.js";
+import { deserializeFunctionRefkey } from "./Operations.js";
 import path from "path";
 
 /**
@@ -79,7 +80,8 @@ function buildLroDeserDetailMap(
           path: `${o.operation.verb.toUpperCase()} ${o.operation.path}`,
           expectedStatusesExpression: getExpectedStatuses(o),
           deserName,
-          renamedDeserName
+          renamedDeserName,
+          operation: o
         };
       })
     );
@@ -138,21 +140,12 @@ export function RestorePoller(props: RestorePollerProps): Children {
 
   // Build the deserialize map and import info
   const deserializeDetails = buildLroDeserDetailMap(context, client);
-  const deserializeMapEntries: string[] = [];
-  const importStatements: string[] = [];
+  const deserializeMapEntries: Children[] = [];
 
-  for (const [key, value] of deserializeDetails.entries()) {
-    const namedImports = value
-      .map((detail) =>
-        detail.renamedDeserName
-          ? `${detail.deserName} as ${detail.renamedDeserName}`
-          : detail.deserName
-      )
-      .join(", ");
-    importStatements.push(`import { ${namedImports} } from "${key}";`);
+  for (const [_key, value] of deserializeDetails.entries()) {
     value.forEach((detail) => {
       deserializeMapEntries.push(
-        `"${detail.path}": { deserializer: ${detail.renamedDeserName ?? detail.deserName}, expectedStatuses: ${detail.expectedStatusesExpression} }`
+        code`"${detail.path}": { deserializer: ${deserializeFunctionRefkey(detail.operation)}, expectedStatuses: ${detail.expectedStatusesExpression} }`
       );
     });
   }
@@ -190,8 +183,6 @@ export function RestorePoller(props: RestorePollerProps): Children {
       {classicalClientImport}
       {"\n"}
       {getLongRunningPollerImport}
-      {"\n"}
-      {importStatements.join("\n")}
       {code`
 
 export interface RestorePollerOptions<
@@ -261,7 +252,7 @@ interface DeserializationHelper {
 }
 
 const deserializeMap: Record<string, DeserializationHelper> = {
-  ${deserializeMapEntries.join(",\n")}
+  ${deserializeMapEntries.flatMap((e, i) => (i > 0 ? [",\n", e] : [e]))}
 };
 
 function getDeserializationHelper(

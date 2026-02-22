@@ -31,6 +31,12 @@ import {
   azureCorePipelineLib,
   azureCoreLroLib
 } from "./ExternalPackages.js";
+import { operationRefkey } from "./Operations.js";
+import { operationOptionsRefkey } from "./OperationOptions.js";
+import {
+  classicalOperationGroupFunctionRefkey,
+  classicalOperationGroupInterfaceRefkey
+} from "./ClassicalOperationGroups.js";
 import path from "path";
 
 // ── Refkey helpers ──────────────────────────────────────────────────────
@@ -174,10 +180,11 @@ export function ClassicalClient(props: ClassicalClientProps): Children {
     clientType = `Client.${classicalClientName}`;
   }
 
-  const operationGroupDecls: string[] = [];
-  const operationGroupAssigns: string[] = [];
-  const directMethods: string[] = [];
+  const operationGroupDecls: Children[] = [];
+  const operationGroupAssigns: Children[] = [];
+  const directMethods: Children[] = [];
   const seenGroupNames = new Set<string>();
+  let hasLroMethods = false;
 
   for (const [prefixKey, operations] of methodMap) {
     const prefixes = prefixKey.split("/");
@@ -197,30 +204,37 @@ export function ClassicalClient(props: ClassicalClientProps): Children {
           "this._client",
           ...methodParams.map((p) => p.name)
         ].join(", ");
-        const paramDecl = methodParams
-          .map(
-            (p) =>
-              `${p.name}${
-                p.type?.endsWith("operationOptions__") || p.hasQuestionToken
-                  ? "?"
-                  : ""
-              }: ${p.type}`
-          )
-          .join(", ");
+        const paramParts: Children[] = [];
+        methodParams.forEach((p, i) => {
+          const isOptionsParam =
+            p.type?.endsWith("operationOptions__") || !!p.initializer;
+          const optional =
+            !isOptionsParam && p.hasQuestionToken ? "?" : "";
+          const typeRef = isOptionsParam
+            ? operationOptionsRefkey(op)
+            : p.type;
+          const defaultVal = p.initializer
+            ? ` = ${p.initializer}`
+            : "";
+          if (i > 0) paramParts.push(", ");
+          paramParts.push(
+            code`${p.name}${optional}: ${typeRef}${defaultVal}`
+          );
+        });
         const docs = declaration.docs
           ? declaration.docs.map((d) => `/** ${d} */`).join("\n")
           : "";
-        const apiFuncName = declaration.name ?? "FIXME";
 
         directMethods.push(
-          `${docs}
-${methodName}(${paramDecl}): ${declaration.returnType} {
-  return ${apiFuncName}(${methodParamStr});
+          code`${docs}
+${methodName}(${paramParts}): ${declaration.returnType} {
+  return ${operationRefkey(op)}(${methodParamStr});
 }`
         );
 
         // LRO compat methods
         if (context.rlcOptions?.compatibilityLro && declaration.isLro) {
+          hasLroMethods = true;
           const returnType = declaration.lroFinalReturnType ?? "void";
           const beginName = normalizeName(
             `begin_${methodName}`,
@@ -232,40 +246,32 @@ ${methodName}(${paramDecl}): ${declaration.returnType} {
           );
 
           directMethods.push(
-            `/** @deprecated use ${methodName} instead */
-async ${beginName}(${paramDecl}): Promise<SimplePollerLike<${azureCoreLroLib.OperationState}<${returnType}>, ${returnType}>> {
-  const poller = ${apiFuncName}(${methodParamStr});
+            code`/** @deprecated use ${methodName} instead */
+async ${beginName}(${paramParts}): Promise<SimplePollerLike<${azureCoreLroLib.OperationState}<${returnType}>, ${returnType}>> {
+  const poller = ${operationRefkey(op)}(${methodParamStr});
   await poller.submitted();
   return getSimplePoller(poller);
 }`
           );
           directMethods.push(
-            `/** @deprecated use ${methodName} instead */
-async ${beginAndWaitName}(${paramDecl}): Promise<${returnType}> {
-  return await ${apiFuncName}(${methodParamStr});
+            code`/** @deprecated use ${methodName} instead */
+async ${beginAndWaitName}(${paramParts}): Promise<${returnType}> {
+  return await ${operationRefkey(op)}(${methodParamStr});
 }`
           );
         }
       }
     } else {
       const rawGroupName = normalizeName(prefixes[0] ?? "", NameType.Interface);
-      const operationFnName = `_get${normalizeName(
-        rawGroupName,
-        NameType.OperationGroup
-      )}Operations`;
-      const propertyTypeName = `${normalizeName(
-        rawGroupName,
-        NameType.OperationGroup
-      )}Operations`;
       const groupName = normalizeName(rawGroupName, NameType.Property);
 
       if (!seenGroupNames.has(groupName)) {
         seenGroupNames.add(groupName);
         operationGroupDecls.push(
-          `/** The operation groups for ${groupName} */\nreadonly ${groupName}: ${propertyTypeName};`
+          code`/** The operation groups for ${groupName} */\nreadonly ${groupName}: ${classicalOperationGroupInterfaceRefkey(client, prefixes, 0)};`
         );
         operationGroupAssigns.push(
-          `this.${groupName} = ${operationFnName}(this._client);`
+          code`this.${groupName} = ${classicalOperationGroupFunctionRefkey(client, prefixes, 0)}(this._client);`
         );
       }
     }
@@ -341,64 +347,30 @@ async ${beginAndWaitName}(${paramDecl}): Promise<${returnType}> {
     .map((p) => `${p.name}: ${p.type}`)
     .join("; ");
 
-  // Collect all API function names we need to import
-  const apiImportNames = new Set<string>();
-  apiImportNames.add(`create${modularClientName}`);
-  for (const [prefixKey, operations] of methodMap) {
-    if (prefixKey === "") {
-      for (const op of operations) {
-        const declaration = getOperationFunction(
-          context,
-          [prefixKey.split("/"), op],
-          clientType
-        );
-        if (declaration.name) apiImportNames.add(declaration.name);
-      }
-    }
-  }
-
-  // Collect operation group function and interface names to import from classic/
-  const classicImportNames = new Set<string>();
-  const classicInterfaceNames = new Set<string>();
-  for (const [prefixKey] of methodMap) {
-    if (prefixKey !== "") {
-      const prefixes = prefixKey.split("/");
-      const rawGroupName = normalizeName(prefixes[0] ?? "", NameType.Interface);
-      classicImportNames.add(
-        `_get${normalizeName(rawGroupName, NameType.OperationGroup)}Operations`
-      );
-      classicInterfaceNames.add(
-        `${normalizeName(rawGroupName, NameType.OperationGroup)}Operations`
-      );
-    }
-  }
-
   // Check if LRO compat imports are needed
-  const needsLroCompat =
-    context.rlcOptions?.compatibilityLro &&
-    directMethods.some((m) => m.includes("SimplePollerLike"));
-
-  // Build import statements
-  const apiImport =
-    apiImportNames.size > 0
-      ? `import { ${[...apiImportNames].join(", ")} } from "./api/index.js";`
-      : "";
-  const classicImport =
-    classicImportNames.size > 0 || classicInterfaceNames.size > 0
-      ? `import { ${[...classicImportNames, ...classicInterfaceNames].join(", ")} } from "./classic/index.js";`
-      : "";
+  const needsLroCompat = hasLroMethods;
   const lroImports = needsLroCompat
     ? `import { SimplePollerLike, getSimplePoller } from "./static-helpers/simplePollerHelpers.js";`
     : "";
+  const apiImport = `import { create${modularClientName} } from "./api/index.js";`;
 
   const constructorDocs = client.doc ? `/** ${client.doc} */` : "";
+
+  // Build Children arrays with separators for rendering
+  const joinChildren = (items: Children[], sep: string): Children[] => {
+    const result: Children[] = [];
+    items.forEach((item, i) => {
+      if (i > 0) result.push(sep);
+      result.push(item);
+    });
+    return result;
+  };
 
   return (
     <ts.SourceFile path={filePath}>
       {code`
 export { ${classicalClientName}OptionalParams } from "./api/${normalizeName(modularClientName, NameType.File)}Context.js";
 ${apiImport}
-${classicImport}
 ${childClientImports.join("\n")}
 ${lroImports}
 
@@ -415,12 +387,12 @@ export class ${classicalClientName} {
     ${createClientStatement}
     ${pipelineStatement}
     ${clientParamsStatement}
-    ${operationGroupAssigns.join("\n    ")}
+    ${joinChildren(operationGroupAssigns, "\n    ")}
   }
 
-  ${directMethods.join("\n\n  ")}
+  ${joinChildren(directMethods, "\n\n  ")}
 
-  ${operationGroupDecls.join("\n  ")}
+  ${joinChildren(operationGroupDecls, "\n  ")}
 
   ${childClientMethods.join("\n\n  ")}
 }

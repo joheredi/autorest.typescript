@@ -19,6 +19,10 @@ export {
   namedKnownValuesRefkey
 } from "./Models.js";
 
+// Unified model files (models + serializers in single source file)
+export { ModelFiles } from "./ModelFiles.js";
+export type { ModelFilesProps } from "./ModelFiles.js";
+
 // Operation options
 export { OperationOptions } from "./OperationOptions.js";
 export type { OperationOptionsProps } from "./OperationOptions.js";
@@ -47,7 +51,11 @@ export {
 export type { ClassicalClientProps } from "./ClassicalClient.js";
 
 // Classical operation groups
-export { ClassicalOperationGroups } from "./ClassicalOperationGroups.js";
+export {
+  ClassicalOperationGroups,
+  classicalOperationGroupFunctionRefkey,
+  classicalOperationGroupInterfaceRefkey
+} from "./ClassicalOperationGroups.js";
 export type { ClassicalOperationGroupsProps } from "./ClassicalOperationGroups.js";
 
 // Logger

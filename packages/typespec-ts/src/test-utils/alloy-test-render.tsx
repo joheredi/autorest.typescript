@@ -22,9 +22,7 @@ import { ClassicalOperationGroups } from "../modular/components/ClassicalOperati
 import { RootIndex } from "../modular/components/RootIndex.js";
 import { SubpathIndex } from "../modular/components/SubpathIndex.js";
 import { Samples } from "../modular/components/Samples.js";
-import { Models } from "../modular/components/Models.js";
-import { Serializers } from "../modular/components/Serializers.js";
-import { XmlSerializers } from "../modular/components/XmlSerializers.js";
+import { ModelFiles } from "../modular/components/ModelFiles.js";
 import { SdkContext } from "../utils/interfaces.js";
 import { ModularEmitterOptions } from "../modular/interfaces.js";
 import { SdkTypeContext } from "../framework/hooks/sdkTypes.js";
@@ -212,13 +210,19 @@ function bridgeTestContext(dpgContext: SdkContext, sdkTypes: SdkTypeContext) {
   } as ExternalDependencies);
 }
 
+interface RenderContextOptions {
+  includeStaticHelperStubs?: boolean;
+}
+
 async function renderWithContext(
   program: Program,
   dpgContext: SdkContext,
   emitterOptions: ModularEmitterOptions,
   sdkTypes: SdkTypeContext,
-  children: Children
+  children: Children,
+  options?: RenderContextOptions
 ): Promise<Map<string, string>> {
+  const includeStubs = options?.includeStaticHelperStubs ?? true;
   bridgeTestContext(dpgContext, sdkTypes);
   const tree = await renderAsync(
     <Output program={program}>
@@ -227,7 +231,7 @@ async function renderWithContext(
         emitterOptions={emitterOptions}
         sdkTypes={sdkTypes}
       >
-        <StaticHelperStubs />
+        {includeStubs && <StaticHelperStubs />}
         {children}
       </SdkContextProvider>
     </Output>
@@ -253,10 +257,14 @@ export async function renderOperations(
     emitterOptions,
     sdkTypes,
     <>
-      <Models context={dpgContext} sourceRoot={sourceRoot} />
-      <Serializers context={dpgContext} sourceRoot={sourceRoot} />
+      <ModelFiles context={dpgContext} sourceRoot={sourceRoot} />
       {clientMaps.map((subClient) => (
         <>
+          <ClientContext
+            context={dpgContext}
+            clientMap={subClient}
+            emitterOptions={emitterOptions}
+          />
           <Operations
             context={dpgContext}
             clientMap={subClient}
@@ -286,11 +294,7 @@ export async function renderClientContext(
     emitterOptions,
     sdkTypes,
     <>
-      <Models
-        context={dpgContext}
-        sourceRoot={emitterOptions.modularOptions.sourceRoot}
-      />
-      <Serializers
+      <ModelFiles
         context={dpgContext}
         sourceRoot={emitterOptions.modularOptions.sourceRoot}
       />
@@ -362,11 +366,7 @@ export async function renderRootIndex(
     emitterOptions,
     sdkTypes,
     <>
-      <Models
-        context={dpgContext}
-        sourceRoot={emitterOptions.modularOptions.sourceRoot}
-      />
-      <Serializers
+      <ModelFiles
         context={dpgContext}
         sourceRoot={emitterOptions.modularOptions.sourceRoot}
       />
@@ -424,7 +424,8 @@ export async function renderSamples(
     dpgContext,
     emitterOptions,
     sdkTypes,
-    <Samples context={dpgContext} />
+    <Samples context={dpgContext} />,
+    { includeStaticHelperStubs: false }
   );
 }
 
@@ -439,20 +440,10 @@ export async function renderModels(
     dpgContext,
     emitterOptions,
     sdkTypes,
-    <>
-      <Models
-        context={dpgContext}
-        sourceRoot={emitterOptions.modularOptions.sourceRoot}
-      />
-      <Serializers
-        context={dpgContext}
-        sourceRoot={emitterOptions.modularOptions.sourceRoot}
-      />
-      <XmlSerializers
-        context={dpgContext}
-        sourceRoot={emitterOptions.modularOptions.sourceRoot}
-      />
-    </>
+    <ModelFiles
+      context={dpgContext}
+      sourceRoot={emitterOptions.modularOptions.sourceRoot}
+    />
   );
 }
 
@@ -469,15 +460,7 @@ export async function renderOperationOptionsOnly(
     emitterOptions,
     sdkTypes,
     <>
-      <Models
-        context={dpgContext}
-        sourceRoot={emitterOptions.modularOptions.sourceRoot}
-      />
-      <Serializers
-        context={dpgContext}
-        sourceRoot={emitterOptions.modularOptions.sourceRoot}
-      />
-      <XmlSerializers
+      <ModelFiles
         context={dpgContext}
         sourceRoot={emitterOptions.modularOptions.sourceRoot}
       />

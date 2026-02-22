@@ -6,9 +6,7 @@ import {
 } from "@azure-tools/typespec-client-generator-core";
 import { Output } from "./modular/components/Output.js";
 import { Logger } from "./modular/components/Logger.js";
-import { Models } from "./modular/components/Models.js";
-import { XmlSerializers } from "./modular/components/XmlSerializers.js";
-import { Serializers } from "./modular/components/Serializers.js";
+import { ModelFiles } from "./modular/components/ModelFiles.js";
 import { RestorePoller } from "./modular/components/RestorePoller.js";
 import { ClientContext } from "./modular/components/ClientContext.js";
 import { ClassicalClient } from "./modular/components/ClassicalClient.js";
@@ -79,9 +77,7 @@ export async function emitAlloyOutput(
           emitterOptions={alloyEmitterOptions}
           srcPath={modularSourcesRoot}
         />
-        <Models context={dpgContext} sourceRoot={modularSourcesRoot} />
-        <Serializers context={dpgContext} sourceRoot={modularSourcesRoot} />
-        <XmlSerializers context={dpgContext} sourceRoot={modularSourcesRoot} />
+        <ModelFiles context={dpgContext} sourceRoot={modularSourcesRoot} />
         {clientMap.map((subClient) => (
           <>
             <RestorePoller

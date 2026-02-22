@@ -1,4 +1,4 @@
-import { code, Children } from "@alloy-js/core";
+import { code, Children, refkey, Refkey } from "@alloy-js/core";
 import * as ts from "@alloy-js/typescript";
 import {
   SdkClientType,
@@ -16,6 +16,30 @@ import {
 } from "../../utils/operationUtil.js";
 import { azureCoreLroLib } from "./ExternalPackages.js";
 import path from "path";
+import { clientContextRefkey } from "./ClientContext.js";
+import { operationRefkey } from "./Operations.js";
+
+// ── Refkey helpers ──────────────────────────────────────────────────────
+
+/** Refkey for a classical _get${name}Operations exported function. */
+export function classicalOperationGroupFunctionRefkey(
+  client: SdkClientType<SdkServiceOperation>,
+  prefixes: string[],
+  layer: number
+): Refkey {
+  const name = getClassicalLayerPrefix(prefixes, NameType.Interface, "", layer);
+  return refkey(client, "classicalOpsFunction", name);
+}
+
+/** Refkey for a classical ${name}Operations exported interface. */
+export function classicalOperationGroupInterfaceRefkey(
+  client: SdkClientType<SdkServiceOperation>,
+  prefixes: string[],
+  layer: number
+): Refkey {
+  const name = getClassicalLayerPrefix(prefixes, NameType.Interface, "", layer);
+  return refkey(client, "classicalOpsInterface", name);
+}
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -25,11 +49,13 @@ interface OperationInfo {
   apiFuncName: string;
   isLro?: boolean;
   lroFinalReturnType?: string;
+  operation: ServiceOperation;
 }
 
 interface FileData {
   filePath: string;
   rlcClientName: string;
+  client: SdkClientType<SdkServiceOperation>;
   /** Interfaces to declare, keyed by name */
   interfaces: Map<
     string,
@@ -38,6 +64,7 @@ interface FileData {
       layer: number;
       doc: string;
       properties: InterfaceProperty[];
+      refkey: Refkey;
     }
   >;
   /** Leaf functions (_getXxx) that return operation implementations */
@@ -56,7 +83,8 @@ interface LeafFunction {
   name: string;
   layer: number;
   rlcClientName: string;
-  bodyEntries: string[];
+  bodyEntries: Children[];
+  hasLroCompat?: boolean;
 }
 
 interface OperationsFunction {
@@ -68,6 +96,7 @@ interface OperationsFunction {
   entries: string[];
   /** If this function also spreads a leaf function */
   spreadLeaf?: string;
+  refkey: Refkey;
 }
 
 // ── Component ───────────────────────────────────────────────────────────
@@ -102,6 +131,7 @@ export function ClassicalOperationGroups(
       fileDataMap.set(fileName, {
         filePath,
         rlcClientName: rlcClientName!,
+        client,
         interfaces: new Map(),
         leafFunctions: [],
         operationsFunctions: []
@@ -168,7 +198,7 @@ export function ClassicalOperationGroups(
   // Render all files
   const files: Children[] = [];
   for (const [, fileData] of fileDataMap) {
-    files.push(renderOperationGroupFile(fileData, context));
+    files.push(renderOperationGroupFile(fileData, context, client));
   }
   return <>{files}</>;
 }
@@ -199,7 +229,12 @@ function processOperationGroup(
       name: interfaceName,
       layer,
       doc: `Interface representing a ${interfaceNamePrefix} operations.`,
-      properties: []
+      properties: [],
+      refkey: classicalOperationGroupInterfaceRefkey(
+        clientMap[1],
+        prefixes,
+        layer
+      )
     });
   }
   const iface = fileData.interfaces.get(interfaceName)!;
@@ -248,7 +283,12 @@ function processOperationGroup(
         layer,
         rlcClientName: rlcClientName!,
         returnType: interfaceName,
-        entries: []
+        entries: [],
+        refkey: classicalOperationGroupFunctionRefkey(
+          clientMap[1],
+          prefixes,
+          layer
+        )
       };
       fileData.operationsFunctions.push(opsFn);
     }
@@ -270,7 +310,8 @@ function processOperationGroup(
         oriName: operation.oriName,
         apiFuncName: declaration.name ?? "FIXME",
         isLro: declaration.isLro,
-        lroFinalReturnType: declaration.lroFinalReturnType
+        lroFinalReturnType: declaration.lroFinalReturnType,
+        operation
       };
     });
 
@@ -327,7 +368,7 @@ function processOperationGroup(
       layer
     )}`;
 
-    const bodyEntries: string[] = [];
+    const bodyEntries: Children[] = [];
     for (const info of operationInfos) {
       const d = info.declaration;
       const methodName = getClassicalMethodName(info);
@@ -350,7 +391,7 @@ function processOperationGroup(
       ].join(",");
 
       bodyEntries.push(
-        `${methodName}: (${classicalParamStr}) => ${info.apiFuncName}(${apiParamStr})`
+        code`${methodName}: (${classicalParamStr}) => ${operationRefkey(info.operation)}(${apiParamStr})`
       );
 
       // LRO compat body entries
@@ -361,25 +402,30 @@ function processOperationGroup(
           NameType.Method
         );
         bodyEntries.push(
-          `${beginName}: async (${classicalParamStr}) => {
-            const poller = ${info.apiFuncName}(${apiParamStr});
+          code`${beginName}: async (${classicalParamStr}) => {
+            const poller = ${operationRefkey(info.operation)}(${apiParamStr});
             await poller.submitted();
             return getSimplePoller(poller);
           }`
         );
         bodyEntries.push(
-          `${beginAndWaitName}: async (${classicalParamStr}) => {
-            return await ${info.apiFuncName}(${apiParamStr});
+          code`${beginAndWaitName}: async (${classicalParamStr}) => {
+            return await ${operationRefkey(info.operation)}(${apiParamStr});
           }`
         );
       }
     }
 
+    const hasLroCompat = !!(
+      dpgContext.rlcOptions?.compatibilityLro &&
+      operationInfos.some((info) => info.isLro)
+    );
     fileData.leafFunctions.push({
       name: functionName,
       layer,
       rlcClientName: rlcClientName!,
-      bodyEntries
+      bodyEntries,
+      hasLroCompat
     });
 
     // Build operations function
@@ -400,7 +446,12 @@ function processOperationGroup(
         rlcClientName: rlcClientName!,
         returnType: interfaceName,
         entries: [],
-        spreadLeaf: functionName
+        spreadLeaf: functionName,
+        refkey: classicalOperationGroupFunctionRefkey(
+          clientMap[1],
+          prefixes,
+          layer
+        )
       };
       fileData.operationsFunctions.push(opsFn);
     } else if (!opsFn.spreadLeaf) {
@@ -423,133 +474,96 @@ function getClassicalMethodName(info: OperationInfo): string {
 
 function renderOperationGroupFile(
   fileData: FileData,
-  dpgContext: SdkContext
+  dpgContext: SdkContext,
+  client: SdkClientType<SdkServiceOperation>
 ): Children {
-  const { filePath, rlcClientName } = fileData;
+  const { filePath } = fileData;
+  const clientCtxRef = clientContextRefkey(client);
 
-  // Collect all API function names referenced in leaf functions
-  const apiImportNames = new Set<string>();
-  for (const leaf of fileData.leafFunctions) {
-    for (const entry of leaf.bodyEntries) {
-      // Extract function names from entries like "methodName: (params) => funcName(args)"
-      const match = entry.match(/=>\s*(\w+)\(/);
-      if (match && match[1]) {
-        apiImportNames.add(match[1]);
-      }
-    }
-  }
-
-  // Compute the layer depth for the client context import
+  // Compute the layer depth for SimplePoller import path
   const maxLayer = Math.max(
     ...fileData.leafFunctions.map((f) => f.layer),
     ...fileData.operationsFunctions.map((f) => f.layer),
     0
   );
 
-  const contextImportPath = `${"../".repeat(maxLayer + 2)}api/${normalizeName(
-    rlcClientName,
-    NameType.File
-  )}.js`;
-
-  // Collect referenced operation function names from other files
-  const referencedOpsFunctions = new Set<string>();
-  for (const opsFn of fileData.operationsFunctions) {
-    for (const entry of opsFn.entries) {
-      const match = entry.match(/:\s*(\w+)\(context\)/);
-      if (match && match[1]) {
-        referencedOpsFunctions.add(match[1]);
-      }
-    }
-  }
-
-  // Collect referenced interface names from sub-groups
-  const referencedInterfaces = new Set<string>();
-  for (const iface of fileData.interfaces.values()) {
-    for (const prop of iface.properties) {
-      if (
-        prop.type.endsWith("Operations") &&
-        !prop.type.includes("=>") &&
-        !fileData.interfaces.has(prop.type)
-      ) {
-        referencedInterfaces.add(prop.type);
-      }
-    }
-  }
-
   // Check if LRO compat is needed
   const needsLroCompat =
     dpgContext.rlcOptions?.compatibilityLro &&
-    (fileData.leafFunctions.some((f) =>
-      f.bodyEntries.some((e) => e.includes("getSimplePoller"))
-    ) ||
+    (fileData.leafFunctions.some((f) => f.hasLroCompat) ||
       [...fileData.interfaces.values()].some((i) =>
         i.properties.some((p) => p.type.includes("SimplePollerLike"))
       ));
 
-  // Build import block
-  const imports: string[] = [];
-  imports.push(`import { ${rlcClientName} } from "${contextImportPath}";`);
+  // Site 3: SimplePoller import (kept manual — static helper refkeys not auto-importable yet)
+  const simplePollerImport = needsLroCompat
+    ? `import { SimplePollerLike, getSimplePoller } from "${"../".repeat(maxLayer + 2)}static-helpers/simplePollerHelpers.js";`
+    : "";
 
-  if (apiImportNames.size > 0) {
-    imports.push(
-      `import { ${[...apiImportNames].join(", ")} } from "${"../".repeat(maxLayer + 2)}api/index.js";`
-    );
-  }
-
-  if (needsLroCompat) {
-    imports.push(
-      `import { SimplePollerLike, getSimplePoller } from "${"../".repeat(maxLayer + 2)}static-helpers/simplePollerHelpers.js";`
-    );
-  }
-
-  // Build interfaces
-  const interfaceBlocks: string[] = [];
-  for (const [, iface] of fileData.interfaces) {
-    const propLines = iface.properties.map((p) => {
-      const docStr =
-        p.docs && p.docs.length > 0
-          ? p.docs.map((d) => `/** ${d} */`).join("\n") + "\n"
-          : "";
-      return `${docStr}${p.name}: ${p.type};`;
-    });
-    interfaceBlocks.push(
-      `/** ${iface.doc} */\nexport interface ${iface.name} {\n  ${propLines.join("\n  ")}\n}`
-    );
-  }
-
-  // Build leaf functions
-  const leafFunctionBlocks: string[] = [];
+  // Build leaf functions as code templates using clientContextRefkey (replaces Site 1)
+  // and operationRefkey (replaces Site 2) for auto-imports
+  const leafFunctionBlocks: Children[] = [];
   for (const leaf of fileData.leafFunctions) {
-    leafFunctionBlocks.push(
-      `function ${leaf.name}(context: ${leaf.rlcClientName}) {\n  return {\n    ${leaf.bodyEntries.join(",\n    ")}\n  };\n}`
-    );
-  }
-
-  // Build operations functions
-  const opsFunctionBlocks: string[] = [];
-  for (const opsFn of fileData.operationsFunctions) {
-    const bodyParts: string[] = [];
-    if (opsFn.spreadLeaf) {
-      bodyParts.push(`...${opsFn.spreadLeaf}(context)`);
+    const bodyContent: Children[] = [];
+    for (let i = 0; i < leaf.bodyEntries.length; i++) {
+      if (i > 0) bodyContent.push(",\n    ");
+      bodyContent.push(leaf.bodyEntries[i]);
     }
-    bodyParts.push(...opsFn.entries);
-
-    opsFunctionBlocks.push(
-      `export function ${opsFn.name}(context: ${opsFn.rlcClientName}): ${opsFn.returnType} {\n  return {\n    ${bodyParts.join(",\n    ")}\n  };\n}`
+    leafFunctionBlocks.push(
+      code`function ${leaf.name}(context: ${clientCtxRef}) {\n  return {\n    ${bodyContent}\n  };\n}`
     );
   }
 
   return (
     <ts.SourceFile path={filePath}>
-      {code`
-${imports.join("\n")}
+      {simplePollerImport}
+      {Array.from(fileData.interfaces.values()).map((iface) => {
+        const propLines = iface.properties.map((p) => {
+          const docStr =
+            p.docs && p.docs.length > 0
+              ? p.docs.map((d) => `/** ${d} */`).join("\n") + "\n"
+              : "";
+          return `${docStr}${p.name}: ${p.type};`;
+        });
+        return (
+          <ts.InterfaceDeclaration
+            export
+            name={iface.name}
+            doc={iface.doc}
+            refkey={iface.refkey}
+          >
+            {code`${propLines.join("\n")}`}
+          </ts.InterfaceDeclaration>
+        );
+      })}
 
-${interfaceBlocks.join("\n\n")}
+      {leafFunctionBlocks}
 
-${leafFunctionBlocks.join("\n\n")}
+      {fileData.operationsFunctions.map((opsFn) => {
+        const bodyParts: Children[] = [];
+        if (opsFn.spreadLeaf) {
+          bodyParts.push(`...${opsFn.spreadLeaf}(context)`);
+        }
+        bodyParts.push(...opsFn.entries);
 
-${opsFunctionBlocks.join("\n\n")}
-`}
+        const bodyContent: Children[] = [];
+        for (let i = 0; i < bodyParts.length; i++) {
+          if (i > 0) bodyContent.push(",\n  ");
+          bodyContent.push(bodyParts[i]);
+        }
+
+        return (
+          <ts.FunctionDeclaration
+            export
+            name={opsFn.name}
+            parameters={[{ name: "context", type: clientCtxRef }]}
+            returnType={opsFn.returnType}
+            refkey={opsFn.refkey}
+          >
+            {code`return {\n  ${bodyContent}\n};`}
+          </ts.FunctionDeclaration>
+        );
+      })}
     </ts.SourceFile>
   );
 }

@@ -70,6 +70,7 @@ import {
   azureCoreLroLib
 } from "./ExternalPackages.js";
 import { operationOptionsRefkey } from "./OperationOptions.js";
+import { clientContextRefkey } from "./ClientContext.js";
 import { typeRefkey as modelTypeRefkey } from "./Models.js";
 import { serializerRefkey, deserializerRefkey } from "./Serializers.js";
 import {
@@ -278,14 +279,19 @@ export function Operations(props: OperationsProps) {
           prefixKey
         );
 
-        // Client import (internal module)
-        const indexPathPrefix =
-          "../".repeat(prefixKey === "" ? 0 : prefixes.length) || "./";
-        const clientImport = `import { ${rlcClientName} as Client } from "${indexPathPrefix}index.js";`;
+        // Client type: type alias via refkey auto-import (single-endpoint)
+        // or aliased import string (multi-endpoint needs namespace access)
+        const clientImport = isMultiEndpoint
+          ? `import { ${rlcClientName} as Client } from "${"../".repeat(prefixKey === "" ? 0 : prefixes.length) || "./"}index.js";`
+          : undefined;
 
         return (
           <ts.SourceFile path={filepath}>
-            {clientImport}
+            {clientImport ?? (
+              <ts.TypeDeclaration name="Client">
+                {clientContextRefkey(client)}
+              </ts.TypeDeclaration>
+            )}
             {staticHelperBlock ? `\n${staticHelperBlock}` : ""}
             {"\n\n"}
             <For each={operations} hardline>
