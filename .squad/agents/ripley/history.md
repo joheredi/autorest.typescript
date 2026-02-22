@@ -188,3 +188,21 @@ const ref = serializerRefkey(bodyType);
 - **Bridge impact:** `typeRefkeys` is still needed by `getDeserializePrivateFunction` and `getOperationFunction` (unconverted ts-morph functions), but `SendFunction` is now free of it.
 - **Pattern for Phase 9:** This decomposition is the model for converting remaining Category A/B helpers — migrate string-returning functions to JSX components that render objects/templates directly.
 
+### 2026-02-21: Design Review — Explicit Import String Concatenation Removal
+
+**What was analyzed:**
+- Audited 13 explicit import string concatenation sites across 5 component files: ClassicalClient.tsx (4), ClassicalOperationGroups.tsx (3), Operations.tsx (2), RestorePoller.tsx (3), Samples.tsx (1).
+- Compared two approaches: (A) Full refkey auto-import (Alloy-native, matches http-client-js reference), (B) Centralized path resolver (keep manual imports, fix paths).
+
+**Key findings:**
+- **4 sites can be fixed immediately** — refkeys and Alloy declarations already exist for `classicalClientRefkey`, `clientOptionalParamsRefkey`, `clientContextRefkey`, `clientContextFactoryRefkey`.
+- **4 sites need new refkeys** — ClassicalOperationGroups generates `_get${name}Operations` functions and `${name}Operations` interfaces but doesn't export refkey accessors for them.
+- **4 sites are BLOCKED** — static helper imports (SimplePoller, polling, paging, URL template, XML helpers) can't use auto-import because `StaticHelperFiles.tsx` renders raw strings without refkey-annotated declarations.
+- **1 site (Samples.tsx line 193) is correct as-is** — imports from npm package name, not relative path. Cannot and should not use refkeys.
+- The `http-client-js` reference implementation uses zero manual import strings — all cross-file references use refkeys exclusively, proving the pattern works at scale.
+- Operations.tsx `import { X as Client }` alias needs workaround — Alloy doesn't support import aliases. Recommended: use a local type alias instead.
+
+**Recommendation:** Approach A (full refkey auto-import), executed in 3 phases prioritized by bug impact. Phase 1 (low-hanging fruit) → Phase 2 (new refkeys for classical groups) → Phase 3 (static helper refkey annotations, large prerequisite).
+
+**Design review delivered:** `.squad/decisions/inbox/ripley-design-review-explicit-imports.md`
+
