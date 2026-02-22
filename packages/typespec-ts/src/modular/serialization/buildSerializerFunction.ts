@@ -19,7 +19,7 @@ import {
 import {
   getAdditionalPropertiesName,
   normalizeModelName
-} from "../emitModels.js";
+} from "../model-utils.js";
 import { NameType, normalizeName } from "@azure-tools/rlc-common";
 import { isAzureCoreErrorType } from "../../utils/modelUtils.js";
 import {
@@ -28,13 +28,7 @@ import {
   isSupportedSerializeType,
   ModelSerializeOptions
 } from "./serializeUtils.js";
-import {
-  MultipartHelpers,
-  SerializationHelpers
-} from "../static-helpers-metadata.js";
-import { resolveReference } from "../../framework/reference.js";
 import { isOrExtendsHttpFile } from "@typespec/http";
-import { refkey } from "../../framework/refkey.js";
 import {
   getAdditionalPropertiesType,
   getDirectSubtypes
@@ -162,7 +156,7 @@ function buildPolymorphicSerializer(
     NameType.Operation
   )}Serializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "serializer"));
+    return serializeFunctionName;
   }
   const serializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,
@@ -171,7 +165,7 @@ function buildPolymorphicSerializer(
     parameters: [
       {
         name: "item",
-        type: resolveReference(refkey(type, "polymorphicType"))
+        type: `${normalizeModelName(context, type, NameType.Interface, true)}Union`
       }
     ],
     returnType: "any",
@@ -263,7 +257,7 @@ function buildDiscriminatedUnionSerializer(
     NameType.Operation
   )}Serializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "serializer"));
+    return serializeFunctionName;
   }
   // Get the base serializer name and ensure reference tracking
   const baseSerializerName = `${normalizeModelName(
@@ -320,7 +314,7 @@ function buildDiscriminatedUnionSerializer(
     parameters: [
       {
         name: "item",
-        type: resolveReference(refkey(type, "polymorphicType"))
+        type: `${normalizeModelName(context, type, NameType.Interface, true)}Union`
       }
     ],
     returnType: "any",
@@ -356,7 +350,7 @@ function buildUnionSerializer(
     NameType.Operation
   )}Serializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "serializer"));
+    return serializerFunctionName;
   }
   const serializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,
@@ -365,7 +359,7 @@ function buildUnionSerializer(
     parameters: [
       {
         name: "item",
-        type: resolveReference(refkey(type))
+        type: normalizeModelName(context, type, NameType.Interface)
       }
     ],
     returnType: "any",
@@ -398,9 +392,7 @@ function buildModelTypeSerializer(
       options.skipDiscriminatedUnionSuffix
     )}Serializer`;
   if (options.nameOnly) {
-    return options.flatten
-      ? resolveReference(refkey(options.flatten.property, "serializer"))
-      : resolveReference(refkey(type, "serializer"));
+    return serializerFunctionName;
   }
   const serializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,
@@ -410,8 +402,12 @@ function buildModelTypeSerializer(
       {
         name: "item",
         type: options.flatten
-          ? resolveReference(refkey(options.flatten.baseModel))
-          : resolveReference(refkey(type))
+          ? normalizeModelName(
+              context,
+              options.flatten.baseModel,
+              NameType.Interface
+            )
+          : normalizeModelName(context, type, NameType.Interface)
       }
     ],
     returnType: "any",
@@ -437,9 +433,7 @@ function buildModelTypeSerializer(
       // eslint-disable-next-line
       const multipart = property.serializationOptions.multipart;
       if (multipart?.isFilePart) {
-        const createFilePartDescriptorDefinition = resolveReference(
-          MultipartHelpers.createFilePartDescriptor
-        );
+        const createFilePartDescriptorDefinition = "createFilePartDescriptor";
         // eslint-disable-next-line
         const itemPath = multipart.isMulti
           ? "x"
@@ -539,7 +533,7 @@ function getAdditionalPropertiesStatement(
   }
   return context.rlcOptions?.compatibilityMode === true
     ? "...item"
-    : `...${resolveReference(SerializationHelpers.serializeRecord)}(${params.join(",")})`;
+    : `...serializeRecord(${params.join(",")})`;
 }
 
 function buildDictTypeSerializer(
@@ -572,7 +566,7 @@ function buildDictTypeSerializer(
   }
   const serializerFunctionName = `${normalizeModelName(context, type, NameType.Operation, false, true)}Serializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "serializer"));
+    return serializerFunctionName;
   }
   const serializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,
@@ -581,7 +575,7 @@ function buildDictTypeSerializer(
     parameters: [
       {
         name: "item",
-        type: `Record<string, ${resolveReference(type.valueType) ?? "any"}>`
+        type: `Record<string, ${normalizeModelName(context, type.valueType as any, NameType.Interface) ?? "any"}>`
       }
     ],
     returnType: "Record<string, any>",
@@ -628,7 +622,7 @@ function buildArrayTypeSerializer(
   }
   const serializerFunctionName = `${normalizeModelName(context, type, NameType.Operation, false, true)}Serializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "serializer"));
+    return serializerFunctionName;
   }
   const serializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,

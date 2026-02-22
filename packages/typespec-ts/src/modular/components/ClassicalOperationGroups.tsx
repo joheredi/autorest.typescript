@@ -14,6 +14,7 @@ import {
   getMethodHierarchiesMap,
   ServiceOperation
 } from "../../utils/operationUtil.js";
+import { azureCoreLroLib } from "./ExternalPackages.js";
 import path from "path";
 
 // ── Types ───────────────────────────────────────────────────────────────
@@ -282,8 +283,7 @@ function processOperationGroup(
         .map(
           (p) =>
             p.name +
-            (p.type?.toString().endsWith("operationOptions__") ||
-            p.hasQuestionToken
+            (p.type?.endsWith("operationOptions__") || p.hasQuestionToken
               ? "?"
               : "") +
             ": " +
@@ -308,7 +308,7 @@ function processOperationGroup(
 
         iface.properties.push({
           name: beginName,
-          type: `(${paramStr}) => Promise<SimplePollerLike<OperationState<${returnType}>, ${returnType}>>`,
+          type: `(${paramStr}) => Promise<SimplePollerLike<${azureCoreLroLib.OperationState}<${returnType}>, ${returnType}>>`,
           docs: [`@deprecated use ${methodName} instead`]
         });
         iface.properties.push({
@@ -336,8 +336,7 @@ function processOperationGroup(
         .map(
           (p) =>
             p.name +
-            (p.type?.toString().endsWith("operationOptions__") ||
-            p.hasQuestionToken
+            (p.type?.endsWith("operationOptions__") || p.hasQuestionToken
               ? "?"
               : "") +
             ": " +
@@ -501,7 +500,6 @@ function renderOperationGroupFile(
     imports.push(
       `import { SimplePollerLike, getSimplePoller } from "${"../".repeat(maxLayer + 2)}static-helpers/simplePollerHelpers.js";`
     );
-    imports.push(`import { OperationState } from "@azure/core-lro";`);
   }
 
   // Build interfaces

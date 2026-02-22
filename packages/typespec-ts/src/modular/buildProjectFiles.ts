@@ -8,8 +8,8 @@ import {
   getModularClientOptions
 } from "../utils/clientUtils.js";
 import { getMethodHierarchiesMap } from "../utils/operationUtil.js";
-import { useContext } from "../contextManager.js";
 import path from "path/posix";
+import { readdirSync } from "fs";
 
 function buildExportsForMultiClient(
   context: SdkContext,
@@ -84,25 +84,31 @@ export function getModuleExports(
 }
 
 function getModelSubpaths(emitterOptions: ModularEmitterOptions) {
-  const outputProject = useContext("outputProject");
-  const modelFiles = outputProject.getSourceFiles(
-    path.join(
-      emitterOptions.modularOptions.sourceRoot.replace(/\\/g, "/"),
-      `models/**/*.ts`
-    )
+  const sourceRoot = emitterOptions.modularOptions.sourceRoot.replace(
+    /\\/g,
+    "/"
   );
+  const modelsPath = path.join(sourceRoot, "models");
   const subpath = new Set<string>();
-  for (const modelFile of modelFiles) {
-    const filepath = modelFile.getFilePath().replace(/\\/g, "/");
-    if (!filepath.endsWith("index.ts")) {
-      continue;
+
+  // Recursively find all index.ts files under models/
+  function findIndexFiles(dir: string) {
+    try {
+      const entries = readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          findIndexFiles(fullPath);
+        } else if (entry.isFile() && entry.name === "index.ts") {
+          const relativePath = path.relative(sourceRoot, fullPath);
+          subpath.add(relativePath);
+        }
+      }
+    } catch (err) {
+      // If models directory doesn't exist, return empty array
     }
-    subpath.add(
-      path.relative(
-        emitterOptions.modularOptions.sourceRoot.replace(/\\/g, "/"),
-        filepath
-      )
-    );
   }
+
+  findIndexFiles(modelsPath);
   return Array.from(subpath);
 }

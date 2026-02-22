@@ -29,7 +29,7 @@ describe("inheritance & polymorphism", () => {
     const modelFile = await emitModularModelsFromTypeSpec(tspContent);
     assert.ok(modelFile);
     await assertEqualContent(
-      modelFile?.getFullText()!,
+      modelFile!,
       `
       export interface Creature {
         life: number;

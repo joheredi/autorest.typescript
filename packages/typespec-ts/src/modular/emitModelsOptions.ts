@@ -1,62 +1,37 @@
-import * as path from "path";
+// ====================================================================
+// DEAD CODE FILE - This entire file is unused as of Phase 5-6
+// buildOperationOptions() and buildApiOptions() were replaced by Operations.tsx
+// Functions stubbed out to remove ts-morph Project dependency
+// Can be deleted in future cleanup
+// ====================================================================
 
 import { ModularEmitterOptions } from "./interfaces.js";
-
-import { buildOperationOptions } from "./buildOperations.js";
 import { SdkContext } from "../utils/interfaces.js";
 import {
   SdkClientType,
   SdkServiceOperation
 } from "@azure-tools/typespec-client-generator-core";
-import { getMethodHierarchiesMap } from "../utils/operationUtil.js";
-import { getModularClientOptions } from "../utils/clientUtils.js";
-import { NameType, normalizeName } from "@azure-tools/rlc-common";
-import { useContext } from "../contextManager.js";
+import { ServiceOperation } from "../utils/operationUtil.js";
 
-// ====== UTILITIES ======
-
-export function buildApiOptions(
-  context: SdkContext,
-  clientMap: [string[], SdkClientType<SdkServiceOperation>],
-  emitterOptions: ModularEmitterOptions
+/**
+ * STUB - This function is unused. Operations are now generated via Operations.tsx component.
+ */
+export function buildOperationOptions(
+  _context: SdkContext,
+  _method: [string[], ServiceOperation],
+  _sourceFile: any
 ) {
-  const project = useContext("outputProject");
-  const [_, client] = clientMap;
-  const modelOptionsFiles = [];
-  const { subfolder } = getModularClientOptions(clientMap);
-  const methodMap = getMethodHierarchiesMap(context, client);
-  for (const [prefixKey, operations] of methodMap) {
-    const prefixes = prefixKey.split("/");
-    const modelOptionsFile = project.createSourceFile(
-      path.join(
-        emitterOptions.modularOptions.sourceRoot,
-        subfolder ?? "",
-        `api`,
-        ...prefixes.map((p) => normalizeName(p, NameType.File)),
-        "options.ts"
-      ),
-      undefined,
-      {
-        overwrite: true
-      }
-    );
-    operations.forEach((o) => {
-      buildOperationOptions(context, [prefixes, o], modelOptionsFile);
-    });
-    modelOptionsFile
-      .getImportDeclarations()
-      .filter((id) => {
-        return (
-          id.isModuleSpecifierRelative() &&
-          !id.getModuleSpecifierValue().endsWith(".js")
-        );
-      })
-      .map((id) => {
-        id.setModuleSpecifier(id.getModuleSpecifierValue() + ".js");
-        return id;
-      });
-    modelOptionsFiles.push(modelOptionsFile);
-  }
+  // Dead code - no-op
+}
 
-  return modelOptionsFiles;
+/**
+ * STUB - This function is unused. Operations are now generated via Operations.tsx component.
+ */
+export function buildApiOptions(
+  _context: SdkContext,
+  _clientMap: [string[], SdkClientType<SdkServiceOperation>],
+  _emitterOptions: ModularEmitterOptions
+): any[] {
+  // Dead code - return empty array
+  return [];
 }

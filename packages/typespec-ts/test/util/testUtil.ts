@@ -199,8 +199,6 @@ export async function createDpgContextTestHelper(
 ): Promise<SdkContext> {
   const outputProject = new Project({ useInMemoryFileSystem: true });
   provideContext("rlcMetaTree", new Map());
-  provideContext("symbolMap", new Map());
-  provideContext("outputProject", outputProject);
 
   const context = await createContextWithDefaultOptions({
     program,

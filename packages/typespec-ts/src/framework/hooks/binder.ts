@@ -6,13 +6,13 @@ import {
   Project
 } from "ts-morph";
 import { provideContext, useContext } from "../../contextManager.js";
-import { ReferenceableSymbol } from "../dependency.js";
-import { provideDependencies, useDependencies } from "./useDependencies.js";
+import { ReferenceableSymbol, ExternalDependencies } from "../dependency.js";
+import { DefaultCoreDependencies } from "../../modular/external-dependencies.js";
 import { refkey } from "../refkey.js";
 import {
   SourceFileSymbol,
   StaticHelperMetadata
-} from "../load-static-helpers.js";
+} from "../load-static-helpers-alloy.js";
 import path from "path/posix";
 import { normalizePath } from "@typespec/compiler";
 import { generateLocallyUniqueName } from "../../modular/helpers/namingHelpers.js";
@@ -59,9 +59,13 @@ class BinderImp implements Binder {
   constructor(project: Project, options: BinderOptions = {}) {
     this.project = project;
 
-    provideDependencies(options.dependencies);
+    const deps = {
+      ...DefaultCoreDependencies,
+      ...(options.dependencies ?? {})
+    } as ExternalDependencies;
+    provideContext("dependencies", deps);
     this.staticHelpers = options.staticHelpers ?? new Map();
-    this.dependencies = useDependencies();
+    this.dependencies = useContext("dependencies");
   }
 
   trackDeclaration(

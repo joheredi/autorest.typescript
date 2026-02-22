@@ -29,13 +29,12 @@ import {
 } from "../helpers/clientHelpers.js";
 import { getTypeExpression } from "../type-expressions/get-type-expression.js";
 import { isCredentialType } from "../helpers/typeHelpers.js";
-import { TypeExpression } from "./TypeExpression.js";
 import {
   httpRuntimeLib,
   azureCoreClientLib,
   azureCoreAuthLib
 } from "./ExternalPackages.js";
-import { getApiVersionEnum, buildEnumTypes } from "../emitModels.js";
+import { getApiVersionEnum, buildEnumTypes } from "../model-utils.js";
 import { reportDiagnostic } from "../../lib.js";
 import { NoTarget } from "@typespec/compiler";
 
@@ -129,7 +128,7 @@ export function ClientContext(props: ClientContextProps): Children {
     })
     .map((p) => ({
       name: getClientParameterName(p),
-      type: p.type,
+      typeStr: getTypeExpression(context, p.type),
       optional: false,
       docs: getDocsWithKnownVersion(context, p)
     }));
@@ -153,7 +152,7 @@ export function ClientContext(props: ClientContextProps): Children {
     })
     .map((p) => ({
       name: getClientParameterName(p),
-      type: p.type,
+      typeStr: getTypeExpression(context, p.type),
       optional: true,
       docs: getDocsWithKnownVersion(context, p)
     }));
@@ -341,7 +340,7 @@ export function ClientContext(props: ClientContextProps): Children {
               optional={prop.optional}
               doc={prop.docs.join("\n") || undefined}
             >
-              <TypeExpression context={context} type={prop.type} />
+              {prop.typeStr}
             </ts.InterfaceMember>
           )}
         </For>

@@ -10,19 +10,82 @@ import {
   isAzurePackage
 } from "@azure-tools/rlc-common";
 import { SdkContext } from "../../utils/interfaces.js";
-import { ModularEmitterOptions } from "../interfaces.js";
-import { getClassicalClientName } from "../helpers/namingHelpers.js";
+import {
+  ModularEmitterOptions,
+  OperationPathAndDeserDetails
+} from "../interfaces.js";
+import {
+  getClassicalClientName,
+  getOperationName
+} from "../helpers/namingHelpers.js";
 import { getModularClientOptions } from "../../utils/clientUtils.js";
 import { getMethodHierarchiesMap } from "../../utils/operationUtil.js";
-import { isLroOnlyOperation } from "../helpers/operationHelpers.js";
-import { buildLroDeserDetailMap } from "../buildOperations.js";
+import {
+  isLroOnlyOperation,
+  getExpectedStatuses
+} from "../helpers/operationHelpers.js";
 import {
   httpRuntimeLib,
   azureCoreClientLib,
   azureCoreLroLib,
   azureAbortControllerLib
 } from "./ExternalPackages.js";
+import { getStaticHelperFileInfo } from "./StaticHelperRefkeys.js";
 import path from "path";
+
+/**
+ * This function creates a map of operation file path to operation names.
+ */
+function buildLroDeserDetailMap(
+  context: SdkContext,
+  client: SdkClientType<SdkServiceOperation>
+) {
+  const map = new Map<string, OperationPathAndDeserDetails[]>();
+  const existingNames = new Set<string>();
+  const methodMap = getMethodHierarchiesMap(context, client);
+  for (const [prefixKey, operations] of methodMap) {
+    const prefixes = prefixKey.split("/");
+    const lroOperations = operations.filter((o) => isLroOnlyOperation(o));
+    // skip this operation group if it has no LRO operations
+    if (lroOperations.length === 0) {
+      continue;
+    }
+
+    const operationFileName =
+      prefixes.length > 0 && prefixKey !== ""
+        ? `${prefixes
+            .map((hierarchy) => {
+              return normalizeName(hierarchy, NameType.File);
+            })
+            .join("/")}/operations`
+        : // When the program has no operation groups defined all operations are put
+          // into a nameless operation group. We'll call this operations.
+          "operations";
+    map.set(
+      `./api/${operationFileName}.js`,
+      lroOperations.map((o) => {
+        const { name } = getOperationName(o);
+        const deserName = `_${name}Deserialize`;
+        let renamedDeserName = undefined;
+        if (existingNames.has(deserName)) {
+          const newName = `${name}Deserialize${normalizeName(
+            operationFileName.split("/").slice(0, -1).join("_"),
+            NameType.Interface
+          )}`;
+          renamedDeserName = `_${newName}`;
+        }
+        existingNames.add(deserName);
+        return {
+          path: `${o.operation.verb.toUpperCase()} ${o.operation.path}`,
+          expectedStatusesExpression: getExpectedStatuses(o),
+          deserName,
+          renamedDeserName
+        };
+      })
+    );
+  }
+  return map;
+}
 
 /** Refkey for the restore poller function */
 export function restorePollerRefkey(
@@ -98,15 +161,35 @@ export function RestorePoller(props: RestorePollerProps): Children {
   const classicalClientName = getClassicalClientName(client);
   const classicalClientImport = `import { ${classicalClientName} } from "./${normalizeName(classicalClientName, NameType.File)}.js";`;
 
-  // TODO: Once the static helper GetLongRunningPoller is migrated to a JSX
-  // component with a refkey, replace this string with a refkey reference.
-  // For now we use the function name directly since it's in a static helper
-  // that gets copied into the output.
-  const getLongRunningPollerName = "getLongRunningPoller";
+  // Build import for getLongRunningPoller from the pollingHelpers static helper.
+  // Once static helpers are rendered as Alloy <ts.SourceFile> components with
+  // refkey-annotated declarations (Phase 9), this manual import can be replaced
+  // with pollingHelperRefkey("getLongRunningPoller") in the code template,
+  // which will auto-resolve the import.
+  const pollingHelperInfo = getStaticHelperFileInfo(
+    "Polling",
+    "getLongRunningPoller"
+  );
+  const pollingHelperDir = path.dirname(
+    path.join(srcPath, pollingHelperInfo.relativePath)
+  );
+  const restorePollerDir = path.dirname(filePath);
+  let pollingHelperRelative = path.relative(restorePollerDir, pollingHelperDir);
+  if (!pollingHelperRelative.startsWith(".")) {
+    pollingHelperRelative = "./" + pollingHelperRelative;
+  }
+  const pollingHelperBasename = path.basename(
+    pollingHelperInfo.relativePath,
+    path.extname(pollingHelperInfo.relativePath)
+  );
+  const getLongRunningPollerImport = `import { ${pollingHelperInfo.exportName} } from "${pollingHelperRelative}/${pollingHelperBasename}.js";`;
+  const getLongRunningPollerName = pollingHelperInfo.exportName;
 
   return (
     <ts.SourceFile path={filePath}>
       {classicalClientImport}
+      {"\n"}
+      {getLongRunningPollerImport}
       {"\n"}
       {importStatements.join("\n")}
       {code`

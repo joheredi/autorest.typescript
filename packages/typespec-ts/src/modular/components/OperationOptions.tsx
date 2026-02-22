@@ -144,14 +144,14 @@ function OperationOptionsInterface(props: OperationOptionsInterfaceProps) {
       extends={<Reference refkey={operationOptionsRefkeyValue} />}
       refkey={operationOptionsRefkey(operation)}
     >
-      <For each={additionalOptions} semicolon hardline>
+      <For each={additionalOptions} semicolon hardline enderPunctuation>
         {(opt) => (
           <ts.InterfaceMember name={opt.name} optional doc={opt.doc}>
             {opt.type}
           </ts.InterfaceMember>
         )}
       </For>
-      <For each={optionalParameters} semicolon hardline>
+      <For each={optionalParameters} semicolon hardline enderPunctuation>
         {(p: SdkMethodParameter) => (
           <ts.InterfaceMember
             name={normalizeName(p.name, NameType.Parameter)}

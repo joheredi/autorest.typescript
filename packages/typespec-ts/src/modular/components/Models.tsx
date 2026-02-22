@@ -1,4 +1,4 @@
-import { Children, For, refkey, Refkey } from "@alloy-js/core";
+import { Children, For, refkey, Refkey, namekey } from "@alloy-js/core";
 import * as ts from "@alloy-js/typescript";
 import {
   SdkArrayType,
@@ -32,7 +32,7 @@ import {
   getModelNamespaces,
   normalizeModelName,
   getAdditionalPropertiesName
-} from "../emitModels.js";
+} from "../model-utils.js";
 import { emitQueue } from "../../framework/hooks/sdkTypes.js";
 import {
   getAllAncestors,
@@ -44,6 +44,17 @@ import { NoTarget } from "@typespec/compiler";
 import { isOrExtendsHttpFile } from "@typespec/http";
 import { TypeExpression } from "./TypeExpression.js";
 import { useSdkTypes } from "./context/SdkContextProvider.js";
+
+// ── Naming helpers ─────────────────────────────────────────────────────
+
+/**
+ * Wrap a model/enum/union name with namekey to bypass the Alloy name policy.
+ * normalizeModelName already applies the correct naming conventions, so the
+ * Alloy name policy must not re-normalize (e.g., "LR" → "Lr").
+ */
+function preservedName(name: string) {
+  return namekey(name, { ignoreNamePolicy: true });
+}
 
 // ── Refkey helpers ──────────────────────────────────────────────────────
 
@@ -169,15 +180,9 @@ function ModelType(props: ModelTypeProps) {
       return <UnionDeclaration context={context} type={type} />;
     case "dict":
     case "array":
-      return (
-        <ts.TypeDeclaration
-          export
-          name={normalizeModelName(context, type)}
-          refkey={typeRefkey(type)}
-        >
-          {normalizeModelName(context, type)}
-        </ts.TypeDeclaration>
-      );
+      // Built-in generic types (Array<T>, Record<K,V>) don't need declarations.
+      // They're in emitQueue for serializer generation only.
+      return null;
     case "nullable":
       return <NullableDeclaration context={context} type={type} />;
     default:
@@ -217,7 +222,7 @@ function ModelDeclaration(props: ModelDeclarationProps) {
     <>
       <ts.InterfaceDeclaration
         export
-        name={name}
+        name={preservedName(name)}
         doc={doc}
         refkey={typeRefkey(type)}
         extends={extendsExpr}
@@ -391,7 +396,7 @@ function PolymorphicTypeAlias(props: PolymorphicTypeAliasProps) {
   return (
     <ts.TypeDeclaration
       export
-      name={name}
+      name={preservedName(name)}
       doc={`Alias for ${name}`}
       refkey={polymorphicTypeRefkey(type)}
     >
@@ -442,7 +447,7 @@ function EnumDeclaration(props: EnumDeclarationComponentProps) {
   const knownValuesEnum = (
     <ts.EnumDeclaration
       export
-      name={knownValuesName}
+      name={preservedName(knownValuesName)}
       doc={
         type.doc ??
         `Known values of {@link ${type.name}} that the service accepts.`
@@ -476,7 +481,7 @@ function EnumDeclaration(props: EnumDeclarationComponentProps) {
   const typeAlias = (
     <ts.TypeDeclaration
       export
-      name={enumName}
+      name={preservedName(enumName)}
       doc={getEnumDoc(context, type)}
       refkey={typeRefkey(type)}
     >
@@ -557,7 +562,7 @@ function UnionDeclaration(props: UnionDeclarationProps) {
   return (
     <ts.TypeDeclaration
       export
-      name={name}
+      name={preservedName(name)}
       doc={type.doc ?? `Alias for ${name}`}
       refkey={typeRefkey(type)}
     >
@@ -585,7 +590,7 @@ function NullableDeclaration(props: NullableDeclarationProps) {
   return (
     <ts.TypeDeclaration
       export
-      name={name}
+      name={preservedName(name)}
       doc={type.doc ?? `Alias for ${name}`}
       refkey={typeRefkey(type)}
     >

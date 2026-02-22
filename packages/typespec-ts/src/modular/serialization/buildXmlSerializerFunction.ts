@@ -14,22 +14,18 @@ import {
   getAllAncestors,
   getAllProperties
 } from "../helpers/operationHelpers.js";
-import { normalizeModelName } from "../emitModels.js";
+import { normalizeModelName } from "../model-utils.js";
 import { NameType } from "@azure-tools/rlc-common";
 import { isAzureCoreErrorType } from "../../utils/modelUtils.js";
 import {
   isSupportedSerializeType,
   ModelSerializeOptions
 } from "./serializeUtils.js";
-import { XmlHelpers } from "../static-helpers-metadata.js";
-import { resolveReference } from "../../framework/reference.js";
-import { refkey } from "../../framework/refkey.js";
 import { reportDiagnostic } from "../../lib.js";
 import { NoTarget } from "@typespec/compiler";
 import { isMetadata } from "@typespec/http";
 import { normalizeModelPropertyName } from "../type-expressions/get-type-expression.js";
 import { isReadOnly } from "@azure-tools/typespec-client-generator-core";
-import { useDependencies } from "../../framework/hooks/useDependencies.js";
 
 /**
  * Checks if a model type has XML serialization options defined
@@ -121,13 +117,11 @@ export function buildXmlModelSerializer(
     )}XmlSerializer`;
 
   if (options.nameOnly) {
-    return resolveReference(refkey(type, "xmlSerializer"));
+    return serializerFunctionName;
   }
 
-  const serializeToXmlRef = resolveReference(XmlHelpers.serializeToXml);
-  const xmlPropertyMetadataRef = resolveReference(
-    XmlHelpers.XmlPropertyMetadata
-  );
+  const serializeToXmlRef = "serializeToXml";
+  const xmlPropertyMetadataRef = "XmlPropertyMetadata";
 
   const properties = getAllProperties(context, type, getAllAncestors(type));
   const xmlRootName = getXmlRootName(type);
@@ -161,7 +155,7 @@ export function buildXmlModelSerializer(
     parameters: [
       {
         name: "item",
-        type: resolveReference(refkey(type))
+        type: normalizeModelName(context, type)
       }
     ],
     returnType: "string",
@@ -218,7 +212,7 @@ export function buildXmlObjectModelSerializer(
     )}XmlObjectSerializer`;
 
   if (options.nameOnly) {
-    return resolveReference(refkey(type, "xmlObjectSerializer"));
+    return serializerFunctionName;
   }
 
   const properties = getAllProperties(context, type, getAllAncestors(type));
@@ -237,9 +231,7 @@ export function buildXmlObjectModelSerializer(
 
   if (isDictType && propertyAssignments.length === 0) {
     // Pure dictionary type - spread all properties
-    statements.push(
-      `return { ...item } as ${resolveReference(XmlHelpers.XmlSerializedObject)};`
-    );
+    statements.push(`return { ...item } as ${"XmlSerializedObject"};`);
   } else if (isDictType) {
     // Model with both defined properties and additional properties
     statements.push(`return {${propertyAssignments}, ...item};`);
@@ -247,9 +239,7 @@ export function buildXmlObjectModelSerializer(
     statements.push(`return {${propertyAssignments}};`);
   }
 
-  const xmlSerializedObjectRef = resolveReference(
-    XmlHelpers.XmlSerializedObject
-  );
+  const xmlSerializedObjectRef = "XmlSerializedObject";
 
   // Use _item when there are no properties and not a dict type to avoid unused parameter lint error
   const paramName =
@@ -262,7 +252,7 @@ export function buildXmlObjectModelSerializer(
     parameters: [
       {
         name: paramName,
-        type: resolveReference(refkey(type))
+        type: normalizeModelName(context, type)
       }
     ],
     returnType: xmlSerializedObjectRef,
@@ -365,9 +355,7 @@ function buildXmlValueSerializationExpr(
   type: SdkType,
   valueExpr: string
 ): string {
-  const uint8ArrayToStringRef = resolveReference(
-    useDependencies().uint8ArrayToString
-  );
+  const uint8ArrayToStringRef = "uint8ArrayToString";
 
   switch (type.kind) {
     case "bytes":
@@ -643,13 +631,11 @@ export function buildXmlModelDeserializer(
     )}XmlDeserializer`;
 
   if (options.nameOnly) {
-    return resolveReference(refkey(type, "xmlDeserializer"));
+    return deserializerFunctionName;
   }
 
-  const deserializeFromXmlRef = resolveReference(XmlHelpers.deserializeFromXml);
-  const xmlPropertyDeserializeMetadataRef = resolveReference(
-    XmlHelpers.XmlPropertyDeserializeMetadata
-  );
+  const deserializeFromXmlRef = "deserializeFromXml";
+  const xmlPropertyDeserializeMetadataRef = "XmlPropertyDeserializeMetadata";
 
   const properties = getAllProperties(context, type, getAllAncestors(type));
   const xmlRootName = getXmlRootName(type);
@@ -669,7 +655,7 @@ export function buildXmlModelDeserializer(
   );
 
   // Generate the deserialization call
-  const typeRef = resolveReference(refkey(type));
+  const typeRef = normalizeModelName(context, type);
   if (xmlRootNs) {
     statements.push(
       `return ${deserializeFromXmlRef}<${typeRef}>(xmlString, properties, "${xmlRootName}", { namespace: "${xmlRootNs.namespace}", prefix: "${xmlRootNs.prefix}" });`
@@ -690,7 +676,7 @@ export function buildXmlModelDeserializer(
         type: "string"
       }
     ],
-    returnType: resolveReference(refkey(type)),
+    returnType: normalizeModelName(context, type),
     statements
   };
 
@@ -840,15 +826,11 @@ export function buildXmlObjectModelDeserializer(
     )}XmlObjectDeserializer`;
 
   if (options.nameOnly) {
-    return resolveReference(refkey(type, "xmlObjectDeserializer"));
+    return deserializerFunctionName;
   }
 
-  const deserializeXmlObjectRef = resolveReference(
-    XmlHelpers.deserializeXmlObject
-  );
-  const xmlPropertyDeserializeMetadataRef = resolveReference(
-    XmlHelpers.XmlPropertyDeserializeMetadata
-  );
+  const deserializeXmlObjectRef = "deserializeXmlObject";
+  const xmlPropertyDeserializeMetadataRef = "XmlPropertyDeserializeMetadata";
 
   const properties = getAllProperties(context, type, getAllAncestors(type));
 
@@ -866,7 +848,7 @@ export function buildXmlObjectModelDeserializer(
   );
 
   // Generate the deserialization call - no rootName needed for object deserializer
-  const typeRef = resolveReference(refkey(type));
+  const typeRef = normalizeModelName(context, type);
   statements.push(
     `return ${deserializeXmlObjectRef}<${typeRef}>(xmlObject, properties);`
   );
@@ -881,7 +863,7 @@ export function buildXmlObjectModelDeserializer(
         type: "Record<string, unknown>"
       }
     ],
-    returnType: resolveReference(refkey(type)),
+    returnType: normalizeModelName(context, type),
     statements
   };
 

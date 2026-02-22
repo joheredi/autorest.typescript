@@ -25,7 +25,8 @@ export type { OperationOptionsProps } from "./OperationOptions.js";
 export { operationOptionsRefkey } from "./OperationOptions.js";
 
 // Operations
-export { operationRefkey } from "./Operations.js";
+export { operationRefkey, Operations } from "./Operations.js";
+export type { OperationsProps } from "./Operations.js";
 
 // Client context
 export {
@@ -65,8 +66,55 @@ export {
   azureIdentityLib
 } from "./ExternalPackages.js";
 
+// JSON Serializers
+export {
+  Serializers,
+  serializerRefkey,
+  deserializerRefkey
+} from "./Serializers.js";
+export type { SerializersProps } from "./Serializers.js";
+
 // Restore poller
 export { restorePollerRefkey } from "./RestorePoller.js";
+
+// XML Serializers
+export { XmlSerializers } from "./XmlSerializers.js";
+export type { XmlSerializersProps } from "./XmlSerializers.js";
+export {
+  xmlSerializerRefkey,
+  xmlDeserializerRefkey,
+  xmlObjectSerializerRefkey,
+  xmlObjectDeserializerRefkey
+} from "./XmlSerializers.js";
+
+// Static helper refkeys
+export {
+  serializationHelperRefkey,
+  pagingHelperRefkey,
+  pollingHelperRefkey,
+  simplePollerHelperRefkey,
+  urlTemplateHelperRefkey,
+  multipartHelperRefkey,
+  cloudSettingHelperRefkey,
+  xmlHelperRefkey,
+  getStaticHelperFileInfo,
+  STATIC_HELPERS_BASE_DIR
+} from "./StaticHelpers.js";
+export type {
+  SerializationHelperName,
+  PagingHelperName,
+  PollingHelperName,
+  SimplePollerHelperName,
+  UrlTemplateHelperName,
+  MultipartHelperName,
+  CloudSettingHelperName,
+  XmlHelperName,
+  StaticHelperFileInfo
+} from "./StaticHelpers.js";
+
+// Static helper files
+export { StaticHelperFiles } from "./StaticHelperFiles.js";
+export type { StaticHelperFilesProps } from "./StaticHelperFiles.js";
 
 // Index files
 export { RootIndex } from "./RootIndex.js";

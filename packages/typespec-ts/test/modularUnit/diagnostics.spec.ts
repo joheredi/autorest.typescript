@@ -11,7 +11,6 @@ describe("Diagnostic reporting tests", () => {
     const operationHelpers =
       await import("../../src/modular/helpers/operationHelpers.js");
     const emitModels = await import("../../src/modular/emitModels.js");
-    const buildRootIndex = await import("../../src/modular/buildRootIndex.js");
     const serializerFunction =
       await import("../../src/modular/serialization/buildSerializerFunction.js");
     const deserializerFunction =
@@ -21,7 +20,6 @@ describe("Diagnostic reporting tests", () => {
     // Basic checks that modules loaded successfully
     ok(operationHelpers);
     ok(emitModels);
-    ok(buildRootIndex);
     ok(serializerFunction);
     ok(deserializerFunction);
     ok(emitUtil);

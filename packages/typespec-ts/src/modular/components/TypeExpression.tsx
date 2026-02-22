@@ -215,8 +215,8 @@ function getExternalModelRefkey(
     return isAzure ? azureCoreClientLib.ErrorModel : httpRuntimeLib.ErrorModel;
   }
   if (commonName === "AzureCoreErrorResponse") {
-    // AzureCoreErrorResponse only exists in Azure flavor
-    return (azureCoreClientLib as any).AzureCoreErrorResponse;
+    // ErrorResponse from Azure Core, accessed via its original package export name
+    return azureCoreClientLib.ErrorResponse;
   }
   return undefined;
 }

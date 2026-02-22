@@ -26,7 +26,11 @@ import {
   getMethodHierarchiesMap,
   isTenantLevelOperation
 } from "../../utils/operationUtil.js";
-import { httpRuntimeLib, azureCorePipelineLib } from "./ExternalPackages.js";
+import {
+  httpRuntimeLib,
+  azureCorePipelineLib,
+  azureCoreLroLib
+} from "./ExternalPackages.js";
 import path from "path";
 
 // ── Refkey helpers ──────────────────────────────────────────────────────
@@ -197,8 +201,7 @@ export function ClassicalClient(props: ClassicalClientProps): Children {
           .map(
             (p) =>
               `${p.name}${
-                p.type?.toString().endsWith("operationOptions__") ||
-                p.hasQuestionToken
+                p.type?.endsWith("operationOptions__") || p.hasQuestionToken
                   ? "?"
                   : ""
               }: ${p.type}`
@@ -230,7 +233,7 @@ ${methodName}(${paramDecl}): ${declaration.returnType} {
 
           directMethods.push(
             `/** @deprecated use ${methodName} instead */
-async ${beginName}(${paramDecl}): Promise<SimplePollerLike<OperationState<${returnType}>, ${returnType}>> {
+async ${beginName}(${paramDecl}): Promise<SimplePollerLike<${azureCoreLroLib.OperationState}<${returnType}>, ${returnType}>> {
   const poller = ${apiFuncName}(${methodParamStr});
   await poller.submitted();
   return getSimplePoller(poller);
@@ -385,10 +388,7 @@ async ${beginAndWaitName}(${paramDecl}): Promise<${returnType}> {
       ? `import { ${[...classicImportNames, ...classicInterfaceNames].join(", ")} } from "./classic/index.js";`
       : "";
   const lroImports = needsLroCompat
-    ? [
-        `import { SimplePollerLike, getSimplePoller } from "./static-helpers/simplePollerHelpers.js";`,
-        `import { OperationState } from "@azure/core-lro";`
-      ].join("\n")
+    ? `import { SimplePollerLike, getSimplePoller } from "./static-helpers/simplePollerHelpers.js";`
     : "";
 
   const constructorDocs = client.doc ? `/** ${client.doc} */` : "";

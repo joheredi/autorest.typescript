@@ -11,8 +11,6 @@ import {
   buildSchemaTypes,
   initInternalImports
 } from "@azure-tools/rlc-common";
-import { emitTypes } from "../../src/modular/emitModels.js";
-import { buildApiOptions } from "../../src/modular/emitModelsOptions.js";
 import {
   compileTypeSpecFor,
   createDpgContextTestHelper,
@@ -21,9 +19,6 @@ import {
 } from "./testUtil.js";
 import { transformUrlInfo } from "../../src/transform/transform.js";
 
-import { buildClassicalClient } from "../../src/modular/buildClassicalClient.js";
-import { buildClientContext } from "../../src/modular/buildClientContext.js";
-import { buildOperationFiles } from "../../src/modular/buildOperations.js";
 import { transformModularEmitterOptions } from "../../src/modular/buildModularOptions.js";
 import { expectDiagnosticEmpty } from "@typespec/compiler/testing";
 import { getCredentialInfo } from "../../src/transform/transfromRLCOptions.js";
@@ -36,12 +31,34 @@ import { transformPaths } from "../../src/transform/transformPaths.js";
 import { transformSchemas } from "../../src/transform/transformSchemas.js";
 import { transformToParameterTypes } from "../../src/transform/transformParameters.js";
 import { transformToResponseTypes } from "../../src/transform/transformResponses.js";
-import { useBinder } from "../../src/framework/hooks/binder.js";
-import { emitSamples } from "../../src/modular/emitSamples.js";
 import { renameClientName } from "../../src/index.js";
-import { buildRootIndex } from "../../src/modular/buildRootIndex.js";
 import { useContext } from "../../src/contextManager.js";
-import { buildSubpathIndexFile } from "../../src/modular/buildSubpathIndex.js";
+import { Project } from "ts-morph";
+import {
+  renderOperations,
+  renderClientContext,
+  renderClassicalClient,
+  renderRootIndex,
+  renderSamples,
+  renderModels,
+  renderOperationOptionsOnly
+} from "../../dist/src/test-utils/alloy-test-render.js";
+
+/**
+ * Creates ts-morph SourceFile objects from rendered text for test API compatibility.
+ */
+function createSourceFilesFromText(
+  files: Map<string, string>
+): import("ts-morph").SourceFile[] {
+  const project = new Project({ useInMemoryFileSystem: true });
+  const sourceFiles: import("ts-morph").SourceFile[] = [];
+  for (const [path, content] of files) {
+    sourceFiles.push(
+      project.createSourceFile(path, content, { overwrite: true })
+    );
+  }
+  return sourceFiles;
+}
 
 export async function emitPageHelperFromTypeSpec(
   tspContent: string,
@@ -411,8 +428,6 @@ export async function emitModularModelsFromTypeSpec(
     false,
     options
   );
-  const binder = useBinder();
-  let modelFile = undefined;
   const includeResponseHeaders =
     options["include-headers-in-response"] === true;
   dpgContext.rlcOptions!.includeHeadersInResponse = includeResponseHeaders;
@@ -422,32 +437,58 @@ export async function emitModularModelsFromTypeSpec(
     options["experimental-extensible-enums"];
   dpgContext.rlcOptions!.ignoreNullableOnOptional =
     options["ignore-nullable-on-optional"] ?? true;
-  const modularEmitterOptions = transformModularEmitterOptions(dpgContext, "", {
-    casing: "camel"
-  });
-  if (needOptions) {
-    emitTypes(dpgContext, { sourceRoot: "" });
-    const clientMap = Array.from(getClientHierarchyMap(dpgContext));
-    modelFile = buildApiOptions(
-      dpgContext,
-      clientMap[0]!,
-      modularEmitterOptions
-    );
-    binder.resolveAllReferences("/");
-    if (modelFile.length > 0) {
-      modelFile[0]!.fixUnusedIdentifiers();
-    }
-  } else {
-    modelFile = emitTypes(dpgContext, { sourceRoot: "" });
-    binder.resolveAllReferences("/");
-  }
+
   if (mustEmptyDiagnostic && dpgContext.program.diagnostics.length > 0) {
     throw dpgContext.program.diagnostics;
   }
-  if (Array.isArray(modelFile)) {
-    return modelFile[0];
+
+  // Use Alloy render helper to get models as rendered strings
+  const modularEmitterOptions = transformModularEmitterOptions(dpgContext, "", {
+    casing: "camel"
+  });
+  const sdkTypes = useContext("sdkTypes");
+
+  if (needOptions) {
+    // Render operation options instead of models
+    const clientMap = Array.from(getClientHierarchyMap(dpgContext));
+    const files = await renderOperationOptionsOnly(
+      context.program,
+      dpgContext,
+      modularEmitterOptions,
+      sdkTypes,
+      clientMap
+    );
+    // Find the options file (contains "Options" in the name)
+    const optionsContent: string[] = [];
+    for (const [path, content] of files) {
+      if (path.includes("options") || path.includes("Options")) {
+        optionsContent.push(content);
+      }
+    }
+    return optionsContent.length > 0 ? optionsContent.join("\n\n") : undefined;
   }
-  return modelFile;
+
+  const files = await renderModels(
+    context.program,
+    dpgContext,
+    modularEmitterOptions,
+    sdkTypes
+  );
+
+  // renderModels generates multiple files (models.ts and serializers.ts)
+  // Combine them into a single string, excluding static helper stubs
+  const allContent: string[] = [];
+  for (const [path, content] of files) {
+    if (
+      path.endsWith(".ts") &&
+      !path.includes("index") &&
+      !path.startsWith("static-helpers/")
+    ) {
+      allContent.push(content);
+    }
+  }
+
+  return allContent.length > 0 ? allContent.join("\n\n") : undefined;
 }
 
 export async function emitRootIndexFromTypeSpec(
@@ -477,8 +518,6 @@ export async function emitRootIndexFromTypeSpec(
     false,
     options
   );
-  const binder = useBinder();
-  const project = useContext("outputProject");
   const includeResponseHeaders =
     options["include-headers-in-response"] === true;
   dpgContext.rlcOptions!.includeHeadersInResponse = includeResponseHeaders;
@@ -494,45 +533,33 @@ export async function emitRootIndexFromTypeSpec(
       casing: "camel"
     }
   );
-  const rootIndexFile = project.createSourceFile(
-    `${modularEmitterOptions.modularOptions.sourceRoot}/index.ts`,
-    "",
-    {
-      overwrite: true
-    }
+  const clientMap = Array.from(getClientHierarchyMap(dpgContext));
+  const sdkTypes = useContext("sdkTypes");
+  const files = await renderRootIndex(
+    context.program,
+    dpgContext,
+    modularEmitterOptions,
+    sdkTypes,
+    clientMap
   );
-  emitTypes(dpgContext, modularEmitterOptions.modularOptions);
-  buildSubpathIndexFile(modularEmitterOptions, "models", undefined, {
-    recursive: true
-  });
-  if (
-    dpgContext.sdkPackage.clients &&
-    dpgContext.sdkPackage.clients.length > 0 &&
-    dpgContext.sdkPackage.clients[0]
-  ) {
-    const clientMap = Array.from(getClientHierarchyMap(dpgContext));
-    buildRootIndex(
-      dpgContext,
-      modularEmitterOptions,
-      rootIndexFile,
-      clientMap[0]!
-    );
-
-    if (
-      options.mustEmptyDiagnostic &&
-      dpgContext.program.diagnostics.length > 0
-    ) {
-      throw dpgContext.program.diagnostics;
-    }
-    binder.resolveAllReferences("/");
-  }
-  if (dpgContext.sdkPackage.clients.length === 0) {
-    buildRootIndex(dpgContext, modularEmitterOptions, rootIndexFile);
-  }
   if (mustEmptyDiagnostic && dpgContext.program.diagnostics.length > 0) {
     throw dpgContext.program.diagnostics;
   }
-  return rootIndexFile;
+  // Find root index.ts file
+  const indexFiles = new Map<string, string>();
+  for (const [path, content] of files) {
+    if (
+      path.endsWith("/index.ts") &&
+      !path.includes("api/") &&
+      !path.includes("models/") &&
+      !path.includes("classic/")
+    ) {
+      indexFiles.set(path, content);
+      break;
+    }
+  }
+  const sourceFiles = createSourceFilesFromText(indexFiles);
+  return sourceFiles.length > 0 ? sourceFiles[0] : undefined;
 }
 
 export async function emitModularOperationsFromTypeSpec(
@@ -556,7 +583,6 @@ export async function emitModularOperationsFromTypeSpec(
     withVersionedApiVersion: options.withVersionedApiVersion ? true : false
   });
   const dpgContext = await createDpgContextTestHelper(context.program);
-  const binder = useBinder();
   const includeResponseHeaders =
     options["include-headers-in-response"] === true;
   dpgContext.rlcOptions!.includeHeadersInResponse = includeResponseHeaders;
@@ -571,25 +597,29 @@ export async function emitModularOperationsFromTypeSpec(
     dpgContext.sdkPackage.clients.length > 0 &&
     dpgContext.sdkPackage.clients[0]
   ) {
-    emitTypes(dpgContext, { sourceRoot: "" });
     const clientMap = Array.from(getClientHierarchyMap(dpgContext));
-    const res = buildOperationFiles(
+    const sdkTypes = useContext("sdkTypes");
+    const files = await renderOperations(
+      context.program,
       dpgContext,
-      clientMap[0]!,
-      modularEmitterOptions
+      modularEmitterOptions,
+      sdkTypes,
+      clientMap
     );
-    buildApiOptions(dpgContext, clientMap[0]!, modularEmitterOptions);
     if (
       options.mustEmptyDiagnostic &&
       dpgContext.program.diagnostics.length > 0
     ) {
       throw dpgContext.program.diagnostics;
     }
-    binder.resolveAllReferences("/");
-    for (const file of res) {
-      file.fixUnusedIdentifiers();
+    // Filter to only operation files (api/*operations*.ts)
+    const opFiles = new Map<string, string>();
+    for (const [path, content] of files) {
+      if (path.includes("api/") && path.includes("operations")) {
+        opFiles.set(path, content);
+      }
     }
-    return res;
+    return createSourceFilesFromText(opFiles);
   }
   return undefined;
 }
@@ -606,7 +636,6 @@ export async function emitModularClientContextFromTypeSpec(
     withVersionedApiVersion: options.withVersionedApiVersion ? true : false
   });
   const dpgContext = await createDpgContextTestHelper(context.program);
-  const binder = useBinder();
   const includeResponseHeaders =
     options["include-headers-in-response"] === true;
   dpgContext.rlcOptions!.includeHeadersInResponse = includeResponseHeaders;
@@ -620,16 +649,19 @@ export async function emitModularClientContextFromTypeSpec(
     dpgContext.sdkPackage.clients.length > 0 &&
     dpgContext.sdkPackage.clients[0]
   ) {
-    emitTypes(dpgContext, { sourceRoot: "" });
     renameClientName(dpgContext.sdkPackage.clients[0], modularEmitterOptions);
     const clientMap = Array.from(getClientHierarchyMap(dpgContext));
-    const res = buildClientContext(
+    const sdkTypes = useContext("sdkTypes");
+    const files = await renderClientContext(
+      context.program,
       dpgContext,
-      clientMap[0]!,
-      modularEmitterOptions
+      modularEmitterOptions,
+      sdkTypes,
+      clientMap[0]!
     );
-    binder.resolveAllReferences("/");
-    return res;
+    // ClientContext generates a single file — return it as ts-morph SourceFile
+    const sourceFiles = createSourceFilesFromText(files);
+    return sourceFiles.length > 0 ? sourceFiles[0] : undefined;
   }
   expectDiagnosticEmpty(dpgContext.program.diagnostics);
   return undefined;
@@ -647,7 +679,6 @@ export async function emitModularClientFromTypeSpec(
     withVersionedApiVersion: options.withVersionedApiVersion ? true : false
   });
   const dpgContext = await createDpgContextTestHelper(context.program);
-  const binder = useBinder();
   const includeResponseHeaders =
     options["include-headers-in-response"] === true;
   dpgContext.rlcOptions!.includeHeadersInResponse = includeResponseHeaders;
@@ -661,18 +692,29 @@ export async function emitModularClientFromTypeSpec(
     dpgContext.sdkPackage.clients.length > 0 &&
     dpgContext.sdkPackage.clients[0]
   ) {
-    emitTypes(dpgContext, { sourceRoot: "" });
     renameClientName(dpgContext.sdkPackage.clients[0], modularEmitterOptions);
     const clientMap = Array.from(getClientHierarchyMap(dpgContext));
-    buildApiOptions(dpgContext, clientMap[0]!, modularEmitterOptions);
-    buildOperationFiles(dpgContext, clientMap[0]!, modularEmitterOptions);
-    const res = buildClassicalClient(
+    const sdkTypes = useContext("sdkTypes");
+    const files = await renderClassicalClient(
+      context.program,
       dpgContext,
-      clientMap[0]!,
-      modularEmitterOptions
+      modularEmitterOptions,
+      sdkTypes,
+      clientMap
     );
-    binder.resolveAllReferences("/");
-    return res;
+    // Find the classical client file
+    const clientFiles = new Map<string, string>();
+    for (const [path, content] of files) {
+      if (
+        path.endsWith("Client.ts") &&
+        !path.includes("api/") &&
+        !path.includes("Context")
+      ) {
+        clientFiles.set(path, content);
+      }
+    }
+    const sourceFiles = createSourceFilesFromText(clientFiles);
+    return sourceFiles.length > 0 ? sourceFiles[0] : undefined;
   }
   expectDiagnosticEmpty(dpgContext.program.diagnostics);
   return undefined;
@@ -700,7 +742,12 @@ export async function emitSamplesFromTypeSpec(
   for (const subClient of dpgContext.sdkPackage.clients) {
     await renameClientName(subClient, modularEmitterOptions);
   }
-  const files = await emitSamples(dpgContext);
-  useBinder().resolveAllReferences("/");
-  return files;
+  const sdkTypes = useContext("sdkTypes");
+  const files = await renderSamples(
+    context.program,
+    dpgContext,
+    modularEmitterOptions,
+    sdkTypes
+  );
+  return createSourceFilesFromText(files);
 }

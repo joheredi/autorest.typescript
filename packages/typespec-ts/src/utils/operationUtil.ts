@@ -52,8 +52,6 @@ import {
 } from "./mediaTypes.js";
 import { isByteOrByteUnion } from "./modelUtils.js";
 import { getOperationNamespaceInterfaceName } from "./namespaceUtils.js";
-import { resolveReference } from "../framework/reference.js";
-import { SerializationHelpers } from "../modular/static-helpers-metadata.js";
 import { listOperationsUnderRLCClient } from "./clientUtils.js";
 import { $ } from "@typespec/compiler/typekit";
 import { reportDiagnostic } from "../lib.js";
@@ -582,17 +580,17 @@ function getHasNewlineCollection(paramType: string, paramFormat: string) {
 export function getCollectionFormatHelper(format: string) {
   switch (format) {
     case KnownCollectionFormat.Multi:
-      return resolveReference(SerializationHelpers.buildMultiCollection);
+      return "buildMultiCollection";
     case KnownCollectionFormat.Pipes:
-      return resolveReference(SerializationHelpers.buildPipeCollection);
+      return "buildPipeCollection";
     case KnownCollectionFormat.Ssv:
-      return resolveReference(SerializationHelpers.buildSsvCollection);
+      return "buildSsvCollection";
     case KnownCollectionFormat.Tsv:
-      return resolveReference(SerializationHelpers.buildTsvCollection);
+      return "buildTsvCollection";
     case KnownCollectionFormat.Csv:
-      return resolveReference(SerializationHelpers.buildCsvCollection);
+      return "buildCsvCollection";
     case KnownCollectionFormat.Newline:
-      return resolveReference(SerializationHelpers.buildNewlineCollection);
+      return "buildNewlineCollection";
     default:
       return undefined;
   }
@@ -601,13 +599,13 @@ export function getCollectionFormatHelper(format: string) {
 export function getCollectionFormatParseHelper(format: string) {
   switch (format) {
     case KnownCollectionFormat.Pipes:
-      return resolveReference(SerializationHelpers.parsePipeCollection);
+      return "parsePipeCollection";
     case KnownCollectionFormat.Ssv:
-      return resolveReference(SerializationHelpers.parseSsvCollection);
+      return "parseSsvCollection";
     case KnownCollectionFormat.Csv:
-      return resolveReference(SerializationHelpers.parseCsvCollection);
+      return "parseCsvCollection";
     case KnownCollectionFormat.Newline:
-      return resolveReference(SerializationHelpers.parseNewlineCollection);
+      return "parseNewlineCollection";
     default:
       return undefined;
   }

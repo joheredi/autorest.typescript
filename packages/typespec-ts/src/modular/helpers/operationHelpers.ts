@@ -1,17 +1,4 @@
-import {
-  FunctionDeclarationStructure,
-  OptionalKind,
-  ParameterDeclarationStructure,
-  StructureKind
-} from "ts-morph";
 import { NoTarget, Program } from "@typespec/compiler";
-import {
-  PagingHelpers,
-  PollingHelpers,
-  SerializationHelpers,
-  UrlTemplateHelpers,
-  XmlHelpers
-} from "../static-helpers-metadata.js";
 import {
   getNullableValidType,
   isSpreadBodyParameter,
@@ -44,7 +31,6 @@ import {
   getDocsFromDescription,
   getFixmeForMultilineDocs
 } from "./docsHelpers.js";
-import { AzurePollingDependencies } from "../external-dependencies.js";
 import { NameType, normalizeName } from "@azure-tools/rlc-common";
 import {
   buildModelDeserializer,
@@ -59,12 +45,9 @@ import {
   buildXmlModelDeserializer,
   hasXmlSerialization
 } from "../serialization/buildXmlSerializerFunction.js";
-import { refkey } from "../../framework/refkey.js";
 import { reportDiagnostic } from "../../lib.js";
-import { resolveReference } from "../../framework/reference.js";
-import { useDependencies } from "../../framework/hooks/useDependencies.js";
-import { useSdkTypes } from "../../framework/hooks/sdkTypes.js";
 import { isAzureCoreErrorType } from "../../utils/modelUtils.js";
+import { normalizeModelName } from "../model-utils.js";
 import {
   getTypeExpression,
   normalizeModelPropertyName
@@ -91,16 +74,39 @@ import {
   SdkType
 } from "@azure-tools/typespec-client-generator-core";
 import { isHeader, isMetadata } from "@typespec/http";
-import { useContext } from "../../contextManager.js";
+import { contextManager } from "../../contextManager.js";
 import { isExtensibleEnum } from "../type-expressions/get-enum-expression.js";
 import { emitInlineModel } from "../type-expressions/get-model-expression.js";
+
+/** Plain data object representing a generated function — no ts-morph dependency. */
+export interface GeneratedFunction {
+  name: string;
+  parameters: Array<{
+    name: string;
+    type?: string;
+    initializer?: string;
+    hasQuestionToken?: boolean;
+  }>;
+  returnType?: string;
+  statements: string[];
+  isAsync?: boolean;
+  isExported?: boolean;
+  docs?: string[];
+}
+
+/** Extended metadata for the public operation function. */
+export interface OperationFunctionInfo extends GeneratedFunction {
+  propertyName?: string;
+  isLro?: boolean;
+  lroFinalReturnType?: string;
+}
 
 export function getSendPrivateFunction(
   dpgContext: SdkContext,
   method: [string[], ServiceOperation],
   clientType: string,
   client?: SdkClientType<SdkHttpOperation>
-): OptionalKind<FunctionDeclarationStructure> {
+): GeneratedFunction {
   const operation = method[1];
   const parameters = getOperationSignatureParameters(
     dpgContext,
@@ -108,14 +114,14 @@ export function getSendPrivateFunction(
     clientType
   );
   const { name } = getOperationName(operation);
-  const dependencies = useDependencies();
 
-  const functionStatement: OptionalKind<FunctionDeclarationStructure> = {
+  const functionStatement: GeneratedFunction = {
     isAsync: false,
     isExported: true,
     name: `_${name}Send`,
     parameters,
-    returnType: resolveReference(dependencies.StreamableMethod)
+    returnType: "StreamableMethod",
+    statements: []
   };
 
   const operationPath = operation.operation.path;
@@ -139,7 +145,7 @@ export function getSendPrivateFunction(
       ? operation.operation.uriTemplate
       : operation.operation.uriTemplate.replace(/^\//, "");
 
-    statements.push(`const ${pathVarName} = ${resolveReference(UrlTemplateHelpers.parseTemplate)}("${uriTemplate}", {
+    statements.push(`const ${pathVarName} = expandUrlTemplate("${uriTemplate}", {
         ${urlTemplateParams.join(",\n")}
         },{
       allowReserved: ${optionalParamName}?.requestOptions?.skipUrlEncoding
@@ -148,7 +154,7 @@ export function getSendPrivateFunction(
   }
 
   statements.push(
-    `return context.path(${pathStr}).${operationMethod}({...${resolveReference(dependencies.operationOptionsToRequestParameters)}(${optionalParamName}), ${getHeaderAndBodyParameters(
+    `return context.path(${pathStr}).${operationMethod}({...operationOptionsToRequestParameters(${optionalParamName}), ${getHeaderAndBodyParameters(
       dpgContext,
       operation,
       optionalParamName
@@ -164,13 +170,10 @@ export function getSendPrivateFunction(
 export function getDeserializePrivateFunction(
   context: SdkContext,
   operation: ServiceOperation
-): OptionalKind<FunctionDeclarationStructure> {
+): GeneratedFunction {
   const { name } = getOperationName(operation);
-  const dependencies = useDependencies();
-  const PathUncheckedResponseReference = resolveReference(
-    dependencies.PathUncheckedResponse
-  );
-  const parameters: OptionalKind<ParameterDeclarationStructure>[] = [
+  const PathUncheckedResponseReference = "PathUncheckedResponse";
+  const parameters: GeneratedFunction["parameters"] = [
     {
       name: "result",
       type: PathUncheckedResponseReference
@@ -203,17 +206,16 @@ export function getDeserializePrivateFunction(
     returnType = { name: "", type: "void" };
   }
 
-  const functionStatement: OptionalKind<FunctionDeclarationStructure> = {
+  const functionStatement: GeneratedFunction = {
     isAsync: true,
     isExported: true,
     name: `_${name}Deserialize`,
     parameters,
-    returnType: `Promise<${returnType.type}>`
+    returnType: `Promise<${returnType.type}>`,
+    statements: []
   };
   const statements: string[] = [];
-  const createRestErrorReference = resolveReference(
-    dependencies.createRestError
-  );
+  const createRestErrorReference = "createRestError";
 
   statements.push(
     `const expectedStatuses = ${getExpectedStatuses(operation)};`
@@ -291,9 +293,7 @@ export function getDeserializePrivateFunction(
       );
 
       if (xmlDeserializerName && jsonDeserializerName) {
-        const isXmlContentTypeRef = resolveReference(
-          XmlHelpers.isXmlContentType
-        );
+        const isXmlContentTypeRef = "isXmlContentType";
         statements.push(
           `const responseContentType = result.headers?.["content-type"] ?? "";
           if (${isXmlContentTypeRef}(responseContentType)) {
@@ -399,7 +399,7 @@ export function getDeserializePrivateFunction(
 export function getDeserializeHeadersPrivateFunction(
   context: SdkContext,
   operation: ServiceOperation
-): OptionalKind<FunctionDeclarationStructure> | undefined {
+): GeneratedFunction | undefined {
   const responseHeaders = getResponseHeaders(operation.operation.responses);
   const isResponseHeadersEnabled =
     context.rlcOptions?.includeHeadersInResponse === true;
@@ -410,12 +410,9 @@ export function getDeserializeHeadersPrivateFunction(
   }
 
   const { name } = getOperationName(operation);
-  const dependencies = useDependencies();
-  const PathUncheckedResponseReference = resolveReference(
-    dependencies.PathUncheckedResponse
-  );
+  const PathUncheckedResponseReference = "PathUncheckedResponse";
 
-  const parameters: OptionalKind<ParameterDeclarationStructure>[] = [
+  const parameters: GeneratedFunction["parameters"] = [
     {
       name: "result",
       type: PathUncheckedResponseReference
@@ -424,12 +421,13 @@ export function getDeserializeHeadersPrivateFunction(
 
   const returnType = buildHeaderOnlyResponseType(context, responseHeaders);
 
-  const functionStatement: OptionalKind<FunctionDeclarationStructure> = {
+  const functionStatement: GeneratedFunction = {
     isAsync: false,
     isExported: true,
     name: `_${name}DeserializeHeaders`,
     parameters,
-    returnType
+    returnType,
+    statements: []
   };
 
   const statements: string[] = [];
@@ -567,7 +565,7 @@ function getExceptionResponseHeaders(
 export function getDeserializeExceptionHeadersPrivateFunction(
   context: SdkContext,
   operation: ServiceOperation
-): OptionalKind<FunctionDeclarationStructure> | undefined {
+): GeneratedFunction | undefined {
   const isResponseHeadersEnabled =
     context.rlcOptions?.includeHeadersInResponse === true;
   if (!isResponseHeadersEnabled) {
@@ -582,12 +580,9 @@ export function getDeserializeExceptionHeadersPrivateFunction(
   }
 
   const { name } = getOperationName(operation);
-  const dependencies = useDependencies();
-  const PathUncheckedResponseReference = resolveReference(
-    dependencies.PathUncheckedResponse
-  );
+  const PathUncheckedResponseReference = "PathUncheckedResponse";
 
-  const parameters: OptionalKind<ParameterDeclarationStructure>[] = [
+  const parameters: GeneratedFunction["parameters"] = [
     {
       name: "result",
       type: PathUncheckedResponseReference
@@ -596,12 +591,13 @@ export function getDeserializeExceptionHeadersPrivateFunction(
 
   const returnType = buildHeaderOnlyResponseType(context, exceptionHeaders);
 
-  const functionStatement: OptionalKind<FunctionDeclarationStructure> = {
+  const functionStatement: GeneratedFunction = {
     isAsync: false,
     isExported: true,
     name: `_${name}DeserializeExceptionHeaders`,
     parameters,
-    returnType
+    returnType,
+    statements: []
   };
 
   const statements: string[] = [];
@@ -630,9 +626,7 @@ function getExceptionThrowStatement(
   operation: ServiceOperation
 ) {
   const statements = [];
-  const createRestErrorReference = resolveReference(
-    useDependencies().createRestError
-  );
+  const createRestErrorReference = "createRestError";
   const {
     customized,
     defaultDeserializer,
@@ -662,7 +656,7 @@ function getExceptionThrowStatement(
   if (customized.length > 0) {
     statements.push(`const error = ${createRestErrorReference}(result);`);
     if (hasAnyDualFormatXml) {
-      const isXmlContentTypeRef = resolveReference(XmlHelpers.isXmlContentType);
+      const isXmlContentTypeRef = "isXmlContentType";
       statements.push(
         `const responseContentType = result.headers?.["content-type"] ?? "";`
       );
@@ -707,9 +701,7 @@ function getExceptionThrowStatement(
           error.details = ${defaultXmlDeserializer}(result.body);
           ${exceptionHeadersCall ?? ""}`);
         } else {
-          const isXmlContentTypeRef = resolveReference(
-            XmlHelpers.isXmlContentType
-          );
+          const isXmlContentTypeRef = "isXmlContentType";
           statements.push(`const error = ${createRestErrorReference}(result);
           const responseContentType = result.headers?.["content-type"] ?? "";
           error.details = ${isXmlContentTypeRef}(responseContentType) ? ${defaultXmlDeserializer}(result.body) : ${defaultDeserializer}(result.body);
@@ -728,13 +720,10 @@ function getExceptionThrowStatement(
   return statements.join("\n");
 }
 
-function getOptionalParamsName(
-  parameters: OptionalKind<ParameterDeclarationStructure>[]
-) {
+function getOptionalParamsName(parameters: GeneratedFunction["parameters"]) {
   return (
-    parameters.filter((p) =>
-      p.type?.toString().endsWith("operationOptions__")
-    )[0]?.name ?? "options"
+    parameters.filter((p) => p.type?.endsWith("operationOptions__"))[0]?.name ??
+    "options"
   );
 }
 
@@ -742,13 +731,10 @@ function getOperationSignatureParameters(
   context: SdkContext,
   method: [string[], ServiceOperation],
   clientType: string
-): OptionalKind<ParameterDeclarationStructure>[] {
+): GeneratedFunction["parameters"] {
   const operation = method[1];
-  const optionsType = resolveReference(refkey(method[1], "operationOptions"));
-  const parameters: Map<
-    string,
-    OptionalKind<ParameterDeclarationStructure>
-  > = new Map();
+  const optionsType = getOperationOptionsName(method, true);
+  const parameters: Map<string, GeneratedFunction["parameters"][0]> = new Map();
 
   operation.parameters
     .filter(
@@ -800,14 +786,10 @@ export function getOperationFunction(
   context: SdkContext,
   method: [string[], ServiceOperation],
   clientType: string
-): FunctionDeclarationStructure & {
-  propertyName?: string;
-  isLro?: boolean;
-  lroFinalReturnType?: string;
-} {
+): OperationFunctionInfo {
   const operation = method[1];
   // Extract required parameters
-  const parameters: OptionalKind<ParameterDeclarationStructure>[] =
+  const parameters: GeneratedFunction["parameters"] =
     getOperationSignatureParameters(context, method, clientType);
   const optionalParamName = getOptionalParamsName(parameters);
   if (isPagingOnlyOperation(operation)) {
@@ -871,8 +853,7 @@ export function getOperationFunction(
     };
   }
   const { name, fixme = [] } = getOperationName(operation);
-  const functionStatement = {
-    kind: StructureKind.Function,
+  const functionStatement: OperationFunctionInfo = {
     docs: [
       ...getDocsFromDescription(operation.doc),
       ...getFixmeForMultilineDocs(fixme)
@@ -882,7 +863,8 @@ export function getOperationFunction(
     name,
     propertyName: normalizeName(operation.name, NameType.Property),
     parameters,
-    returnType: `Promise<${returnType.type}>`
+    returnType: `Promise<${returnType.type}>`,
+    statements: []
   };
 
   const statements: string[] = [];
@@ -903,7 +885,7 @@ export function getOperationFunction(
       `const ${streamableMethodVarName} = _${name}Send(${parameterList});`
     );
     statements.push(
-      `const ${resultVarName} = await ${resolveReference(SerializationHelpers.getBinaryResponse)}(${streamableMethodVarName});`
+      `const ${resultVarName} = await getBinaryResponse(${streamableMethodVarName});`
     );
   } else {
     statements.push(
@@ -936,7 +918,7 @@ export function getOperationFunction(
   return {
     ...functionStatement,
     statements
-  } as FunctionDeclarationStructure & { propertyName?: string };
+  };
 }
 
 function getLroOnlyOperationFunction(
@@ -944,25 +926,16 @@ function getLroOnlyOperationFunction(
   method: [string[], SdkLroServiceMethod<SdkHttpOperation>],
   clientType: string,
   optionalParamName: string = "options"
-): FunctionDeclarationStructure & {
-  propertyName?: string;
-  isLro?: boolean;
-  lroFinalReturnType?: string;
-} {
+): OperationFunctionInfo {
   const operation = method[1];
   // Extract required parameters
-  const parameters: OptionalKind<ParameterDeclarationStructure>[] =
+  const parameters: GeneratedFunction["parameters"] =
     getOperationSignatureParameters(context, method, clientType);
   const returnType = buildLroReturnType(context, operation);
   const { name, fixme = [] } = getOperationName(operation);
-  const pollerLikeReference = resolveReference(
-    AzurePollingDependencies.PollerLike
-  );
-  const operationStateReference = resolveReference(
-    AzurePollingDependencies.OperationState
-  );
-  const functionStatement = {
-    kind: StructureKind.Function,
+  const pollerLikeReference = "PollerLike";
+  const operationStateReference = "OperationState";
+  const functionStatement: OperationFunctionInfo = {
     docs: [
       ...getDocsFromDescription(operation.doc),
       ...getFixmeForMultilineDocs(fixme)
@@ -974,12 +947,11 @@ function getLroOnlyOperationFunction(
     isLro: true,
     lroFinalReturnType: returnType.type,
     parameters,
-    returnType: `${pollerLikeReference}<${operationStateReference}<${returnType.type}>, ${returnType.type}>`
+    returnType: `${pollerLikeReference}<${operationStateReference}<${returnType.type}>, ${returnType.type}>`,
+    statements: []
   };
 
-  const getLongRunningPollerReference = resolveReference(
-    PollingHelpers.GetLongRunningPoller
-  );
+  const getLongRunningPollerReference = "getLongRunningPoller";
   const lroMetadata =
     operation.kind === "lro" || operation.kind === "lropaging"
       ? operation.lroMetadata
@@ -1018,7 +990,7 @@ function getLroOnlyOperationFunction(
   return {
     ...functionStatement,
     statements
-  } as FunctionDeclarationStructure & { propertyName?: string };
+  };
 }
 
 function getLroAndPagingOperationFunction(
@@ -1026,7 +998,7 @@ function getLroAndPagingOperationFunction(
   method: [string[], SdkLroPagingServiceMethod<SdkHttpOperation>],
   clientType: string,
   optionalParamName: string = "options"
-): FunctionDeclarationStructure & { propertyName?: string } {
+): OperationFunctionInfo {
   const operation = method[1];
   const parameters = getOperationSignatureParameters(
     context,
@@ -1066,12 +1038,12 @@ function getLroAndPagingOperationFunction(
 
   // Resolve references
   const refs = {
-    pagedIterator: resolveReference(PagingHelpers.PagedAsyncIterableIterator),
-    buildPaging: resolveReference(PagingHelpers.BuildPagedAsyncIterator),
-    getLroPoller: resolveReference(PollingHelpers.GetLongRunningPoller),
-    pollerLike: resolveReference(AzurePollingDependencies.PollerLike),
-    operationState: resolveReference(AzurePollingDependencies.OperationState),
-    pathResponse: resolveReference(useDependencies().PathUncheckedResponse)
+    pagedIterator: "PagedAsyncIterableIterator",
+    buildPaging: "buildPagedAsyncIterator",
+    getLroPoller: "getLongRunningPoller",
+    pollerLike: "PollerLike",
+    operationState: "OperationState",
+    pathResponse: "PathUncheckedResponse"
   };
 
   const expectedStatuses = getExpectedStatuses(operation);
@@ -1080,7 +1052,6 @@ function getLroAndPagingOperationFunction(
     pagingOptions.length > 0 ? `,\n    {${pagingOptions.join(", ")}}` : "";
 
   return {
-    kind: StructureKind.Function,
     docs: [
       ...getDocsFromDescription(operation.doc),
       ...getFixmeForMultilineDocs(fixme)
@@ -1148,10 +1119,10 @@ function getPagingOnlyOperationFunction(
   context: SdkContext,
   method: [string[], SdkPagingServiceMethod<SdkHttpOperation>],
   clientType: string
-): FunctionDeclarationStructure & { propertyName?: string } {
+): OperationFunctionInfo {
   const operation = method[1];
   // Extract required parameters
-  const parameters: OptionalKind<ParameterDeclarationStructure>[] =
+  const parameters: GeneratedFunction["parameters"] =
     getOperationSignatureParameters(context, method, clientType);
 
   // TODO: Support operation overloads
@@ -1165,14 +1136,9 @@ function getPagingOnlyOperationFunction(
     };
   }
   const { name, fixme = [] } = getOperationName(operation);
-  const pagedAsyncIterableIteratorReference = resolveReference(
-    PagingHelpers.PagedAsyncIterableIterator
-  );
-  const buildPagedAsyncIteratorReference = resolveReference(
-    PagingHelpers.BuildPagedAsyncIterator
-  );
-  const functionStatement = {
-    kind: StructureKind.Function,
+  const pagedAsyncIterableIteratorReference = "PagedAsyncIterableIterator";
+  const buildPagedAsyncIteratorReference = "buildPagedAsyncIterator";
+  const functionStatement: OperationFunctionInfo = {
     docs: [
       ...getDocsFromDescription(operation.doc),
       ...getFixmeForMultilineDocs(fixme)
@@ -1182,7 +1148,8 @@ function getPagingOnlyOperationFunction(
     name,
     propertyName: normalizeName(operation.name, NameType.Property),
     parameters,
-    returnType: `${pagedAsyncIterableIteratorReference}<${returnType.type}>`
+    returnType: `${pagedAsyncIterableIteratorReference}<${returnType.type}>`,
+    statements: []
   };
 
   const statements: string[] = [];
@@ -1230,7 +1197,7 @@ function getPagingOnlyOperationFunction(
   return {
     ...functionStatement,
     statements
-  } as FunctionDeclarationStructure & { propertyName?: string };
+  };
 }
 
 export function getOperationOptionsName(
@@ -1439,7 +1406,7 @@ function buildBodyParameter(
     }) as string | undefined;
 
     if (xmlSerializerName && jsonSerializerName) {
-      const isXmlContentTypeRef = resolveReference(XmlHelpers.isXmlContentType);
+      const isXmlContentTypeRef = "isXmlContentType";
       return `\nbody: ${nullOrUndefinedPrefix}(${isXmlContentTypeRef}(${optionalParamName}?.contentType ?? "application/json") ? ${xmlSerializerName}(${bodyNameExpression}) : ${jsonSerializerName}(${bodyNameExpression})),`;
     }
   }
@@ -1869,7 +1836,7 @@ function getSerializationExpressionForFlatten(
       !isMetadata(context.program, p.__raw!)
   );
   const optionalPrefix = property.optional
-    ? `${resolveReference(SerializationHelpers.areAllPropsUndefined)}(${propertyPath}, [${validProps
+    ? `areAllPropsUndefined(${propertyPath}, [${validProps
         .map((p) => `"${p.name}"`)
         .join(", ")}]) ? undefined : `
     : "";
@@ -2023,8 +1990,9 @@ export function getResponseMapping(
       property.optional || isTypeNullable(property.type)
         ? `!${restValue}? ${restValue}: `
         : "";
-    const flattenContext =
-      useContext("sdkTypes").flattenProperties.get(property);
+    const flattenContext = contextManager
+      .getContext("sdkTypes")
+      ?.flattenProperties.get(property);
     const isSupportedFlatten = flattenContext && enableFlatten;
     const deserializeFunctionName = isSupportedFlatten
       ? buildPropertyDeserializer(context, property, {
@@ -2074,8 +2042,6 @@ export function serializeRequestValue(
   serializedName?: string,
   isTopLevel: boolean = false
 ): string {
-  const getSdkType = useSdkTypes();
-  const dependencies = useDependencies();
   const nullOrUndefinedPrefix =
     isTypeNullable(type) || getOptionalForType(type) || !required
       ? `!${clientValue}? ${clientValue}: `
@@ -2134,9 +2100,7 @@ export function serializeRequestValue(
     case "bytes":
       // TODO https://github.com/Azure/typespec-azure/issues/1999
       if (format !== "binary" && format !== "bytes") {
-        const uint8ArrayToStringReference = resolveReference(
-          dependencies.uint8ArrayToString
-        );
+        const uint8ArrayToStringReference = "uint8ArrayToString";
         return required
           ? `${getNullableCheck(
               clientValue,
@@ -2159,9 +2123,7 @@ export function serializeRequestValue(
             context.rlcOptions?.experimentalExtensibleEnums ?? false
         })
       ) {
-        const sdkType = getSdkType(type.__raw!);
-        const serializerRefkey = refkey(sdkType, "serializer");
-        const serializeFunctionName = resolveReference(serializerRefkey);
+        const serializeFunctionName = `${normalizeModelName(context, type, NameType.Operation)}Serializer`;
         return `${serializeFunctionName}(${clientValue})`;
       } else {
         return `${clientValue} as any`;
@@ -2273,10 +2235,7 @@ export function deserializeResponseValue(
   format?: string,
   recursionDepth: number = 0
 ): string {
-  const dependencies = useDependencies();
-  const stringToUint8ArrayReference = resolveReference(
-    dependencies.stringToUint8Array
-  );
+  const stringToUint8ArrayReference = "stringToUint8Array";
   const nullOrUndefinedPrefix =
     isTypeNullable(type) || getOptionalForType(type) || !required
       ? `!${restValue}? ${restValue}: `

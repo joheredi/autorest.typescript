@@ -22,8 +22,6 @@ import { SdkContext } from "../../utils/interfaces.js";
 import { getClassicalClientName } from "./namingHelpers.js";
 import { getTypeExpression } from "../type-expressions/get-type-expression.js";
 import { isCredentialType } from "./typeHelpers.js";
-import { CloudSettingHelpers } from "../static-helpers-metadata.js";
-import { resolveReference } from "../../framework/reference.js";
 
 interface ClientParameterOptions {
   onClientOnly?: boolean;
@@ -201,7 +199,7 @@ export function buildGetClientEndpointParam(
   let coreEndpointParam = "";
   if (dpgContext.rlcOptions?.flavor === "azure") {
     const cloudSettingSuffix = dpgContext.arm
-      ? ` ?? ${resolveReference(CloudSettingHelpers.getArmEndpoint)}(options.cloudSetting)`
+      ? ` ?? getArmEndpoint(options.cloudSetting)`
       : "";
     coreEndpointParam = `options.endpoint${cloudSettingSuffix}`;
   } else {

@@ -1,4 +1,3 @@
-import { Project, SourceFile } from "ts-morph";
 import { RlcMetaTree } from "./metaTree.js";
 import { EmitContext } from "@typespec/compiler";
 import { SdkContext } from "@azure-tools/typespec-client-generator-core";
@@ -21,8 +20,6 @@ import { ExternalDependencies } from "./framework/dependency.js";
  */
 type Contexts = {
   rlcMetaTree: RlcMetaTree; // Context for RLC types metadata.
-  outputProject: Project; // The TS-Morph root project context for code generation.
-  symbolMap: Map<string, SourceFile>; // Mapping of symbols to their corresponding source files.
   sdkTypes: SdkTypeContext;
   emitContext: {
     compilerContext: EmitContext;

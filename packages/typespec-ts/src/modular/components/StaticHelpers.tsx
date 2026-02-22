@@ -1,34 +1,59 @@
 /**
- * Static Helpers — deferred from Alloy JSX conversion.
+ * Static Helper Declarations — Alloy refkey definitions for static helpers.
  *
  * Static helpers (21 .ts files in static/static-helpers/) provide runtime
  * utilities for serialization, paging, polling, multipart, URL templates, etc.
- * They are currently loaded by `loadStaticHelpers()` in src/framework/load-static-helpers.ts,
- * added to the ts-morph Project, and emitted via `TsMorphBridge`.
  *
- * ### Why conversion is deferred
+ * ### Dual-path coexistence
  *
- * The serializers and operation helpers reference static helper symbols via
- * `resolveReference(refkey("PagingHelpers.X"))`, `resolveReference(refkey("PollingHelpers.Y"))`,
- * etc. These references are resolved by the current binder (provideBinder/useBinder),
- * which receives the loaded static helpers map.
+ * The old ts-morph pipeline loads static helpers via `loadStaticHelpers()` in
+ * `src/framework/load-static-helpers.ts`, adds them to the ts-morph Project,
+ * and emits them via `TsMorphBridge`. The old binder resolves references using
+ * string-based refkeys from `static-helpers-metadata.ts`.
  *
- * Converting static helpers to `<ts.SourceFile>` Alloy components would require
- * the serializers (still using ts-morph codegen) to switch to Alloy's refkey-based
- * imports. Until the serializers are also converted to Alloy JSX, the static
- * helpers must remain in the ts-morph pipeline to keep references working.
+ * The new Alloy pipeline uses the refkey accessor functions exported here
+ * (e.g., `pollingHelperRefkey("getLongRunningPoller")`). These return Alloy
+ * `Refkey` objects from `@alloy-js/core` that downstream Alloy components
+ * (serializers, operations) will use in `code` templates.
  *
- * ### Current flow
+ * Both systems coexist: the old string-based refkeys and new Alloy Refkey
+ * objects are in separate namespaces. The old `static-helpers-metadata.ts`
+ * and `loadStaticHelpers()` remain untouched.
  *
- * 1. `$onEmit` calls `loadStaticHelpers()` → adds files to ts-morph Project
- * 2. The binder tracks which helpers are referenced and prunes unreferenced ones
- * 3. `TsMorphBridge` emits the ts-morph Project files (including static helpers)
+ * ### Migration path
  *
- * ### Future conversion
- *
- * When serializers are converted to Alloy JSX:
- * - Create a component per helper category (PagingHelpers, PollingHelpers, etc.)
- * - Each renders a `<ts.SourceFile>` with the helper content
- * - Register exported symbols with Alloy refkeys for automatic import resolution
- * - Remove `loadStaticHelpers()` call from `$onEmit` and delete `static-helpers-metadata.ts`
+ * When static helpers are rendered as `<ts.SourceFile>` Alloy components
+ * (Phase 9), the refkeys defined here will be attached to declarations,
+ * enabling auto-import resolution. Until then, consumers use these refkeys
+ * for naming consistency and build manual import statements using
+ * `getStaticHelperFileInfo()`.
  */
+
+// Re-export all refkey accessor functions and metadata
+export {
+  // Refkey accessor functions
+  serializationHelperRefkey,
+  pagingHelperRefkey,
+  pollingHelperRefkey,
+  simplePollerHelperRefkey,
+  urlTemplateHelperRefkey,
+  multipartHelperRefkey,
+  cloudSettingHelperRefkey,
+  xmlHelperRefkey,
+  // Metadata
+  getStaticHelperFileInfo,
+  STATIC_HELPERS_BASE_DIR
+} from "./StaticHelperRefkeys.js";
+
+// Re-export types
+export type {
+  SerializationHelperName,
+  PagingHelperName,
+  PollingHelperName,
+  SimplePollerHelperName,
+  UrlTemplateHelperName,
+  MultipartHelperName,
+  CloudSettingHelperName,
+  XmlHelperName,
+  StaticHelperFileInfo
+} from "./StaticHelperRefkeys.js";

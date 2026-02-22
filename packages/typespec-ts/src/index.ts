@@ -2,25 +2,10 @@
 // Licensed under the MIT License.
 
 import * as fsextra from "fs-extra";
-import {
-  AzureCoreDependencies,
-  AzureIdentityDependencies,
-  AzurePollingDependencies,
-  DefaultCoreDependencies
-} from "./modular/external-dependencies.js";
+
 import { clearDirectory } from "./utils/fileSystemUtils.js";
 import { EmitContext, Program } from "@typespec/compiler";
 import { GenerationDirDetail, SdkContext } from "./utils/interfaces.js";
-import {
-  CloudSettingHelpers,
-  MultipartHelpers,
-  PagingHelpers,
-  PollingHelpers,
-  SerializationHelpers,
-  SimplePollerHelpers,
-  UrlTemplateHelpers,
-  XmlHelpers
-} from "./modular/static-helpers-metadata.js";
 import {
   RLCModel,
   RLCOptions,
@@ -65,10 +50,7 @@ import { provideContext, useContext } from "./contextManager.js";
 
 import { EmitterOptions } from "./lib.js";
 import { ModularEmitterOptions } from "./modular/interfaces.js";
-import { Project } from "ts-morph";
-import { getClientContextPath } from "./modular/buildClientContext.js";
-import { buildApiOptions } from "./modular/emitModelsOptions.js";
-import { buildOperationFiles } from "./modular/buildOperations.js";
+import { getClientContextPath } from "./utils/clientUtils.js";
 import {
   createSdkContext,
   listAllServiceNamespaces,
@@ -76,14 +58,14 @@ import {
   SdkServiceOperation
 } from "@azure-tools/typespec-client-generator-core";
 import { transformModularEmitterOptions } from "./modular/buildModularOptions.js";
-import { emitTypes } from "./modular/emitModels.js";
+
 import { existsSync } from "fs";
 import { getModuleExports } from "./modular/buildProjectFiles.js";
 import { getClientHierarchyMap, getRLCClients } from "./utils/clientUtils.js";
 import { join } from "path";
-import { loadStaticHelpers } from "./framework/load-static-helpers.js";
+import { loadStaticHelpersAlloy } from "./framework/load-static-helpers-alloy.js";
 import { packageUsesXmlSerialization } from "./modular/serialization/buildXmlSerializerFunction.js";
-import { provideBinder } from "./framework/hooks/binder.js";
+
 import { provideSdkTypes } from "./framework/hooks/sdkTypes.js";
 import { transformRLCModel } from "./transform/transform.js";
 import { transformRLCOptions } from "./transform/transfromRLCOptions.js";
@@ -97,7 +79,6 @@ export async function $onEmit(context: EmitContext) {
     return;
   }
   /** Shared status */
-  const outputProject = new Project();
   const program: Program = context.program;
   const emitterOptions: EmitterOptions = context.options;
   const dpgContext = await createContextWithDefaultOptions(context);
@@ -111,42 +92,9 @@ export async function $onEmit(context: EmitContext) {
     RLCModel
   >();
   provideContext("rlcMetaTree", new Map());
-  provideContext("symbolMap", new Map());
-  provideContext("outputProject", outputProject);
   provideContext("emitContext", {
     compilerContext: context,
     tcgcContext: dpgContext
-  });
-  const staticHelpers = await loadStaticHelpers(
-    outputProject,
-    {
-      ...SerializationHelpers,
-      ...PagingHelpers,
-      ...PollingHelpers,
-      ...SimplePollerHelpers,
-      ...UrlTemplateHelpers,
-      ...MultipartHelpers,
-      ...CloudSettingHelpers,
-      ...XmlHelpers
-    },
-    {
-      sourcesDir: dpgContext.generationPathDetail?.modularSourcesDir,
-      options: rlcOptions,
-      program
-    }
-  );
-  const extraDependencies = isAzurePackage({ options: rlcOptions })
-    ? {
-        ...AzurePollingDependencies,
-        ...AzureCoreDependencies,
-        ...AzureIdentityDependencies
-      }
-    : { ...DefaultCoreDependencies };
-  const binder = provideBinder(outputProject, {
-    staticHelpers,
-    dependencies: {
-      ...extraDependencies
-    }
   });
   provideSdkTypes(dpgContext);
 
@@ -286,7 +234,6 @@ export async function $onEmit(context: EmitContext) {
   async function generateModularSources() {
     const modularSourcesRoot =
       dpgContext.generationPathDetail?.modularSourcesDir ?? "src";
-    const project = useContext("outputProject");
     modularEmitterOptions = transformModularEmitterOptions(
       dpgContext,
       modularSourcesRoot,
@@ -310,11 +257,13 @@ export async function $onEmit(context: EmitContext) {
       return;
     }
 
+    // Load static helpers as Map<relativePath, content>
+    const staticHelpers = await loadStaticHelpersAlloy({
+      options: rlcOptions
+    });
+
     // ── Emit everything through Alloy pipeline ──
-    // Pure Alloy components + TsMorphBridge for remaining ts-morph files.
-    // The tsMorphGenerate callback runs the remaining ts-morph generation
-    // (operations, options, serializers) and resolves binder references
-    // before Alloy renders the output.
+    // Pure Alloy components handle all source generation.
     const { emitAlloyOutput } = await import("./alloy-emitter.js");
     const sdkTypesCtx = useContext("sdkTypes");
     // Alloy writeOutput() joins emitterOutputDir + path, so paths must be relative
@@ -332,17 +281,9 @@ export async function $onEmit(context: EmitContext) {
       relativeSourcesRoot,
       dpgContext,
       sdkTypesCtx,
-      project,
+      staticHelpers,
       clientMap,
-      emitterOptions,
-      async () => {
-        emitTypes(dpgContext, { sourceRoot: modularSourcesRoot });
-        for (const subClient of clientMap) {
-          buildApiOptions(dpgContext, subClient, modularEmitterOptions);
-          buildOperationFiles(dpgContext, subClient, modularEmitterOptions);
-        }
-        binder.resolveAllReferences(modularSourcesRoot);
-      }
+      emitterOptions
     );
   }
 

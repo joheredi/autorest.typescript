@@ -3,9 +3,8 @@ import { NoTarget } from "@typespec/compiler";
 import { buildModelDeserializer } from "../../src/modular/serialization/buildDeserializerFunction.js";
 import { buildModelSerializer } from "../../src/modular/serialization/buildSerializerFunction.js";
 import { getParameterMap } from "../../src/modular/helpers/operationHelpers.js";
-import { buildSubClientIndexFile } from "../../src/modular/buildRootIndex.js";
+import { buildSubClientIndexFile } from "./testUtil/diagnosticTestHelpers.js";
 import { visitPackageTypes } from "../../src/modular/emitModels.js";
-import { provideContext } from "../../src/contextManager.js";
 import { SdkContext } from "../../src/utils/interfaces.js";
 import { UsageFlags } from "@azure-tools/typespec-client-generator-core";
 import { Project } from "ts-morph";
@@ -335,7 +334,6 @@ describe("Diagnostic Reporting Tests", () => {
   describe("buildSubClientIndexFile diagnostics", () => {
     it("should report client-file-not-found diagnostic", () => {
       const mockProject = new Project({ useInMemoryFileSystem: true });
-      provideContext("outputProject", mockProject);
 
       const mockClient = {
         kind: "client",
@@ -347,7 +345,12 @@ describe("Diagnostic Reporting Tests", () => {
         modularOptions: { sourceRoot: "src" }
       } as any;
 
-      buildSubClientIndexFile(mockContext, mockClientMap, mockEmitterOptions);
+      buildSubClientIndexFile(
+        mockContext,
+        mockClientMap,
+        mockEmitterOptions,
+        mockProject
+      );
 
       console.log(capturedDiagnostics[0]?.code);
       console.log(capturedDiagnostics[0]?.message);

@@ -13,6 +13,7 @@ import { assertEqualContent, ExampleJson } from "../util/testUtil.js";
 import { format } from "prettier";
 import { prettierTypeScriptOptions } from "../../src/lib.js";
 import { load as loadYaml } from "js-yaml";
+import { Project } from "ts-morph";
 
 const SCENARIOS_LOCATION = "./test/modularUnit/scenarios";
 
@@ -42,9 +43,9 @@ const OUTPUT_CODE_BLOCK_TYPES: Record<string, EmitterFunction> = {
       ? (namedUnknownArgs["configs"] as Record<string, string>)
       : {};
     const result = await emitModularModelsFromTypeSpec(tsp, configs);
-    return result!
-      .getInterfaceOrThrow(name ?? "No name specified!")
-      .getFullText();
+    const project = new Project({ useInMemoryFileSystem: true });
+    const file = project.createSourceFile("temp.ts", result || "");
+    return file.getInterfaceOrThrow(name ?? "No name specified!").getFullText();
   },
 
   // Snapshot of a particular class named {name} in the models file
@@ -57,7 +58,9 @@ const OUTPUT_CODE_BLOCK_TYPES: Record<string, EmitterFunction> = {
       ? (namedUnknownArgs["configs"] as Record<string, string>)
       : {};
     const result = await emitModularModelsFromTypeSpec(tsp, configs);
-    return result!.getTypeAlias(name ?? "No name specified!")!.getFullText();
+    const project = new Project({ useInMemoryFileSystem: true });
+    const file = project.createSourceFile("temp.ts", result || "");
+    return file.getTypeAlias(name ?? "No name specified!")!.getFullText();
   },
 
   // Snapshot of a particular enum named {name} in the models file
@@ -73,7 +76,9 @@ const OUTPUT_CODE_BLOCK_TYPES: Record<string, EmitterFunction> = {
     if (result === undefined) {
       return "// (file was not generated)";
     }
-    return result!.getEnum(name ?? "No name specified!")!.getFullText();
+    const project = new Project({ useInMemoryFileSystem: true });
+    const file = project.createSourceFile("temp.ts", result);
+    return file.getEnum(name ?? "No name specified!")!.getFullText();
   },
 
   // Snapshot of a particular function named {name} in the models file
@@ -91,7 +96,9 @@ const OUTPUT_CODE_BLOCK_TYPES: Record<string, EmitterFunction> = {
       return "// (file was not generated)";
     }
 
-    return result.getFunctionOrThrow(name ?? "No name specified!").getText();
+    const project = new Project({ useInMemoryFileSystem: true });
+    const file = project.createSourceFile("temp.ts", result);
+    return file.getFunctionOrThrow(name ?? "No name specified!").getText();
   },
 
   // Snapshot of the entire models file
@@ -105,7 +112,7 @@ const OUTPUT_CODE_BLOCK_TYPES: Record<string, EmitterFunction> = {
       return "// (file was not generated)";
     }
 
-    return result.getFullText();
+    return result;
   },
 
   // Snapshot of the top-level index file
@@ -140,7 +147,9 @@ const OUTPUT_CODE_BLOCK_TYPES: Record<string, EmitterFunction> = {
       return "// (file was not generated)";
     }
 
-    return result.getInterfaceOrThrow(name ?? "No name specified!").getText();
+    const project = new Project({ useInMemoryFileSystem: true });
+    const file = project.createSourceFile("temp.ts", result);
+    return file.getInterfaceOrThrow(name ?? "No name specified!").getText();
   },
 
   // Snapshot of the entire models file
@@ -157,7 +166,7 @@ const OUTPUT_CODE_BLOCK_TYPES: Record<string, EmitterFunction> = {
       return "// (file was not generated)";
     }
 
-    return result.getFullText();
+    return result;
   },
 
   // Snapshot of the entire operations file for when there is only one operation group

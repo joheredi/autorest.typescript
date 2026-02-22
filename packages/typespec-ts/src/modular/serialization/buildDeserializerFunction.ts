@@ -18,7 +18,7 @@ import {
 import {
   getAdditionalPropertiesName,
   normalizeModelName
-} from "../emitModels.js";
+} from "../model-utils.js";
 import { NameType, normalizeName } from "@azure-tools/rlc-common";
 import { isAzureCoreErrorType } from "../../utils/modelUtils.js";
 import {
@@ -27,9 +27,7 @@ import {
   isSupportedSerializeType,
   ModelSerializeOptions
 } from "./serializeUtils.js";
-import { SerializationHelpers } from "../static-helpers-metadata.js";
-import { refkey } from "../../framework/refkey.js";
-import { resolveReference } from "../../framework/reference.js";
+
 import {
   getAdditionalPropertiesType,
   getDirectSubtypes
@@ -157,7 +155,7 @@ function buildPolymorphicDeserializer(
     NameType.Operation
   )}Deserializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "deserializer"));
+    return deserializeFunctionName;
   }
   const deserializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,
@@ -169,7 +167,7 @@ function buildPolymorphicDeserializer(
         type: "any"
       }
     ],
-    returnType: resolveReference(refkey(type, "polymorphicType")),
+    returnType: `${normalizeModelName(context, type, NameType.Interface, true)}Union`,
     statements: []
   };
   if (!type.discriminatorProperty) {
@@ -263,7 +261,7 @@ function buildDiscriminatedUnionDeserializer(
     NameType.Operation
   )}Deserializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "deserializer"));
+    return deserializeFunctionName;
   }
   // Get the base deserializer name and ensure reference tracking
   const baseDeserializerName = `${normalizeModelName(
@@ -327,7 +325,7 @@ function buildDiscriminatedUnionDeserializer(
         type: "any"
       }
     ],
-    returnType: resolveReference(refkey(type, "polymorphicType")),
+    returnType: `${normalizeModelName(context, type, NameType.Interface, true)}Union`,
     statements: output.join("\n")
   };
   return deserializerFunction;
@@ -360,7 +358,7 @@ function buildUnionDeserializer(
     NameType.Operation
   )}Deserializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "deserializer"));
+    return deserializerFunctionName;
   }
   const deserializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,
@@ -372,7 +370,7 @@ function buildUnionDeserializer(
         type: "any"
       }
     ],
-    returnType: resolveReference(refkey(type)),
+    returnType: normalizeModelName(context, type, NameType.Interface),
     statements: ["return item;"]
   };
   return deserializerFunction;
@@ -402,9 +400,7 @@ function buildModelTypeDeserializer(
       options.skipDiscriminatedUnionSuffix
     )}Deserializer`;
   if (options.nameOnly) {
-    return options.flatten
-      ? resolveReference(refkey(options.flatten.property, "deserializer"))
-      : resolveReference(refkey(type, "deserializer"));
+    return deserializerFunctionName;
   }
   const deserializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,
@@ -418,7 +414,7 @@ function buildModelTypeDeserializer(
     ],
     returnType: options.flatten
       ? undefined // not set return type for flattened property deserializer and type system will infer correct one
-      : resolveReference(refkey(type)),
+      : normalizeModelName(context, type, NameType.Interface),
     statements: ["return item;"]
   };
   const nullabilityPrefix = "";
@@ -483,7 +479,7 @@ function getAdditionalPropertiesStatement(
   }
   return context.rlcOptions?.compatibilityMode === true
     ? "...item,"
-    : `${getAdditionalPropertiesName(context, type)}: ${resolveReference(SerializationHelpers.serializeRecord)}(${params.join(",")}),`;
+    : `${getAdditionalPropertiesName(context, type)}: serializeRecord(${params.join(",")}),`;
 }
 
 function buildDictTypeDeserializer(
@@ -517,7 +513,7 @@ function buildDictTypeDeserializer(
 
   const deserializerFunctionName = `${normalizeModelName(context, type, NameType.Operation, false, true)}Deserializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "deserializer"));
+    return deserializerFunctionName;
   }
   const deserializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,
@@ -529,7 +525,7 @@ function buildDictTypeDeserializer(
         type: "Record<string, any>"
       }
     ],
-    returnType: `Record<string, ${resolveReference(refkey(type.valueType)) ?? "any"}>`,
+    returnType: `Record<string, ${normalizeModelName(context, type.valueType as any, NameType.Interface) ?? "any"}>`,
     statements: [
       `
   const result: Record<string, any> = {};
@@ -573,7 +569,7 @@ function buildArrayTypeDeserializer(
   }
   const deserializerFunctionName = `${normalizeModelName(context, type, NameType.Operation, false, true)}Deserializer`;
   if (nameOnly) {
-    return resolveReference(refkey(type, "deserializer"));
+    return deserializerFunctionName;
   }
   const serializerFunction: FunctionDeclarationStructure = {
     kind: StructureKind.Function,

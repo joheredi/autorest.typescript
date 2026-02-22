@@ -25,7 +25,7 @@ import {
   getModelNamespaces,
   normalizeModelName,
   getModelsPath
-} from "../emitModels.js";
+} from "../model-utils.js";
 import { emitQueue } from "../../framework/hooks/sdkTypes.js";
 import { isExtensibleEnum } from "../type-expressions/get-enum-expression.js";
 import { isDiscriminatedUnion } from "../serialization/serializeUtils.js";

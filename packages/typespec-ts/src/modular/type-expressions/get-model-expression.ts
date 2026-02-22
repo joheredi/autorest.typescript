@@ -9,12 +9,11 @@ import {
   SdkModelType,
   SdkServiceResponseHeader
 } from "@azure-tools/typespec-client-generator-core";
-import { refkey } from "../../framework/refkey.js";
-import { resolveReference } from "../../framework/reference.js";
+import { NameType } from "@azure-tools/rlc-common";
 import { shouldEmitInline } from "./utils.js";
 import { useContext } from "../../contextManager.js";
 import { SdkContext } from "../../utils/interfaces.js";
-import { MultipartHelpers } from "../static-helpers-metadata.js";
+import { normalizeModelName } from "../model-utils.js";
 
 export interface ModelExpressionOptions extends EmitTypeOptions {
   skipPolymorphicUnion?: boolean;
@@ -27,16 +26,16 @@ export function getModelExpression(
 ): string {
   const externalModel = getExternalModel(type);
   if (externalModel) {
-    return resolveReference(externalModel);
+    return externalModel;
   }
 
   if (shouldEmitInline(type, options)) {
     return emitInlineModel(context, type.properties);
   } else {
     if (!options.skipPolymorphicUnion && type.discriminatedSubtypes) {
-      return resolveReference(refkey(type, "polymorphicType"));
+      return normalizeModelName(context, type);
     } else {
-      return resolveReference(type);
+      return normalizeModelName(context, type, NameType.Interface, true);
     }
   }
 }
@@ -99,13 +98,13 @@ export function getMultipartFileTypeExpression(
     : "string";
 
   let typeExpression = "{";
-  typeExpression += `contents: ${resolveReference(MultipartHelpers.FileContents)};`;
+  typeExpression += `contents: FileContents;`;
   typeExpression += `contentType${isContentTypeOptional ? "?" : ""}: ${contentTypeType};`;
   typeExpression += `filename${isFilenameOptional ? "?" : ""}: ${filenameType};`;
   typeExpression += "}";
 
   if (isContentTypeOptional && isFilenameOptional) {
-    typeExpression = `(${resolveReference(MultipartHelpers.FileContents)}) | ${typeExpression}`;
+    typeExpression = `(FileContents) | ${typeExpression}`;
   } else {
     typeExpression = `File | ${typeExpression}`;
   }
@@ -117,7 +116,7 @@ export function getMultipartFileTypeExpression(
   return typeExpression;
 }
 
-export function getExternalModel(type: SdkModelType) {
+export function getExternalModel(type: SdkModelType): string | undefined {
   const commonName = externalModels[type.crossLanguageDefinitionId];
 
   if (!commonName) {
@@ -125,5 +124,5 @@ export function getExternalModel(type: SdkModelType) {
   }
 
   const externalDependencies = useContext("dependencies");
-  return externalDependencies[commonName];
+  return externalDependencies[commonName]?.name;
 }

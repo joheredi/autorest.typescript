@@ -15,8 +15,12 @@ import {
   Operation
 } from "@typespec/compiler";
 import { SdkContext } from "./interfaces.js";
-import { ModularClientOptions } from "../modular/interfaces.js";
+import {
+  ModularClientOptions,
+  ModularEmitterOptions
+} from "../modular/interfaces.js";
 import { NameType, normalizeName } from "@azure-tools/rlc-common";
+import { getClientName } from "../modular/helpers/namingHelpers.js";
 
 export function getRLCClients(
   dpgContext: SdkContext,
@@ -173,4 +177,21 @@ export function getClientHierarchyMap(
     }
   }
   return clientMap;
+}
+
+/**
+ * This function gets the path of the file containing the modular client context
+ */
+export function getClientContextPath(
+  clientMap: [string[], SdkClientType<SdkServiceOperation>],
+  emitterOptions: ModularEmitterOptions
+): string {
+  const [_, client] = clientMap;
+  const { subfolder } = getModularClientOptions(clientMap);
+  const name = getClientName(client);
+  const srcPath = emitterOptions.modularOptions.sourceRoot;
+  const contentPath = `${srcPath}/${
+    subfolder && subfolder !== "" ? subfolder + "/" : ""
+  }api/${normalizeName(name, NameType.File)}Context.ts`;
+  return contentPath;
 }
