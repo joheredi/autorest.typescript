@@ -147,3 +147,44 @@
 
 **Impact:** Completes Phase 10.5. All production code files now render through Alloy `writeOutput()`. Last ts-morph Project dependency removed from production code. Test infrastructure preserved for backward compatibility.
 
+### 2026-02-21: Phase 11 — `getHeaderAndBodyParameters` Decomposed into JSX Components
+
+**Architectural milestone:** First function fully migrated where `resolveReferences()` was completely removed, proving refkey-native pattern.
+
+**What was done:**
+- **Decomposed `getHeaderAndBodyParameters`** (monolithic 200+ line string-returning function in `operationHelpers.ts`) into 3 JSX components in `Operations.tsx`:
+  - `<ContentTypeParam>` — renders `contentType` property. Returns `ts.PropertyAssignment` object.
+  - `<HeaderParams>` — renders headers object. Returns `ts.ObjectLiteralExpression` for the headers structure.
+  - `<BodyParam>` — renders body property using `serializerRefkey(bodyType)` / `xmlSerializerRefkey(bodyType)` **directly in code templates** (NOT via `resolveReferences()` string scanning). Uses `<ts.ImportSpecifier>` for explicit imports.
+- **Updated `<RequestCall>`** component to accept `children` prop (the 3 components above) instead of `headerAndBodyParams` string prop.
+- **Updated `<SendFunction>`** component:
+  - Removed `typeRefkeys` prop entirely — serializer imports are now auto-resolved via Alloy refkeys
+  - Removed `resolveReferences(typeRefkeys)` call and related string-scanning logic
+  - Now generates clean import statements directly from refkey objects
+
+**Exported 7 previously private helpers from `operationHelpers.ts`** for reuse in components:
+- `isContentType(value)` — checks if a value is a content-type constant
+- `getContentTypeValue(operation, type)` — extracts content-type string
+- `buildHeaderParameter(headerName, headerValue)` — constructs header property assignment
+- `isConstant(value)` — type guard for constant expressions
+- `isDefaultValueTypeMatch(defaultValue, parameterType)` — validates default value matches type
+- `formatDefaultValue(defaultValue, parameterType)` — serializes default value for code
+- `getEncodeForType(parameterType)` — determines URI encoding strategy
+
+**Refkey pattern in code templates:**
+Components now use refkey objects (e.g., `serializerRefkey(bodyType)`) directly inside code string templates:
+```tsx
+const ref = serializerRefkey(bodyType);
+// In template: 
+`import { ${ref.name} } from "${ref.module}";`
+// Alloy resolves the refkey object to its actual symbol reference during rendering
+```
+
+**Test results:** All 526 modular unit tests pass, no breaking API changes, no changes to operation output (all baselines match).
+
+**Architecture significance:**
+- **First complete `resolveReferences()` elimination:** This function was the last holdout in the operation pipeline. Proves the refkey-native pattern works end-to-end for complex string-rendering scenarios.
+- **SendFunction fully refkey-native:** Removed dependency on `typeRefkeys` prop that was passed from bridge code. All serializer references now use Alloy auto-import via refkeys.
+- **Bridge impact:** `typeRefkeys` is still needed by `getDeserializePrivateFunction` and `getOperationFunction` (unconverted ts-morph functions), but `SendFunction` is now free of it.
+- **Pattern for Phase 9:** This decomposition is the model for converting remaining Category A/B helpers — migrate string-returning functions to JSX components that render objects/templates directly.
+

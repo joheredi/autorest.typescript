@@ -18,6 +18,7 @@ import {
   getMethodHierarchiesMap,
   ServiceOperation,
   hasDualFormatSupport,
+  isBinaryPayload,
   isXmlPayload
 } from "../../utils/operationUtil.js";
 import {
@@ -32,7 +33,16 @@ import {
   getOptionalParamsName,
   getPathParameters,
   getQueryParameters,
-  getHeaderAndBodyParameters,
+  getParameterMap,
+  isContentType,
+  isConstant,
+  getContentTypeValue,
+  buildHeaderParameter,
+  getEncodeForType,
+  isDefaultValueTypeMatch,
+  formatDefaultValue,
+  getPropertySerializationPrefix,
+  serializeRequestValue,
   getResponseHeaders,
   getExceptionResponseHeaders,
   buildHeaderOnlyResponseType,
@@ -53,13 +63,20 @@ import {
 } from "./ExternalPackages.js";
 import { operationOptionsRefkey } from "./OperationOptions.js";
 import { typeRefkey as modelTypeRefkey } from "./Models.js";
-import {
-  serializerRefkey,
-  deserializerRefkey
-} from "./Serializers.js";
+import { serializerRefkey, deserializerRefkey } from "./Serializers.js";
+import { xmlSerializerRefkey } from "./XmlSerializers.js";
 import { normalizeModelName } from "../model-utils.js";
 import { buildModelSerializer } from "../serialization/buildSerializerFunction.js";
 import { buildModelDeserializer } from "../serialization/buildDeserializerFunction.js";
+import {
+  buildXmlModelSerializer,
+  hasXmlSerialization
+} from "../serialization/buildXmlSerializerFunction.js";
+import {
+  getNullableValidType,
+  isSpreadBodyParameter
+} from "../helpers/typeHelpers.js";
+import { isAzureCoreErrorType } from "../../utils/modelUtils.js";
 
 // ── Refkey helpers ──────────────────────────────────────────────────────
 
@@ -376,11 +393,7 @@ export function Operations(props: OperationsProps) {
         // Refkey map: maps symbol name strings found in generated function text
         // to Alloy refkeys. Alloy resolves these against declarations from
         // Models, Serializers, OperationOptions, and ExternalPackages.
-        const typeRefkeys = buildTypeRefkeys(
-          context,
-          operations,
-          prefixes
-        );
+        const typeRefkeys = buildTypeRefkeys(context, operations, prefixes);
 
         return (
           <ts.SourceFile path={filepath}>
@@ -432,7 +445,6 @@ function OperationGroup(props: OperationGroupProps): Children {
         prefixes={prefixes}
         clientType={clientType}
         client={client as SdkClientType<SdkHttpOperation>}
-        typeRefkeys={typeRefkeys}
       />
       {"\n"}
       <OperationFunction
@@ -461,9 +473,7 @@ function OperationGroup(props: OperationGroupProps): Children {
         refkey={operationRefkey(operation)}
         typeRefkeys={typeRefkeys}
       >
-        <FunctionBody typeRefkeys={typeRefkeys}>
-          {opFn.statements}
-        </FunctionBody>
+        <FunctionBody typeRefkeys={typeRefkeys}>{opFn.statements}</FunctionBody>
       </OperationFunction>
     </>
   );
@@ -502,7 +512,9 @@ function DeserializeHeaders(props: DeserializeHeadersProps): Children {
       <ts.FunctionDeclaration
         export
         name={`_${name}DeserializeHeaders`}
-        parameters={[{ name: "result", type: runtimeLib.PathUncheckedResponse }]}
+        parameters={[
+          { name: "result", type: runtimeLib.PathUncheckedResponse }
+        ]}
         returnType={returnType}
         refkey={deserializeHeadersRefkey(operation)}
       >
@@ -538,7 +550,9 @@ function DeserializeExceptionHeaders(props: DeserializeHeadersProps): Children {
       <ts.FunctionDeclaration
         export
         name={`_${name}DeserializeExceptionHeaders`}
-        parameters={[{ name: "result", type: runtimeLib.PathUncheckedResponse }]}
+        parameters={[
+          { name: "result", type: runtimeLib.PathUncheckedResponse }
+        ]}
         returnType={returnType}
         refkey={deserializeExceptionHeadersRefkey(operation)}
       >
@@ -556,8 +570,6 @@ interface SendFunctionProps {
   prefixes: string[];
   clientType: string;
   client?: SdkClientType<SdkHttpOperation>;
-  /** Refkey map for resolving symbol names in string helpers (temporary bridge). */
-  typeRefkeys: Record<string, Refkey>;
 }
 
 /**
@@ -565,8 +577,7 @@ interface SendFunctionProps {
  * Handles URL template expansion, headers, body serialization, and the HTTP call.
  */
 function SendFunction(props: SendFunctionProps): Children {
-  const { context, operation, prefixes, clientType, client, typeRefkeys } =
-    props;
+  const { context, operation, prefixes, clientType, client } = props;
   const { name } = getOperationName(operation);
   const runtimeLib = getRuntimeLib(context);
 
@@ -599,15 +610,6 @@ function SendFunction(props: SendFunctionProps): Children {
 
   const operationMethod = operation.operation.verb.toLowerCase();
 
-  // Header/body params come from a string helper — resolve symbol names
-  // (e.g. serializer function names) through the refkey map
-  const headerAndBodyStr = getHeaderAndBodyParameters(
-    context,
-    operation,
-    optionalParamName
-  );
-  const resolvedHeaderBody = resolveReferences(headerAndBodyStr, typeRefkeys);
-
   return (
     <ts.FunctionDeclaration
       export
@@ -632,9 +634,23 @@ function SendFunction(props: SendFunctionProps): Children {
         hasUrlTemplate={hasUrlTemplate}
         pathVarName={hasUrlTemplate ? getPathVarName(rawParams) : undefined}
         optionalParamName={optionalParamName}
-        headerAndBodyParams={resolvedHeaderBody}
         runtimeLib={runtimeLib}
-      />
+      >
+        <ContentTypeParam
+          operation={operation}
+          optionalParamName={optionalParamName}
+        />
+        <HeaderParams
+          context={context}
+          operation={operation}
+          optionalParamName={optionalParamName}
+        />
+        <BodyParam
+          context={context}
+          operation={operation}
+          optionalParamName={optionalParamName}
+        />
+      </RequestCall>
     </ts.FunctionDeclaration>
   );
 }
@@ -668,9 +684,7 @@ function UrlExpansion(props: UrlExpansionProps): Children {
 }
 
 /** Computes a unique local variable name for the URL path. */
-function getPathVarName(
-  params: Array<{ name: string }>
-): string {
+function getPathVarName(params: Array<{ name: string }>): string {
   const paramNames = new Set(params.map((p) => p.name));
   return generateLocallyUniqueName("path", paramNames);
 }
@@ -681,9 +695,8 @@ interface RequestCallProps {
   hasUrlTemplate: boolean;
   pathVarName?: string;
   optionalParamName: string;
-  /** Resolved header/body params — may contain refkeys for serializer imports. */
-  headerAndBodyParams: Children;
   runtimeLib: ReturnType<typeof getRuntimeLib>;
+  children?: Children;
 }
 
 /** Renders the final HTTP request call statement. */
@@ -692,7 +705,195 @@ function RequestCall(props: RequestCallProps): Children {
     ? props.pathVarName!
     : `"${props.operationPath}"`;
 
-  return code`return context.path(${pathArg}).${props.verb}({...${props.runtimeLib.operationOptionsToRequestParameters}(${props.optionalParamName}), ${props.headerAndBodyParams}});`;
+  return code`return context.path(${pathArg}).${props.verb}({...${props.runtimeLib.operationOptionsToRequestParameters}(${props.optionalParamName}), ${props.children}});`;
+}
+
+// ── Header and body parameter components ────────────────────────────────
+
+interface ContentTypeParamProps {
+  operation: ServiceOperation;
+  optionalParamName: string;
+}
+
+/** Renders the contentType property in the request options, if applicable. */
+function ContentTypeParam(props: ContentTypeParamProps): Children {
+  const params = props.operation.operation.parameters;
+  if (!params) return null;
+
+  const contentTypeParameter = params.find(isContentType);
+  if (!contentTypeParameter) return null;
+
+  return `${getContentTypeValue(contentTypeParameter, props.optionalParamName)},`;
+}
+
+interface HeaderParamsProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+  optionalParamName: string;
+}
+
+/** Renders the headers object in the request options, if applicable. */
+function HeaderParams(props: HeaderParamsProps): Children {
+  const { context, operation, optionalParamName } = props;
+  const params = operation.operation.parameters;
+  if (!params) return null;
+
+  const operationParameters = params.filter((p) => !isContentType(p));
+
+  const headerEntries: { paramMap: string; param: (typeof params)[0] }[] = [];
+  for (const param of operationParameters) {
+    if (param.kind === "header") {
+      // skip tcgc generated contentType and accept non constant type header parameter
+      if (
+        param.isGeneratedName &&
+        !isConstant(param.type) &&
+        (param.name === "contentType" || param.name === "accept")
+      ) {
+        continue;
+      }
+      if (
+        param.methodParameterSegments &&
+        param.methodParameterSegments.length > 0
+      ) {
+        headerEntries.push({
+          paramMap: getParameterMap(context, param, optionalParamName),
+          param
+        });
+      }
+    }
+  }
+
+  if (headerEntries.length === 0) return null;
+
+  const headerStr = headerEntries
+    .map((i) =>
+      buildHeaderParameter(
+        context.program,
+        i.paramMap,
+        i.param,
+        optionalParamName
+      )
+    )
+    .join(",\n");
+
+  return `\nheaders: {${headerStr}, ...${optionalParamName}.requestOptions?.headers },`;
+}
+
+interface BodyParamProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+  optionalParamName: string;
+}
+
+/**
+ * Renders the body property in the request options.
+ * Uses Alloy refkeys for serializer function references so imports are auto-resolved.
+ */
+function BodyParam(props: BodyParamProps): Children {
+  const { context, operation, optionalParamName } = props;
+  const bodyParameter = operation.operation.bodyParam;
+
+  if (bodyParameter === undefined) return null;
+  if (!bodyParameter || !bodyParameter.type) return null;
+
+  const contentTypes = bodyParameter.contentTypes;
+  const isXml = isXmlPayload(contentTypes);
+  const isDualFormat = hasDualFormatSupport(contentTypes);
+  const bodyType = getNullableValidType(bodyParameter.type);
+
+  const useXmlSerialization =
+    isXml && bodyType.kind === "model" && hasXmlSerialization(bodyType);
+
+  // Check if a named serializer function exists
+  let hasNamedSerializer = false;
+  if (useXmlSerialization) {
+    hasNamedSerializer = !!buildXmlModelSerializer(context, bodyType, {
+      nameOnly: true,
+      skipDiscriminatedUnionSuffix: false
+    });
+  } else {
+    hasNamedSerializer = !!buildModelSerializer(context, bodyType, {
+      nameOnly: true,
+      skipDiscriminatedUnionSuffix: false
+    });
+  }
+
+  // Compute body name expression
+  const bodyParamName = normalizeName(
+    bodyParameter.name,
+    NameType.Parameter,
+    true
+  );
+  let bodyNameExpression = bodyParameter.optional
+    ? `${optionalParamName}["${bodyParamName}"]`
+    : bodyParamName;
+
+  const hasClientDefault =
+    bodyParameter.optional &&
+    bodyParameter.clientDefaultValue !== undefined &&
+    isDefaultValueTypeMatch(bodyParameter, bodyParameter.clientDefaultValue);
+
+  if (hasClientDefault) {
+    const formattedDefault = formatDefaultValue(
+      bodyParameter.clientDefaultValue
+    );
+    bodyNameExpression = `(${bodyNameExpression} ?? ${formattedDefault})`;
+  }
+
+  const nullOrUndefinedPrefix = hasClientDefault
+    ? ""
+    : getPropertySerializationPrefix(
+        context,
+        bodyParameter,
+        bodyParameter.optional ? optionalParamName : undefined
+      );
+
+  // Dual-format: runtime content type check with both XML and JSON serializers
+  if (
+    isDualFormat &&
+    bodyType.kind === "model" &&
+    hasXmlSerialization(bodyType)
+  ) {
+    const hasXmlSerializer = !!buildXmlModelSerializer(context, bodyType, {
+      nameOnly: true,
+      skipDiscriminatedUnionSuffix: false
+    });
+    const hasJsonSerializer = !!buildModelSerializer(context, bodyType, {
+      nameOnly: true,
+      skipDiscriminatedUnionSuffix: false
+    });
+
+    if (hasXmlSerializer && hasJsonSerializer) {
+      return code`\nbody: ${nullOrUndefinedPrefix}(isXmlContentType(${optionalParamName}?.contentType ?? "application/json") ? ${xmlSerializerRefkey(bodyType)}(${bodyNameExpression}) : ${serializerRefkey(bodyType)}(${bodyNameExpression})),`;
+    }
+  }
+
+  // Named serializer (non-spread body)
+  if (hasNamedSerializer && !isSpreadBodyParameter(bodyParameter)) {
+    const ref = useXmlSerialization
+      ? xmlSerializerRefkey(bodyType)
+      : serializerRefkey(bodyType);
+    return code`\nbody: ${nullOrUndefinedPrefix}${ref}(${bodyNameExpression}),`;
+  }
+
+  // Azure Core error type — pass through without serializer
+  if (isAzureCoreErrorType(context.program, bodyParameter.type.__raw)) {
+    return `\nbody: ${nullOrUndefinedPrefix}${bodyNameExpression},`;
+  }
+
+  // Inline serialization fallback (spread models, basic types, etc.)
+  const serializedBody = serializeRequestValue(
+    context,
+    bodyParameter.type,
+    bodyNameExpression,
+    !bodyParameter.optional,
+    isBinaryPayload(context, bodyParameter.__raw!, bodyParameter.contentTypes)
+      ? "binary"
+      : getEncodeForType(bodyParameter.type),
+    undefined,
+    true
+  );
+  return `\nbody: ${serializedBody.startsWith(nullOrUndefinedPrefix) ? "" : nullOrUndefinedPrefix}${serializedBody},`;
 }
 
 // ── Bridge components (temporary — for functions not yet converted to JSX) ──

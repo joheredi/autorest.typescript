@@ -1,6 +1,7 @@
 # Lambert — History
 
 ## Project Context
+
 **Project:** TypeSpec TypeScript Emitter — Alloy Framework Migration
 **Stack:** TypeScript, TypeSpec, Alloy JSX, ts-morph (being replaced)
 **User:** Jose Manuel Heredia Hidalgo
@@ -13,19 +14,26 @@
 Ripley delivered the foundational refkey API. Eight accessor functions provide type-safe access to ~50 static helper symbols:
 
 **Available for operations (Phase 4):**
+
 - `pagingHelperRefkey(name)` — 6 symbols (buildPagedAsyncIterator, PageSettings, ContinuablePage, etc.)
 - `pollingHelperRefkey(name)` — 2 symbols (getLongRunningPoller, GetLongRunningPollerOptions)
 - `urlTemplateHelperRefkey(name)` — 2 symbols (expandUrlTemplate, UrlTemplateOptions)
 - Plus access to serialization and XML helpers as needed
 
 **Other functions also available:**
+
 - `serializationHelperRefkey(name)` — 13 symbols
 - `xmlHelperRefkey(name)` — 13 symbols
 - And 3 more families
 
 **How to use:**
+
 ```tsx
-import { pagingHelperRefkey, pollingHelperRefkey, urlTemplateHelperRefkey } from "@alloy-js/typescript-sdk/modular";
+import {
+  pagingHelperRefkey,
+  pollingHelperRefkey,
+  urlTemplateHelperRefkey,
+} from "@alloy-js/typescript-sdk/modular";
 
 const buildPagingRef = pagingHelperRefkey("buildPagedAsyncIterator");
 const getLroPollerRef = pollingHelperRefkey("getLongRunningPoller");
@@ -58,6 +66,7 @@ Successfully migrated operation generation from ts-morph to Alloy JSX pipeline.
 4. **`index.ts`** — Removed `buildOperationFiles` and `buildApiOptions` from the `tsMorphGenerate` callback
 
 **Key learnings:**
+
 - Functions in `operationHelpers.ts` are shared between operation and serializer pipelines — can't blindly remove `resolveReference` from shared functions
 - The binder's `resolveAllReferences` must still run for serializer import tracking
 - Operation function bodies are rendered as raw strings; import tracking handled via explicit import computation rather than Alloy auto-import (pragmatic bridge until full code-template conversion in Phase 9)
@@ -70,6 +79,7 @@ Successfully migrated operation generation from ts-morph to Alloy JSX pipeline.
 Removed ALL `resolveReference`, `addDeclaration`, `refkey`, `useDependencies`, `useSdkTypes`, and `frameworkRefkey` calls from 4 operation files:
 
 **operationHelpers.ts (L1) — 4 calls removed:**
+
 - `resolveReference(SerializationHelpers.areAllPropsUndefined)` → literal `"areAllPropsUndefined"`
 - `resolveReference(dependencies.uint8ArrayToString)` → literal `"uint8ArrayToString"`
 - `resolveReference(frameworkRefkey(sdkType, "serializer"))` → `normalizeModelName(context, type, NameType.Operation) + "Serializer"`
@@ -78,12 +88,14 @@ Removed ALL `resolveReference`, `addDeclaration`, `refkey`, `useDependencies`, `
 - Added import: `normalizeModelName` from `../model-utils.js`
 
 **buildOperations.ts (L3) — 3 calls removed:**
+
 - `resolveReference(dependencies.OperationOptions)` → literal `"OperationOptions"`
 - `addDeclaration(sourceFile, operationDeclaration, refkey(op, "api"))` → `operationGroupFile.addFunction(operationDeclaration)`
 - `addDeclaration(sourceFile, operationOptionsInterface, refkey(...))` → `sourceFile.addInterface(operationOptionsInterface)`
 - Removed imports: `resolveReference`, `useDependencies`, `addDeclaration`, `refkey`
 
 **classicalOperationHelpers.ts (L4) — 12 calls removed:**
+
 - All `resolveReference(refkey(X, layer, "classicOperations"))` → direct name string (e.g. `interfaceName`, `nextLayerInterfaceName`, `functionName`)
 - `resolveReference(AzurePollingDependencies.OperationState)` → `"OperationState"`
 - `resolveReference(SimplePollerHelpers.SimplePollerLike)` → `"SimplePollerLike"`
@@ -92,6 +104,7 @@ Removed ALL `resolveReference`, `addDeclaration`, `refkey`, `useDependencies`, `
 - Removed imports: `refkey`, `resolveReference`, `addDeclaration`, `SimplePollerHelpers`, `AzurePollingDependencies`
 
 **buildClassicalClient.ts (L5) — 8 calls removed:**
+
 - `resolveReference(dependencies.Pipeline)` → `"Pipeline"`
 - `resolveReference(refkey(method[1], "api"))` → `declaration.name ?? "FIXME"`
 - `resolveReference(AzurePollingDependencies.OperationState)` → `"OperationState"`
@@ -124,12 +137,14 @@ Successfully removed all ts-morph Project creation, population, and querying fro
 6. **importHelper.ts** — Stubbed out getRelativePartFromImportPath() function. This file was never imported anywhere. Function now returns undefined to remove symbolMap dependency.
 
 **Verification:**
+
 - emitModels.ts is NOT orphaned — visitPackageTypes() is still actively called by provideSdkTypes() in sdkTypes.ts
 - emitTypes() within emitModels.ts WAS orphaned — deleted along with 500+ lines of helper code
 - emitModelsOptions.ts IS orphaned — no imports anywhere, functions stubbed out
 - importHelper.ts IS orphaned — no imports anywhere, functions stubbed out
 
 **Impact:**
+
 - Zero `new Project()` calls in production code
 - Zero `outputProject.getSourceFile()` or `outputProject.createSourceFile()` calls in active code paths
 - All output file discovery now happens via filesystem scanning after Alloy writes files
@@ -144,6 +159,7 @@ Future cleanup can delete the stubbed files (emitModelsOptions.ts, importHelper.
 Created the Alloy component and utility for rendering static helper files.
 
 **Step 1: File-reading utility (`loadStaticHelpersAlloy`)**
+
 - Located in `src/framework/load-static-helpers-alloy.ts`
 - Reads all `.ts` files from `static/static-helpers/` recursively
 - For non-Azure packages, rewrites imports:
@@ -154,6 +170,7 @@ Created the Alloy component and utility for rendering static helper files.
 - Already existed before this task, enhanced with better documentation
 
 **Step 2: StaticHelperFiles Alloy component**
+
 - Created in `src/modular/components/StaticHelperFiles.tsx`
 - Interface: `StaticHelperFilesProps { files: Map<string, string> }`
 - Renders each entry as `<ts.SourceFile path={path}>{content}</ts.SourceFile>`
@@ -162,11 +179,13 @@ Created the Alloy component and utility for rendering static helper files.
 - Exported from `src/modular/components/index.ts`
 
 **Integration:**
+
 - Used in `src/alloy-emitter.tsx` with `<StaticHelperFiles files={staticHelpers} />`
 - Files are pre-read via `loadStaticHelpersAlloy()` before rendering
 - Component fits into the Alloy JSX pipeline alongside other components
 
 **Key patterns learned:**
+
 - TypeScript module resolution: import `.tsx` files using `.js` extension in import paths
 - Alloy components use `<For>` for clean map iteration instead of manual array building
 - File reading and content transformation separated from rendering for testability
@@ -174,8 +193,55 @@ Created the Alloy component and utility for rendering static helper files.
 **Build + format clean.** Component ready for integration with TsMorphBridge replacement in Phase 9.
 
 **Phase 10.5 Completion (2026-02-21):**
+
 - ✅ Static helpers converted from TsMorphBridge to Alloy JSX
 - ✅ All production code now renders through `writeOutput()` pipeline
 - ✅ Type check, build, 309 RLC + 282 Modular tests passing
 - ✅ Test infrastructure preserved for backward compatibility
 - ⚠️ Unresolved refkey blocker identified in isolated component test rendering
+
+### Phase 11 Complete — `getHeaderAndBodyParameters` JSX Decomposition (2026-02-21) [COMPLETED]
+
+**Cross-agent note from Ripley:** Three new JSX components are now available in `Operations.tsx` for request construction:
+
+- `<ContentTypeParam>` — renders contentType property
+- `<HeaderParams>` — renders headers object
+- `<BodyParam>` — renders body property using refkeys directly in templates
+
+**What changed:**
+
+1. **Three new JSX components in `Operations.tsx`:**
+   - `<ContentTypeParam>` — extracts and renders contentType property. Returns `ts.PropertyAssignment`.
+   - `<HeaderParams>` — builds headers object literal. Returns `ts.ObjectLiteralExpression | undefined`.
+   - `<BodyParam>` — renders body with serializer refkeys **directly in code templates** (not via `resolveReferences` string scanning). Returns `ts.PropertyAssignment`.
+
+2. **Updated `<RequestCall>` component:**
+   - Now accepts `children` prop containing the three sub-components
+   - Composes them into the final request call structure
+
+3. **Updated `<SendFunction>` component:**
+   - **Removed `typeRefkeys` prop completely** — serializer imports now auto-resolved via Alloy refkeys
+   - Removed all `resolveReferences(typeRefkeys)` string-scanning logic
+   - Now generates clean import statements directly from refkey objects
+
+4. **Exported 7 helpers from `operationHelpers.ts`:**
+   - `isContentType`, `getContentTypeValue`, `buildHeaderParameter`, `isConstant`, `isDefaultValueTypeMatch`, `formatDefaultValue`, `getEncodeForType`
+   - Available for component reuse and unit testing
+
+**Architectural significance:**
+
+- **First complete `resolveReferences()` elimination** — proved refkey-native pattern works for complex rendering
+- **SendFunction fully refkey-native** — removed bridge prop `typeRefkeys` that was passed from unconverted code
+- **Pattern established for Phase 9:** JSX components can use refkey objects directly in code templates; Alloy resolves them during rendering
+
+**Test results:** 526 modular + 309 RLC + 144 next — all passing. Build + format + lint clean. No breaking changes.
+
+**Key pattern for future decomposition:**
+
+```tsx
+// Use refkeys directly in templates — no post-render string-scanning
+const serializerRef = serializerRefkey(bodyType);
+const template = code`
+  const result = ${serializerRef}(data); // Alloy resolves during rendering
+`;
+```

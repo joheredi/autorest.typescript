@@ -720,7 +720,9 @@ function getExceptionThrowStatement(
   return statements.join("\n");
 }
 
-export function getOptionalParamsName(parameters: GeneratedFunction["parameters"]) {
+export function getOptionalParamsName(
+  parameters: GeneratedFunction["parameters"]
+) {
   return (
     parameters.filter((p) => p.type?.endsWith("operationOptions__"))[0]?.name ??
     "options"
@@ -1297,7 +1299,7 @@ export function getHeaderAndBodyParameters(
 }
 
 // Specially handle the type for headers because we only allow string/number/boolean values
-function buildHeaderParameter(
+export function buildHeaderParameter(
   program: Program,
   paramMap: string,
   param: SdkHttpParameter,
@@ -1517,14 +1519,14 @@ function getCollectionFormatForParam(
   )}`;
 }
 
-function isContentType(param: SdkHttpParameter): boolean {
+export function isContentType(param: SdkHttpParameter): boolean {
   return (
     param.kind === "header" &&
     param.serializedName.toLowerCase() === "content-type"
   );
 }
 
-function getContentTypeValue(
+export function getContentTypeValue(
   param: SdkHttpParameter,
   optionalParamName: string = "options"
 ) {
@@ -1580,7 +1582,7 @@ function getConstantValue(param: SdkConstantType) {
   return `${param.value}`;
 }
 
-function isConstant(param: SdkType): param is SdkConstantType {
+export function isConstant(param: SdkType): param is SdkConstantType {
   return param.kind === "constant";
 }
 
@@ -1627,7 +1629,7 @@ function getOptional(
 /**
  * Get the encode for SDK type
  */
-function getEncodeForType(
+export function getEncodeForType(
   type: SdkType | SdkHttpParameter | SdkModelPropertyType
 ) {
   return (type as any).encode;
@@ -2430,7 +2432,7 @@ export function getAllAncestors(type: SdkType): SdkType[] {
  * Checks if a clientDefaultValue type matches the parameter type.
  * Returns true if the default value type is compatible with the parameter type.
  */
-function isDefaultValueTypeMatch(
+export function isDefaultValueTypeMatch(
   param: SdkHttpParameter | SdkBodyParameter,
   defaultValue: unknown
 ): boolean {
@@ -2465,7 +2467,7 @@ function isDefaultValueTypeMatch(
  * Formats a default value for code generation.
  * Strings are wrapped in quotes, other values are used as-is.
  */
-function formatDefaultValue(defaultValue: unknown): string {
+export function formatDefaultValue(defaultValue: unknown): string {
   if (typeof defaultValue === "string") {
     return `"${defaultValue}"`;
   }
