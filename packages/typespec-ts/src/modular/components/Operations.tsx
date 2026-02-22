@@ -1,4 +1,4 @@
-import { Children, For, refkey, Refkey } from "@alloy-js/core";
+import { Children, code, For, refkey, Refkey } from "@alloy-js/core";
 import * as ts from "@alloy-js/typescript";
 import {
   SdkClientType,
@@ -26,14 +26,17 @@ import {
 import {
   getSendPrivateFunction,
   getDeserializePrivateFunction,
-  getDeserializeHeadersPrivateFunction,
-  getDeserializeExceptionHeadersPrivateFunction,
   getOperationFunction,
   getOperationOptionsName,
+  getResponseHeaders,
+  getExceptionResponseHeaders,
+  buildHeaderOnlyResponseType,
+  buildHeaderOnlyResponseValue,
   isLroOnlyOperation,
   isLroAndPagingOperation,
   isPagingOnlyOperation
 } from "../helpers/operationHelpers.js";
+import { getOperationName } from "../helpers/namingHelpers.js";
 import {
   httpRuntimeLib,
   azureCoreClientLib,
@@ -55,6 +58,25 @@ import { buildModelDeserializer } from "../serialization/buildDeserializerFuncti
 /** Refkey for a public operation function. */
 export function operationRefkey(operation: ServiceOperation): Refkey {
   return refkey(operation, "api");
+}
+
+/** Refkey for the response headers deserializer function. */
+export function deserializeHeadersRefkey(operation: ServiceOperation): Refkey {
+  return refkey(operation, "deserializeHeaders");
+}
+
+/** Refkey for the exception headers deserializer function. */
+export function deserializeExceptionHeadersRefkey(
+  operation: ServiceOperation
+): Refkey {
+  return refkey(operation, "deserializeExceptionHeaders");
+}
+
+/** Returns the appropriate Alloy external package for runtime imports. */
+function getRuntimeLib(context: SdkContext) {
+  return isAzurePackage({ options: context.rlcOptions ?? {} })
+    ? azureCoreClientLib
+    : httpRuntimeLib;
 }
 
 // ── Types ───────────────────────────────────────────────────────────────
@@ -393,11 +415,6 @@ function OperationGroup(props: OperationGroupProps): Children {
     client as SdkClientType<SdkHttpOperation>
   );
   const deserFn = getDeserializePrivateFunction(context, operation);
-  const headersFn = getDeserializeHeadersPrivateFunction(context, operation);
-  const exHeadersFn = getDeserializeExceptionHeadersPrivateFunction(
-    context,
-    operation
-  );
   const opFn = getOperationFunction(context, [prefixes, operation], clientType);
 
   return (
@@ -429,42 +446,8 @@ function OperationGroup(props: OperationGroupProps): Children {
           {deserFn.statements}
         </FunctionBody>
       </OperationFunction>
-      {headersFn && (
-        <>
-          {"\n"}
-          <OperationFunction
-            name={headersFn.name}
-            export={headersFn.isExported}
-            async={headersFn.isAsync}
-            returnType={headersFn.returnType}
-            parameters={headersFn.parameters}
-            docs={headersFn.docs}
-            typeRefkeys={typeRefkeys}
-          >
-            <FunctionBody typeRefkeys={typeRefkeys}>
-              {headersFn.statements}
-            </FunctionBody>
-          </OperationFunction>
-        </>
-      )}
-      {exHeadersFn && (
-        <>
-          {"\n"}
-          <OperationFunction
-            name={exHeadersFn.name}
-            export={exHeadersFn.isExported}
-            async={exHeadersFn.isAsync}
-            returnType={exHeadersFn.returnType}
-            parameters={exHeadersFn.parameters}
-            docs={exHeadersFn.docs}
-            typeRefkeys={typeRefkeys}
-          >
-            <FunctionBody typeRefkeys={typeRefkeys}>
-              {exHeadersFn.statements}
-            </FunctionBody>
-          </OperationFunction>
-        </>
-      )}
+      <DeserializeHeaders context={context} operation={operation} />
+      <DeserializeExceptionHeaders context={context} operation={operation} />
       {"\n"}
       <OperationFunction
         name={opFn.name}
@@ -484,7 +467,86 @@ function OperationGroup(props: OperationGroupProps): Children {
   );
 }
 
-// ── Idiomatic Alloy function components ─────────────────────────────────
+// ── Native JSX operation components ─────────────────────────────────────
+// These replace the old getXxxFunction helpers with declarative Alloy components.
+// They use `code` tagged templates with refkeys — no string scanning needed.
+
+interface DeserializeHeadersProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+}
+
+/**
+ * Renders the private function that deserializes response headers.
+ * Only renders when headers exist and include-headers-in-response is enabled.
+ */
+function DeserializeHeaders(props: DeserializeHeadersProps): Children {
+  const { context, operation } = props;
+  const isResponseHeadersEnabled =
+    context.rlcOptions?.includeHeadersInResponse === true;
+  if (!isResponseHeadersEnabled) return null;
+
+  const responseHeaders = getResponseHeaders(operation.operation.responses);
+  if (responseHeaders.length === 0) return null;
+
+  const { name } = getOperationName(operation);
+  const runtimeLib = getRuntimeLib(context);
+  const returnType = buildHeaderOnlyResponseType(context, responseHeaders);
+  const bodyExpr = buildHeaderOnlyResponseValue(context, responseHeaders);
+
+  return (
+    <>
+      {"\n"}
+      <ts.FunctionDeclaration
+        export
+        name={`_${name}DeserializeHeaders`}
+        parameters={[{ name: "result", type: runtimeLib.PathUncheckedResponse }]}
+        returnType={returnType}
+        refkey={deserializeHeadersRefkey(operation)}
+      >
+        {code`return ${bodyExpr};`}
+      </ts.FunctionDeclaration>
+    </>
+  );
+}
+
+/**
+ * Renders the private function that deserializes exception response headers.
+ * Only renders when exception headers exist and include-headers-in-response is enabled.
+ */
+function DeserializeExceptionHeaders(props: DeserializeHeadersProps): Children {
+  const { context, operation } = props;
+  const isResponseHeadersEnabled =
+    context.rlcOptions?.includeHeadersInResponse === true;
+  if (!isResponseHeadersEnabled) return null;
+
+  const exceptionHeaders = getExceptionResponseHeaders(
+    operation.operation.exceptions
+  );
+  if (exceptionHeaders.length === 0) return null;
+
+  const { name } = getOperationName(operation);
+  const runtimeLib = getRuntimeLib(context);
+  const returnType = buildHeaderOnlyResponseType(context, exceptionHeaders);
+  const bodyExpr = buildHeaderOnlyResponseValue(context, exceptionHeaders);
+
+  return (
+    <>
+      {"\n"}
+      <ts.FunctionDeclaration
+        export
+        name={`_${name}DeserializeExceptionHeaders`}
+        parameters={[{ name: "result", type: runtimeLib.PathUncheckedResponse }]}
+        returnType={returnType}
+        refkey={deserializeExceptionHeadersRefkey(operation)}
+      >
+        {code`return ${bodyExpr};`}
+      </ts.FunctionDeclaration>
+    </>
+  );
+}
+
+// ── Bridge components (temporary — for functions not yet converted to JSX) ──
 
 interface OperationFunctionProps {
   name: string;

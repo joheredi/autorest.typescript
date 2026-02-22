@@ -543,7 +543,7 @@ function getExceptionDetails(
 /**
  * Collects and deduplicates all response headers from operation exceptions.
  */
-function getExceptionResponseHeaders(
+export function getExceptionResponseHeaders(
   exceptions: SdkHttpOperation["exceptions"]
 ): SdkServiceResponseHeader[] {
   const headerMap = new Map<string, SdkServiceResponseHeader>();
@@ -2623,7 +2623,7 @@ function buildCompositeResponseType(
  * @param headers - The response headers
  * @returns The inline type expression as a string (e.g., "{ requestId: string; optionalHeader?: string }")
  */
-function buildHeaderOnlyResponseType(
+export function buildHeaderOnlyResponseType(
   context: SdkContext,
   headers: SdkServiceResponseHeader[]
 ): string {
@@ -2646,7 +2646,7 @@ function buildHeaderOnlyResponseType(
  * @param headers - The response headers
  * @returns JavaScript expression string for the header-only response object
  */
-function buildHeaderOnlyResponseValue(
+export function buildHeaderOnlyResponseValue(
   context: SdkContext,
   headers: SdkServiceResponseHeader[]
 ): string {
