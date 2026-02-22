@@ -2,11 +2,15 @@ import { Children, code, For, refkey, Refkey } from "@alloy-js/core";
 import * as ts from "@alloy-js/typescript";
 import {
   getClientOptions,
+  isReadOnly,
   SdkClientType,
   SdkHttpOperation,
+  SdkModelPropertyType,
+  SdkModelType,
   SdkServiceOperation,
   SdkType
 } from "@azure-tools/typespec-client-generator-core";
+import { isMetadata } from "@typespec/http";
 import {
   NameType,
   normalizeName,
@@ -40,6 +44,11 @@ import {
   isDefaultValueTypeMatch,
   formatDefaultValue,
   getPropertySerializationPrefix,
+  getPropertyFullName,
+  getPropertySerializedName,
+  getSerializationExpression,
+  getAllAncestors,
+  getAllProperties,
   serializeRequestValue,
   getResponseHeaders,
   getExceptionResponseHeaders,
@@ -1616,6 +1625,48 @@ interface BodyParamProps {
 }
 
 /**
+ * Builds the property entries for a spread model body, using Alloy refkeys for
+ * model serializer function references so imports are auto-resolved.
+ * Properties with a named model serializer use `serializerRefkey`; all others
+ * fall back to the raw serialization expression produced by `getSerializationExpression`.
+ */
+function buildSpreadModelBodyProps(
+  context: SdkContext,
+  bodyType: SdkModelType
+): Children[] {
+  const allParents = getAllAncestors(bodyType);
+  const properties: SdkModelPropertyType[] =
+    getAllProperties(context, bodyType, allParents) ?? [];
+
+  return properties
+    .filter(
+      (p) =>
+        !(p.kind === "property" && isReadOnly(p)) &&
+        !isMetadata(context.program, p.__raw!)
+    )
+    .map((prop) => {
+      const serializedName = getPropertySerializedName(prop);
+      const propType = getNullableValidType(prop.type);
+      const propFullName = getPropertyFullName(context, prop, "");
+      const nullOrUndef = getPropertySerializationPrefix(context, prop, "");
+
+      // For model types with a named serializer, use a refkey so Alloy tracks the import
+      if (propType.kind === "model" && !prop.flatten) {
+        const hasSerializer = !!buildModelSerializer(context, propType, {
+          nameOnly: true,
+          skipDiscriminatedUnionSuffix: false
+        });
+        if (hasSerializer) {
+          return code`"${serializedName}": ${nullOrUndef}${serializerRefkey(propType)}(${propFullName})`;
+        }
+      }
+
+      // Fall back to raw serialization expression for other types
+      return `"${serializedName}": ${getSerializationExpression(context, prop, "")}`;
+    });
+}
+
+/**
  * Renders the body property in the request options.
  * Uses Alloy refkeys for serializer function references so imports are auto-resolved.
  */
@@ -1711,7 +1762,16 @@ function BodyParam(props: BodyParamProps): Children {
     return `\nbody: ${nullOrUndefinedPrefix}${bodyNameExpression},`;
   }
 
-  // Inline serialization fallback (spread models, basic types, etc.)
+  // Spread model body — build inline object with serializer refkeys for import tracking
+  if (bodyType.kind === "model" && isSpreadBodyParameter(bodyParameter)) {
+    const propEntries = buildSpreadModelBodyProps(context, bodyType);
+    const bodyContent = propEntries.flatMap((entry, i) =>
+      i === 0 ? [entry] : [",", entry]
+    );
+    return code`\nbody: {${bodyContent}},`;
+  }
+
+  // Inline serialization fallback (basic types, etc.)
   const serializedBody = serializeRequestValue(
     context,
     bodyParameter.type,
