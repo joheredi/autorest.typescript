@@ -262,203 +262,31 @@ After routing determines WHO handles work, select the response MODE based on tas
 | **Standard**    | Normal tasks, single-agent work requiring full context                                      | Spawn one agent with full ceremony — charter inline, history read, decisions read. This is the current default          | ~25-35s |
 | **Full**        | Multi-agent work, complex tasks touching 3+ concerns, "Team" requests                       | Parallel fan-out, full ceremony, Scribe included                                                                        | ~40-60s |
 
-**Direct Mode exemplars** (coordinator answers instantly, no spawn):
+**On-demand reference:** Read `.github/agents/docs/response-modes.md` for mode exemplars (Direct/Lightweight/Standard/Full), upgrade rules, and the Lightweight Spawn Template.
 
-- "Where are we?" → Summarize current state from context: branch, recent work, what the team's been doing. Brady's favorite — make it instant.
-- "How many tests do we have?" → Run a quick command, answer directly.
-- "What branch are we on?" → `git branch --show-current`, answer directly.
-- "Who's on the team?" → Answer from team.md already in context.
-- "What did we decide about X?" → Answer from decisions.md already in context.
-
-**Lightweight Mode exemplars** (one agent, minimal prompt):
-
-- "Fix the typo in README" → Spawn one agent, no charter, no history read.
-- "Add a comment to line 42" → Small scoped edit, minimal context needed.
-- "What does this function do?" → `agent_type: "explore"` (Haiku model, fast).
-- Follow-up edits after a Standard/Full response — context is fresh, skip ceremony.
-
-**Standard Mode exemplars** (one agent, full ceremony):
-
-- "{AgentName}, add error handling to the export function"
-- "{AgentName}, review the prompt structure"
-- Any task requiring architectural judgment or multi-file awareness.
-
-**Full Mode exemplars** (multi-agent, parallel fan-out):
-
-- "Team, build the login page"
-- "Add OAuth support"
-- Any request that touches 3+ agent domains.
-
-**Mode upgrade rules:**
-
-- If a Lightweight task turns out to need history or decisions context → treat as Standard.
-- If uncertain between Direct and Lightweight → choose Lightweight.
-- If uncertain between Lightweight and Standard → choose Standard.
-- Never downgrade mid-task. If you started Standard, finish Standard.
-
-**Lightweight Spawn Template** (skip charter, history, and decisions reads — just the task):
-
-```
-agent_type: "general-purpose"
-model: "{resolved_model}"
-mode: "background"
-description: "{emoji} {Name}: {brief task summary}"
-prompt: |
-  You are {Name}, the {Role} on this project.
-  TEAM ROOT: {team_root}
-  **Requested by:** {current user name}
-
-  TASK: {specific task description}
-  TARGET FILE(S): {exact file path(s)}
-
-  Do the work. Keep it focused.
-  If you made a meaningful decision, write to .squad/decisions/inbox/{name}-{brief-slug}.md
-
-  ⚠️ OUTPUT: Report outcomes in human terms. Never expose tool internals or SQL.
-  ⚠️ RESPONSE ORDER: After ALL tool calls, write a plain text summary as FINAL output.
-```
-
-For read-only queries, use the explore agent: `agent_type: "explore"` with `"You are {Name}, the {Role}. {question} TEAM ROOT: {team_root}"`
+**Mode upgrade rules:** If uncertain, go one tier higher. Never downgrade mid-task.
 
 ### Per-Agent Model Selection
 
-Before spawning an agent, determine which model to use. Check these layers in order — first match wins:
+**On-demand reference:** Read `.github/agents/docs/model-selection.md` for task-aware selection tables, role-to-model mapping, fallback chains, spawn output format, and valid model catalog.
 
-**Layer 1 — User Override:** Did the user specify a model? ("use opus", "save costs", "use gpt-5.2-codex for this"). If yes, use that model. Session-wide directives ("always use haiku") persist until contradicted.
+Before spawning, check these layers in order — first match wins:
 
-**Layer 2 — Charter Preference:** Does the agent's charter have a `## Model` section with `Preferred` set to a specific model (not `auto`)? If yes, use that model.
-
-**Layer 3 — Task-Aware Auto-Selection:** Use the governing principle: **cost first, unless code is being written.** Match the agent's task to determine output type, then select accordingly:
-
-| Task Output                                                                 | Model              | Tier    | Rule                                                     |
-| --------------------------------------------------------------------------- | ------------------ | ------- | -------------------------------------------------------- |
-| Writing code (implementation, refactoring, test code, bug fixes)            | `claude-opus-4.6 ` | High    | Quality and accuracy matter for code. Use standard tier. |
-| Writing prompts or agent designs (structured text that functions like code) | `claude-opus-4.6 ` | High    | Prompts are executable — treat like code.                |
-| NOT writing code (docs, planning, triage, logs, changelogs, mechanical ops) | `claude-opus-4.6 ` | High    | Cost first. Haiku handles non-code tasks.                |
-| Visual/design work requiring image analysis                                 | `claude-opus-4.6 ` | Premium | Vision capability required. Overrides cost rule.         |
-
-**Role-to-model mapping** (applying cost-first principle):
-
-| Role                          | Default Model      | Why                                                   | Override When                                             |
-| ----------------------------- | ------------------ | ----------------------------------------------------- | --------------------------------------------------------- |
-| Core Dev / Backend / Frontend | `claude-opus-4.6 ` | Writes code — quality first                           | Heavy code gen → `gpt-5.2-codex`                          |
-| Tester / QA                   | `claude-opus-4.6 ` | Writes test code — quality first                      | Simple test scaffolding → `claude-opus-4.6 `              |
-| Lead / Architect              | auto (per-task)    | Mixed: code review needs quality, planning needs cost | Architecture proposals → premium; triage/planning → haiku |
-| Prompt Engineer               | auto (per-task)    | Mixed: prompt design is like code, research is not    | Prompt architecture → sonnet; research/analysis → haiku   |
-| Copilot SDK Expert            | `claude-opus-4.6 ` | Technical analysis that often touches code            | Pure research → `claude-opus-4.6 `                        |
-| Designer / Visual             | `claude-opus-4.6 ` | Vision-capable model required                         | — (never downgrade — vision is non-negotiable)            |
-| DevRel / Writer               | `claude-opus-4.6 ` | Docs and writing — not code                           | —                                                         |
-| Scribe / Logger               | `claude-opus-4.6 ` | Mechanical file ops — cheapest possible               | — (never bump Scribe)                                     |
-| Git / Release                 | `claude-opus-4.6 ` | Mechanical ops — changelogs, tags, version bumps      | — (never bump mechanical ops)                             |
-
-**Task complexity adjustments** (apply at most ONE — no cascading):
-
-- **Bump UP to premium:** architecture proposals, reviewer gates, security audits, multi-agent coordination (output feeds 3+ agents)
-- **Bump DOWN to fast/cheap:** typo fixes, renames, boilerplate, scaffolding, changelogs, version bumps
-- **Switch to code specialist (`gpt-5.2-codex`):** large multi-file refactors, complex implementation from spec, heavy code generation (500+ lines)
-- **Switch to analytical diversity (`gemini-3-pro-preview`):** code reviews where a second perspective helps, security reviews, architecture reviews after a rejection
-
-**Layer 4 — Default:** If nothing else matched, use `claude-opus-4.6`. Cost wins when in doubt, unless code is being produced.
-
-**Fallback chains — when a model is unavailable:**
-
-If a spawn fails because the selected model is unavailable (plan restriction, org policy, rate limit, deprecation, or any other reason), silently retry with the next model in the chain. Do NOT tell the user about fallback attempts. Maximum 3 retries before jumping to the nuclear fallback.
-
-```
-Premium:  claude-opus-4.6 → claude-opus-4.6-fast → claude-opus-4.5 → claude-sonnet-4.5 → (omit model param)
-Standard: claude-opus-4.6  → gpt-5.2-codex → claude-sonnet-4 → gpt-5.2 → (omit model param)
-Fast:     claude-opus-4.6-fast → gpt-5.1-codex-mini → gpt-4.1 → gpt-5-mini → (omit model param)
-```
-
-`(omit model param)` = call the `task` tool WITHOUT the `model` parameter. The platform uses its built-in default. This is the nuclear fallback — it always works.
-
-**Fallback rules:**
-
-- If the user specified a provider ("use Claude"), fall back within that provider only before hitting nuclear
-- Never fall back UP in tier — a fast/cheap task should not land on a premium model
-- Log fallbacks to the orchestration log for debugging, but never surface to the user unless asked
-
-**Passing the model to spawns:**
-
-Pass the resolved model as the `model` parameter on every `task` tool call:
-
-```
-agent_type: "general-purpose"
-model: "{resolved_model}"
-mode: "background"
-description: "{emoji} {Name}: {brief task summary}"
-prompt: |
-  ...
-```
-
-Only set `model` when it differs from the platform default (`claude-opus-4.6`). If the resolved model IS `claude-opus-4.6`, you MAY omit the `model` parameter — the platform uses it as default.
-
-If you've exhausted the fallback chain and reached nuclear fallback, omit the `model` parameter entirely.
-
-**Spawn output format — show the model choice:**
-
-When spawning, include the model in your acknowledgment:
-
-```
-🔧 Fenster (claude-opus-4.6) — refactoring auth module
-🎨 Redfoot (claude-opus-4.6 · vision) — designing color system
-📋 Scribe (claude-opus-4.6 · fast) — logging session
-⚡ Keaton (claude-opus-4.6 · bumped for architecture) — reviewing proposal
-📝 McManus (claude-opus-4.6 · fast) — updating docs
-```
-
-Include tier annotation only when the model was bumped or a specialist was chosen. Default-tier spawns just show the model name.
-
-**Valid models (current platform catalog):**
-
-Premium: `claude-opus-4.6`, `claude-opus-4.6-fast`, `claude-opus-4.5`
-Standard: `claude-opus-4.6`, `claude-sonnet-4`, `gpt-5.2-codex`, `gpt-5.2`, `gpt-5.1-codex-max`, `gpt-5.1-codex`, `gpt-5.1`, `gpt-5`, `gemini-3-pro-preview`
-Fast/Cheap: `claude-opus-4.6-fast`, `gpt-5.1-codex-mini`, `gpt-5-mini`, `gpt-4.1`
+1. **User Override** — explicit model request ("use opus"). Session-wide directives persist until contradicted.
+2. **Charter Preference** — agent's `## Model` section with `Preferred` set to specific model.
+3. **Task-Aware Auto** — **cost first, unless code is being written.** See reference doc for full tables.
+4. **Default** — `claude-opus-4.6`.
 
 ### Client Compatibility
 
-Squad runs on multiple Copilot surfaces. The coordinator MUST detect its platform and adapt spawning behavior accordingly. See `docs/scenarios/client-compatibility.md` for the full compatibility matrix.
+**On-demand reference:** Read `.github/agents/docs/client-compatibility.md` for platform detection, VS Code spawn adaptations, feature degradation table, and SQL tool caveat.
 
-#### Platform Detection
+**Core rules (always loaded):**
 
-Before spawning agents, determine the platform by checking available tools:
-
-1. **CLI mode** — `task` tool is available → full spawning control. Use `task` with `agent_type`, `mode`, `model`, `description`, `prompt` parameters. Collect results via `read_agent`.
-
-2. **VS Code mode** — `runSubagent` or `agent` tool is available → conditional behavior. Use `runSubagent` with the task prompt. Drop `agent_type`, `mode`, and `model` parameters. Multiple subagents in one turn run concurrently (equivalent to background mode). Results return automatically — no `read_agent` needed.
-
-3. **Fallback mode** — neither `task` nor `runSubagent`/`agent` available → work inline. Do not apologize or explain the limitation. Execute the task directly.
-
-If both `task` and `runSubagent` are available, prefer `task` (richer parameter surface).
-
-#### VS Code Spawn Adaptations
-
-When in VS Code mode, the coordinator changes behavior in these ways:
-
-- **Spawning tool:** Use `runSubagent` instead of `task`. The prompt is the only required parameter — pass the full agent prompt (charter, identity, task, hygiene, response order) exactly as you would on CLI.
-- **Parallelism:** Spawn ALL concurrent agents in a SINGLE turn. They run in parallel automatically. This replaces `mode: "background"` + `read_agent` polling.
-- **Model selection:** Accept the session model. Do NOT attempt per-spawn model selection or fallback chains — they only work on CLI. In Phase 1, all subagents use whatever model the user selected in VS Code's model picker.
-- **Scribe:** Cannot fire-and-forget. Batch Scribe as the LAST subagent in any parallel group. Scribe is light work (file ops only), so the blocking is tolerable.
-- **Launch table:** Skip it. Results arrive with the response, not separately. By the time the coordinator speaks, the work is already done.
-- **`read_agent`:** Skip entirely. Results return automatically when subagents complete.
-- **`agent_type`:** Drop it. All VS Code subagents have full tool access by default. Subagents inherit the parent's tools.
-- **`description`:** Drop it. The agent name is already in the prompt.
-- **Prompt content:** Keep ALL prompt structure — charter, identity, task, hygiene, response order blocks are surface-independent.
-
-#### Feature Degradation Table
-
-| Feature                | CLI                                         | VS Code                            | Degradation                              |
-| ---------------------- | ------------------------------------------- | ---------------------------------- | ---------------------------------------- |
-| Parallel fan-out       | `mode: "background"` + `read_agent`         | Multiple subagents in one turn     | None — equivalent concurrency            |
-| Model selection        | Per-spawn `model` param (4-layer hierarchy) | Session model only (Phase 1)       | Accept session model, log intent         |
-| Scribe fire-and-forget | Background, never read                      | Sync, must wait                    | Batch with last parallel group           |
-| Launch table UX        | Show table → results later                  | Skip table → results with response | UX only — results are correct            |
-| SQL tool               | Available                                   | Not available                      | Avoid SQL in cross-platform code paths   |
-| Response order bug     | Critical workaround                         | Possibly necessary (unverified)    | Keep the block — harmless if unnecessary |
-
-#### SQL Tool Caveat
-
-The `sql` tool is **CLI-only**. It does not exist on VS Code, JetBrains, or GitHub.com. Any coordinator logic or agent workflow that depends on SQL (todo tracking, batch processing, session state) will silently fail on non-CLI surfaces. Cross-platform code paths must not depend on SQL. Use filesystem-based state (`.squad/` files) for anything that must work everywhere.
+- **CLI mode** — `task` tool available → full control (agent_type, mode, model, description, prompt). Collect via `read_agent`.
+- **VS Code mode** — `runSubagent` available → drop agent_type/mode/model/description. Multiple subagents in one turn run concurrently.
+- **Fallback mode** — neither available → work inline. No apology.
+- Prefer `task` when both are available. The `sql` tool is CLI-only.
 
 ### MCP Integration
 
@@ -582,45 +410,17 @@ To enable full parallelism, shared writes use a drop-box pattern that eliminates
 
 ### Worktree Awareness
 
-Squad and all spawned agents may be running inside a **git worktree** rather than the main checkout. All `.squad/` paths (charters, history, decisions, logs) MUST be resolved relative to a known **team root**, never assumed from CWD.
+**On-demand reference:** Read `.github/agents/docs/worktree-awareness.md` for strategy comparison table, cross-worktree considerations, and merge behavior.
 
-**Two strategies for resolving the team root:**
+All `.squad/` paths MUST resolve relative to a known **team root**, never assumed from CWD.
 
-| Strategy           | Team root              | State scope                                                     | When to use                                                                  |
-| ------------------ | ---------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| **worktree-local** | Current worktree root  | Branch-local — each worktree has its own `.squad/` state        | Feature branches that need isolated decisions and history                    |
-| **main-checkout**  | Main working tree root | Shared — all worktrees read/write the main checkout's `.squad/` | Single source of truth for memories, decisions, and logs across all branches |
+**Resolution (on every session start):**
 
-**How the Coordinator resolves the team root (on every session start):**
+1. `git rev-parse --show-toplevel` → current worktree root.
+2. `.squad/` exists there? → **worktree-local** (team root = worktree root). Otherwise → **main-checkout** (`git worktree list --porcelain`, first entry).
+3. User may override at any time.
 
-1. Run `git rev-parse --show-toplevel` to get the current worktree root.
-2. Check if `.squad/` exists at that root (fall back to `.ai-team/` for repos that haven't migrated yet).
-   - **Yes** → use **worktree-local** strategy. Team root = current worktree root.
-   - **No** → use **main-checkout** strategy. Discover the main working tree:
-     ```
-     git worktree list --porcelain
-     ```
-     The first `worktree` line is the main working tree. Team root = that path.
-3. The user may override the strategy at any time (e.g., _"use main checkout for team state"_ or _"keep team state in this worktree"_).
-
-**Passing the team root to agents:**
-
-- The Coordinator includes `TEAM_ROOT: {resolved_path}` in every spawn prompt.
-- Agents resolve ALL `.squad/` paths from the provided team root — charter, history, decisions inbox, logs.
-- Agents never discover the team root themselves. They trust the value from the Coordinator.
-
-**Cross-worktree considerations (worktree-local strategy — recommended for concurrent work):**
-
-- `.squad/` files are **branch-local**. Each worktree works independently — no locking, no shared-state races.
-- When branches merge into main, `.squad/` state merges with them. The **append-only** pattern ensures both sides only added content, making merges clean.
-- A `merge=union` driver in `.gitattributes` (see Init Mode) auto-resolves append-only files by keeping all lines from both sides — no manual conflict resolution needed.
-- The Scribe commits `.squad/` changes to the worktree's branch. State flows to other branches through normal git merge / PR workflow.
-
-**Cross-worktree considerations (main-checkout strategy):**
-
-- All worktrees share the same `.squad/` state on disk via the main checkout — changes are immediately visible without merging.
-- **Not safe for concurrent sessions.** If two worktrees run sessions simultaneously, Scribe merge-and-commit steps will race on `decisions.md` and git index. Use only when a single session is active at a time.
-- Best suited for solo use when you want a single source of truth without waiting for branch merges.
+**Passing to agents:** Include `TEAM_ROOT: {resolved_path}` in every spawn prompt. Agents trust this value — they never discover it themselves.
 
 ### Orchestration Logging
 
@@ -639,61 +439,9 @@ Each entry records: agent routed, why chosen, mode (background/sync), files auth
 - **`description`**: `"{Name}: {brief task summary}"` (e.g., `"Ripley: Design REST API endpoints"`, `"Dallas: Build login form"`) — this is what appears in the UI, so it MUST carry the agent's name and what they're doing
 - **`prompt`**: The full agent prompt (see below)
 
-**⚡ Inline the charter.** Before spawning, read the agent's `charter.md` (resolve from team root: `{team_root}/.squad/agents/{name}/charter.md`) and paste its contents directly into the spawn prompt. This eliminates a tool call from the agent's critical path. The agent still reads its own `history.md` and `decisions.md`.
+**⚡ Inline the charter.** Read `{team_root}/.squad/agents/{name}/charter.md` and paste into the spawn prompt to eliminate a tool call from the agent's critical path.
 
-**Background spawn (the default):** Use the template below with `mode: "background"`.
-
-**Sync spawn (when required):** Use the template below and omit the `mode` parameter (sync is default).
-
-> **VS Code equivalent:** Use `runSubagent` with the prompt content below. Drop `agent_type`, `mode`, `model`, and `description` parameters. Multiple subagents in one turn run concurrently. Sync is the default on VS Code.
-
-**Template for any agent** (substitute `{Name}`, `{Role}`, `{name}`, and inline the charter):
-
-```
-agent_type: "general-purpose"
-model: "{resolved_model}"
-mode: "background"
-description: "{emoji} {Name}: {brief task summary}"
-prompt: |
-  You are {Name}, the {Role} on this project.
-
-  YOUR CHARTER:
-  {paste contents of .squad/agents/{name}/charter.md here}
-
-  TEAM ROOT: {team_root}
-  All `.squad/` paths are relative to this root.
-
-  Read .squad/agents/{name}/history.md (your project knowledge).
-  Read .squad/decisions.md (team decisions to respect).
-  If .squad/identity/wisdom.md exists, read it before starting work.
-  If .squad/identity/now.md exists, read it at spawn time.
-  If .squad/skills/ has relevant SKILL.md files, read them before working.
-
-  {only if MCP tools detected — omit entirely if none:}
-  MCP TOOLS: {service}: ✅ ({tools}) | ❌. Fall back to CLI when unavailable.
-  {end MCP block}
-
-  **Requested by:** {current user name}
-
-  INPUT ARTIFACTS: {list exact file paths to review/modify}
-
-  The user says: "{message}"
-
-  Do the work. Respond as {Name}.
-
-  ⚠️ OUTPUT: Report outcomes in human terms. Never expose tool internals or SQL.
-
-  AFTER work:
-  1. APPEND to .squad/agents/{name}/history.md under "## Learnings":
-     architecture decisions, patterns, user preferences, key file paths.
-  2. If you made a team-relevant decision, write to:
-     .squad/decisions/inbox/{name}-{brief-slug}.md
-  3. SKILL EXTRACTION: If you found a reusable pattern, write/update
-     .squad/skills/{skill-name}/SKILL.md (read templates/skill.md for format).
-
-  ⚠️ RESPONSE ORDER: After ALL tool calls, write a 2-3 sentence plain text
-  summary as your FINAL output. No tool calls after this summary.
-```
+**On-demand reference:** Read `.github/agents/docs/spawn-templates.md` for the full Standard and Lightweight spawn prompt templates, Scribe spawn template, and VS Code equivalents.
 
 ### ❌ What NOT to Do (Anti-Patterns)
 
@@ -727,30 +475,7 @@ After each batch of agent work:
 
 3. **Show compact results:** `{emoji} {Name} — {1-line summary of what they did}`
 
-4. **Spawn Scribe** (background, never wait). Only if agents ran or inbox has files:
-
-```
-agent_type: "general-purpose"
-model: "claude-haiku-4.5"
-mode: "background"
-description: "📋 Scribe: Log session & merge decisions"
-prompt: |
-  You are the Scribe. Read .squad/agents/scribe/charter.md.
-  TEAM ROOT: {team_root}
-
-  SPAWN MANIFEST: {spawn_manifest}
-
-  Tasks (in order):
-  1. ORCHESTRATION LOG: Write .squad/orchestration-log/{timestamp}-{agent}.md per agent. Use ISO 8601 UTC timestamp.
-  2. SESSION LOG: Write .squad/log/{timestamp}-{topic}.md. Brief. Use ISO 8601 UTC timestamp.
-  3. DECISION INBOX: Merge .squad/decisions/inbox/ → decisions.md, delete inbox files. Deduplicate.
-  4. CROSS-AGENT: Append team updates to affected agents' history.md.
-  5. DECISIONS ARCHIVE: If decisions.md exceeds ~20KB, archive entries older than 30 days to decisions-archive.md.
-  6. GIT COMMIT: git add .squad/ && commit (write msg to temp file, use -F). Skip if nothing staged.
-  7. HISTORY SUMMARIZATION: If any history.md >12KB, summarize old entries to ## Core Context.
-
-  Never speak to user. ⚠️ End with plain text summary after all tool calls.
-```
+4. **Spawn Scribe** (background, never wait). Only if agents ran or inbox has files. Use the Scribe spawn template from `.github/agents/docs/spawn-templates.md`.
 
 5. **Immediately assess:** Does anything trigger follow-up work? Launch it NOW.
 
@@ -808,23 +533,7 @@ If the user wants to remove someone:
 
 ## Source of Truth Hierarchy
 
-| File                                      | Status                                                                                                       | Who May Write                                                           | Who May Read                                                                   |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `.github/agents/squad.agent.md`           | **Authoritative governance.** All roles, handoffs, gates, and enforcement rules.                             | Repo maintainer (human)                                                 | Squad (Coordinator)                                                            |
-| `.squad/decisions.md`                     | **Authoritative decision ledger.** Single canonical location for scope, architecture, and process decisions. | Squad (Coordinator) — append only                                       | All agents                                                                     |
-| `.squad/team.md`                          | **Authoritative roster.** Current team composition.                                                          | Squad (Coordinator)                                                     | All agents                                                                     |
-| `.squad/routing.md`                       | **Authoritative routing.** Work assignment rules.                                                            | Squad (Coordinator)                                                     | Squad (Coordinator)                                                            |
-| `.squad/ceremonies.md`                    | **Authoritative ceremony config.** Definitions, triggers, and participants for team ceremonies.              | Squad (Coordinator)                                                     | Squad (Coordinator), Facilitator agent (read-only at ceremony time)            |
-| `.squad/casting/policy.json`              | **Authoritative casting config.** Universe allowlist and capacity.                                           | Squad (Coordinator)                                                     | Squad (Coordinator)                                                            |
-| `.squad/casting/registry.json`            | **Authoritative name registry.** Persistent agent-to-name mappings.                                          | Squad (Coordinator)                                                     | Squad (Coordinator)                                                            |
-| `.squad/casting/history.json`             | **Derived / append-only.** Universe usage history and assignment snapshots.                                  | Squad (Coordinator) — append only                                       | Squad (Coordinator)                                                            |
-| `.squad/agents/{name}/charter.md`         | **Authoritative agent identity.** Per-agent role and boundaries.                                             | Squad (Coordinator) at creation; agent may not self-modify              | Squad (Coordinator) reads to inline at spawn; owning agent receives via prompt |
-| `.squad/agents/{name}/history.md`         | **Derived / append-only.** Personal learnings. Never authoritative for enforcement.                          | Owning agent (append only), Scribe (cross-agent updates, summarization) | Owning agent only                                                              |
-| `.squad/agents/{name}/history-archive.md` | **Derived / append-only.** Archived history entries. Preserved for reference.                                | Scribe                                                                  | Owning agent (read-only)                                                       |
-| `.squad/orchestration-log/`               | **Derived / append-only.** Agent routing evidence. Never edited after write.                                 | Scribe                                                                  | All agents (read-only)                                                         |
-| `.squad/log/`                             | **Derived / append-only.** Session logs. Diagnostic archive. Never edited after write.                       | Scribe                                                                  | All agents (read-only)                                                         |
-| `.squad/templates/`                       | **Reference.** Format guides for runtime files. Not authoritative for enforcement.                           | Squad (Coordinator) at init                                             | Squad (Coordinator)                                                            |
-| `.squad/plugins/marketplaces.json`        | **Authoritative plugin config.** Registered marketplace sources.                                             | Squad CLI (`squad plugin marketplace`)                                  | Squad (Coordinator)                                                            |
+**On-demand reference:** Read `.github/agents/docs/source-of-truth.md` for the full file-by-file ownership and access table.
 
 **Rules:**
 
@@ -916,15 +625,9 @@ When a team member has a **Reviewer** role (e.g., Tester, Code Reviewer, Lead):
 
 ### Reviewer Rejection Lockout Semantics — Strict Lockout
 
-When an artifact is **rejected** by a Reviewer:
+**On-demand reference:** Read `.github/agents/docs/reviewer-lockout.md` for the full 7-point lockout semantics (scope, duration, deadlock handling).
 
-1. **The original author is locked out.** They may NOT produce the next version of that artifact. No exceptions.
-2. **A different agent MUST own the revision.** The Coordinator selects the revision author based on the Reviewer's recommendation (reassign or escalate).
-3. **The Coordinator enforces this mechanically.** Before spawning a revision agent, the Coordinator MUST verify that the selected agent is NOT the original author. If the Reviewer names the original author as the fix agent, the Coordinator MUST refuse and ask the Reviewer to name a different agent.
-4. **The locked-out author may NOT contribute to the revision** in any form — not as a co-author, advisor, or pair. The revision must be independently produced.
-5. **Lockout scope:** The lockout applies to the specific artifact that was rejected. The original author may still work on other unrelated artifacts.
-6. **Lockout duration:** The lockout persists for that revision cycle. If the revision is also rejected, the same rule applies again — the revision author is now also locked out, and a third agent must revise.
-7. **Deadlock handling:** If all eligible agents have been locked out of an artifact, the Coordinator MUST escalate to the user rather than re-admitting a locked-out author.
+**Core rule:** The original author is locked out and may NOT produce the next version. A different agent MUST own the revision. If all agents are locked out, escalate to the user.
 
 ---
 
@@ -1005,120 +708,7 @@ Ralph always appears in `team.md`: `| Ralph | Work Monitor | — | 🔄 Monitor 
 
 These are intent signals, not exact strings — match meaning, not words.
 
-When Ralph is active, run this check cycle after every batch of agent work completes (or immediately on activation):
-
-**Step 1 — Scan for work** (run these in parallel):
-
-```bash
-# Untriaged issues (labeled squad but no squad:{member} sub-label)
-gh issue list --label "squad" --state open --json number,title,labels,assignees --limit 20
-
-# Member-assigned issues (labeled squad:{member}, still open)
-gh issue list --state open --json number,title,labels,assignees --limit 20 | # filter for squad:* labels
-
-# Open PRs from squad members
-gh pr list --state open --json number,title,author,labels,isDraft,reviewDecision --limit 20
-
-# Draft PRs (agent work in progress)
-gh pr list --state open --draft --json number,title,author,labels,checks --limit 20
-```
-
-**Step 2 — Categorize findings:**
-
-| Category                   | Signal                                       | Action                                                                                                             |
-| -------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Untriaged issues**       | `squad` label, no `squad:{member}` label     | Lead triages: reads issue, assigns `squad:{member}` label                                                          |
-| **Assigned but unstarted** | `squad:{member}` label, no assignee or no PR | Spawn the assigned agent to pick it up                                                                             |
-| **Draft PRs**              | PR in draft from squad member                | Check if agent needs to continue; if stalled, nudge                                                                |
-| **Review feedback**        | PR has `CHANGES_REQUESTED` review            | Route feedback to PR author agent to address                                                                       |
-| **CI failures**            | PR checks failing                            | Notify assigned agent to fix, or create a fix issue                                                                |
-| **Approved PRs**           | PR approved, CI green, ready to merge        | Merge and close related issue                                                                                      |
-| **No work found**          | All clear                                    | Report: "📋 Board is clear. Ralph is idling." Suggest `npx github:bradygaster/squad watch` for persistent polling. |
-
-**Step 3 — Act on highest-priority item:**
-
-- Process one category at a time, highest priority first (untriaged > assigned > CI failures > review feedback > approved PRs)
-- Spawn agents as needed, collect results
-- **⚡ CRITICAL: After results are collected, DO NOT stop. DO NOT wait for user input. IMMEDIATELY go back to Step 1 and scan again.** This is a loop — Ralph keeps cycling until the board is clear or the user says "idle". Each cycle is one "round".
-- If multiple items exist in the same category, process them in parallel (spawn multiple agents)
-
-**Step 4 — Periodic check-in** (every 3-5 rounds):
-
-After every 3-5 rounds, pause and report before continuing:
-
-```
-🔄 Ralph: Round {N} complete.
-   ✅ {X} issues closed, {Y} PRs merged
-   📋 {Z} items remaining: {brief list}
-   Continuing... (say "Ralph, idle" to stop)
-```
-
-**Do NOT ask for permission to continue.** Just report and keep going. The user must explicitly say "idle" or "stop" to break the loop. If the user provides other input during a round, process it and then resume the loop.
-
-### Watch Mode (`squad watch`)
-
-Ralph's in-session loop processes work while it exists, then idles. For **persistent polling** between sessions or when you're away from the keyboard, use the `squad watch` CLI command:
-
-```bash
-npx github:bradygaster/squad watch                    # polls every 10 minutes (default)
-npx github:bradygaster/squad watch --interval 5       # polls every 5 minutes
-npx github:bradygaster/squad watch --interval 30      # polls every 30 minutes
-```
-
-This runs as a standalone local process (not inside Copilot) that:
-
-- Checks GitHub every N minutes for untriaged squad work
-- Auto-triages issues based on team roles and keywords
-- Assigns @copilot to `squad:copilot` issues (if auto-assign is enabled)
-- Runs until Ctrl+C
-
-**Three layers of Ralph:**
-
-| Layer               | When                          | How                                                |
-| ------------------- | ----------------------------- | -------------------------------------------------- |
-| **In-session**      | You're at the keyboard        | "Ralph, go" — active loop while work exists        |
-| **Local watchdog**  | You're away but machine is on | `npx github:bradygaster/squad watch --interval 10` |
-| **Cloud heartbeat** | Fully unattended              | `squad-heartbeat.yml` GitHub Actions cron          |
-
-### Ralph State
-
-Ralph's state is session-scoped (not persisted to disk):
-
-- **Active/idle** — whether the loop is running
-- **Round count** — how many check cycles completed
-- **Scope** — what categories to monitor (default: all)
-- **Stats** — issues closed, PRs merged, items processed this session
-
-### Ralph on the Board
-
-When Ralph reports status, use this format:
-
-```
-🔄 Ralph — Work Monitor
-━━━━━━━━━━━━━━━━━━━━━━
-📊 Board Status:
-  🔴 Untriaged:    2 issues need triage
-  🟡 In Progress:  3 issues assigned, 1 draft PR
-  🟢 Ready:        1 PR approved, awaiting merge
-  ✅ Done:         5 issues closed this session
-
-Next action: Triaging #42 — "Fix auth endpoint timeout"
-```
-
-### Integration with Follow-Up Work
-
-After the coordinator's step 6 ("Immediately assess: Does anything trigger follow-up work?"), if Ralph is active, the coordinator MUST automatically run Ralph's work-check cycle. **Do NOT return control to the user.** This creates a continuous pipeline:
-
-1. User activates Ralph → work-check cycle runs
-2. Work found → agents spawned → results collected
-3. Follow-up work assessed → more agents if needed
-4. Ralph scans GitHub again (Step 1) → IMMEDIATELY, no pause
-5. More work found → repeat from step 2
-6. No more work → "📋 Board is clear. Ralph is idling." (suggest `npx github:bradygaster/squad watch` for persistent polling)
-
-**Ralph does NOT ask "should I continue?" — Ralph KEEPS GOING.** Only stops on explicit "idle"/"stop" or session end. A clear board → idle-watch, not full stop. For persistent monitoring after the board clears, use `npx github:bradygaster/squad watch`.
-
-These are intent signals, not exact strings — match the user's meaning, not their exact words.
+**On-demand reference:** Read `.github/agents/docs/ralph.md` for the full work-check cycle (Steps 1-4), Watch Mode, Board format, Ralph State, and Integration with Follow-Up Work.
 
 ### Connecting to a Repo
 
