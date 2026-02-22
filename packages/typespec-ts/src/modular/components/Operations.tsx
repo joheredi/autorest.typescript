@@ -1,6 +1,7 @@
 import { Children, code, For, refkey, Refkey } from "@alloy-js/core";
 import * as ts from "@alloy-js/typescript";
 import {
+  getClientOptions,
   SdkClientType,
   SdkHttpOperation,
   SdkServiceOperation,
@@ -24,10 +25,14 @@ import {
   isRLCMultiEndpoint
 } from "../../utils/clientUtils.js";
 import {
-  getSendPrivateFunction,
   getDeserializePrivateFunction,
   getOperationFunction,
   getOperationOptionsName,
+  getOperationSignatureParameters,
+  getOptionalParamsName,
+  getPathParameters,
+  getQueryParameters,
+  getHeaderAndBodyParameters,
   getResponseHeaders,
   getExceptionResponseHeaders,
   buildHeaderOnlyResponseType,
@@ -36,7 +41,10 @@ import {
   isLroAndPagingOperation,
   isPagingOnlyOperation
 } from "../helpers/operationHelpers.js";
-import { getOperationName } from "../helpers/namingHelpers.js";
+import {
+  getOperationName,
+  generateLocallyUniqueName
+} from "../helpers/namingHelpers.js";
 import {
   httpRuntimeLib,
   azureCoreClientLib,
@@ -63,6 +71,11 @@ export function operationRefkey(operation: ServiceOperation): Refkey {
 /** Refkey for the response headers deserializer function. */
 export function deserializeHeadersRefkey(operation: ServiceOperation): Refkey {
   return refkey(operation, "deserializeHeaders");
+}
+
+/** Refkey for the send private function. */
+export function sendFunctionRefkey(operation: ServiceOperation): Refkey {
+  return refkey(operation, "send");
 }
 
 /** Refkey for the exception headers deserializer function. */
@@ -408,30 +421,19 @@ function OperationGroup(props: OperationGroupProps): Children {
   const { context, prefixes, operation, clientType, client, typeRefkeys } =
     props;
 
-  const sendFn = getSendPrivateFunction(
-    context,
-    [prefixes, operation],
-    clientType,
-    client as SdkClientType<SdkHttpOperation>
-  );
   const deserFn = getDeserializePrivateFunction(context, operation);
   const opFn = getOperationFunction(context, [prefixes, operation], clientType);
 
   return (
     <>
-      <OperationFunction
-        name={sendFn.name}
-        export={sendFn.isExported}
-        async={sendFn.isAsync}
-        returnType={sendFn.returnType}
-        parameters={sendFn.parameters}
-        docs={sendFn.docs}
+      <SendFunction
+        context={context}
+        operation={operation}
+        prefixes={prefixes}
+        clientType={clientType}
+        client={client as SdkClientType<SdkHttpOperation>}
         typeRefkeys={typeRefkeys}
-      >
-        <FunctionBody typeRefkeys={typeRefkeys}>
-          {sendFn.statements}
-        </FunctionBody>
-      </OperationFunction>
+      />
       {"\n"}
       <OperationFunction
         name={deserFn.name}
@@ -544,6 +546,153 @@ function DeserializeExceptionHeaders(props: DeserializeHeadersProps): Children {
       </ts.FunctionDeclaration>
     </>
   );
+}
+
+// ── Send function component ─────────────────────────────────────────────
+
+interface SendFunctionProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+  prefixes: string[];
+  clientType: string;
+  client?: SdkClientType<SdkHttpOperation>;
+  /** Refkey map for resolving symbol names in string helpers (temporary bridge). */
+  typeRefkeys: Record<string, Refkey>;
+}
+
+/**
+ * Renders the private `_${name}Send` function that builds and sends the HTTP request.
+ * Handles URL template expansion, headers, body serialization, and the HTTP call.
+ */
+function SendFunction(props: SendFunctionProps): Children {
+  const { context, operation, prefixes, clientType, client, typeRefkeys } =
+    props;
+  const { name } = getOperationName(operation);
+  const runtimeLib = getRuntimeLib(context);
+
+  // Build parameter descriptors with refkeys for typed params
+  const rawParams = getOperationSignatureParameters(
+    context,
+    [prefixes, operation],
+    clientType
+  );
+  const optionalParamName = getOptionalParamsName(rawParams);
+
+  const params: ts.ParameterDescriptor[] = rawParams.map((p) => {
+    // Options parameter — use refkey for its type
+    if (p.name === optionalParamName) {
+      return {
+        name: p.name,
+        type: operationOptionsRefkey(operation),
+        default: p.initializer
+      };
+    }
+    return { name: p.name, type: p.type };
+  });
+
+  // URL template expansion
+  const urlTemplateParams = [
+    ...getPathParameters(operation),
+    ...getQueryParameters(context, operation)
+  ];
+  const hasUrlTemplate = urlTemplateParams.length > 0;
+
+  const operationMethod = operation.operation.verb.toLowerCase();
+
+  // Header/body params come from a string helper — resolve symbol names
+  // (e.g. serializer function names) through the refkey map
+  const headerAndBodyStr = getHeaderAndBodyParameters(
+    context,
+    operation,
+    optionalParamName
+  );
+  const resolvedHeaderBody = resolveReferences(headerAndBodyStr, typeRefkeys);
+
+  return (
+    <ts.FunctionDeclaration
+      export
+      name={`_${name}Send`}
+      parameters={params}
+      returnType={runtimeLib.StreamableMethod}
+      refkey={sendFunctionRefkey(operation)}
+    >
+      {hasUrlTemplate && (
+        <UrlExpansion
+          context={context}
+          operation={operation}
+          client={client}
+          params={rawParams}
+          urlTemplateParams={urlTemplateParams}
+          optionalParamName={optionalParamName}
+        />
+      )}
+      <RequestCall
+        operationPath={operation.operation.path}
+        verb={operationMethod}
+        hasUrlTemplate={hasUrlTemplate}
+        pathVarName={hasUrlTemplate ? getPathVarName(rawParams) : undefined}
+        optionalParamName={optionalParamName}
+        headerAndBodyParams={resolvedHeaderBody}
+        runtimeLib={runtimeLib}
+      />
+    </ts.FunctionDeclaration>
+  );
+}
+
+interface UrlExpansionProps {
+  context: SdkContext;
+  operation: ServiceOperation;
+  client?: SdkClientType<SdkHttpOperation>;
+  params: Array<{ name: string; type?: string }>;
+  urlTemplateParams: string[];
+  optionalParamName: string;
+}
+
+/** Renders the URL template expansion statement. */
+function UrlExpansion(props: UrlExpansionProps): Children {
+  const { operation, client, params, urlTemplateParams, optionalParamName } =
+    props;
+  const pathVarName = getPathVarName(params);
+  const includeRootSlash = client
+    ? getClientOptions(client, "includeRootSlash") !== false
+    : true;
+  const uriTemplate = includeRootSlash
+    ? operation.operation.uriTemplate
+    : operation.operation.uriTemplate.replace(/^\//, "");
+
+  return code`const ${pathVarName} = expandUrlTemplate("${uriTemplate}", {
+    ${urlTemplateParams.join(",\n")}
+  }, {
+    allowReserved: ${optionalParamName}?.requestOptions?.skipUrlEncoding
+  });`;
+}
+
+/** Computes a unique local variable name for the URL path. */
+function getPathVarName(
+  params: Array<{ name: string }>
+): string {
+  const paramNames = new Set(params.map((p) => p.name));
+  return generateLocallyUniqueName("path", paramNames);
+}
+
+interface RequestCallProps {
+  operationPath: string;
+  verb: string;
+  hasUrlTemplate: boolean;
+  pathVarName?: string;
+  optionalParamName: string;
+  /** Resolved header/body params — may contain refkeys for serializer imports. */
+  headerAndBodyParams: Children;
+  runtimeLib: ReturnType<typeof getRuntimeLib>;
+}
+
+/** Renders the final HTTP request call statement. */
+function RequestCall(props: RequestCallProps): Children {
+  const pathArg = props.hasUrlTemplate
+    ? props.pathVarName!
+    : `"${props.operationPath}"`;
+
+  return code`return context.path(${pathArg}).${props.verb}({...${props.runtimeLib.operationOptionsToRequestParameters}(${props.optionalParamName}), ${props.headerAndBodyParams}});`;
 }
 
 // ── Bridge components (temporary — for functions not yet converted to JSX) ──

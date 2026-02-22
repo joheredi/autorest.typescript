@@ -720,14 +720,14 @@ function getExceptionThrowStatement(
   return statements.join("\n");
 }
 
-function getOptionalParamsName(parameters: GeneratedFunction["parameters"]) {
+export function getOptionalParamsName(parameters: GeneratedFunction["parameters"]) {
   return (
     parameters.filter((p) => p.type?.endsWith("operationOptions__"))[0]?.name ??
     "options"
   );
 }
 
-function getOperationSignatureParameters(
+export function getOperationSignatureParameters(
   context: SdkContext,
   method: [string[], ServiceOperation],
   clientType: string
@@ -1219,7 +1219,7 @@ export function getOperationOptionsName(
  * RLC internally. This will translate High Level parameters into the RLC ones.
  * Figuring out what goes in headers, body, path and qsp.
  */
-function getHeaderAndBodyParameters(
+export function getHeaderAndBodyParameters(
   dpgContext: SdkContext,
   operation: ServiceOperation,
   optionalParamName: string = "options"
@@ -1652,7 +1652,7 @@ function getDefaultValue(param: SdkHttpParameter) {
 /**
  * Extracts the path parameters
  */
-function getPathParameters(
+export function getPathParameters(
   operation: ServiceOperation,
   optionalParamName: string = "options"
 ) {
@@ -1678,7 +1678,7 @@ function getPathParameters(
 /**
  * Extract the query parameters
  */
-function getQueryParameters(
+export function getQueryParameters(
   dpgContext: SdkContext,
   operation: ServiceOperation
 ): string[] {
